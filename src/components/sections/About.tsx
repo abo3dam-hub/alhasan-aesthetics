@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
+import doctorImg from "/doctor.jpg";
 
 const stats = [
   { icon: Clock, value: "15+", key: "experience" },
@@ -34,28 +35,72 @@ export default function About() {
             className="relative"
           >
             <div className="relative">
-              {/* Glass card as visual placeholder */}
-              <div className="glass-elevated rounded-3xl p-8 sm:p-10 glow-champagne aspect-[4/3] flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Award className="h-12 w-12 text-primary/60" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground/70">
+              {/* Outer glass frame with subtle glow */}
+              <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-primary/20 via-secondary/15 to-primary/10 blur-sm" />
+
+              {/* Main image container */}
+              <div className="relative glass-elevated rounded-[2rem] overflow-hidden glow-champagne">
+                {/* The doctor image */}
+                <div className="aspect-[3/4] overflow-hidden">
+                  <img
+                    src={doctorImg}
+                    alt="Dr. AlHasan"
+                    className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                  />
+                </div>
+
+                {/* Bottom gradient overlay for text readability */}
+                <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />
+
+                {/* Name overlay at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <p className="text-white font-serif-luxury text-2xl sm:text-3xl font-semibold drop-shadow-lg">
                     Dr. AlHasan
                   </p>
-                  <p className="text-xs text-muted-foreground/50 mt-1">
-                    Aesthetic Surgery
+                  <p className="text-white/80 text-sm mt-1 drop-shadow">
+                    Aesthetic & Plastic Surgery
+                  </p>
+                </div>
+
+                {/* Top-right glass badge */}
+                <div className="absolute top-4 end-4 glass-card rounded-2xl px-3 py-2 backdrop-blur-md">
+                  <p className="text-xs font-semibold text-white drop-shadow">
+                    Board Certified
                   </p>
                 </div>
               </div>
 
-              {/* Floating glass accent */}
-              <div className="absolute -bottom-4 -end-4 w-32 h-24 glass-card rounded-2xl hidden sm:flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">15+</p>
-                  <p className="text-[10px] text-muted-foreground">{t.about.experience}</p>
+              {/* Floating glass accent — experience badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={inView ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="absolute -bottom-5 -end-5 sm:-bottom-6 sm:-end-6 glass-elevated rounded-2xl px-5 py-3.5 flex items-center gap-3 shadow-lg"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Award className="h-5 w-5 text-primary" />
                 </div>
-              </div>
+                <div>
+                  <p className="text-xl font-bold text-foreground leading-tight">15+</p>
+                  <p className="text-[11px] text-muted-foreground">{t.about.experience}</p>
+                </div>
+              </motion.div>
+
+              {/* Floating glass accent — left side (desktop) */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={inView ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                className="absolute top-1/2 -start-4 sm:-start-6 -translate-y-1/2 glass-card rounded-2xl px-4 py-3 hidden lg:flex items-center gap-2.5 shadow-md"
+              >
+                <div className="h-8 w-8 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0">
+                  <Heart className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground leading-tight">5000+</p>
+                  <p className="text-[10px] text-muted-foreground">{t.about.procedures}</p>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
 
