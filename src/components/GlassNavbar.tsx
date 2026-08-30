@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import doctorAvatar from "/assets/4.jpg";
+import doctorAvatar from "/assets/3.jpg";
 
 const navLinks = [
   { key: "home" as const, href: "#home" },

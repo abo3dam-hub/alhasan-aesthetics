@@ -1,7 +1,7 @@
 import { useI18n } from "@/i18n";
 import { Phone, Mail, MapPin, Globe } from "lucide-react";
 
-const doctorLogo = "/assets/4.jpg";
+const doctorLogo = "/assets/3.jpg";
 
 export default function Footer() {
   const { t, dir, toggleLocale } = useI18n();
