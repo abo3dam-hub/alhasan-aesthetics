@@ -2,7 +2,7 @@ import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
-import doctorImg from "/doctor.jpg";
+import doctorImg from "/assets/1.jpg";
 
 const stats = [
   { icon: Clock, value: "15+", key: "experience" },
