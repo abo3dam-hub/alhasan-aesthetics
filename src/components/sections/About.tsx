@@ -44,7 +44,7 @@ export default function About() {
                 <div className="aspect-[3/4] overflow-hidden">
                   <img
                     src={doctorImg}
-                    alt="Dr. AlHasan"
+                    alt="Dr. Al Hasan Al Saiem"
                     className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
                   />
                 </div>
@@ -55,7 +55,7 @@ export default function About() {
                 {/* Name overlay at bottom */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <p className="text-white font-serif-luxury text-2xl sm:text-3xl font-semibold drop-shadow-lg">
-                    Dr. AlHasan
+                    Dr. Al Hasan Al Saiem
                   </p>
                   <p className="text-white/80 text-sm mt-1 drop-shadow">
                     Aesthetic & Plastic Surgery

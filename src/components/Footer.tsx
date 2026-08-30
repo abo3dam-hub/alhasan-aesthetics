@@ -1,6 +1,7 @@
 import { useI18n } from "@/i18n";
 import { Phone, Mail, MapPin, Globe } from "lucide-react";
-import logo from "@/assets/logo.svg";
+
+const doctorLogo = "/assets/4.jpg";
 
 export default function Footer() {
   const { t, dir, toggleLocale } = useI18n();
@@ -16,12 +17,16 @@ export default function Footer() {
   ];
 
   const services = [
+    t.procedures.blepharoplasty,
+    t.procedures.faceNeckLift,
     t.procedures.rhinoplasty,
-    t.procedures.facelift,
-    t.procedures.liposuction,
-    t.procedures.browLift,
-    t.procedures.breastAugmentation,
-    t.procedures.buccalFat,
+    t.procedures.liposuctionFat,
+    t.procedures.tummyTuck,
+    t.procedures.botox,
+    t.procedures.fillers,
+    t.procedures.armThighLift,
+    t.procedures.breastSurgery,
+    t.procedures.scarRevision,
   ];
 
   return (
@@ -34,8 +39,12 @@ export default function Footer() {
             {/* Brand */}
             <div className="sm:col-span-2 lg:col-span-1">
               <a href="#home" className="flex items-center gap-3 mb-4">
-                <img src={logo} alt="Logo" className="h-10 w-10 rounded-full" />
-                <span className="font-serif-luxury text-xl font-semibold text-foreground">
+                <img
+                  src={doctorLogo}
+                  alt="Dr. Al Hasan Al Saiem"
+                  className="h-12 w-12 rounded-xl object-cover border border-border/40 shadow-sm"
+                />
+                <span className="font-serif-luxury text-lg font-semibold text-foreground leading-tight">
                   {t.nav.logo}
                 </span>
               </a>
@@ -75,12 +84,12 @@ export default function Footer() {
               <h3 className="text-sm font-semibold text-foreground mb-4 tracking-wide uppercase">
                 {t.footer.services}
               </h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {services.map((service) => (
                   <li key={service}>
                     <a
                       href="#procedures"
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {service}
                     </a>
@@ -103,9 +112,12 @@ export default function Footer() {
                   <Mail className="h-4 w-4 text-primary shrink-0" />
                   <span>info@dr-alhasan.com</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 text-primary shrink-0" />
-                  <span className="flex flex-col"><span>Syria, Damascus, Lattakia</span><span>United Arab Emirates, Dubai</span></span>
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <span className="flex flex-col">
+                    <span>Syria, Damascus, Lattakia</span>
+                    <span>United Arab Emirates, Dubai</span>
+                  </span>
                 </div>
                 <div className="h-px bg-border/40 my-2" />
                 <div className="text-sm space-y-1">

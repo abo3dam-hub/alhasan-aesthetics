@@ -3,15 +3,30 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { SmilePlus, HandMetal, Scissors, Eye, Heart, Sparkles } from "lucide-react";
+import {
+  Eye,
+  UserRound,
+  SmilePlus,
+  Droplets,
+  Scissors,
+  Sparkles,
+  Heart,
+  ArrowUpDown,
+  Stethoscope,
+  Ban,
+} from "lucide-react";
 
 const procedures = [
+  { key: "blepharoplasty", icon: Eye },
+  { key: "faceNeckLift", icon: UserRound },
   { key: "rhinoplasty", icon: SmilePlus },
-  { key: "facelift", icon: HandMetal },
-  { key: "liposuction", icon: Scissors },
-  { key: "browLift", icon: Eye },
-  { key: "breastAugmentation", icon: Heart },
-  { key: "buccalFat", icon: Sparkles },
+  { key: "liposuctionFat", icon: Droplets },
+  { key: "tummyTuck", icon: Scissors },
+  { key: "botox", icon: Sparkles },
+  { key: "fillers", icon: Heart },
+  { key: "armThighLift", icon: ArrowUpDown },
+  { key: "breastSurgery", icon: Stethoscope },
+  { key: "scarRevision", icon: Ban },
 ];
 
 const fadeInUp = {
@@ -50,7 +65,7 @@ export default function Procedures() {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" dir={dir}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5" dir={dir}>
           {procedures.map((proc, i) => (
             <motion.div
               key={proc.key}
@@ -60,23 +75,23 @@ export default function Procedures() {
                 ...fadeInUp,
                 visible: {
                   ...fadeInUp.visible,
-                  transition: { duration: 0.5, delay: 0.1 * i },
+                  transition: { duration: 0.5, delay: 0.06 * i },
                 },
               }}
             >
-              <div className="glass-card rounded-3xl p-6 sm:p-8 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer">
-                <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 mb-5 group-hover:bg-primary/15 transition-colors">
-                  <proc.icon className="h-7 w-7 text-primary" />
+              <div className="glass-card rounded-3xl p-5 sm:p-6 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
+                  <proc.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
                   {t.procedures[proc.key as keyof typeof t.procedures]}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
                   {t.procedures[`${proc.key}Desc` as keyof typeof t.procedures]}
                 </p>
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
                   {t.procedures.learnMore}
-                  <Arrow className="h-4 w-4" />
+                  <Arrow className="h-3.5 w-3.5" />
                 </span>
               </div>
             </motion.div>
