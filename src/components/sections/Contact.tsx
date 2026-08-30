@@ -23,7 +23,7 @@ const fadeInUp = {
 const infoItems = [
   { icon: Phone, key: "phone", detail: "+966 XX XXX XXXX" },
   { icon: Mail, key: "email", detail: "info@dr-alhasan.com" },
-  { icon: MapPin, key: "location", detail: "Riyadh, Saudi Arabia" },
+  { icon: MapPin, key: "location", detail: "lines" },
   { icon: Clock, key: "hours", detail: "hoursDetail" },
 ];
 
@@ -86,11 +86,18 @@ export default function Contact() {
                   <p className="text-sm font-semibold text-foreground">
                     {t.contact[item.key as keyof typeof t.contact]}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {item.detail === "hoursDetail"
-                      ? t.contact.hoursDetail
-                      : item.detail}
-                  </p>
+                  <div className="text-sm text-muted-foreground mt-0.5">
+                    {item.detail === "hoursDetail" ? (
+                      t.contact.hoursDetail
+                    ) : item.detail === "lines" ? (
+                      <span className="flex flex-col">
+                        <span>Syria, Damascus, Lattakia</span>
+                        <span>United Arab Emirates, Dubai</span>
+                      </span>
+                    ) : (
+                      item.detail
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
