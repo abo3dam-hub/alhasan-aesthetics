@@ -1,0 +1,211 @@
+/* DO NOT CHANGE */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap');
+@custom-variant dark (&:is(.dark *));
+
+/* DO NOT CHANGE */
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* CHANGE VALUES FOR THEME — Light Glassmorphism */
+:root {
+  --radius: 0.75rem;
+  --background: #FDF8F4;
+  --foreground: #1E1E1E;
+  --card: rgba(255, 255, 255, 0.55);
+  --card-foreground: #1E1E1E;
+  --popover: rgba(255, 255, 255, 0.6);
+  --popover-foreground: #1E1E1E;
+  --primary: #8B7355;
+  --primary-foreground: #FFFFFF;
+  --secondary: #C5A882;
+  --secondary-foreground: #1E1E1E;
+  --muted: #F0E8DE;
+  --muted-foreground: #6B5E4F;
+  --accent: #D4C4AD;
+  --accent-foreground: #1E1E1E;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: rgba(212, 196, 173, 0.4);
+  --input: rgba(212, 196, 173, 0.3);
+  --ring: #8B7355;
+  --chart-1: #8B7355;
+  --chart-2: #C5A882;
+  --chart-3: #D4C4AD;
+  --chart-4: #A89278;
+  --chart-5: #6B5E4F;
+  --sidebar: rgba(255, 255, 255, 0.55);
+  --sidebar-foreground: #1E1E1E;
+  --sidebar-primary: #8B7355;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(212, 196, 173, 0.3);
+  --sidebar-accent-foreground: #1E1E1E;
+  --sidebar-border: rgba(212, 196, 173, 0.3);
+  --sidebar-ring: #8B7355;
+}
+
+
+
+/* Glass utility classes */
+.glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-elevated {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Luxury gradient backgrounds */
+.luxury-gradient {
+  background: linear-gradient(
+    135deg,
+    #FDF8F4 0%,
+    #F5EDE3 25%,
+    #FAF3EC 50%,
+    #F0E8DE 75%,
+    #FDF8F4 100%
+  );
+}
+
+.hero-gradient {
+  background: linear-gradient(
+    160deg,
+    #FDF8F4 0%,
+    #F8F0E6 20%,
+    #FAF3EC 40%,
+    #F5EDE3 60%,
+    #FDF8F4 80%,
+    #FAF3EC 100%
+  );
+}
+
+/* Glass shimmer effect for hero */
+.glass-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-shimmer::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-30%) translateY(-30%) rotate(0deg); }
+  50% { transform: translateX(30%) translateY(30%) rotate(2deg); }
+}
+
+/* RTL-aware direction helpers */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', 'Noto Kufi Arabic', system-ui, sans-serif;
+  }
+  [dir="rtl"] body {
+    font-family: 'Noto Kufi Arabic', 'Inter', system-ui, sans-serif;
+  }
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    cursor: pointer;
+  }
+}
+
+/* Serif headings for luxury feel */
+.font-serif-luxury {
+  font-family: 'Playfair Display', 'Noto Kufi Arabic', Georgia, serif;
+}
+
+/* Subtle glow accent */
+.glow-champagne {
+  box-shadow: 0 0 40px rgba(197, 168, 130, 0.15);
+}
