@@ -105,7 +105,8 @@ export default function Footer() {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 text-primary shrink-0" />
-                  <span>Riyadh, Saudi Arabia</span>
+                  <span>Syria,Damascus,Lattakia
+                  United Arab Emirates,Duba</span>
                 </div>
                 <div className="h-px bg-border/40 my-2" />
                 <div className="text-sm space-y-1">
