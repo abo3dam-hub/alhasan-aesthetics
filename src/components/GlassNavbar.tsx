@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.svg";
+import doctorAvatar from "/assets/3.jpg";
 
 const navLinks = [
   { key: "home" as const, href: "#home" },
@@ -32,7 +32,14 @@ export default function GlassNavbar() {
           <div className="flex h-16 sm:h-18 items-center justify-between">
             {/* Logo */}
             <a href="#home" className="flex items-center gap-3 shrink-0">
-              <img src={logo} alt="Logo" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full" />
+              <div className="relative">
+                <img
+                  src={doctorAvatar}
+                  alt="Dr. AlHasan"
+                  className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
+                />
+                <div className="absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-white" />
+              </div>
               <span className="font-serif-luxury text-lg sm:text-xl font-semibold text-foreground tracking-tight">
                 {t.nav.logo}
               </span>
@@ -111,7 +118,11 @@ export default function GlassNavbar() {
             >
               <div className="flex items-center justify-between p-4 border-b border-border/40">
                 <a href="#home" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                  <img src={logo} alt="Logo" className="h-8 w-8 rounded-full" />
+                  <img
+                    src={doctorAvatar}
+                    alt="Dr. AlHasan"
+                    className="h-9 w-9 rounded-full object-cover border-2 border-primary/30"
+                  />
                   <span className="font-serif-luxury text-lg font-semibold">{t.nav.logo}</span>
                 </a>
                 <button
