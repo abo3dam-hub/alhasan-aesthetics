@@ -113,47 +113,6 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Decorative glass panel on the right side (desktop) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="hidden xl:block absolute end-8 lg:end-16 top-1/2 -translate-y-1/2 w-80"
-        >
-          <div className="glass-elevated rounded-3xl p-8 glow-champagne">
-            <div className="space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Award className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Board Certified</p>
-                  <p className="text-xs text-muted-foreground">International Standards</p>
-                </div>
-              </div>
-              <div className="h-px bg-border/40" />
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-secondary/20 flex items-center justify-center shrink-0">
-                  <Star className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">99% Satisfaction</p>
-                  <p className="text-xs text-muted-foreground">Patient reviews</p>
-                </div>
-              </div>
-              <div className="h-px bg-border/40" />
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-accent/30 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">15+ Years</p>
-                  <p className="text-xs text-muted-foreground">Surgical expertise</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
