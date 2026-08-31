@@ -1,7 +1,7 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
 > **Last Updated:** August 31, 2026
-> **Status:** Public website frontend built ✅ | Backend pending ⏳
+> **Status:** Public website ✅ | Backend (Convex) ✅ | Admin Dashboard ✅ | Contact Form ✅ | Before/After Page ✅ | Procedure Detail Page ✅
 
 ---
 
@@ -157,8 +157,10 @@ The design direction is **Luxury Medical / Glassmorphism** — premium, elegant,
 | `/` | `<Landing />` | No | Arabic homepage (default) |
 | `/ar` | `<Landing />` | No | Arabic homepage (explicit) |
 | `/en` | `<Landing />` | No | English homepage |
+| `/procedure/:slug` | `<ProcedureDetail />` | No | Individual procedure page |
+| `/before-after` | `<BeforeAfterPage />` | No | Dedicated B&A gallery with filters |
 | `/auth` | `<AuthPage />` | No | Login/signup with email OTP |
-| `/dashboard` | `<Dashboard />` | **Yes** | Protected patient dashboard |
+| `/dashboard` | `<Dashboard />` | **Yes** | Admin dashboard (procedures, testimonials, FAQ, bookings, consultations) |
 | `*` | `<NotFound />` | No | 404 page |
 
 **Auth flow:** Unauthenticated users hitting `/dashboard` are redirected to `/auth?returnTo=/dashboard`. After successful auth, they're redirected to `/dashboard`.
@@ -252,23 +254,25 @@ All interactive elements and their targets:
 ### Completed
 - Schema defined (`src/convex/schema.ts`) with:
   - Auth tables (via `@convex-dev/auth`)
-  - Users table with: name, image, email, emailVerificationTime, isAnonymous, role
+  - Users table with: name, image, email, emailVerificationTime, isAnonymous, role, phone, dateOfBirth, notes
   - Roles: admin, user, member
-- Auth configured with email OTP
-- Basic user queries/mutations
+- Auth configured with email OTP + Anonymous
+- Full CRUD functions for:
+  - **Procedures** (`src/convex/procedures.ts`) — list, listActive, getBySlug, getById, getByCategory, create, update, remove
+  - **Before/After Cases** (`src/convex/beforeAfter.ts`) — list, listActive, getByProcedure, create, update, remove
+  - **Testimonials** (`src/convex/testimonials.ts`) — list, listActive, create, update, remove
+  - **FAQ** (`src/convex/faq.ts`) — list, listActive, create, update, remove
+  - **Bookings** (`src/convex/bookings.ts`) — list, listByUser, listByStatus, create, updateStatus, remove
+  - **Consultations** (`src/convex/consultations.ts`) — list, listByStatus, create, updateStatus, remove
+  - **Notifications** (`src/convex/notifications.ts`) — listByUser, unreadCount, markAsRead, markAllAsRead, create
+- Admin Dashboard with full management UI
+- Contact form saves to Convex consultations table
 
 ### Not Yet Built
-- [ ] Procedures table (CRUD for admin)
-- [ ] Before/After cases table
-- [ ] Testimonials table
-- [ ] FAQ table
-- [ ] Bookings table
-- [ ] Consultation requests table
-- [ ] Notifications table
-- [ ] Admin dashboard queries/mutations
-- [ ] Patient profile queries/mutations
-- [ ] Image storage (Supabase or Convex storage)
-- [ ] Availability/scheduling
+- [ ] Image storage (upload to Convex or external)
+- [ ] Patient profile editing from dashboard
+- [ ] Availability/scheduling system
+- [ ] Email notifications (Convex action with email provider)
 
 ---
 
