@@ -1,273 +1,377 @@
-## Overview
+# Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-This project uses the following tech stack:
-- Vite
-- Typescript
-- React Router v7 (all imports from `react-router` instead of `react-router-dom`)
-- React 19 (for frontend components)
-- Tailwind v4 (for styling)
-- Shadcn UI (for UI components library)
-- Lucide Icons (for icons)
-- Convex (for backend & database)
-- Convex Auth (for authentication)
-- Framer Motion (for animations)
-- Three js (for 3d models)
+> **Last Updated:** August 31, 2026
+> **Status:** Public website frontend built ✅ | Backend pending ⏳
 
-All relevant files live in the 'src' directory.
+---
 
-Use bun for the package manager.
+## Project Overview
 
-## Setup
+A premium, bilingual (Arabic RTL / English LTR) website for **Dr. Al Hasan Al Saiem** (د. الحسن الصايم), a plastic and aesthetic surgeon based in **Syria (Damascus, Lattakia)** and **United Arab Emirates (Dubai)**.
 
-This project is set up already and running on a cloud environment, as well as a convex development in the sandbox.
+The design direction is **Luxury Medical / Glassmorphism** — premium, elegant, modern, clean, trustworthy, and sophisticated. Not sterile.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript |
+| Build Tool | Vite 7 |
+| Styling | Tailwind CSS 4 |
+| UI Components | shadcn/ui (Radix UI primitives) |
+| Animations | Framer Motion 12 |
+| Routing | React Router 7 (client-side SPA) |
+| Backend/DB | Convex (schema defined, no custom functions yet) |
+| Auth | Convex Auth (`@convex-dev/auth`) with email OTP |
+| i18n | Custom I18nProvider (Arabic/English, localStorage persistence) |
+| Icons | Lucide React |
+| Forms | React Hook Form + Zod validation |
+| Package Manager | Bun |
+
+---
+
+## Design System — Light Glassmorphism
+
+### Color Palette
+
+| Token | Value | Usage |
+|---|---|---|
+| Warm Ivory | `#FDF8F4` | Background |
+| Deep Charcoal | `#1E1E1E` | Text |
+| Champagne | `#C5A882` | Secondary accent |
+| Warm Nude | `#D4C4AD` | Borders, muted elements |
+| Warm Brown | `#8B7355` | Primary CTA buttons |
+
+### Glass Utility Classes (defined in `src/index.css`)
+
+| Class | Opacity | Blur | Use Case |
+|---|---|---|---|
+| `.glass` | 55% white | 20px | General glass panels |
+| `.glass-strong` | 70% white | 30px | Navbar, prominent panels |
+| `.glass-subtle` | 30% white | 12px | Background accents |
+| `.glass-card` | 45% white | 24px | Cards with inner shadow |
+| `.glass-elevated` | 65% white | 32px | Navbar, elevated elements |
+
+### Typography
+
+| Font | Usage |
+|---|---|
+| **Playfair Display** | Serif headings (luxury editorial feel) — `.font-serif-luxury` |
+| **Inter** | Body text (Latin) |
+| **Noto Kufi Arabic** | Arabic text (auto-applied when `dir="rtl"`) |
+
+---
+
+## Project Structure
+
+```
+/
+├── index.html                          # Entry HTML (title: Dr. Al Hasan Al Saiem)
+├── package.json                        # Dependencies & scripts
+├── vite.config.ts                      # Vite config (HMR disabled, path aliases)
+├── tsconfig.json / tsconfig.app.json   # TypeScript config
+├── tailwind.config.*                   # (Uses Tailwind CSS v4 — config in CSS)
+├── components.json                     # shadcn/ui configuration
+│
+├── public/
+│   └── assets/
+│       ├── 1.jpg                       # Doctor photo (used in About section)
+│       ├── 2.jpg                       # Available asset
+│       ├── 3.jpg                       # Doctor photo (used as Navbar icon)
+│       └── 4.jpg                       # Business card image (used as Footer logo)
+│
+├── src/
+│   ├── main.tsx                        # App entrypoint — providers, routing, error boundaries
+│   ├── index.css                       # Global styles, glass utilities, theme tokens
+│   ├── vite-env.d.ts                   # Vite type declarations
+│   │
+│   ├── i18n/
+│   │   ├── index.tsx                   # I18nProvider + useI18n() hook
+│   │   └── types.ts                    # Translation type definitions
+│   │
+│   ├── locales/
+│   │   ├── ar.json                     # Arabic translations (primary language)
+│   │   └── en.json                     # English translations
+│   │
+│   ├── pages/
+│   │   ├── Landing.tsx                 # Homepage — assembles all sections
+│   │   ├── Auth.tsx                    # Authentication page (email + OTP)
+│   │   ├── Dashboard.tsx               # Protected dashboard (placeholder)
+│   │   └── NotFound.tsx                # 404 page
+│   │
+│   ├── components/
+│   │   ├── GlassNavbar.tsx             # Fixed glassmorphism navbar with mobile menu
+│   │   ├── Footer.tsx                  # 4-column footer with contact info
+│   │   ├── RequireAuth.tsx             # Auth guard wrapper
+│   │   ├── LogoDropdown.tsx            # Logo dropdown component
+│   │   │
+│   │   ├── sections/                   # Homepage sections
+│   │   │   ├── Hero.tsx                # Hero with CTA buttons (scroll to #contact, #procedures)
+│   │   │   ├── About.tsx               # Doctor bio, photo (1.jpg), stats
+│   │   │   ├── Procedures.tsx          # 10 procedures grid with icons
+│   │   │   ├── BeforeAfter.tsx         # Before/After gallery (placeholder images)
+│   │   │   ├── Testimonials.tsx        # 3 patient testimonial cards
+│   │   │   ├── FAQ.tsx                 # 6 FAQ accordion items
+│   │   │   ├── Contact.tsx             # Contact form + info cards
+│   │   │   └── CTA.tsx                 # Final call-to-action section
+│   │   │
+│   │   └── ui/                         # shadcn/ui components (50+ components)
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── accordion.tsx
+│   │       ├── dialog.tsx
+│   │       └── ... (50+ components)
+│   │
+│   ├── convex/                         # Convex backend
+│   │   ├── schema.ts                   # Database schema (users + auth tables)
+│   │   ├── auth.config.ts              # Auth configuration
+│   │   ├── auth.ts                     # Auth utilities
+│   │   ├── http.ts                     # HTTP endpoints
+│   │   ├── users.ts                    # User queries/mutations
+│   │   ├── auth/
+│   │   │   └── emailOtp.ts             # Email OTP auth
+│   │   └── _generated/                 # Auto-generated Convex types
+│   │
+│   ├── hooks/
+│   │   ├── use-auth.ts                 # Auth hook
+│   │   └── use-mobile.ts              # Mobile detection hook
+│   │
+│   ├── lib/
+│   │   ├── utils.ts                    # Utility functions (cn, etc.)
+│   │   └── vly-integrations.ts         # Vly platform integrations
+│   │
+│   └── types/
+│       └── global.d.ts                 # Global type declarations
+│
+└── convex.json                         # Convex project config
+```
+
+---
+
+## Routing
+
+| Path | Component | Auth Required | Description |
+|---|---|---|---|
+| `/` | `<Landing />` | No | Arabic homepage (default) |
+| `/ar` | `<Landing />` | No | Arabic homepage (explicit) |
+| `/en` | `<Landing />` | No | English homepage |
+| `/auth` | `<AuthPage />` | No | Login/signup with email OTP |
+| `/dashboard` | `<Dashboard />` | **Yes** | Protected patient dashboard |
+| `*` | `<NotFound />` | No | 404 page |
+
+**Auth flow:** Unauthenticated users hitting `/dashboard` are redirected to `/auth?returnTo=/dashboard`. After successful auth, they're redirected to `/dashboard`.
+
+---
+
+## Homepage Sections (Single-Page Layout)
+
+All sections are assembled in `src/pages/Landing.tsx` as a single scrollable page with anchor-based navigation.
+
+| Section | ID | Component | Description |
+|---|---|---|---|
+| Navbar | — | `GlassNavbar.tsx` | Fixed top, glass effect, language toggle, mobile slide-out menu |
+| Hero | `#home` | `Hero.tsx` | Full-height hero, gradient text, two CTAs → `#contact` & `#procedures` |
+| About | `#about` | `About.tsx` | Doctor photo (1.jpg), bio, 4 stats (15+ years, 5000+ procedures, 99% satisfaction, international certification) |
+| Procedures | `#procedures` | `Procedures.tsx` | 10 procedure cards in 3-column grid |
+| Before/After | `#before-after` | `BeforeAfter.tsx` | 4-column comparison grid (placeholder images) |
+| Testimonials | `#testimonials` | `Testimonials.tsx` | 3 patient review cards with star ratings |
+| FAQ | `#faq` | `FAQ.tsx` | 6 accordion Q&A items |
+| Contact | `#contact` | `Contact.tsx` | Contact info cards + form (name, email, subject, message) |
+| CTA | — | `CTA.tsx` | Final call-to-action → `#contact` |
+| Footer | — | `Footer.tsx` | 4-column footer, business card logo (4.jpg), addresses, hours |
+
+---
+
+## Doctor's Procedures (from Business Card)
+
+1. **شد الأجفان العلوية والسفلية** — Upper & Lower Blepharoplasty
+2. **شد الوجه والرقبة** — Face & Neck Lift
+3. **تجميل الأنف** — Rhinoplasty
+4. **شفط الشحم وحقن الشحم** — Liposuction & Fat Transfer
+5. **شد البطن** — Tummy Tuck
+6. **حقن البوتوكس** — Botox Injections
+7. **الفيلر** — Dermal Fillers
+8. **شد العضدين والفخذين** — Arm & Thigh Lift
+9. **تكبير/تصغير الثدي** — Breast Augmentation/Reduction
+10. **إصلاح الندب والتشوهات** — Scar Revision
+
+---
+
+## Doctor's Locations
+
+- **Syria:** Damascus, Lattakia
+- **United Arab Emirates:** Dubai
+
+---
+
+## i18n System
+
+- **Default language:** Arabic (RTL)
+- **Secondary language:** English (LTR)
+- Persistence: `localStorage` key `"locale"`
+- Toggle: Globe icon in Navbar (desktop & mobile)
+- All UI text uses `t.key` translations from `src/locales/ar.json` / `src/locales/en.json`
+- RTL/LTR auto-applied via `document.documentElement.dir`
+
+---
+
+## Button & Navigation Map
+
+All interactive elements and their targets:
+
+| Button/Link | Location | Action |
+|---|---|---|
+| Logo (3.jpg) | Navbar | `→ #home` (scroll to top) |
+| Home | Navbar | `→ #home` |
+| About | Navbar | `→ #about` |
+| Procedures | Navbar | `→ #procedures` |
+| Before/After | Navbar | `→ #before-after` |
+| Testimonials | Navbar | `→ #testimonials` |
+| FAQ | Navbar | `→ #faq` |
+| Contact | Navbar | `→ #contact` |
+| Language Toggle | Navbar | Switches AR ↔ EN |
+| Book Consultation | Navbar | `→ #contact` |
+| Book Free Consultation | Hero | `→ #contact` |
+| Explore Procedures | Hero | `→ #procedures` |
+| Learn More | Procedure cards | `→ #procedures` (same section) |
+| View All | Procedures | `→ #procedures` (same section) |
+| View All | Before/After | `→ #before-after` (same section) |
+| Book Consultation | CTA | `→ #contact` |
+| Send Message | Contact form | Form submission |
+| Language toggle | Footer | Switches AR ↔ EN |
+| All footer links | Footer | `→ #home`, `→ #about`, etc. |
+
+**Mobile menu:** All nav links scroll to section AND close the mobile menu overlay.
+
+---
+
+## Backend Status (Convex)
+
+### Completed
+- Schema defined (`src/convex/schema.ts`) with:
+  - Auth tables (via `@convex-dev/auth`)
+  - Users table with: name, image, email, emailVerificationTime, isAnonymous, role
+  - Roles: admin, user, member
+- Auth configured with email OTP
+- Basic user queries/mutations
+
+### Not Yet Built
+- [ ] Procedures table (CRUD for admin)
+- [ ] Before/After cases table
+- [ ] Testimonials table
+- [ ] FAQ table
+- [ ] Bookings table
+- [ ] Consultation requests table
+- [ ] Notifications table
+- [ ] Admin dashboard queries/mutations
+- [ ] Patient profile queries/mutations
+- [ ] Image storage (Supabase or Convex storage)
+- [ ] Availability/scheduling
+
+---
+
+## Planned Features — What's NOT Built Yet
+
+### Patient Features (NOT started)
+- [ ] Mobile number login with OTP
+- [ ] Patient profile page
+- [ ] Booking requests
+- [ ] Consultation requests
+- [ ] Booking history
+- [ ] Notifications
+
+### Admin Dashboard (NOT started)
+- [ ] Dashboard overview
+- [ ] Patients management
+- [ ] Procedures CRUD
+- [ ] Before/After cases management
+- [ ] Testimonials management
+- [ ] FAQ management
+- [ ] Bookings management
+- [ ] Consultation requests
+- [ ] Doctor availability
+- [ ] Website settings
+
+### Public Pages (partially built)
+- [x] Homepage with all sections
+- [ ] Individual procedure pages (dynamic routes)
+- [ ] Before & After dedicated page
+- [ ] Patient Stories page
+- [ ] Dedicated contact page
+- [ ] Cost inquiry form
+- [ ] Procedure finder tool
+
+---
+
+## Assets Inventory
+
+| File | Location | Usage |
+|---|---|---|
+| `1.jpg` | `public/assets/1.jpg` | Doctor photo in About section |
+| `2.jpg` | `public/assets/2.jpg` | Available (not used yet) |
+| `3.jpg` | `public/assets/3.jpg` | Doctor photo used as Navbar avatar icon |
+| `4.jpg` | `public/assets/4.jpg` | Business card image used as Footer logo |
+| `logo.svg` | `public/logo.svg` | Original SVG logo (not actively used) |
+| `logo.svg` | `src/assets/logo.svg` | Source logo (not actively used) |
+
+---
+
+## How to Run Locally
+
+```bash
+# Install dependencies
+bun install
+
+# Start dev server
+bun run dev
+
+# Typecheck
+bun tsc -b --noEmit
+
+# Build for production
+bun run build
+```
+
+**Convex backend:**
+```bash
+# Start Convex dev (generates types + deploys functions)
+bun convex dev
+
+# One-shot codegen
+bun convex dev --once
+```
+
+---
 
 ## Environment Variables
 
-The project is set up with project specific CONVEX_DEPLOYMENT and VITE_CONVEX_URL environment variables on the client side.
-
-The convex server has a separate set of environment variables that are accessible by the convex backend.
-
-Currently, these variables include auth-specific keys: JWKS, JWT_PRIVATE_KEY, and SITE_URL.
-
-
-# Using Authentication (Important!)
-
-You must follow these conventions when using authentication.
-
-## Auth is already set up.
-
-All convex authentication functions are already set up. The auth currently uses email OTP and anonymous users, but can support more.
-
-The email OTP configuration is defined in `src/convex/auth/emailOtp.ts`. DO NOT MODIFY THIS FILE.
-
-Also, DO NOT MODIFY THESE AUTH FILES: `src/convex/auth.config.ts` and `src/convex/auth.ts`.
-
-## Using Convex Auth on the backend
-
-On the `src/convex/users.ts` file, you can use the `getCurrentUser` function to get the current user's data.
-
-## Using Convex Auth on the frontend
-
-The `/auth` page is already set up to use auth. Navigate to `/auth` for all log in / sign up sequences.
-
-You MUST use this hook to get user data. Never do this yourself without the hook:
-```typescript
-import { useAuth } from "@/hooks/use-auth";
-
-const { isLoading, isAuthenticated, user, signIn, signOut } = useAuth();
-```
-
-## Protected Routes
-
-The starter `/dashboard` route is protected with `RequireAuth`, which sends
-signed-out users to `/auth?returnTo=<current route>`. Extend that page for the
-product's authenticated experience, and reuse `RequireAuth` when adding another
-protected route.
-
-## Auth Page
-
-The auth page is defined in `src/pages/Auth.tsx`. Send sign-in and sign-up actions
-to `/auth`.
-
-## Authorization
-
-You can perform authorization checks on the frontend and backend.
-
-On the frontend, you can use the `useAuth` hook to get the current user's data and authentication state.
-
-You should also be protecting queries, mutations, and actions at the base level, checking for authorization securely.
-
-## Adding a redirect after auth
-
-The `/auth` route in `src/main.tsx` redirects to `/dashboard` by default. If the
-product's main authenticated route is different, update `redirectAfterAuth` to
-that route. A validated same-origin `returnTo` query parameter takes priority so
-users can resume the protected page they originally requested. Never leave an
-authenticated product redirecting back to the public landing page.
-
-## Complete authenticated products
-
-When the requested product implies accounts, a workspace, a dashboard, or other
-signed-in functionality, the task is not complete with only a landing page and
-auth form. Build the main authenticated experience, protect its route, and verify
-that signing in reaches it.
-
-# Frontend Conventions
-
-You will be using the Vite frontend with React 19, Tailwind v4, and Shadcn UI.
-
-Generally, pages should be in the `src/pages` folder, and components should be in the `src/components` folder.
-
-Shadcn primitives are located in the `src/components/ui` folder and should be used by default.
-
-## Page routing
-
-Your page component should go under the `src/pages` folder.
-
-When adding a page, update the react router configuration in `src/main.tsx` to include the new route you just added.
-
-## Shad CN conventions
-
-Follow these conventions when using Shad CN components, which you should use by default.
-- Remember to use "cursor-pointer" to make the element clickable
-- For title text, use the "tracking-tight font-bold" class to make the text more readable
-- Always make apps MOBILE RESPONSIVE. This is important
-- AVOID NESTED CARDS. Try and not to nest cards, borders, components, etc. Nested cards add clutter and make the app look messy.
-- AVOID SHADOWS. Avoid adding any shadows to components. stick with a thin border without the shadow.
-- Avoid skeletons; instead, use the loader2 component to show a spinning loading state when loading data.
-
-
-## Landing Pages
-
-You must always create good-looking designer-level styles to your application. 
-- Make it well animated and fit a certain "theme", ie neo brutalist, retro, neumorphism, glass morphism, etc
-
-Use known images and emojis from online.
-
-If the user is logged in already, show the get started button to say "Dashboard" or "Profile" instead to take them there.
-
-## Responsiveness and formatting
-
-Make sure pages are wrapped in a container to prevent the width stretching out on wide screens. Always make sure they are centered aligned and not off-center.
-
-Always make sure that your designs are mobile responsive. Verify the formatting to ensure it has correct max and min widths as well as mobile responsiveness.
-
-- Always create sidebars for protected dashboard pages and navigate between pages
-- Always create navbars for landing pages
-- On these bars, the created logo should be clickable and redirect to the index page
-
-## Animating with Framer Motion
-
-You must add animations to components using Framer Motion. It is already installed and configured in the project.
-
-To use it, import the `motion` component from `framer-motion` and use it to wrap the component you want to animate.
-
-
-### Other Items to animate
-- Fade in and Fade Out
-- Slide in and Slide Out animations
-- Rendering animations
-- Button clicks and UI elements
-
-Animate for all components, including on landing page and app pages.
-
-## Three JS Graphics
-
-Your app comes with three js by default. You can use it to create 3D graphics for landing pages, games, etc.
-
-
-## Colors
-
-You can override colors in: `src/index.css`
-
-This uses the oklch color format for tailwind v4.
-
-Always use these color variable names.
-
-Make sure all ui components are set up to be mobile responsive and compatible with both light and dark mode.
-
-Set theme using `dark` or `light` variables at the parent className.
-
-## Styling and Theming
-
-When changing the theme, always change the underlying theme of the shad cn components app-wide under `src/components/ui` and the colors in the index.css file.
-
-Avoid hardcoding in colors unless necessary for a use case, and properly implement themes through the underlying shad cn ui components.
-
-When styling, ensure buttons and clickable items have pointer-click on them (don't by default).
-
-Always follow a set theme style and ensure it is tuned to the user's liking.
-
-## Toasts
-
-You should always use toasts to display results to the user, such as confirmations, results, errors, etc.
-
-Use the shad cn Sonner component as the toaster. For example:
-
-```
-import { toast } from "sonner"
-
-import { Button } from "@/components/ui/button"
-export function SonnerDemo() {
-  return (
-    <Button
-      variant="outline"
-      onClick={() =>
-        toast("Event has been created", {
-          description: "Sunday, December 03, 2023 at 9:00 AM",
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    >
-      Show Toast
-    </Button>
-  )
-}
-```
-
-Remember to import { toast } from "sonner". Usage: `toast("Event has been created.")`
-
-## Dialogs
-
-Always ensure your larger dialogs have a scroll in its content to ensure that its content fits the screen size. Make sure that the content is not cut off from the screen.
-
-Ideally, instead of using a new page, use a Dialog instead. 
-
-# Using the Convex backend
-
-You will be implementing the convex backend. Follow your knowledge of convex and the documentation to implement the backend.
-
-## The Convex Schema
-
-You must correctly follow the convex schema implementation.
-
-The schema is defined in `src/convex/schema.ts`.
-
-Do not include the `_id` and `_creationTime` fields in your queries (it is included by default for each table).
-Do not index `_creationTime` as it is indexed for you. Never have duplicate indexes.
-
-
-## Convex Actions: Using CRUD operations
-
-When running anything that involves external connections, you must use a convex action with "use node" at the top of the file.
-
-You cannot have queries or mutations in the same file as a "use node" action file. Thus, you must use pre-built queries and mutations in other files.
-
-You can also use the pre-installed internal crud functions for the database:
-
-```ts
-// in convex/users.ts
-import { crud } from "convex-helpers/server/crud";
-import schema from "./schema.ts";
-
-export const { create, read, update, destroy } = crud(schema, "users");
-
-// in some file, in an action:
-const user = await ctx.runQuery(internal.users.read, { id: userId });
-
-await ctx.runMutation(internal.users.update, {
-  id: userId,
-  patch: {
-    status: "inactive",
-  },
-});
-```
-
-
-## Common Convex Mistakes To Avoid
-
-When using convex, make sure:
-- Document IDs are referenced as `_id` field, not `id`.
-- Document ID types are referenced as `Id<"TableName">`, not `string`.
-- Document object types are referenced as `Doc<"TableName">`.
-- Keep schemaValidation to false in the schema file.
-- You must correctly type your code so that it passes the type checker.
-- You must handle null / undefined cases of your convex queries for both frontend and backend, or else it will throw an error that your data could be null or undefined.
-- Always use the `@/folder` path, with `@/convex/folder/file.ts` syntax for importing convex files.
-- This includes importing generated files like `@/convex/_generated/server`, `@/convex/_generated/api`
-- Remember to import functions like useQuery, useMutation, useAction, etc. from `convex/react`
-- NEVER have return type validators.
-# alhasan-aesthetics
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_CONVEX_URL` | Yes | Convex deployment URL (set via Freebuff Keys UI) |
+| `CONVEX_DEPLOY_KEY` | For deploy | Convex deploy key (server-side only) |
+
+---
+
+## Git & Deployment
+
+- **GitHub Repo:** `https://github.com/abo3dam-hub/alhasan-aesthetics`
+- **Branch:** `main`
+- **Platform:** Freebuff (Vite dev server managed by platform)
+- **Deploy:** Can be connected to Vercel for auto-deployment from GitHub
+
+---
+
+## Notes for AI Agents
+
+1. **This is a single-page app.** The homepage is one long scrollable page (`Landing.tsx`) composed of section components. There are no separate route pages for About, Procedures, etc.
+2. **All text is translatable.** Never hardcode Arabic or English strings in components — always use `t.nav.key`, `t.hero.key`, etc. from `useI18n()`.
+3. **RTL is critical.** The app defaults to Arabic RTL. Use Tailwind's `rtl:` variant and `dir` attribute for layout mirroring.
+4. **Glassmorphism is the design language.** Use `.glass`, `.glass-card`, `.glass-elevated` classes. Don't use solid backgrounds for cards/panels.
+5. **Images are in `public/assets/`.** Reference them as `/assets/1.jpg` etc. Do not use `import` for JPGs in `public/`.
+6. **Convex is the planned backend.** Don't add Express, Next.js API routes, or other backends. All server logic should go in `src/convex/`.
+7. **The dashboard is a placeholder.** It only shows "Welcome to Dashboard" and a logout button. It needs to be fully built out.
+8. **Before/After section uses placeholder images.** No real patient photos have been uploaded yet.
+9. **The contact form is frontend-only.** It shows a success toast but doesn't save to any database yet.
+10. **Freebuff manages the dev server.** Never run `bun run dev`, `vite`, or kill processes. Edit files and the platform picks up changes automatically.
