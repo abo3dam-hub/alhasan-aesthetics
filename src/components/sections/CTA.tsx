@@ -45,6 +45,7 @@ export default function CTA() {
                 <Button
                   size="lg"
                   className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
+                  onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
                 >
                   {t.cta.button}
                   <Arrow className="h-5 w-5" />

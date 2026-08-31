@@ -74,6 +74,7 @@ export default function GlassNavbar() {
               <Button
                 size="sm"
                 className="hidden md:inline-flex bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 shadow-sm"
+                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
               >
                 {t.nav.bookConsultation}
               </Button>
@@ -150,7 +151,10 @@ export default function GlassNavbar() {
               </div>
 
               <div className="p-4 border-t border-border/40">
-                <Button className="w-full rounded-full bg-primary text-primary-foreground">
+                <Button
+                  className="w-full rounded-full bg-primary text-primary-foreground"
+                  onClick={() => { setMobileOpen(false); document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }); }}
+                >
                   {t.nav.bookConsultation}
                 </Button>
               </div>

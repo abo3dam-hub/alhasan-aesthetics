@@ -109,6 +109,7 @@ export default function Procedures() {
             variant="outline"
             size="lg"
             className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
+            onClick={() => document.getElementById("procedures")?.scrollIntoView({ behavior: "smooth" })}
           >
             {t.procedures.viewAll}
             <Arrow className="h-4 w-4" />

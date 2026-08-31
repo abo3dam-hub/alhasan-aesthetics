@@ -97,6 +97,7 @@ export default function BeforeAfter() {
             variant="outline"
             size="lg"
             className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
+            onClick={() => document.getElementById("before-after")?.scrollIntoView({ behavior: "smooth" })}
           >
             {t.beforeAfter.viewAll}
             <Arrow className="h-4 w-4" />
