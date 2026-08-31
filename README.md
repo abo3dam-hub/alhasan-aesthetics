@@ -1,7 +1,7 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
 > **Last Updated:** August 31, 2026
-> **Status:** ✅ Public Website | ✅ Backend (Convex) | ✅ Booking System | ✅ Admin Dashboard | ✅ i18n (AR/EN)
+> **Status:** ✅ Public Website | ✅ Backend (Convex) | ✅ Booking System | ✅ Admin Dashboard | ✅ i18n (AR/EN) | ✅ Seed Data
 
 ---
 
@@ -92,10 +92,12 @@ A premium, bilingual (Arabic RTL / English LTR) website for **Dr. Al Hasan Al Sa
 | Each Procedure Card | Procedures | → `/procedure/:slug` |
 | View All Results | Procedures / Before/After | → `/before-after` |
 | Book Now | CTA section | → `/booking` |
+| Book Consultation | Before/After page CTA | → `/booking` |
 | Back to Home | All detail pages | → `/` |
 | All footer links | Footer | → Respective pages |
 | Login/Signup | Auth page | → `/dashboard` |
 | Sign Out | Dashboard | → `/` |
+| Seed Data | Dashboard Overview | Populates database |
 
 ---
 
@@ -111,6 +113,8 @@ The booking page (`/booking`) implements a **3-step wizard**:
 **Time Slots:** `09:00, 09:30, 10:00, 10:30, 11:00, 11:30, 12:00, 12:30, 13:00, 13:30, 14:00, 14:30, 15:00, 15:30, 16:00, 16:30, 17:00, 17:30`
 
 **Working Hours:** Sunday - Thursday, 9 AM - 6 PM
+
+**Pre-selection:** Can be pre-selected via URL: `/booking?procedure=rhinoplasty`
 
 ---
 
@@ -129,7 +133,7 @@ The booking page (`/booking`) implements a **3-step wizard**:
 | 9 | تكبير/تصغير الثدي | Breast Augmentation/Reduction | `breast-augmentation-reduction` |
 | 10 | إصلاح الندب والتشوهات | Scar & Deformity Correction | `scar-deformity-correction` |
 
-Each procedure has: Arabic/English titles, descriptions, long descriptions, duration, and recovery time.
+Each procedure has: Arabic/English titles, descriptions, long descriptions, duration, and recovery time — both as fallback data in code AND in Convex database (via seed).
 
 ---
 
@@ -146,8 +150,20 @@ Each procedure has: Arabic/English titles, descriptions, long descriptions, dura
 |---|---|
 | `public/assets/1.jpg` | Doctor photo in About section |
 | `public/assets/2.jpg` | Available (not used) |
-| `public/assets/3.jpg` | Doctor photo — Navbar avatar icon |
+| `public/assets/3.jpg` | Doctor photo — Navbar avatar + LogoDropdown |
 | `public/assets/4.jpg` | Business card — Footer logo |
+
+---
+
+## Seed Data
+
+The admin dashboard includes a **"Seed Data"** button that populates the Convex database with:
+
+- **10 procedures** (all from business card, bilingual)
+- **3 testimonials** (bilingual, 5-star ratings)
+- **6 FAQ items** (bilingual, common questions)
+
+To seed: Login → `/dashboard` → Overview tab → Click "Seed Data"
 
 ---
 
@@ -159,74 +175,75 @@ Each procedure has: Arabic/English titles, descriptions, long descriptions, dura
 ├── package.json
 ├── vite.config.ts
 ├── tsconfig.json / tsconfig.app.json
-├── components.json                          # shadcn/ui config
+├── components.json
 │
 ├── public/assets/
-│   ├── 1.jpg                                # Doctor photo (About)
-│   ├── 2.jpg                                # Available
-│   ├── 3.jpg                                # Doctor photo (Navbar)
-│   └── 4.jpg                                # Business card (Footer)
+│   ├── 1.jpg                    # Doctor photo (About)
+│   ├── 2.jpg                    # Available
+│   ├── 3.jpg                    # Doctor photo (Navbar, LogoDropdown)
+│   └── 4.jpg                    # Business card (Footer)
 │
 ├── src/
-│   ├── main.tsx                             # App entry — providers, routing
-│   ├── index.css                            # Glass utilities, theme tokens
+│   ├── main.tsx                 # App entry — providers, routing
+│   ├── index.css                # Glass utilities, theme tokens
 │   │
 │   ├── i18n/
-│   │   ├── index.tsx                        # I18nProvider + useI18n()
-│   │   └── types.ts                         # Translation types
+│   │   ├── index.tsx            # I18nProvider + useI18n()
+│   │   └── types.ts             # Translation types
 │   │
 │   ├── locales/
-│   │   ├── ar.json                          # Arabic translations
-│   │   └── en.json                          # English translations
+│   │   ├── ar.json              # Arabic translations (100+ keys)
+│   │   └── en.json              # English translations (100+ keys)
 │   │
 │   ├── pages/
-│   │   ├── Landing.tsx                      # Homepage — all sections
-│   │   ├── BookingPage.tsx                  # 3-step booking wizard
-│   │   ├── ProcedureDetail.tsx              # /procedure/:slug
-│   │   ├── BeforeAfterPage.tsx              # /before-after gallery
-│   │   ├── Auth.tsx                         # Email OTP login
-│   │   ├── Dashboard.tsx                    # Admin panel
-│   │   └── NotFound.tsx                     # 404 page
+│   │   ├── Landing.tsx          # Homepage — all sections
+│   │   ├── BookingPage.tsx      # 3-step booking wizard
+│   │   ├── ProcedureDetail.tsx  # /procedure/:slug (with fallback data)
+│   │   ├── BeforeAfterPage.tsx  # /before-after gallery
+│   │   ├── Auth.tsx             # Email OTP login (glassmorphism bg)
+│   │   ├── Dashboard.tsx        # Admin panel (6 tabs + seed button)
+│   │   └── NotFound.tsx         # 404 page
 │   │
 │   ├── components/
-│   │   ├── GlassNavbar.tsx                  # Fixed glass navbar + mobile menu
-│   │   ├── Footer.tsx                       # 4-column footer
-│   │   ├── RequireAuth.tsx                  # Auth guard
-│   │   ├── LogoDropdown.tsx
+│   │   ├── GlassNavbar.tsx      # Fixed glass navbar + mobile menu
+│   │   ├── Footer.tsx           # 4-column footer
+│   │   ├── RequireAuth.tsx      # Auth guard
+│   │   ├── LogoDropdown.tsx     # Logo dropdown (uses 3.jpg)
 │   │   │
-│   │   ├── sections/                        # Homepage sections
-│   │   │   ├── Hero.tsx                     # Hero + CTAs
-│   │   │   ├── About.tsx                    # Doctor bio + photo
-│   │   │   ├── Procedures.tsx               # 10 procedure cards → /procedure/:slug
-│   │   │   ├── BeforeAfter.tsx              # Convex data → /before-after
-│   │   │   ├── Testimonials.tsx             # Convex data
-│   │   │   ├── FAQ.tsx                      # Convex data + Accordion
-│   │   │   ├── Contact.tsx                  # Form → Convex consultations
-│   │   │   └── CTA.tsx                      # → /booking
+│   │   ├── sections/            # Homepage sections
+│   │   │   ├── Hero.tsx         # Hero + CTAs
+│   │   │   ├── About.tsx        # Doctor bio + photo
+│   │   │   ├── Procedures.tsx   # 10 procedure cards → /procedure/:slug
+│   │   │   ├── BeforeAfter.tsx  # Convex data → /before-after
+│   │   │   ├── Testimonials.tsx # Convex data
+│   │   │   ├── FAQ.tsx          # Convex data + Accordion
+│   │   │   ├── Contact.tsx      # Form → Convex consultations
+│   │   │   └── CTA.tsx          # → /booking
 │   │   │
-│   │   └── ui/                              # 50+ shadcn/ui components
+│   │   └── ui/                  # 50+ shadcn/ui components
 │   │
 │   ├── convex/
-│   │   ├── schema.ts                        # Full schema (8 tables)
-│   │   ├── procedures.ts                    # CRUD queries/mutations
-│   │   ├── beforeAfter.ts                   # CRUD queries/mutations
-│   │   ├── testimonials.ts                  # CRUD queries/mutations
-│   │   ├── faq.ts                           # CRUD queries/mutations
-│   │   ├── bookings.ts                      # CRUD + status management
-│   │   ├── consultations.ts                 # CRUD + status management
-│   │   ├── notifications.ts                 # CRUD + read/unread
-│   │   ├── users.ts                         # User queries
-│   │   ├── auth.ts                          # Auth config
-│   │   ├── auth.config.ts                   # Auth providers
-│   │   ├── http.ts                          # HTTP routes
-│   │   └── auth/emailOtp.ts                 # Email OTP provider
+│   │   ├── schema.ts            # Full schema (8 tables)
+│   │   ├── seed.ts              # Seed data mutation
+│   │   ├── procedures.ts        # CRUD queries/mutations
+│   │   ├── beforeAfter.ts       # CRUD queries/mutations
+│   │   ├── testimonials.ts      # CRUD queries/mutations
+│   │   ├── faq.ts               # CRUD queries/mutations
+│   │   ├── bookings.ts          # CRUD + status management
+│   │   ├── consultations.ts     # CRUD + status management
+│   │   ├── notifications.ts     # CRUD + read/unread
+│   │   ├── users.ts             # User queries
+│   │   ├── auth.ts              # Auth config
+│   │   ├── auth.config.ts       # Auth providers
+│   │   ├── http.ts              # HTTP routes
+│   │   └── auth/emailOtp.ts     # Email OTP provider
 │   │
 │   ├── hooks/
-│   │   ├── use-auth.ts                      # Auth hook
+│   │   ├── use-auth.ts
 │   │   └── use-mobile.ts
 │   │
 │   └── lib/
-│       ├── utils.ts                         # cn() utility
+│       ├── utils.ts
 │       └── vly-integrations.ts
 ```
 
@@ -234,7 +251,7 @@ Each procedure has: Arabic/English titles, descriptions, long descriptions, dura
 
 ## Convex Database Schema
 
-### Tables
+### Tables (8 total)
 
 | Table | Fields | Indexes |
 |---|---|---|
@@ -247,10 +264,11 @@ Each procedure has: Arabic/English titles, descriptions, long descriptions, dura
 | **consultations** | name, email, phone, subject, message, userId, status, reply | `by_status`, `by_user` |
 | **notifications** | userId, title, message, type, isRead, link | `by_user`, `by_unread` |
 
-### Convex Functions (7 files)
+### Convex Functions (8 files)
 
 | File | Functions |
 |---|---|
+| `seed.ts` | seedAll |
 | `procedures.ts` | list, listActive, getBySlug, getById, getByCategory, create, update, remove |
 | `beforeAfter.ts` | list, listActive, getByProcedure, create, update, remove |
 | `testimonials.ts` | list, listActive, create, update, remove |
@@ -267,12 +285,12 @@ The `/dashboard` page provides full CRUD management:
 
 | Tab | Capabilities |
 |---|---|
-| **Overview** | Stats cards (procedures, bookings, consultations, new messages), recent bookings list |
+| **Overview** | Stats cards, seed data button, recent bookings list |
 | **Procedures** | List all, toggle active/inactive, delete, add new (full form) |
 | **Testimonials** | List all, toggle active, delete, add new |
 | **FAQ** | List all, toggle active, delete, add new |
-| **Bookings** | List all, change status (pending/confirmed/completed/cancelled), view details |
-| **Consultations** | List all, change status (new/read/replied/archived), view messages |
+| **Bookings** | List all, change status (pending/confirmed/completed/cancelled) |
+| **Consultations** | List all, change status (new/read/replied/archived) |
 
 ---
 
@@ -282,7 +300,7 @@ The `/dashboard` page provides full CRUD management:
 - **Before/After section:** Pulls from `beforeAfter.listActive`, falls back to placeholder cards
 - **Testimonials section:** Pulls from `testimonials.listActive`, falls back to translation strings
 - **FAQ section:** Pulls from `faq.listActive`, falls back to translation strings
-- **Procedure Detail:** Pulls from `procedures.getBySlug`, falls back to hardcoded translation data
+- **Procedure Detail:** Pulls from `procedures.getBySlug`, falls back to hardcoded translation data (10 procedures with full descriptions)
 
 ### Forms → Convex
 - **Contact Form:** Saves to `consultations` table via `consultations.create`
@@ -291,6 +309,7 @@ The `/dashboard` page provides full CRUD management:
 ### Admin Dashboard → Convex
 - All CRUD operations via Convex mutations
 - Real-time reactive updates via Convex queries
+- Seed data via `seed.seedAll` mutation
 
 ---
 
@@ -314,12 +333,14 @@ bun convex dev --once  # One-shot codegen
 ## Notes for AI Agents
 
 1. **SPA architecture.** Homepage is one scrollable page (`Landing.tsx`) with section components. Detail pages are separate routes.
-2. **All text is translatable.** Use `t.key` from `useI18n()`. Never hardcode strings.
+2. **All text is translatable.** Use `t.key` from `useI18n()`. Never hardcode strings. Booking page uses `t.booking.*` keys.
 3. **RTL is critical.** Default language is Arabic RTL. Use Tailwind `rtl:` variant.
 4. **Glassmorphism design.** Use `.glass`, `.glass-card`, `.glass-elevated`. No solid backgrounds for panels.
 5. **Images in `public/assets/`.** Reference as `/assets/1.jpg`. Don't `import` JPGs.
 6. **Convex is the backend.** Don't add Express or other backends.
 7. **Contact form saves to Convex.** Uses `consultations.create` mutation.
 8. **Booking form saves to Convex.** Uses `bookings.create` mutation.
-9. **Procedure detail has fallback.** Shows hardcoded data when Convex table is empty.
-10. **Freebuff manages dev server.** Never run `bun run dev` or kill processes.
+9. **Procedure detail has fallback.** Shows hardcoded data when Convex table is empty. 10 procedures fully defined.
+10. **Seed data available.** Run `seedAll` mutation from Dashboard to populate database.
+11. **All logos use 3.jpg.** Navbar, LogoDropdown, and Footer all use the doctor's photo. Auth page also uses it.
+12. **Freebuff manages dev server.** Never run `bun run dev` or kill processes.
