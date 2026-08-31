@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { Link } from "react-router";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -42,14 +43,15 @@ export default function CTA() {
               </p>
 
               <div className="mt-8 sm:mt-10">
-                <Button
-                  size="lg"
-                  className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
-                  onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-                >
-                  {t.cta.button}
-                  <Arrow className="h-5 w-5" />
-                </Button>
+                <Link to="/booking">
+                  <Button
+                    size="lg"
+                    className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
+                  >
+                    {t.cta.button}
+                    <Arrow className="h-5 w-5" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

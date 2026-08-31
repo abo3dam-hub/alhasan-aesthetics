@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { Link } from "react-router";
 
 const cases = [
   { label: "Rhinoplasty", before: "Before", after: "After" },
@@ -93,15 +94,16 @@ export default function BeforeAfter() {
           variants={fadeInUp}
           className="text-center mt-10 sm:mt-12"
         >
-          <Button
-            variant="outline"
-            size="lg"
-            className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
-            onClick={() => document.getElementById("before-after")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            {t.beforeAfter.viewAll}
-            <Arrow className="h-4 w-4" />
-          </Button>
+          <Link to="/before-after">
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
+            >
+              {t.beforeAfter.viewAll}
+              <Arrow className="h-4 w-4" />
+            </Button>
+          </Link>
         </motion.div>
       </div>
     </section>

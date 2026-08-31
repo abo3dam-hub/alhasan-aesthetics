@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Link } from "react-router";
 import {
   Eye,
   UserRound,
@@ -17,16 +18,16 @@ import {
 } from "lucide-react";
 
 const procedures = [
-  { key: "blepharoplasty", icon: Eye },
-  { key: "faceNeckLift", icon: UserRound },
-  { key: "rhinoplasty", icon: SmilePlus },
-  { key: "liposuctionFat", icon: Droplets },
-  { key: "tummyTuck", icon: Scissors },
-  { key: "botox", icon: Sparkles },
-  { key: "fillers", icon: Heart },
-  { key: "armThighLift", icon: ArrowUpDown },
-  { key: "breastSurgery", icon: Stethoscope },
-  { key: "scarRevision", icon: Ban },
+  { key: "blepharoplasty", slug: "blepharoplasty", icon: Eye },
+  { key: "faceNeckLift", slug: "face-neck-lift", icon: UserRound },
+  { key: "rhinoplasty", slug: "rhinoplasty", icon: SmilePlus },
+  { key: "liposuctionFat", slug: "liposuction-fat-transfer", icon: Droplets },
+  { key: "tummyTuck", slug: "tummy-tuck", icon: Scissors },
+  { key: "botox", slug: "botox", icon: Sparkles },
+  { key: "fillers", slug: "fillers", icon: Heart },
+  { key: "armThighLift", slug: "arm-thigh-lift", icon: ArrowUpDown },
+  { key: "breastSurgery", slug: "breast-augmentation-reduction", icon: Stethoscope },
+  { key: "scarRevision", slug: "scar-deformity-correction", icon: Ban },
 ];
 
 const fadeInUp = {
@@ -79,21 +80,23 @@ export default function Procedures() {
                 },
               }}
             >
-              <div className="glass-card rounded-3xl p-5 sm:p-6 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer">
-                <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
-                  <proc.icon className="h-6 w-6 text-primary" />
+              <Link to={`/procedure/${proc.slug}`} className="block h-full">
+                <div className="glass-card rounded-3xl p-5 sm:p-6 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
+                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
+                    <proc.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
+                    {t.procedures[proc.key as keyof typeof t.procedures]}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
+                    {t.procedures[`${proc.key}Desc` as keyof typeof t.procedures]}
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
+                    {t.procedures.learnMore}
+                    <Arrow className="h-3.5 w-3.5" />
+                  </span>
                 </div>
-                <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
-                  {t.procedures[proc.key as keyof typeof t.procedures]}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
-                  {t.procedures[`${proc.key}Desc` as keyof typeof t.procedures]}
-                </p>
-                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
-                  {t.procedures.learnMore}
-                  <Arrow className="h-3.5 w-3.5" />
-                </span>
-              </div>
+              </Link>
             </motion.div>
           ))}
         </div>
@@ -105,15 +108,16 @@ export default function Procedures() {
           variants={fadeInUp}
           className="text-center mt-10 sm:mt-12"
         >
-          <Button
-            variant="outline"
-            size="lg"
-            className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
-            onClick={() => document.getElementById("procedures")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            {t.procedures.viewAll}
-            <Arrow className="h-4 w-4" />
-          </Button>
+          <Link to="/before-after">
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
+            >
+              {t.beforeAfter.viewAll}
+              <Arrow className="h-4 w-4" />
+            </Button>
+          </Link>
         </motion.div>
       </div>
     </section>

@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles, Star, Award } from "lucide-react";
+import { Link } from "react-router";
 
 const container = {
   hidden: { opacity: 0 },
@@ -72,14 +73,15 @@ export default function Hero() {
             variants={item}
             className="mt-6 sm:mt-10 flex flex-wrap gap-3 sm:gap-4"
           >
-            <Button
-              size="lg"
-              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-              className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
-            >
-              {t.hero.cta}
-              <Arrow className="h-4 w-4" />
-            </Button>
+            <Link to="/booking">
+              <Button
+                size="lg"
+                className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
+              >
+                {t.hero.cta}
+                <Arrow className="h-4 w-4" />
+              </Button>
+            </Link>
             <Button
               size="lg"
               variant="outline"

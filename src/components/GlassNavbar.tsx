@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe } from "lucide-react";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import doctorAvatar from "/assets/3.jpg";
 
@@ -71,13 +72,14 @@ export default function GlassNavbar() {
               </button>
 
               {/* CTA */}
-              <Button
-                size="sm"
-                className="hidden md:inline-flex bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 shadow-sm"
-                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-              >
-                {t.nav.bookConsultation}
-              </Button>
+              <Link to="/booking">
+                <Button
+                  size="sm"
+                  className="hidden md:inline-flex bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 shadow-sm"
+                >
+                  {t.nav.bookConsultation}
+                </Button>
+              </Link>
 
               {/* Mobile Toggle */}
               <button
@@ -151,12 +153,13 @@ export default function GlassNavbar() {
               </div>
 
               <div className="p-4 border-t border-border/40">
-                <Button
-                  className="w-full rounded-full bg-primary text-primary-foreground"
-                  onClick={() => { setMobileOpen(false); document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }); }}
-                >
-                  {t.nav.bookConsultation}
-                </Button>
+                <Link to="/booking" onClick={() => setMobileOpen(false)}>
+                  <Button
+                    className="w-full rounded-full bg-primary text-primary-foreground"
+                  >
+                    {t.nav.bookConsultation}
+                  </Button>
+                </Link>
               </div>
             </motion.nav>
           </motion.div>
