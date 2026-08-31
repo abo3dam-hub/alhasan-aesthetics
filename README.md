@@ -1,7 +1,7 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
 > **Last Updated:** August 31, 2026
-> **Status:** Public website ✅ | Backend (Convex) ✅ | Admin Dashboard ✅ | Contact Form ✅ | Before/After Page ✅ | Procedure Detail Page ✅
+> **Status:** ✅ Public Website | ✅ Backend (Convex) | ✅ Booking System | ✅ Admin Dashboard | ✅ i18n (AR/EN)
 
 ---
 
@@ -9,7 +9,9 @@
 
 A premium, bilingual (Arabic RTL / English LTR) website for **Dr. Al Hasan Al Saiem** (د. الحسن الصايم), a plastic and aesthetic surgeon based in **Syria (Damascus, Lattakia)** and **United Arab Emirates (Dubai)**.
 
-The design direction is **Luxury Medical / Glassmorphism** — premium, elegant, modern, clean, trustworthy, and sophisticated. Not sterile.
+**Design Direction:** Luxury Medical / Light Glassmorphism — premium, elegant, modern, clean, trustworthy, and sophisticated.
+
+**GitHub:** `https://github.com/abo3dam-hub/alhasan-aesthetics`
 
 ---
 
@@ -19,22 +21,19 @@ The design direction is **Luxury Medical / Glassmorphism** — premium, elegant,
 |---|---|
 | Framework | React 19 + TypeScript |
 | Build Tool | Vite 7 |
-| Styling | Tailwind CSS 4 |
-| UI Components | shadcn/ui (Radix UI primitives) |
+| Styling | Tailwind CSS 4 + Glassmorphism utilities |
+| UI Components | shadcn/ui (50+ Radix UI primitives) |
 | Animations | Framer Motion 12 |
 | Routing | React Router 7 (client-side SPA) |
-| Backend/DB | Convex (schema defined, no custom functions yet) |
-| Auth | Convex Auth (`@convex-dev/auth`) with email OTP |
-| i18n | Custom I18nProvider (Arabic/English, localStorage persistence) |
+| Backend/DB | Convex (schema + queries + mutations) |
+| Auth | Convex Auth (`@convex-dev/auth`) — Email OTP + Anonymous |
+| i18n | Custom I18nProvider (Arabic RTL / English LTR) |
 | Icons | Lucide React |
-| Forms | React Hook Form + Zod validation |
 | Package Manager | Bun |
 
 ---
 
-## Design System — Light Glassmorphism
-
-### Color Palette
+## Color Palette & Design System
 
 | Token | Value | Usage |
 |---|---|---|
@@ -44,7 +43,7 @@ The design direction is **Luxury Medical / Glassmorphism** — premium, elegant,
 | Warm Nude | `#D4C4AD` | Borders, muted elements |
 | Warm Brown | `#8B7355` | Primary CTA buttons |
 
-### Glass Utility Classes (defined in `src/index.css`)
+### Glass Utility Classes
 
 | Class | Opacity | Blur | Use Case |
 |---|---|---|---|
@@ -58,146 +57,79 @@ The design direction is **Luxury Medical / Glassmorphism** — premium, elegant,
 
 | Font | Usage |
 |---|---|
-| **Playfair Display** | Serif headings (luxury editorial feel) — `.font-serif-luxury` |
+| **Playfair Display** | Serif headings (`.font-serif-luxury`) |
 | **Inter** | Body text (Latin) |
-| **Noto Kufi Arabic** | Arabic text (auto-applied when `dir="rtl"`) |
+| **Noto Kufi Arabic** | Arabic text (auto RTL) |
 
 ---
 
-## Project Structure
+## Routing & Navigation Map
 
-```
-/
-├── index.html                          # Entry HTML (title: Dr. Al Hasan Al Saiem)
-├── package.json                        # Dependencies & scripts
-├── vite.config.ts                      # Vite config (HMR disabled, path aliases)
-├── tsconfig.json / tsconfig.app.json   # TypeScript config
-├── tailwind.config.*                   # (Uses Tailwind CSS v4 — config in CSS)
-├── components.json                     # shadcn/ui configuration
-│
-├── public/
-│   └── assets/
-│       ├── 1.jpg                       # Doctor photo (used in About section)
-│       ├── 2.jpg                       # Available asset
-│       ├── 3.jpg                       # Doctor photo (used as Navbar icon)
-│       └── 4.jpg                       # Business card image (used as Footer logo)
-│
-├── src/
-│   ├── main.tsx                        # App entrypoint — providers, routing, error boundaries
-│   ├── index.css                       # Global styles, glass utilities, theme tokens
-│   ├── vite-env.d.ts                   # Vite type declarations
-│   │
-│   ├── i18n/
-│   │   ├── index.tsx                   # I18nProvider + useI18n() hook
-│   │   └── types.ts                    # Translation type definitions
-│   │
-│   ├── locales/
-│   │   ├── ar.json                     # Arabic translations (primary language)
-│   │   └── en.json                     # English translations
-│   │
-│   ├── pages/
-│   │   ├── Landing.tsx                 # Homepage — assembles all sections
-│   │   ├── Auth.tsx                    # Authentication page (email + OTP)
-│   │   ├── Dashboard.tsx               # Protected dashboard (placeholder)
-│   │   └── NotFound.tsx                # 404 page
-│   │
-│   ├── components/
-│   │   ├── GlassNavbar.tsx             # Fixed glassmorphism navbar with mobile menu
-│   │   ├── Footer.tsx                  # 4-column footer with contact info
-│   │   ├── RequireAuth.tsx             # Auth guard wrapper
-│   │   ├── LogoDropdown.tsx            # Logo dropdown component
-│   │   │
-│   │   ├── sections/                   # Homepage sections
-│   │   │   ├── Hero.tsx                # Hero with CTA buttons (scroll to #contact, #procedures)
-│   │   │   ├── About.tsx               # Doctor bio, photo (1.jpg), stats
-│   │   │   ├── Procedures.tsx          # 10 procedures grid with icons
-│   │   │   ├── BeforeAfter.tsx         # Before/After gallery (placeholder images)
-│   │   │   ├── Testimonials.tsx        # 3 patient testimonial cards
-│   │   │   ├── FAQ.tsx                 # 6 FAQ accordion items
-│   │   │   ├── Contact.tsx             # Contact form + info cards
-│   │   │   └── CTA.tsx                 # Final call-to-action section
-│   │   │
-│   │   └── ui/                         # shadcn/ui components (50+ components)
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── accordion.tsx
-│   │       ├── dialog.tsx
-│   │       └── ... (50+ components)
-│   │
-│   ├── convex/                         # Convex backend
-│   │   ├── schema.ts                   # Database schema (users + auth tables)
-│   │   ├── auth.config.ts              # Auth configuration
-│   │   ├── auth.ts                     # Auth utilities
-│   │   ├── http.ts                     # HTTP endpoints
-│   │   ├── users.ts                    # User queries/mutations
-│   │   ├── auth/
-│   │   │   └── emailOtp.ts             # Email OTP auth
-│   │   └── _generated/                 # Auto-generated Convex types
-│   │
-│   ├── hooks/
-│   │   ├── use-auth.ts                 # Auth hook
-│   │   └── use-mobile.ts              # Mobile detection hook
-│   │
-│   ├── lib/
-│   │   ├── utils.ts                    # Utility functions (cn, etc.)
-│   │   └── vly-integrations.ts         # Vly platform integrations
-│   │
-│   └── types/
-│       └── global.d.ts                 # Global type declarations
-│
-└── convex.json                         # Convex project config
-```
+### Pages
 
----
-
-## Routing
-
-| Path | Component | Auth Required | Description |
+| Path | Component | Auth | Description |
 |---|---|---|---|
 | `/` | `<Landing />` | No | Arabic homepage (default) |
 | `/ar` | `<Landing />` | No | Arabic homepage (explicit) |
 | `/en` | `<Landing />` | No | English homepage |
+| `/booking` | `<BookingPage />` | No | 3-step booking wizard |
 | `/procedure/:slug` | `<ProcedureDetail />` | No | Individual procedure page |
-| `/before-after` | `<BeforeAfterPage />` | No | Dedicated B&A gallery with filters |
+| `/before-after` | `<BeforeAfterPage />` | No | B&A gallery with filters |
 | `/auth` | `<AuthPage />` | No | Login/signup with email OTP |
-| `/dashboard` | `<Dashboard />` | **Yes** | Admin dashboard (procedures, testimonials, FAQ, bookings, consultations) |
-| `*` | `<NotFound />` | No | 404 page |
+| `/dashboard` | `<Dashboard />` | **Yes** | Admin dashboard |
+| `*` | `<NotFound />` | No | Beautiful 404 page |
 
-**Auth flow:** Unauthenticated users hitting `/dashboard` are redirected to `/auth?returnTo=/dashboard`. After successful auth, they're redirected to `/dashboard`.
+### Button Navigation Map
+
+| Button | Location | Target |
+|---|---|---|
+| Book Free Consultation | Hero | → `/booking` |
+| Explore Procedures | Hero | → `#procedures` (scroll) |
+| Book Consultation | Navbar (desktop) | → `/booking` |
+| Book Consultation | Navbar (mobile) | → `/booking` |
+| Dashboard | Navbar (auth only) | → `/dashboard` |
+| Language Toggle | Navbar | Switches AR ↔ EN |
+| Each Procedure Card | Procedures | → `/procedure/:slug` |
+| View All Results | Procedures / Before/After | → `/before-after` |
+| Book Now | CTA section | → `/booking` |
+| Back to Home | All detail pages | → `/` |
+| All footer links | Footer | → Respective pages |
+| Login/Signup | Auth page | → `/dashboard` |
+| Sign Out | Dashboard | → `/` |
 
 ---
 
-## Homepage Sections (Single-Page Layout)
+## Booking System
 
-All sections are assembled in `src/pages/Landing.tsx` as a single scrollable page with anchor-based navigation.
+The booking page (`/booking`) implements a **3-step wizard**:
 
-| Section | ID | Component | Description |
+1. **Step 1 — Procedure Selection:** Choose from 10 available procedures
+2. **Step 2 — Schedule:** Pick date (from today) and time slot (9:00-17:30, 30min intervals)
+3. **Step 3 — Personal Info:** Name, email, phone, optional notes
+4. **Confirmation:** Saves to Convex `bookings` table, shows summary
+
+**Time Slots:** `09:00, 09:30, 10:00, 10:30, 11:00, 11:30, 12:00, 12:30, 13:00, 13:30, 14:00, 14:30, 15:00, 15:30, 16:00, 16:30, 17:00, 17:30`
+
+**Working Hours:** Sunday - Thursday, 9 AM - 6 PM
+
+---
+
+## Available Procedures (from Business Card)
+
+| # | Arabic | English | Slug |
 |---|---|---|---|
-| Navbar | — | `GlassNavbar.tsx` | Fixed top, glass effect, language toggle, mobile slide-out menu |
-| Hero | `#home` | `Hero.tsx` | Full-height hero, gradient text, two CTAs → `#contact` & `#procedures` |
-| About | `#about` | `About.tsx` | Doctor photo (1.jpg), bio, 4 stats (15+ years, 5000+ procedures, 99% satisfaction, international certification) |
-| Procedures | `#procedures` | `Procedures.tsx` | 10 procedure cards in 3-column grid |
-| Before/After | `#before-after` | `BeforeAfter.tsx` | 4-column comparison grid (placeholder images) |
-| Testimonials | `#testimonials` | `Testimonials.tsx` | 3 patient review cards with star ratings |
-| FAQ | `#faq` | `FAQ.tsx` | 6 accordion Q&A items |
-| Contact | `#contact` | `Contact.tsx` | Contact info cards + form (name, email, subject, message) |
-| CTA | — | `CTA.tsx` | Final call-to-action → `#contact` |
-| Footer | — | `Footer.tsx` | 4-column footer, business card logo (4.jpg), addresses, hours |
+| 1 | شد الأجفان العلوية والسفلية | Upper & Lower Eyelid Lift | `blepharoplasty` |
+| 2 | شد الوجه والرقبة | Face & Neck Lift | `face-neck-lift` |
+| 3 | تجميل الأنف | Rhinoplasty | `rhinoplasty` |
+| 4 | شفط الشحم وحقن الشحم | Liposuction & Fat Transfer | `liposuction-fat-transfer` |
+| 5 | شد البطن | Tummy Tuck | `tummy-tuck` |
+| 6 | حقن البوتوكس | Botox Injections | `botox` |
+| 7 | الفيلر | Fillers | `fillers` |
+| 8 | شد العضدين والفخذين | Arm & Thigh Lift | `arm-thigh-lift` |
+| 9 | تكبير/تصغير الثدي | Breast Augmentation/Reduction | `breast-augmentation-reduction` |
+| 10 | إصلاح الندب والتشوهات | Scar & Deformity Correction | `scar-deformity-correction` |
 
----
-
-## Doctor's Procedures (from Business Card)
-
-1. **شد الأجفان العلوية والسفلية** — Upper & Lower Blepharoplasty
-2. **شد الوجه والرقبة** — Face & Neck Lift
-3. **تجميل الأنف** — Rhinoplasty
-4. **شفط الشحم وحقن الشحم** — Liposuction & Fat Transfer
-5. **شد البطن** — Tummy Tuck
-6. **حقن البوتوكس** — Botox Injections
-7. **الفيلر** — Dermal Fillers
-8. **شد العضدين والفخذين** — Arm & Thigh Lift
-9. **تكبير/تصغير الثدي** — Breast Augmentation/Reduction
-10. **إصلاح الندب والتشوهات** — Scar Revision
+Each procedure has: Arabic/English titles, descriptions, long descriptions, duration, and recovery time.
 
 ---
 
@@ -208,174 +140,186 @@ All sections are assembled in `src/pages/Landing.tsx` as a single scrollable pag
 
 ---
 
-## i18n System
-
-- **Default language:** Arabic (RTL)
-- **Secondary language:** English (LTR)
-- Persistence: `localStorage` key `"locale"`
-- Toggle: Globe icon in Navbar (desktop & mobile)
-- All UI text uses `t.key` translations from `src/locales/ar.json` / `src/locales/en.json`
-- RTL/LTR auto-applied via `document.documentElement.dir`
-
----
-
-## Button & Navigation Map
-
-All interactive elements and their targets:
-
-| Button/Link | Location | Action |
-|---|---|---|
-| Logo (3.jpg) | Navbar | `→ #home` (scroll to top) |
-| Home | Navbar | `→ #home` |
-| About | Navbar | `→ #about` |
-| Procedures | Navbar | `→ #procedures` |
-| Before/After | Navbar | `→ #before-after` |
-| Testimonials | Navbar | `→ #testimonials` |
-| FAQ | Navbar | `→ #faq` |
-| Contact | Navbar | `→ #contact` |
-| Language Toggle | Navbar | Switches AR ↔ EN |
-| Book Consultation | Navbar | `→ #contact` |
-| Book Free Consultation | Hero | `→ #contact` |
-| Explore Procedures | Hero | `→ #procedures` |
-| Learn More | Procedure cards | `→ #procedures` (same section) |
-| View All | Procedures | `→ #procedures` (same section) |
-| View All | Before/After | `→ #before-after` (same section) |
-| Book Consultation | CTA | `→ #contact` |
-| Send Message | Contact form | Form submission |
-| Language toggle | Footer | Switches AR ↔ EN |
-| All footer links | Footer | `→ #home`, `→ #about`, etc. |
-
-**Mobile menu:** All nav links scroll to section AND close the mobile menu overlay.
-
----
-
-## Backend Status (Convex)
-
-### Completed
-- Schema defined (`src/convex/schema.ts`) with:
-  - Auth tables (via `@convex-dev/auth`)
-  - Users table with: name, image, email, emailVerificationTime, isAnonymous, role, phone, dateOfBirth, notes
-  - Roles: admin, user, member
-- Auth configured with email OTP + Anonymous
-- Full CRUD functions for:
-  - **Procedures** (`src/convex/procedures.ts`) — list, listActive, getBySlug, getById, getByCategory, create, update, remove
-  - **Before/After Cases** (`src/convex/beforeAfter.ts`) — list, listActive, getByProcedure, create, update, remove
-  - **Testimonials** (`src/convex/testimonials.ts`) — list, listActive, create, update, remove
-  - **FAQ** (`src/convex/faq.ts`) — list, listActive, create, update, remove
-  - **Bookings** (`src/convex/bookings.ts`) — list, listByUser, listByStatus, create, updateStatus, remove
-  - **Consultations** (`src/convex/consultations.ts`) — list, listByStatus, create, updateStatus, remove
-  - **Notifications** (`src/convex/notifications.ts`) — listByUser, unreadCount, markAsRead, markAllAsRead, create
-- Admin Dashboard with full management UI
-- Contact form saves to Convex consultations table
-
-### Not Yet Built
-- [ ] Image storage (upload to Convex or external)
-- [ ] Patient profile editing from dashboard
-- [ ] Availability/scheduling system
-- [ ] Email notifications (Convex action with email provider)
-
----
-
-## Planned Features — What's NOT Built Yet
-
-### Patient Features (NOT started)
-- [ ] Mobile number login with OTP
-- [ ] Patient profile page
-- [ ] Booking requests
-- [ ] Consultation requests
-- [ ] Booking history
-- [ ] Notifications
-
-### Admin Dashboard (NOT started)
-- [ ] Dashboard overview
-- [ ] Patients management
-- [ ] Procedures CRUD
-- [ ] Before/After cases management
-- [ ] Testimonials management
-- [ ] FAQ management
-- [ ] Bookings management
-- [ ] Consultation requests
-- [ ] Doctor availability
-- [ ] Website settings
-
-### Public Pages (partially built)
-- [x] Homepage with all sections
-- [ ] Individual procedure pages (dynamic routes)
-- [ ] Before & After dedicated page
-- [ ] Patient Stories page
-- [ ] Dedicated contact page
-- [ ] Cost inquiry form
-- [ ] Procedure finder tool
-
----
-
 ## Assets Inventory
 
-| File | Location | Usage |
+| File | Usage |
+|---|---|
+| `public/assets/1.jpg` | Doctor photo in About section |
+| `public/assets/2.jpg` | Available (not used) |
+| `public/assets/3.jpg` | Doctor photo — Navbar avatar icon |
+| `public/assets/4.jpg` | Business card — Footer logo |
+
+---
+
+## Project Structure
+
+```
+/
+├── index.html
+├── package.json
+├── vite.config.ts
+├── tsconfig.json / tsconfig.app.json
+├── components.json                          # shadcn/ui config
+│
+├── public/assets/
+│   ├── 1.jpg                                # Doctor photo (About)
+│   ├── 2.jpg                                # Available
+│   ├── 3.jpg                                # Doctor photo (Navbar)
+│   └── 4.jpg                                # Business card (Footer)
+│
+├── src/
+│   ├── main.tsx                             # App entry — providers, routing
+│   ├── index.css                            # Glass utilities, theme tokens
+│   │
+│   ├── i18n/
+│   │   ├── index.tsx                        # I18nProvider + useI18n()
+│   │   └── types.ts                         # Translation types
+│   │
+│   ├── locales/
+│   │   ├── ar.json                          # Arabic translations
+│   │   └── en.json                          # English translations
+│   │
+│   ├── pages/
+│   │   ├── Landing.tsx                      # Homepage — all sections
+│   │   ├── BookingPage.tsx                  # 3-step booking wizard
+│   │   ├── ProcedureDetail.tsx              # /procedure/:slug
+│   │   ├── BeforeAfterPage.tsx              # /before-after gallery
+│   │   ├── Auth.tsx                         # Email OTP login
+│   │   ├── Dashboard.tsx                    # Admin panel
+│   │   └── NotFound.tsx                     # 404 page
+│   │
+│   ├── components/
+│   │   ├── GlassNavbar.tsx                  # Fixed glass navbar + mobile menu
+│   │   ├── Footer.tsx                       # 4-column footer
+│   │   ├── RequireAuth.tsx                  # Auth guard
+│   │   ├── LogoDropdown.tsx
+│   │   │
+│   │   ├── sections/                        # Homepage sections
+│   │   │   ├── Hero.tsx                     # Hero + CTAs
+│   │   │   ├── About.tsx                    # Doctor bio + photo
+│   │   │   ├── Procedures.tsx               # 10 procedure cards → /procedure/:slug
+│   │   │   ├── BeforeAfter.tsx              # Convex data → /before-after
+│   │   │   ├── Testimonials.tsx             # Convex data
+│   │   │   ├── FAQ.tsx                      # Convex data + Accordion
+│   │   │   ├── Contact.tsx                  # Form → Convex consultations
+│   │   │   └── CTA.tsx                      # → /booking
+│   │   │
+│   │   └── ui/                              # 50+ shadcn/ui components
+│   │
+│   ├── convex/
+│   │   ├── schema.ts                        # Full schema (8 tables)
+│   │   ├── procedures.ts                    # CRUD queries/mutations
+│   │   ├── beforeAfter.ts                   # CRUD queries/mutations
+│   │   ├── testimonials.ts                  # CRUD queries/mutations
+│   │   ├── faq.ts                           # CRUD queries/mutations
+│   │   ├── bookings.ts                      # CRUD + status management
+│   │   ├── consultations.ts                 # CRUD + status management
+│   │   ├── notifications.ts                 # CRUD + read/unread
+│   │   ├── users.ts                         # User queries
+│   │   ├── auth.ts                          # Auth config
+│   │   ├── auth.config.ts                   # Auth providers
+│   │   ├── http.ts                          # HTTP routes
+│   │   └── auth/emailOtp.ts                 # Email OTP provider
+│   │
+│   ├── hooks/
+│   │   ├── use-auth.ts                      # Auth hook
+│   │   └── use-mobile.ts
+│   │
+│   └── lib/
+│       ├── utils.ts                         # cn() utility
+│       └── vly-integrations.ts
+```
+
+---
+
+## Convex Database Schema
+
+### Tables
+
+| Table | Fields | Indexes |
 |---|---|---|
-| `1.jpg` | `public/assets/1.jpg` | Doctor photo in About section |
-| `2.jpg` | `public/assets/2.jpg` | Available (not used yet) |
-| `3.jpg` | `public/assets/3.jpg` | Doctor photo used as Navbar avatar icon |
-| `4.jpg` | `public/assets/4.jpg` | Business card image used as Footer logo |
-| `logo.svg` | `public/logo.svg` | Original SVG logo (not actively used) |
-| `logo.svg` | `src/assets/logo.svg` | Source logo (not actively used) |
+| **users** | name, image, email, role, phone, dateOfBirth, notes | `by_email` |
+| **procedures** | slug, titleAr/En, descriptionAr/En, longDescriptionAr/En, icon, category, duration, recovery, price, image, gallery, isActive, order | `by_slug`, `by_category`, `by_order` |
+| **beforeAfter** | titleAr/En, procedureType, beforeImage, afterImage, descriptionAr/En, patientAge, isActive, order | `by_procedure`, `by_order` |
+| **testimonials** | nameAr/En, textAr/En, rating, procedureType, avatar, isActive, order | `by_order` |
+| **faq** | questionAr/En, answerAr/En, category, isActive, order | `by_order`, `by_category` |
+| **bookings** | userId, patientName, patientEmail, patientPhone, procedureType, preferredDate, preferredTime, message, status, notes | `by_user`, `by_status` |
+| **consultations** | name, email, phone, subject, message, userId, status, reply | `by_status`, `by_user` |
+| **notifications** | userId, title, message, type, isRead, link | `by_user`, `by_unread` |
+
+### Convex Functions (7 files)
+
+| File | Functions |
+|---|---|
+| `procedures.ts` | list, listActive, getBySlug, getById, getByCategory, create, update, remove |
+| `beforeAfter.ts` | list, listActive, getByProcedure, create, update, remove |
+| `testimonials.ts` | list, listActive, create, update, remove |
+| `faq.ts` | list, listActive, create, update, remove |
+| `bookings.ts` | list, listByUser, listByStatus, create, updateStatus, remove |
+| `consultations.ts` | list, listByStatus, create, updateStatus, remove |
+| `notifications.ts` | listByUser, unreadCount, markAsRead, markAllAsRead, create |
 
 ---
 
-## How to Run Locally
+## Admin Dashboard Features
+
+The `/dashboard` page provides full CRUD management:
+
+| Tab | Capabilities |
+|---|---|
+| **Overview** | Stats cards (procedures, bookings, consultations, new messages), recent bookings list |
+| **Procedures** | List all, toggle active/inactive, delete, add new (full form) |
+| **Testimonials** | List all, toggle active, delete, add new |
+| **FAQ** | List all, toggle active, delete, add new |
+| **Bookings** | List all, change status (pending/confirmed/completed/cancelled), view details |
+| **Consultations** | List all, change status (new/read/replied/archived), view messages |
+
+---
+
+## Data Flow
+
+### Public Pages (Convex → Frontend)
+- **Before/After section:** Pulls from `beforeAfter.listActive`, falls back to placeholder cards
+- **Testimonials section:** Pulls from `testimonials.listActive`, falls back to translation strings
+- **FAQ section:** Pulls from `faq.listActive`, falls back to translation strings
+- **Procedure Detail:** Pulls from `procedures.getBySlug`, falls back to hardcoded translation data
+
+### Forms → Convex
+- **Contact Form:** Saves to `consultations` table via `consultations.create`
+- **Booking Form:** Saves to `bookings` table via `bookings.create`
+
+### Admin Dashboard → Convex
+- All CRUD operations via Convex mutations
+- Real-time reactive updates via Convex queries
+
+---
+
+## How to Run
 
 ```bash
-# Install dependencies
 bun install
-
-# Start dev server
-bun run dev
-
-# Typecheck
-bun tsc -b --noEmit
-
-# Build for production
-bun run build
+bun run dev            # Start dev server
+bun tsc -b --noEmit    # Typecheck
+bun convex dev --once  # One-shot codegen
 ```
 
-**Convex backend:**
-```bash
-# Start Convex dev (generates types + deploys functions)
-bun convex dev
-
-# One-shot codegen
-bun convex dev --once
-```
-
----
-
-## Environment Variables
-
+**Environment Variables:**
 | Variable | Required | Description |
 |---|---|---|
-| `VITE_CONVEX_URL` | Yes | Convex deployment URL (set via Freebuff Keys UI) |
-| `CONVEX_DEPLOY_KEY` | For deploy | Convex deploy key (server-side only) |
-
----
-
-## Git & Deployment
-
-- **GitHub Repo:** `https://github.com/abo3dam-hub/alhasan-aesthetics`
-- **Branch:** `main`
-- **Platform:** Freebuff (Vite dev server managed by platform)
-- **Deploy:** Can be connected to Vercel for auto-deployment from GitHub
+| `VITE_CONVEX_URL` | Yes | Convex deployment URL |
+| `CONVEX_DEPLOY_KEY` | For deploy | Server-side only |
 
 ---
 
 ## Notes for AI Agents
 
-1. **This is a single-page app.** The homepage is one long scrollable page (`Landing.tsx`) composed of section components. There are no separate route pages for About, Procedures, etc.
-2. **All text is translatable.** Never hardcode Arabic or English strings in components — always use `t.nav.key`, `t.hero.key`, etc. from `useI18n()`.
-3. **RTL is critical.** The app defaults to Arabic RTL. Use Tailwind's `rtl:` variant and `dir` attribute for layout mirroring.
-4. **Glassmorphism is the design language.** Use `.glass`, `.glass-card`, `.glass-elevated` classes. Don't use solid backgrounds for cards/panels.
-5. **Images are in `public/assets/`.** Reference them as `/assets/1.jpg` etc. Do not use `import` for JPGs in `public/`.
-6. **Convex is the planned backend.** Don't add Express, Next.js API routes, or other backends. All server logic should go in `src/convex/`.
-7. **The dashboard is a placeholder.** It only shows "Welcome to Dashboard" and a logout button. It needs to be fully built out.
-8. **Before/After section uses placeholder images.** No real patient photos have been uploaded yet.
-9. **The contact form is frontend-only.** It shows a success toast but doesn't save to any database yet.
-10. **Freebuff manages the dev server.** Never run `bun run dev`, `vite`, or kill processes. Edit files and the platform picks up changes automatically.
+1. **SPA architecture.** Homepage is one scrollable page (`Landing.tsx`) with section components. Detail pages are separate routes.
+2. **All text is translatable.** Use `t.key` from `useI18n()`. Never hardcode strings.
+3. **RTL is critical.** Default language is Arabic RTL. Use Tailwind `rtl:` variant.
+4. **Glassmorphism design.** Use `.glass`, `.glass-card`, `.glass-elevated`. No solid backgrounds for panels.
+5. **Images in `public/assets/`.** Reference as `/assets/1.jpg`. Don't `import` JPGs.
+6. **Convex is the backend.** Don't add Express or other backends.
+7. **Contact form saves to Convex.** Uses `consultations.create` mutation.
+8. **Booking form saves to Convex.** Uses `bookings.create` mutation.
+9. **Procedure detail has fallback.** Shows hardcoded data when Convex table is empty.
+10. **Freebuff manages dev server.** Never run `bun run dev` or kill processes.
