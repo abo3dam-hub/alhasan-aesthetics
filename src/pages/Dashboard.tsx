@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
+import { Database } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -121,6 +122,8 @@ export default function Dashboard() {
 
 // ─── Overview Tab ───
 function OverviewTab() {
+  const seedData = useMutation(api.seed.seedAll);
+  const [seeding, setSeeding] = useState(false);
   const bookings = useQuery(api.bookings.list);
   const consultations = useQuery(api.consultations.list);
   const procedures = useQuery(api.procedures.list);
@@ -157,6 +160,40 @@ function OverviewTab() {
           </Card>
         ))}
       </div>
+
+      {/* Seed Data */}
+      <Card className="border-border/60">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-xl bg-blue-50 flex items-center justify-center">
+                <Database className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Seed Database</p>
+                <p className="text-sm text-muted-foreground">Populate procedures, testimonials, and FAQ data</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={seeding}
+              onClick={async () => {
+                setSeeding(true);
+                try {
+                  const result = await seedData();
+                  toast.success(result || "Data seeded successfully!");
+                } catch (e) {
+                  toast.error("Data may already exist or an error occurred.");
+                }
+                setSeeding(false);
+              }}
+            >
+              {seeding ? "Seeding..." : "Seed Data"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recent Bookings */}
       <Card className="border-border/60">
