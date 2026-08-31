@@ -24,7 +24,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center hero-gradient overflow-hidden"
+      className="relative min-h-[auto] md:min-h-screen flex items-center hero-gradient overflow-hidden"
     >
       {/* Decorative orbs */}
       <div className="absolute top-20 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(197, 168, 130, 0.15)" }} />
@@ -35,7 +35,7 @@ export default function Hero() {
       <div className="absolute top-32 end-8 lg:end-20 w-48 h-48 glass-subtle rounded-3xl rotate-12 opacity-60 hidden md:block" />
       <div className="absolute bottom-24 start-8 lg:start-16 w-32 h-32 glass-subtle rounded-2xl -rotate-6 opacity-40 hidden md:block" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-20 sm:pt-32 sm:pb-28">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-28 pb-12 sm:pt-32 sm:pb-20 lg:pt-32 lg:pb-28">
         <motion.div
           variants={container}
           initial="hidden"
@@ -45,14 +45,14 @@ export default function Hero() {
         >
           {/* Badge */}
           <motion.div variants={item}>
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs sm:text-sm font-medium text-muted-foreground mb-6 sm:mb-8">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs sm:text-sm font-medium text-muted-foreground mb-4 sm:mb-8">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               {t.hero.badge}
             </span>
           </motion.div>
 
           {/* Heading */}
-          <motion.h1 variants={item} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
+          <motion.h1 variants={item} className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
             <span className="block text-foreground">{t.hero.title}</span>
             <span className="block mt-1 sm:mt-2 bg-gradient-to-l from-primary via-secondary to-primary bg-clip-text text-transparent font-serif-luxury">
               {t.hero.titleHighlight}
@@ -62,7 +62,7 @@ export default function Hero() {
           {/* Subtitle */}
           <motion.p
             variants={item}
-            className="mt-6 sm:mt-8 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl"
+            className="mt-4 sm:mt-8 text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-xl"
           >
             {t.hero.subtitle}
           </motion.p>
@@ -70,7 +70,7 @@ export default function Hero() {
           {/* CTAs */}
           <motion.div
             variants={item}
-            className="mt-8 sm:mt-10 flex flex-wrap gap-3 sm:gap-4"
+            className="mt-6 sm:mt-10 flex flex-wrap gap-3 sm:gap-4"
           >
             <Button
               size="lg"
@@ -91,7 +91,7 @@ export default function Hero() {
           {/* Trust Badges */}
           <motion.div
             variants={item}
-            className="mt-12 sm:mt-16 flex flex-wrap gap-4 sm:gap-6"
+            className="mt-8 sm:mt-16 flex flex-wrap gap-3 sm:gap-6"
           >
             {[
               { icon: Award, text: t.hero.trust1 },
