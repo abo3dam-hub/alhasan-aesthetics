@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import {
@@ -8,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const faqKeys = ["q1", "q2", "q3", "q4", "q5", "q6"];
+const placeholderFaqKeys = ["q1", "q2", "q3", "q4", "q5", "q6"];
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -17,7 +19,11 @@ const fadeInUp = {
 
 export default function FAQ() {
   const { t, dir } = useI18n();
+  const isRtl = dir === "rtl";
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
+  const faqs = useQuery(api.faq.listActive);
+
+  const displayFaqs = faqs && faqs.length > 0 ? faqs : null;
 
   return (
     <section id="faq" className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">
@@ -58,20 +64,35 @@ export default function FAQ() {
           >
             <div className="glass-elevated rounded-3xl p-2 sm:p-3">
               <Accordion type="single" collapsible className="w-full">
-                {faqKeys.map((qKey, i) => (
-                  <AccordionItem
-                    key={qKey}
-                    value={qKey}
-                    className="border-b border-border/30 last:border-b-0 px-4 sm:px-6"
-                  >
-                    <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:no-underline py-5 sm:py-6 text-start">
-                      {t.faq[qKey as keyof typeof t.faq]}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5 sm:pb-6">
-                      {t.faq[`a${i + 1}` as keyof typeof t.faq]}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
+                {displayFaqs
+                  ? displayFaqs.map((faq, i) => (
+                      <AccordionItem
+                        key={faq._id}
+                        value={faq._id}
+                        className="border-b border-border/30 last:border-b-0 px-4 sm:px-6"
+                      >
+                        <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:no-underline py-5 sm:py-6 text-start">
+                          {isRtl ? faq.questionAr : faq.questionEn}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5 sm:pb-6">
+                          {isRtl ? faq.answerAr : faq.answerEn}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))
+                  : placeholderFaqKeys.map((qKey, i) => (
+                      <AccordionItem
+                        key={qKey}
+                        value={qKey}
+                        className="border-b border-border/30 last:border-b-0 px-4 sm:px-6"
+                      >
+                        <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:no-underline py-5 sm:py-6 text-start">
+                          {t.faq[qKey as keyof typeof t.faq]}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5 sm:pb-6">
+                          {t.faq[`a${i + 1}` as keyof typeof t.faq]}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
               </Accordion>
             </div>
           </motion.div>

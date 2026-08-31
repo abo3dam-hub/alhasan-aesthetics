@@ -1,15 +1,18 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router";
+import { useState } from "react";
 
-const cases = [
-  { label: "Rhinoplasty", before: "Before", after: "After" },
-  { label: "Facelift", before: "Before", after: "After" },
-  { label: "Liposuction", before: "Before", after: "After" },
-  { label: "Brow Lift", before: "Before", after: "After" },
+const placeholderCases = [
+  { label: "Rhinoplasty", labelAr: "تجميل الأنف" },
+  { label: "Facelift", labelAr: "شد الوجه" },
+  { label: "Liposuction", labelAr: "شفط الشحم" },
+  { label: "Brow Lift", labelAr: "شد الجفون" },
 ];
 
 const fadeInUp = {
@@ -19,8 +22,12 @@ const fadeInUp = {
 
 export default function BeforeAfter() {
   const { t, dir } = useI18n();
+  const isRtl = dir === "rtl";
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const cases = useQuery(api.beforeAfter.listActive);
+
+  const displayCases = cases && cases.length > 0 ? cases.slice(0, 4) : null;
 
   return (
     <section id="before-after" className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">
@@ -49,42 +56,71 @@ export default function BeforeAfter() {
 
         {/* Cases Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" dir={dir}>
-          {cases.map((c, i) => (
-            <motion.div
-              key={i}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              variants={{
-                ...fadeInUp,
-                visible: {
-                  ...fadeInUp.visible,
-                  transition: { duration: 0.5, delay: 0.1 * i },
-                },
-              }}
-            >
-              <div className="glass-card rounded-3xl overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300">
-                {/* Before/After comparison placeholder */}
-                <div className="relative aspect-square bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center">
-                  <div className="flex items-center gap-3">
-                    <div className="h-16 w-16 rounded-2xl bg-white/40 flex items-center justify-center text-xs font-medium text-muted-foreground">
-                      {c.before}
+          {displayCases
+            ? displayCases.map((c, i) => (
+                <motion.div
+                  key={c._id}
+                  initial="hidden"
+                  animate={inView ? "visible" : "hidden"}
+                  variants={{
+                    ...fadeInUp,
+                    visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.1 * i } },
+                  }}
+                >
+                  <div className="glass-card rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
+                    <div className="relative aspect-square overflow-hidden">
+                      <img
+                        src={c.afterImage}
+                        alt={isRtl ? c.titleAr : c.titleEn}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
+                        {isRtl ? "بعد" : "After"}
+                      </div>
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="h-px w-6 bg-primary/40" />
-                      <Eye className="h-4 w-4 text-primary" />
-                      <div className="h-px w-6 bg-primary/40" />
-                    </div>
-                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                      {c.after}
+                    <div className="p-4 sm:p-5">
+                      <p className="text-sm font-semibold text-foreground">
+                        {isRtl ? c.titleAr : c.titleEn}
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="p-4 sm:p-5">
-                  <p className="text-sm font-semibold text-foreground">{c.label}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+                </motion.div>
+              ))
+            : placeholderCases.map((c, i) => (
+                <motion.div
+                  key={c.label}
+                  initial="hidden"
+                  animate={inView ? "visible" : "hidden"}
+                  variants={{
+                    ...fadeInUp,
+                    visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.1 * i } },
+                  }}
+                >
+                  <div className="glass-card rounded-3xl overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300">
+                    <div className="relative aspect-square bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center">
+                      <div className="flex items-center gap-3">
+                        <div className="h-16 w-16 rounded-2xl bg-white/40 flex items-center justify-center text-xs font-medium text-muted-foreground">
+                          {isRtl ? "قبل" : "Before"}
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="h-px w-6 bg-primary/40" />
+                          <Eye className="h-4 w-4 text-primary" />
+                          <div className="h-px w-6 bg-primary/40" />
+                        </div>
+                        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                          {isRtl ? "بعد" : "After"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 sm:p-5">
+                      <p className="text-sm font-semibold text-foreground">
+                        {isRtl ? c.labelAr : c.label}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
         </div>
 
         {/* View All */}

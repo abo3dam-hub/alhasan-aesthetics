@@ -1,149 +1,105 @@
 import { useI18n } from "@/i18n";
-import { Phone, Mail, MapPin, Globe } from "lucide-react";
-
-const doctorLogo = "/assets/3.jpg";
+import { Link } from "react-router";
+import { Globe, Phone, Mail, MapPin } from "lucide-react";
+import doctorLogo from "/assets/3.jpg";
 
 export default function Footer() {
   const { t, dir, toggleLocale } = useI18n();
-  const year = new Date().getFullYear();
-
-  const quickLinks = [
-    { label: t.nav.about, href: "#about" },
-    { label: t.nav.procedures, href: "#procedures" },
-    { label: t.nav.beforeAfter, href: "#before-after" },
-    { label: t.nav.testimonials, href: "#testimonials" },
-    { label: t.nav.faq, href: "#faq" },
-    { label: t.nav.contact, href: "#contact" },
-  ];
-
-  const services = [
-    t.procedures.blepharoplasty,
-    t.procedures.faceNeckLift,
-    t.procedures.rhinoplasty,
-    t.procedures.liposuctionFat,
-    t.procedures.tummyTuck,
-    t.procedures.botox,
-    t.procedures.fillers,
-    t.procedures.armThighLift,
-    t.procedures.breastSurgery,
-    t.procedures.scarRevision,
-  ];
+  const isRtl = dir === "rtl";
 
   return (
-    <footer className="relative overflow-hidden border-t border-border/30" dir={dir}>
-      <div className="absolute inset-0 luxury-gradient pointer-events-none" />
+    <footer className="relative border-t border-border/40" dir={dir}>
+      <div className="absolute inset-0 luxury-gradient pointer-events-none opacity-50" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="py-12 sm:py-16">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-            {/* Brand */}
-            <div className="sm:col-span-2 lg:col-span-1">
-              <a href="#home" className="flex items-center gap-3 mb-4">
-                <img
-                  src={doctorLogo}
-                  alt="Dr. Al Hasan Al Saiem"
-                  className="h-12 w-12 rounded-xl object-cover border border-border/40 shadow-sm"
-                />
-                <span className="font-serif-luxury text-lg font-semibold text-foreground leading-tight">
-                  {t.nav.logo}
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Brand */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link to="/" className="flex items-center gap-3 mb-4">
+              <img
+                src={doctorLogo}
+                alt="Dr. Al Hasan Al Saiem"
+                className="h-12 w-12 rounded-xl object-cover border border-border/40"
+              />
+              <span className="font-serif-luxury text-lg font-semibold text-foreground">
+                {t.nav.logo}
+              </span>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+              {t.footer.description}
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4 text-sm">{t.footer.quickLinks}</h3>
+            <ul className="space-y-2.5">
+              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.home}</Link></li>
+              <li><Link to="/#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.about}</Link></li>
+              <li><Link to="/#procedures" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.procedures}</Link></li>
+              <li><Link to="/before-after" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.beforeAfter}</Link></li>
+              <li><Link to="/#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.testimonials}</Link></li>
+              <li><Link to="/#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.faq}</Link></li>
+              <li><Link to="/booking" className="text-sm text-primary font-medium hover:text-primary/80 transition-colors">{t.nav.bookConsultation}</Link></li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4 text-sm">{t.footer.services}</h3>
+            <ul className="space-y-2.5">
+              <li><Link to="/procedure/rhinoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.rhinoplasty}</Link></li>
+              <li><Link to="/procedure/face-neck-lift" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.faceNeckLift}</Link></li>
+              <li><Link to="/procedure/blepharoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.blepharoplasty}</Link></li>
+              <li><Link to="/procedure/botox" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.botox}</Link></li>
+              <li><Link to="/procedure/fillers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.fillers}</Link></li>
+              <li><Link to="/procedure/tummy-tuck" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.tummyTuck}</Link></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-4 text-sm">{t.nav.contact}</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2.5">
+                <Phone className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">+966 XX XXX XXXX</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Mail className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">info@dr-alhasan.com</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">
+                  Syria, Damascus, Lattakia<br />
+                  United Arab Emirates, Dubai
                 </span>
-              </a>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                {t.footer.description}
-              </p>
-              <button
-                onClick={toggleLocale}
-                className="mt-4 inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors font-medium"
-              >
-                <Globe className="h-4 w-4" />
-                {t.common.switchLang}
-              </button>
-            </div>
+              </li>
+            </ul>
 
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 tracking-wide uppercase">
-                {t.footer.quickLinks}
-              </h3>
-              <ul className="space-y-2.5">
-                {quickLinks.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Services */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 tracking-wide uppercase">
-                {t.footer.services}
-              </h3>
-              <ul className="space-y-2">
-                {services.map((service) => (
-                  <li key={service}>
-                    <a
-                      href="#procedures"
-                      className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {service}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact & Hours */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 tracking-wide uppercase">
-                {t.footer.workingHours}
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4 text-primary shrink-0" />
-                  <span>+966 XX XXX XXXX</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4 text-primary shrink-0" />
-                  <span>info@dr-alhasan.com</span>
-                </div>
-                <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <span className="flex flex-col">
-                    <span>Syria, Damascus, Lattakia</span>
-                    <span>United Arab Emirates, Dubai</span>
-                  </span>
-                </div>
-                <div className="h-px bg-border/40 my-2" />
-                <div className="text-sm space-y-1">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>{t.footer.weekdays}</span>
-                    <span className="text-foreground/80">9 AM - 6 PM</span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>{t.footer.friday}</span>
-                    <span className="text-foreground/80">Closed</span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>{t.footer.saturday}</span>
-                    <span className="text-foreground/80">10 AM - 2 PM</span>
-                  </div>
-                </div>
-              </div>
+            {/* Working Hours */}
+            <div className="mt-4 pt-4 border-t border-border/30">
+              <p className="text-xs font-medium text-foreground mb-2">{t.footer.workingHours}</p>
+              <p className="text-xs text-muted-foreground">{t.footer.weekdays}: 9 AM - 6 PM</p>
+              <p className="text-xs text-muted-foreground">{t.footer.friday}: {isRtl ? "مغلق" : "Closed"}</p>
+              <p className="text-xs text-muted-foreground">{t.footer.saturday}: {isRtl ? "مغلق" : "Closed"}</p>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-border/30 py-6 text-center">
+        <div className="mt-12 pt-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            &copy; {year} {t.nav.logo}. {t.footer.rights}.
+            © {new Date().getFullYear()} Dr. Al Hasan Al Saiem. {t.footer.rights}.
           </p>
+          <button
+            onClick={toggleLocale}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {t.common.switchLang}
+          </button>
         </div>
       </div>
     </footer>
