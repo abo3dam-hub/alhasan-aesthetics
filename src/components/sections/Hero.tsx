@@ -74,6 +74,7 @@ export default function Hero() {
           >
             <Button
               size="lg"
+              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
               className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
             >
               {t.hero.cta}
@@ -82,6 +83,7 @@ export default function Hero() {
             <Button
               size="lg"
               variant="outline"
+              onClick={() => document.getElementById("procedures")?.scrollIntoView({ behavior: "smooth" })}
               className="rounded-full glass-card hover:bg-white/60 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base border-border/60"
             >
               {t.hero.ctaSecondary}
