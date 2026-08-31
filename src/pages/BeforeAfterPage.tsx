@@ -230,11 +230,11 @@ export default function BeforeAfterPage() {
                 ? "احجز استشارة مجانية ود. الحسن الصايم يوريك نتائج مشابهة."
                 : "Book a free consultation and Dr. Al Hasan Al Saiem will show you similar results."}
             </p>
-            <a href="/#contact">
+            <Link to="/booking">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-6 text-base">
                 {isRtl ? "احجز استشارتك" : "Book Consultation"}
               </Button>
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
