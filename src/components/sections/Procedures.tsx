@@ -52,6 +52,8 @@ export default function Procedures() {
         title: dir === "rtl" ? p.titleAr : p.titleEn,
         description: dir === "rtl" ? p.descriptionAr : p.descriptionEn,
         icon: iconMap[p.icon] || Sparkles,
+        image: p.image,
+        price: p.price,
       }))
     : null;
 
@@ -97,20 +99,39 @@ export default function Procedures() {
                   }}
                 >
                   <Link to={`/procedure/${proc.slug}`} className="block h-full">
-                    <div className="glass-card rounded-3xl p-5 sm:p-6 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
-                      <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
-                        <proc.icon className="h-6 w-6 text-primary" />
+                    <div className="glass-card rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
+                      {proc.image ? (
+                        <div className="relative aspect-[4/3] overflow-hidden">
+                          <img src={proc.image} alt={proc.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                        </div>
+                      ) : (
+                        <div className="p-5 sm:p-6">
+                          <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
+                            <proc.icon className="h-6 w-6 text-primary" />
+                          </div>
+                        </div>
+                      )}
+                      <div className="p-5 sm:p-6">
+                        {proc.image && (
+                          <div className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 mb-3">
+                            <proc.icon className="h-4 w-4 text-primary" />
+                          </div>
+                        )}
+                        <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
+                          {proc.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-3">
+                          {proc.description}
+                        </p>
+                        {proc.price && (
+                          <p className="text-sm font-semibold text-primary mb-3">{proc.price}</p>
+                        )}
+                        <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
+                          {t.procedures.learnMore}
+                          <Arrow className="h-3.5 w-3.5" />
+                        </span>
                       </div>
-                      <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
-                        {proc.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
-                        {proc.description}
-                      </p>
-                      <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
-                        {t.procedures.learnMore}
-                        <Arrow className="h-3.5 w-3.5" />
-                      </span>
                     </div>
                   </Link>
                 </motion.div>

@@ -74,9 +74,14 @@ export default function FAQ() {
                         className="border-b border-border/30 last:border-b-0 px-4 sm:px-6"
                       >
                         <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:no-underline py-5 sm:py-6 text-start">
-                          {isRtl ? faq.questionAr : faq.questionEn}
+                          <span>{isRtl ? faq.questionAr : faq.questionEn}</span>
                         </AccordionTrigger>
                         <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5 sm:pb-6">
+                          {faq.category && (
+                            <span className="inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-2">
+                              {faq.category}
+                            </span>
+                          )}
                           {isRtl ? faq.answerAr : faq.answerEn}
                         </AccordionContent>
                       </AccordionItem>

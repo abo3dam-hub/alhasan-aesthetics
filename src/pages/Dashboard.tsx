@@ -391,6 +391,13 @@ function ProcedureForm({
   const [selectedIcon, setSelectedIcon] = useState(existing?.icon || "Sparkles");
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [imageUrl, setImageUrl] = useState(existing?.image || "");
+  const [beforeImageUrl, setBeforeImageUrl] = useState(existing?.beforeImage || "");
+  const [afterImageUrl, setAfterImageUrl] = useState(existing?.afterImage || "");
+  const [ogImageUrl, setOgImageUrl] = useState(existing?.ogImage || "");
+  const [galleryUrls, setGalleryUrls] = useState<string[]>(existing?.gallery || []);
+
+  const addGalleryImage = (url: string) => setGalleryUrls((prev) => [...prev, url]);
+  const removeGalleryImage = (index: number) => setGalleryUrls((prev) => prev.filter((_, i) => i !== index));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -406,10 +413,19 @@ function ProcedureForm({
       longDescriptionEn: fd.get("longDescriptionEn") as string,
       icon: selectedIcon,
       image: imageUrl || undefined,
+      beforeImage: beforeImageUrl || undefined,
+      afterImage: afterImageUrl || undefined,
+      ogImage: ogImageUrl || undefined,
+      gallery: galleryUrls.length > 0 ? galleryUrls : undefined,
+      price: (fd.get("price") as string) || undefined,
       isFeatured: !!fd.get("isFeatured"),
       category: (fd.get("category") as string) || "general",
       duration: (fd.get("duration") as string) || "1-2 hours",
       recovery: (fd.get("recovery") as string) || "1-2 weeks",
+      seoTitleEn: (fd.get("seoTitleEn") as string) || undefined,
+      seoTitleAr: (fd.get("seoTitleAr") as string) || undefined,
+      seoDescriptionEn: (fd.get("seoDescriptionEn") as string) || undefined,
+      seoDescriptionAr: (fd.get("seoDescriptionAr") as string) || undefined,
       isActive: existing?.isActive ?? true,
       order: existing?.order ?? 0,
     });
@@ -431,43 +447,105 @@ function ProcedureForm({
               <Input name="titleAr" dir="rtl" required defaultValue={existing?.titleAr} placeholder="تجميل الأنف" />
             </div>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Slug</Label>
               <Input name="slug" required defaultValue={existing?.slug} placeholder="rhinoplasty" />
             </div>
             <div className="space-y-2">
-              <Label>Icon</Label>
-              <div className="relative">
-                <button type="button" onClick={() => setShowIconPicker(!showIconPicker)} className="w-full flex items-center justify-between px-3 py-2 border border-border/60 rounded-lg bg-white/40 text-sm">
-                  <span>{selectedIcon}</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-                {showIconPicker && (
-                  <div className="absolute z-50 top-full mt-1 w-full bg-white rounded-xl shadow-lg border border-border/40 p-2 grid grid-cols-4 gap-1">
-                    {iconOptions.map((icon) => (
-                      <button key={icon} type="button" onClick={() => { setSelectedIcon(icon); setShowIconPicker(false); }} className={cn("p-2 rounded-lg text-sm text-center hover:bg-primary/10 transition-colors", selectedIcon === icon && "bg-primary/10 font-bold")}>
-                        {icon}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Label>Category</Label>
+              <Input name="category" defaultValue={existing?.category} placeholder="face" />
+            </div>
+            <div className="space-y-2">
+              <Label>Price (optional)</Label>
+              <Input name="price" defaultValue={existing?.price} placeholder="From $3000" />
             </div>
           </div>
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div className="space-y-2"><Label>Category</Label><Input name="category" defaultValue={existing?.category} placeholder="face" /></div>
+          <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2"><Label>Duration</Label><Input name="duration" defaultValue={existing?.duration} placeholder="1-2 hours" /></div>
             <div className="space-y-2"><Label>Recovery</Label><Input name="recovery" defaultValue={existing?.recovery} placeholder="1-2 weeks" /></div>
+          </div>
+          <div className="space-y-2">
+            <Label>Icon</Label>
+            <div className="relative">
+              <button type="button" onClick={() => setShowIconPicker(!showIconPicker)} className="w-full flex items-center justify-between px-3 py-2 border border-border/60 rounded-lg bg-white/40 text-sm">
+                <span>{selectedIcon}</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+              {showIconPicker && (
+                <div className="absolute z-50 top-full mt-1 w-full bg-white rounded-xl shadow-lg border border-border/40 p-2 grid grid-cols-4 gap-1">
+                  {iconOptions.map((icon) => (
+                    <button key={icon} type="button" onClick={() => { setSelectedIcon(icon); setShowIconPicker(false); }} className={cn("p-2 rounded-lg text-sm text-center hover:bg-primary/10 transition-colors", selectedIcon === icon && "bg-primary/10 font-bold")}>
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="space-y-2"><Label>Short Description (EN)</Label><Textarea name="descriptionEn" rows={2} required defaultValue={existing?.descriptionEn} placeholder="Brief description..." /></div>
           <div className="space-y-2"><Label>Short Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} required defaultValue={existing?.descriptionAr} placeholder="وصف مختصر..." /></div>
           <div className="space-y-2"><Label>Full Description (EN)</Label><Textarea name="longDescriptionEn" rows={4} required defaultValue={existing?.longDescriptionEn} placeholder="Detailed description..." /></div>
           <div className="space-y-2"><Label>Full Description (AR)</Label><Textarea name="longDescriptionAr" dir="rtl" rows={4} required defaultValue={existing?.longDescriptionAr} placeholder="وصف تفصيلي..." /></div>
-          <div className="space-y-2">
-            <Label>Procedure Image</Label>
-            <ImageUpload value={imageUrl} onChange={setImageUrl} label="Upload or paste image URL" />
+
+          {/* Images */}
+          <div className="space-y-4">
+            <Label className="text-base font-semibold">Images</Label>
+            <div className="space-y-2">
+              <Label>Main Image</Label>
+              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Procedure main image" />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Before Image</Label>
+                <ImageUpload value={beforeImageUrl} onChange={setBeforeImageUrl} label="Before image" />
+              </div>
+              <div className="space-y-2">
+                <Label>After Image</Label>
+                <ImageUpload value={afterImageUrl} onChange={setAfterImageUrl} label="After image" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>OG Image (for social sharing)</Label>
+              <ImageUpload value={ogImageUrl} onChange={setOgImageUrl} label="OG image" />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center justify-between">
+                <span>Gallery Images</span>
+                <Button type="button" variant="outline" size="sm" onClick={() => addGalleryImage("")}>+ Add Image</Button>
+              </Label>
+              <div className="space-y-3">
+                {galleryUrls.map((url, i) => (
+                  <div key={i} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <ImageUpload value={url} onChange={(newUrl) => {
+                        const updated = [...galleryUrls];
+                        updated[i] = newUrl;
+                        setGalleryUrls(updated);
+                      }} label={`Gallery image ${i + 1}`} />
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" className="mt-7 text-red-500 hover:text-red-600" onClick={() => removeGalleryImage(i)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {/* SEO */}
+          <div className="space-y-4">
+            <Label className="text-base font-semibold">SEO</Label>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>SEO Title (EN)</Label><Input name="seoTitleEn" defaultValue={existing?.seoTitleEn} placeholder="Custom SEO title..." /></div>
+              <div className="space-y-2"><Label>SEO Title (AR)</Label><Input name="seoTitleAr" dir="rtl" defaultValue={existing?.seoTitleAr} placeholder="عنوان SEO مخصص..." /></div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>SEO Description (EN)</Label><Textarea name="seoDescriptionEn" rows={2} defaultValue={existing?.seoDescriptionEn} placeholder="Custom SEO description..." /></div>
+              <div className="space-y-2"><Label>SEO Description (AR)</Label><Textarea name="seoDescriptionAr" dir="rtl" rows={2} defaultValue={existing?.seoDescriptionAr} placeholder="وصف SEO مخصص..." /></div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
             <input type="checkbox" name="isFeatured" id="isFeatured" defaultChecked={existing?.isFeatured} className="rounded border-border" />
             <Label htmlFor="isFeatured" className="cursor-pointer">Featured on homepage</Label>
@@ -498,6 +576,7 @@ function BeforeAfterTab() {
     e.preventDefault();
     setLoading(true);
     const fd = new FormData(e.currentTarget);
+    const ageVal = (fd.get("patientAge") as string) || "";
     const data = {
       titleAr: fd.get("titleAr") as string,
       titleEn: fd.get("titleEn") as string,
@@ -506,6 +585,7 @@ function BeforeAfterTab() {
       afterImage: fd.get("afterImage") as string || "",
       descriptionAr: (fd.get("descriptionAr") as string) || undefined,
       descriptionEn: (fd.get("descriptionEn") as string) || undefined,
+      patientAge: ageVal ? Number(ageVal) : undefined,
     };
     if (editingId) {
       await updateCase({ id: editingId as any, ...data });
@@ -550,6 +630,7 @@ function BeforeAfterTab() {
               <p className="text-xs text-muted-foreground">Upload images in the Media tab, then paste the URL here.</p>
               <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
               <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
+              <div className="space-y-2"><Label>Patient Age (optional)</Label><Input name="patientAge" type="number" min={1} max={120} defaultValue={existing?.patientAge ?? ""} placeholder="e.g. 35" /></div>
               <div className="flex gap-3">
                 <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
@@ -614,6 +695,8 @@ function TestimonialsTab() {
       textAr: fd.get("textAr") as string,
       textEn: fd.get("textEn") as string,
       rating: Number(fd.get("rating") as string) || 5,
+      avatar: (fd.get("avatar") as string) || undefined,
+      procedureType: (fd.get("procedureType") as string) || undefined,
     };
     if (editingId) {
       await updateTestimonial({ id: editingId as any, ...data });
@@ -647,7 +730,11 @@ function TestimonialsTab() {
               </div>
               <div className="space-y-2"><Label>Text (EN)</Label><Textarea name="textEn" rows={3} required defaultValue={existing?.textEn} /></div>
               <div className="space-y-2"><Label>Text (AR)</Label><Textarea name="textAr" dir="rtl" rows={3} required defaultValue={existing?.textAr} /></div>
-              <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
+                <div className="space-y-2"><Label>Procedure Type (optional)</Label><Input name="procedureType" defaultValue={existing?.procedureType} placeholder="e.g. rhinoplasty" /></div>
+              </div>
+              <div className="space-y-2"><Label>Avatar URL (optional)</Label><Input name="avatar" defaultValue={existing?.avatar} placeholder="https://... or paste from Media" /></div>
               <div className="flex gap-3">
                 <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
@@ -716,6 +803,7 @@ function FaqTab() {
       questionEn: fd.get("questionEn") as string,
       answerAr: fd.get("answerAr") as string,
       answerEn: fd.get("answerEn") as string,
+      category: (fd.get("category") as string) || undefined,
     };
     if (editingId) {
       await updateFaq({ id: editingId as any, ...data });
@@ -754,6 +842,7 @@ function FaqTab() {
               </div>
               <div className="space-y-2"><Label>Answer (EN)</Label><Textarea name="answerEn" rows={3} required defaultValue={existing?.answerEn} /></div>
               <div className="space-y-2"><Label>Answer (AR)</Label><Textarea name="answerAr" dir="rtl" rows={3} required defaultValue={existing?.answerAr} /></div>
+              <div className="space-y-2"><Label>Category (optional)</Label><Input name="category" defaultValue={existing?.category} placeholder="e.g. general, pricing, recovery" /></div>
               <div className="flex gap-3">
                 <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>

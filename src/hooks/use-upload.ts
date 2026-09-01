@@ -61,6 +61,7 @@ export function useImageUpload() {
           name: file.name,
           type: file.type,
           size: file.size,
+          alt: file.name.replace(/\.[^.]+$/, ""),
         });
 
         return { storageId, url };

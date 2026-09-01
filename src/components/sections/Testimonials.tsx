@@ -79,9 +79,13 @@ export default function Testimonials() {
                     </p>
                     <div className="mt-6 pt-5 border-t border-border/30">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
-                          {(isRtl ? item.nameAr : item.nameEn).charAt(0)}
-                        </div>
+                        {item.avatar ? (
+                          <img src={item.avatar} alt={isRtl ? item.nameAr : item.nameEn} className="h-10 w-10 rounded-full object-cover shrink-0" loading="lazy" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
+                            {(isRtl ? item.nameAr : item.nameEn).charAt(0)}
+                          </div>
+                        )}
                         <p className="text-sm font-semibold text-foreground">
                           {isRtl ? item.nameAr : item.nameEn}
                         </p>

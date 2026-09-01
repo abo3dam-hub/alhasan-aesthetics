@@ -109,6 +109,8 @@ const schema = defineSchema(
       name: v.string(),
       type: v.string(),
       size: v.number(),
+      alt: v.optional(v.string()),
+      uploadedAt: v.optional(v.number()),
       uploadedBy: v.optional(v.string()),
     }).index("by_storageId", ["storageId"]),
 

@@ -76,6 +76,7 @@ export default function ProcedureDetail() {
   const longDescription = isRtl
     ? displayData.longDescriptionAr
     : displayData.longDescriptionEn;
+  const gallery = displayData.gallery || [];
 
   // Dynamic SEO
   useEffect(() => {
@@ -146,7 +147,23 @@ export default function ProcedureDetail() {
             <p className="text-lg text-muted-foreground max-w-2xl">
               {description}
             </p>
+
+            {displayData.price && (
+              <p className="mt-4 text-xl font-semibold text-primary">{displayData.price}</p>
+            )}
           </motion.div>
+
+          {/* Hero Image */}
+          {displayData.image && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mt-8 rounded-2xl overflow-hidden glass-elevated"
+            >
+              <img src={displayData.image} alt={title} className="w-full h-64 sm:h-80 lg:h-96 object-cover" loading="lazy" />
+            </motion.div>
+          )}
 
           {/* Quick Info Cards */}
           <motion.div
@@ -209,6 +226,59 @@ export default function ProcedureDetail() {
           </motion.div>
         </div>
       </section>
+
+      {/* Before & After */}
+      {(displayData.beforeImage || displayData.afterImage) && (
+        <section className="py-16">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+              <h2 className="text-2xl font-serif-luxury font-bold text-foreground mb-8">
+                {isRtl ? "قبل وبعد" : "Before & After"}
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-6">
+                {displayData.beforeImage && (
+                  <div className="glass-card rounded-2xl overflow-hidden">
+                    <div className="relative aspect-square">
+                      <img src={displayData.beforeImage} alt={`${title} - ${isRtl ? "قبل" : "Before"}`} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">{isRtl ? "قبل" : "Before"}</div>
+                    </div>
+                  </div>
+                )}
+                {displayData.afterImage && (
+                  <div className="glass-card rounded-2xl overflow-hidden">
+                    <div className="relative aspect-square">
+                      <img src={displayData.afterImage} alt={`${title} - ${isRtl ? "بعد" : "After"}`} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute top-3 end-3 px-3 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">{isRtl ? "بعد" : "After"}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* Gallery */}
+      {gallery.length > 0 && (
+        <section className="py-16">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+              <h2 className="text-2xl font-serif-luxury font-bold text-foreground mb-8">
+                {isRtl ? "معرض الصور" : "Gallery"}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {gallery.map((url, i) => (
+                  <div key={i} className="glass-card rounded-2xl overflow-hidden">
+                    <div className="aspect-square">
+                      <img src={url} alt={`${title} gallery ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="pb-20">
