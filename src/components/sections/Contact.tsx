@@ -27,8 +27,10 @@ export default function Contact() {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
 
-  const phone = doctorSettings?.phoneNumber || "+966 XX XXX XXXX";
+  const phone = doctorSettings?.phone || "+966 XX XXX XXXX";
   const email = doctorSettings?.email || "info@dr-alhasan.com";
+  const addressEn = doctorSettings?.addressEn || "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai";
+  const addressAr = doctorSettings?.addressAr || "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي";
 
   const infoItems = [
     { icon: Phone, key: "phone", detail: phone },
@@ -116,8 +118,9 @@ export default function Contact() {
                       t.contact.hoursDetail
                     ) : item.detail === "lines" ? (
                       <span className="flex flex-col">
-                        <span>Syria, Damascus, Lattakia</span>
-                        <span>United Arab Emirates, Dubai</span>
+                        {(isArabic ? addressAr : addressEn).split('\n').map((line: string, i: number) => (
+                          <span key={i}>{line}</span>
+                        ))}
                       </span>
                     ) : (
                       item.detail

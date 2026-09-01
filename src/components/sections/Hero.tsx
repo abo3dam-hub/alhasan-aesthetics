@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles, Star, Award } from "lucide-react";
@@ -21,6 +23,15 @@ export default function Hero() {
   const { t, dir } = useI18n();
   const isRtl = dir === "rtl";
   const Arrow = isRtl ? ArrowLeft : ArrowRight;
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+
+  // Use CMS hero content if available, otherwise fallback to translations
+  const heroTitle = isRtl
+    ? (doctorSettings?.heroTitleAr || t.hero.title)
+    : (doctorSettings?.heroTitleEn || t.hero.title);
+  const heroHighlight = isRtl
+    ? (doctorSettings?.heroSubtitleAr || t.hero.titleHighlight)
+    : (doctorSettings?.heroSubtitleEn || t.hero.titleHighlight);
 
   return (
     <section
@@ -54,9 +65,9 @@ export default function Hero() {
 
           {/* Heading */}
           <motion.h1 variants={item} className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-            <span className="block text-foreground">{t.hero.title}</span>
+            <span className="block text-foreground">{heroTitle}</span>
             <span className="block mt-1 sm:mt-2 bg-gradient-to-l from-primary via-secondary to-primary bg-clip-text text-transparent font-serif-luxury">
-              {t.hero.titleHighlight}
+              {heroHighlight}
             </span>
           </motion.h1>
 

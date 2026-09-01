@@ -10,8 +10,11 @@ export default function Footer() {
   const isRtl = dir === "rtl";
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
 
-  const phone = doctorSettings?.phoneNumber || "+966 XX XXX XXXX";
+  const phone = doctorSettings?.phone || "+966 XX XXX XXXX";
   const email = doctorSettings?.email || "info@dr-alhasan.com";
+  const addressEn = doctorSettings?.addressEn || "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai";
+  const addressAr = doctorSettings?.addressAr || "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي";
+  const address = isRtl ? addressAr : addressEn;
 
   return (
     <footer className="relative border-t border-border/40" dir={dir}>
@@ -78,8 +81,9 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                 <span className="text-sm text-muted-foreground">
-                  Syria, Damascus, Lattakia<br />
-                  United Arab Emirates, Dubai
+                  {address.split('\n').map((line: string, i: number) => (
+                    <span key={i}>{line}{i === 0 && <br />}</span>
+                  ))}
                 </span>
               </li>
             </ul>

@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
@@ -18,7 +20,14 @@ const fadeInUp = {
 
 export default function About() {
   const { t, dir } = useI18n();
+  const isRtl = dir === "rtl";
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+
+  // Use CMS biography if available, otherwise fallback to translations
+  const description = isRtl
+    ? (doctorSettings?.biographyAr || t.about.description)
+    : (doctorSettings?.biographyEn || t.about.description);
 
   return (
     <section id="about" className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">
@@ -123,7 +132,7 @@ export default function About() {
 
             {/* Description */}
             <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
-              {t.about.description}
+              {description}
             </p>
 
             {/* Stats Grid */}
