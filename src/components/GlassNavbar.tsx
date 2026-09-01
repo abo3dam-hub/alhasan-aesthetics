@@ -169,21 +169,6 @@ export default function GlassNavbar() {
                     </Link>
                   </motion.div>
                 ))}
-
-                {/* Before/After Page Link */}
-                <motion.div
-                  initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: navLinks.length * 0.05 }}
-                >
-                  <Link
-                    to="/before-after"
-                    className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/40 rounded-xl transition-colors"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {t.nav.beforeAfter}
-                  </Link>
-                </motion.div>
               </div>
 
               <div className="p-4 border-t border-border/40 space-y-3">
