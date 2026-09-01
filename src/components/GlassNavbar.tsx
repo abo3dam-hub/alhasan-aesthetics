@@ -7,14 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import doctorAvatar from "/assets/3.jpg";
 
-const navLinks = [
+// Hash-scroll links use native <a> so the browser handles smooth scrolling.
+// Route links use React Router <Link>.
+const hashLinks = [
   { key: "home" as const, href: "/#home" },
   { key: "about" as const, href: "/#about" },
   { key: "procedures" as const, href: "/#procedures" },
-  { key: "beforeAfter" as const, href: "/before-after" },
   { key: "testimonials" as const, href: "/#testimonials" },
   { key: "faq" as const, href: "/#faq" },
   { key: "contact" as const, href: "/#contact" },
+];
+
+const routeLinks = [
+  { key: "beforeAfter" as const, href: "/before-after" },
 ];
 
 export default function GlassNavbar() {
@@ -22,6 +27,8 @@ export default function GlassNavbar() {
   const { isAuthenticated, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isRtl = dir === "rtl";
+
+  const allNavLinks = [...hashLinks, ...routeLinks];
 
   return (
     <>
@@ -34,7 +41,7 @@ export default function GlassNavbar() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 sm:h-18 items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 shrink-0">
+            <a href="/" className="flex items-center gap-3 shrink-0">
               <div className="relative">
                 <img
                   src={doctorAvatar}
@@ -46,11 +53,22 @@ export default function GlassNavbar() {
               <span className="font-serif-luxury text-lg sm:text-xl font-semibold text-foreground tracking-tight">
                 {t.nav.logo}
               </span>
-            </Link>
+            </a>
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
+              {/* Hash-scroll links — native <a> for browser scrolling */}
+              {hashLinks.map((link) => (
+                <a
+                  key={link.key}
+                  href={link.href}
+                  className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-white/40"
+                >
+                  {t.nav[link.key]}
+                </a>
+              ))}
+              {/* Route links — React Router <Link> */}
+              {routeLinks.map((link) => (
                 <Link
                   key={link.key}
                   to={link.href}
@@ -136,14 +154,14 @@ export default function GlassNavbar() {
               dir={dir}
             >
               <div className="flex items-center justify-between p-4 border-b border-border/40">
-                <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                <a href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
                   <img
                     src={doctorAvatar}
                     alt="Dr. AlHasan"
                     className="h-9 w-9 rounded-full object-cover border-2 border-primary/30"
                   />
                   <span className="font-serif-luxury text-lg font-semibold">{t.nav.logo}</span>
-                </Link>
+                </a>
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="p-2 rounded-lg hover:bg-white/40"
@@ -153,22 +171,35 @@ export default function GlassNavbar() {
               </div>
 
               <div className="flex flex-col p-4 gap-1">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.key}
-                    initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <Link
-                      to={link.href}
-                      className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/40 rounded-xl transition-colors"
-                      onClick={() => setMobileOpen(false)}
+                {allNavLinks.map((link, i) => {
+                  const isHash = hashLinks.some((h) => h.key === link.key);
+                  return (
+                    <motion.div
+                      key={link.key}
+                      initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
                     >
-                      {t.nav[link.key]}
-                    </Link>
-                  </motion.div>
-                ))}
+                      {isHash ? (
+                        <a
+                          href={link.href}
+                          className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/40 rounded-xl transition-colors"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          {t.nav[link.key]}
+                        </a>
+                      ) : (
+                        <Link
+                          to={link.href}
+                          className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/40 rounded-xl transition-colors"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          {t.nav[link.key]}
+                        </Link>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </div>
 
               <div className="p-4 border-t border-border/40 space-y-3">

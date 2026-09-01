@@ -40,12 +40,12 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4 text-sm">{t.footer.quickLinks}</h3>
             <ul className="space-y-2.5">
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.home}</Link></li>
-              <li><Link to="/#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.about}</Link></li>
-              <li><Link to="/#procedures" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.procedures}</Link></li>
+              <li><a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.home}</a></li>
+              <li><a href="/#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.about}</a></li>
+              <li><a href="/#procedures" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.procedures}</a></li>
               <li><Link to="/before-after" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.beforeAfter}</Link></li>
-              <li><Link to="/#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.testimonials}</Link></li>
-              <li><Link to="/#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.faq}</Link></li>
+              <li><a href="/#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.testimonials}</a></li>
+              <li><a href="/#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.faq}</a></li>
               <li><Link to="/consultation" className="text-sm text-primary font-medium hover:text-primary/80 transition-colors">{t.nav.bookConsultation}</Link></li>
             </ul>
           </div>
