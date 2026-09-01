@@ -25,7 +25,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-[600px] md:min-h-screen flex items-center hero-gradient overflow-hidden"
+      className="relative min-h-[500px] md:min-h-[75vh] lg:min-h-[80vh] flex items-center hero-gradient overflow-hidden"
     >
       {/* Decorative orbs */}
       <div className="absolute top-20 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(197, 168, 130, 0.15)" }} />
