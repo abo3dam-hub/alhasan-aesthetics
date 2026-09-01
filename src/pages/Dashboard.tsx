@@ -910,7 +910,12 @@ function SettingsTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Settings</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">Settings</h2>
+        <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-6 gap-2">
+          {saving ? "Saving..." : "Save All Settings"}
+        </Button>
+      </div>
 
       {/* Doctor / Clinic Info */}
       <Card className="border-border/60">

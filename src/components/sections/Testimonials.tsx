@@ -17,10 +17,12 @@ const fadeInUp = {
 };
 
 export default function Testimonials() {
-  const { t, dir } = useI18n();
+  const { t, dir, locale } = useI18n();
   const isRtl = dir === "rtl";
+  const isArabic = locale === "ar";
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
   const testimonials = useQuery(api.testimonials.listActive);
+  const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: "testimonialsSection" });
 
   const displayTestimonials =
     testimonials && testimonials.length > 0
@@ -41,14 +43,14 @@ export default function Testimonials() {
           dir={dir}
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
-            {t.testimonials.badge}
+            {sectionCMS?.badgeAr && sectionCMS?.badgeEn ? (isArabic ? sectionCMS.badgeAr : sectionCMS.badgeEn) : t.testimonials.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            <span className="text-foreground">{t.testimonials.title}</span>{" "}
-            <span className="font-serif-luxury text-primary">{t.testimonials.titleHighlight}</span>
+            <span className="text-foreground">{sectionCMS?.titleAr && sectionCMS?.titleEn ? (isArabic ? sectionCMS.titleAr : sectionCMS.titleEn) : t.testimonials.title}</span>{" "}
+            <span className="font-serif-luxury text-primary">{sectionCMS?.titleHighlightAr && sectionCMS?.titleHighlightEn ? (isArabic ? sectionCMS.titleHighlightAr : sectionCMS.titleHighlightEn) : t.testimonials.titleHighlight}</span>
           </h2>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
-            {t.testimonials.subtitle}
+            {sectionCMS?.subtitleAr && sectionCMS?.subtitleEn ? (isArabic ? sectionCMS.subtitleAr : sectionCMS.subtitleEn) : t.testimonials.subtitle}
           </p>
         </motion.div>
 

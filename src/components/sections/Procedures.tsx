@@ -37,10 +37,12 @@ const fadeInUp = {
 };
 
 export default function Procedures() {
-  const { t, dir } = useI18n();
+  const { t, dir, locale } = useI18n();
+  const isArabic = locale === "ar";
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
   const cmsProcedures = useQuery(api.procedures.listActive);
+  const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: "proceduresSection" });
 
 
   // Use CMS procedures if available
@@ -67,14 +69,14 @@ export default function Procedures() {
           dir={dir}
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
-            {t.procedures.badge}
+            {sectionCMS?.badgeAr && sectionCMS?.badgeEn ? (isArabic ? sectionCMS.badgeAr : sectionCMS.badgeEn) : t.procedures.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            <span className="text-foreground">{t.procedures.title}</span>{" "}
-            <span className="font-serif-luxury text-primary">{t.procedures.titleHighlight}</span>
+            <span className="text-foreground">{sectionCMS?.titleAr && sectionCMS?.titleEn ? (isArabic ? sectionCMS.titleAr : sectionCMS.titleEn) : t.procedures.title}</span>{" "}
+            <span className="font-serif-luxury text-primary">{sectionCMS?.titleHighlightAr && sectionCMS?.titleHighlightEn ? (isArabic ? sectionCMS.titleHighlightAr : sectionCMS.titleHighlightEn) : t.procedures.titleHighlight}</span>
           </h2>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
-            {t.procedures.subtitle}
+            {sectionCMS?.subtitleAr && sectionCMS?.subtitleEn ? (isArabic ? sectionCMS.subtitleAr : sectionCMS.subtitleEn) : t.procedures.subtitle}
           </p>
         </motion.div>
 

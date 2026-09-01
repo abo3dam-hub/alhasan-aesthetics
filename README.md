@@ -18,6 +18,7 @@ Premium bilingual (Arabic/English) aesthetic surgery website with structured Adm
 src/
 ├── components/
 │   ├── sections/       # Homepage sections (Hero, About, Procedures, etc.)
+│   ├── dashboard/      # Admin CMS tab components (HomepageCMSTab, SEOTab)
 │   ├── ui/             # shadcn/ui components
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu
@@ -30,17 +31,18 @@ src/
 │   ├── beforeAfter.ts  # Before & After CRUD (protected)
 │   ├── testimonials.ts # Testimonials CRUD (protected)
 │   ├── faq.ts          # FAQ CRUD (protected)
-│   ├── siteSettings.ts # Key/value settings store (protected)
+│   ├── homepageSettings.ts # Homepage CMS settings (hero, about, CTA, footer, sections)
+│   ├── siteSettings.ts # Key/value settings store (doctor, SEO)
 │   ├── media.ts        # File upload to Convex storage (protected)
 │   ├── users.ts        # User queries + becomeAdmin
-│   ├── seed.ts         # Initial data seeding
+│   ├── seed.ts         # Initial data seeding (10 procedures, 3 testimonials, 6 FAQ)
 │   └── auth/           # Auth providers (Email OTP)
 ├── pages/
-│   ├── Landing.tsx         # Homepage (all sections CMS-driven)
-│   ├── Dashboard.tsx       # Full Admin CMS dashboard
+│   ├── Landing.tsx         # Homepage (all sections CMS-driven with visibility toggle)
+│   ├── Dashboard.tsx       # Full Admin CMS dashboard (9 tabs)
 │   ├── ProcedureDetail.tsx # Individual procedure page (CMS-driven)
 │   ├── BeforeAfterPage.tsx # Before & After gallery with interactive slider
-│   ├── ConsultationPage.tsx # WhatsApp consultation form (3-step, no data stored)
+│   ├── ConsultationPage.tsx # WhatsApp consultation form (2-step, no data stored)
 │   ├── Auth.tsx            # Login/signup page (Email OTP)
 │   └── NotFound.tsx        # 404 page
 ├── hooks/              # Custom hooks (auth, upload, mobile)
@@ -51,18 +53,37 @@ src/
 
 ## Admin CMS
 
-Access via `/auth` → sign in → `/dashboard` → click "Become Admin" (first user only).
+Access: Visit `/auth` → sign in → go to `/dashboard` → click **"Become Admin"** (first user only).
 
-### CMS Tabs
+### Dashboard Tabs
 
 | Tab | CRUD | Edit | Reorder | Search | Image Upload | Toggle Active |
 |-----|------|------|---------|--------|--------------|---------------|
+| **Overview** | — | — | — | — | — | — |
+| **Homepage CMS** | — | ✅ | — | — | ✅ | ✅ Toggle |
 | **Procedures** | ✅ | ✅ | ✅ ↑↓ | ✅ | ✅ | ✅ |
 | **Before & After** | ✅ | ✅ | ✅ ↑↓ | — | Via Media tab | ✅ |
 | **Testimonials** | ✅ | ✅ | ✅ ↑↓ | — | — | ✅ |
 | **FAQ** | ✅ | ✅ | ✅ ↑↓ | ✅ | — | ✅ |
+| **SEO** | — | ✅ | — | — | — | — |
 | **Settings** | — | ✅ | — | — | — | — |
 | **Media** | — | — | — | — | ✅ Upload | — |
+
+### Homepage CMS (Editable from Admin)
+
+Every homepage section header and content is CMS-managed:
+
+| Section | Admin-Editable Fields |
+|---------|----------------------|
+| **Hero** | Badge, title, subtitle, description, primary/secondary CTA text, trust badges, hero image |
+| **About** | Badge, title, highlight, description, doctor image, statistics (value, icon, label, order) |
+| **Procedures Header** | Badge, title, title highlight, subtitle |
+| **Before & After Header** | Badge, title, title highlight, subtitle |
+| **Testimonials Header** | Badge, title, title highlight, subtitle |
+| **FAQ Header** | Badge, title, title highlight, subtitle |
+| **CTA** | Badge, title, description, button text, destination, enable/disable |
+| **Footer** | Description (AR/EN) |
+| **Visibility** | Show/hide each homepage section |
 
 ### Settings CMS Fields
 
@@ -78,33 +99,32 @@ Access via `/auth` → sign in → `/dashboard` → click "Become Admin" (first 
 
 ### Admin Security
 
-All CMS mutations are protected server-side via `requireAdmin()`. Public users cannot modify content. Authorization verified at the Convex function level.
+All CMS mutations are protected server-side via `requireAdmin()`. Authorization is verified at the Convex function level — public users cannot modify any content.
 
 ## Consultation Flow (WhatsApp — No Data Stored)
 
 1. Visitor selects procedures from CMS-driven list + "Other Procedure"
 2. Fills patient info (name, age, gender, nationality, residence)
 3. Reviews summary
-4. Clicks "Send via WhatsApp" → generates professional AR/EN message
+4. Clicks **"Send via WhatsApp"** → generates professional AR/EN message
 5. Opens `wa.me` with pre-filled text
 6. **No patient data is stored in the database**
 
-The consultation form uses translation keys for all labels, errors, and placeholders (full i18n coverage in `src/locales/ar.json` and `src/locales/en.json`).
-
 ## Public Website — CMS-Driven
 
-Every homepage section pulls data from Convex CMS:
+Every homepage section pulls data from Convex with translation fallbacks:
 
 | Section | CMS Source | Fallback |
 |---------|-----------|----------|
-| **Hero** | siteSettings (heroTitle, heroSubtitle) | translations |
-| **About** | siteSettings (biography) | translations |
-| **Procedures** | procedures (listActive) | — |
-| **Before & After** | beforeAfter (listActive) | placeholder |
-| **Testimonials** | testimonials (listActive) | placeholder |
-| **FAQ** | faq (listActive) | translations |
-| **Contact** | siteSettings (phone, email, address) | — |
-| **Footer** | siteSettings (phone, email, address, hours) + procedures (listActive) | translations |
+| **Hero** | siteSettings.hero, hero image | translations |
+| **About** | siteSettings.about, doctor image | translations |
+| **Procedures** | procedures.listActive + section header CMS | translations |
+| **Before & After** | beforeAfter.listActive + section header CMS | placeholder |
+| **Testimonials** | testimonials.listActive + section header CMS | placeholder |
+| **FAQ** | faq.listActive + section header CMS | translations |
+| **Contact** | siteSettings.doctor (phone, email, address) | — |
+| **CTA** | siteSettings.cta | translations |
+| **Footer** | siteSettings.footer + doctor settings + procedures | translations |
 
 ## Bilingual Support
 
@@ -113,41 +133,26 @@ Every homepage section pulls data from Convex CMS:
 - All CMS content has AR/EN fields
 - Language toggle in navbar and footer
 - WhatsApp messages generated in the correct language
-- Full i18n coverage: all UI strings, form labels, errors, and placeholders use translation keys
+- Full i18n coverage: all UI strings, form labels, errors, and placeholders
 
 ## Database Schema
 
 | Table | Purpose |
 |-------|---------|
 | `users` | Auth users with role (admin/user) |
-| `procedures` | CMS-managed procedures (CRUD) |
+| `procedures` | CMS-managed procedures (CRUD, with SEO fields) |
 | `beforeAfter` | Before & After cases (CRUD) |
 | `testimonials` | Patient testimonials (CRUD) |
 | `faq` | FAQ entries (CRUD) |
-| `siteSettings` | Key/value settings store |
-
-### Removed (Legacy Cleanup)
-
-- `consultations` table — removed, replaced by WhatsApp flow
-- `bookings` table — removed (deprecated stub)
-- `notifications` table — removed (deprecated stub)
+| `siteSettings` | Key/value settings store (doctor, hero, about, CTA, footer, visibility, SEO, section headers) |
 
 ## Image Management
 
 - Upload via Media tab in Dashboard
 - Images stored in Convex storage
 - Copy URL and paste into procedure/BA/testimonial forms
+- Hero image and doctor image use ImageUpload component
 - Supported: JPEG, PNG, WebP, GIF (max 5MB)
-- File validation: type + size checked client-side
-
-## SEO
-
-- Meta tags (title, description, keywords, robots)
-- Open Graph + Twitter Card
-- JSON-LD structured data (Physician schema)
-- robots.txt + sitemap.xml
-- Semantic HTML
-- Favicon + web app manifest
 
 ## Responsive Design
 
@@ -155,8 +160,18 @@ Every homepage section pulls data from Convex CMS:
 - Glassmorphism design system
 - RTL/LTR support
 - Mobile hamburger menu with slide-in animation
-- Optimized for 320px+ screens
 - Interactive before/after slider on gallery page
+
+## Routes
+
+| Route | Page | Auth |
+|-------|------|------|
+| `/` | Landing (homepage) | Public |
+| `/procedure/:slug` | Procedure detail | Public |
+| `/before-after` | Before & After gallery | Public |
+| `/consultation` | WhatsApp consultation form | Public |
+| `/auth` | Login / signup (Email OTP) | Public |
+| `/dashboard` | Admin CMS dashboard | Admin only |
 
 ## Development
 
@@ -187,4 +202,4 @@ bun run build
 2. Connect to Vercel/Freebuff
 3. Set `VITE_CONVEX_URL` in environment
 4. Run `bunx convex deploy` for production Convex
-5. Seed data: call `seed:seedAll` from Convex dashboard (once)
+5. Seed data: click "Seed Data" in the Dashboard Overview tab (once)

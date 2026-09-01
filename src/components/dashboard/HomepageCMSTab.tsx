@@ -17,6 +17,10 @@ export default function HomepageCMSTab() {
   const sections = [
     { key: "hero", label: "Hero Section" },
     { key: "about", label: "About Section" },
+    { key: "procedures-header", label: "Procedures Section Header" },
+    { key: "beforeAfter-header", label: "Before & After Section Header" },
+    { key: "testimonials-header", label: "Testimonials Section Header" },
+    { key: "faq-header", label: "FAQ Section Header" },
     { key: "cta", label: "CTA Section" },
     { key: "footer", label: "Footer Content" },
     { key: "visibility", label: "Section Visibility" },
@@ -40,6 +44,10 @@ export default function HomepageCMSTab() {
             <div className="mt-2">
               {section.key === "hero" && <HeroEditor />}
               {section.key === "about" && <AboutEditor />}
+              {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label="Procedures" fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
+              {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label="Before & After" fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
+              {section.key === "testimonials-header" && <SectionHeaderEditor sectionKey="testimonialsSection" label="Testimonials" fallbackKeys={{ badge: "testimonials.badge", title: "testimonials.title", titleHighlight: "testimonials.titleHighlight", subtitle: "testimonials.subtitle" }} />}
+              {section.key === "faq-header" && <SectionHeaderEditor sectionKey="faqSection" label="FAQ" fallbackKeys={{ badge: "faq.badge", title: "faq.title", titleHighlight: "faq.titleHighlight", subtitle: "faq.subtitle" }} />}
               {section.key === "cta" && <CTAEditor />}
               {section.key === "footer" && <FooterEditor />}
               {section.key === "visibility" && <VisibilityEditor />}
@@ -406,6 +414,68 @@ function FooterEditor() {
         <p className="text-xs text-muted-foreground">Social media links and contact info come from Doctor Settings.</p>
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Footer"}</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter) ───
+function SectionHeaderEditor({ sectionKey, label, fallbackKeys }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
+  const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: sectionKey });
+  const setSetting = useMutation(api.homepageSettings.set);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [initialized, setInitialized] = useState(false);
+
+  if (sectionCMS && !initialized) {
+    setForm({
+      badgeAr: sectionCMS.badgeAr || "",
+      badgeEn: sectionCMS.badgeEn || "",
+      titleAr: sectionCMS.titleAr || "",
+      titleEn: sectionCMS.titleEn || "",
+      titleHighlightAr: sectionCMS.titleHighlightAr || "",
+      titleHighlightEn: sectionCMS.titleHighlightEn || "",
+      subtitleAr: sectionCMS.subtitleAr || "",
+      subtitleEn: sectionCMS.subtitleEn || "",
+    });
+    setInitialized(true);
+  }
+
+  const update = (key: string, value: string) => setForm((p) => ({ ...p, [key]: value }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await setSetting({ key: sectionKey, value: form });
+      toast.success(`${label} section header saved!`);
+    } catch (e) { toast.error("Failed to save"); }
+    setSaving(false);
+  };
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader><CardTitle className="text-lg">{label} Section Header</CardTitle></CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} /></div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} /></div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title Highlight (EN)</Label><Input value={form.titleHighlightEn || ""} onChange={(e) => update("titleHighlightEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title Highlight (AR)</Label><Input dir="rtl" value={form.titleHighlightAr || ""} onChange={(e) => update("titleHighlightAr", e.target.value)} /></div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (EN)</Label><Textarea rows={2} value={form.subtitleEn || ""} onChange={(e) => update("subtitleEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (AR)</Label><Textarea dir="rtl" rows={2} value={form.subtitleAr || ""} onChange={(e) => update("subtitleAr", e.target.value)} /></div>
+        </div>
+        <p className="text-xs text-muted-foreground">Leave fields blank to use default translations.</p>
+        <div className="flex justify-end">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save"}</Button>
         </div>
       </CardContent>
     </Card>
