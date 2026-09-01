@@ -67,7 +67,6 @@ const countries = [
   "Tajikistan","Tanzania","Thailand","Tunisia","Turkey","Turkmenistan",
   "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States",
   "Uruguay","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe",
-  "Syrian",
 ];
 
 const fadeInUp = {
@@ -353,7 +352,7 @@ export default function ConsultationPage() {
                   type="button"
                   onClick={() => toggleProcedure(proc.slug)}
                   className={cn(
-                    "w-full text-left p-4 rounded-2xl border-2 transition-all",
+                    "w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all active:scale-[0.98]",
                     selected
                       ? "border-primary bg-primary/5 glass-card"
                       : "border-border/40 hover:border-border/80 hover:bg-white/40"
@@ -388,7 +387,7 @@ export default function ConsultationPage() {
               type="button"
               onClick={() => toggleProcedure(otherProcedureKey)}
               className={cn(
-                "w-full text-left p-4 rounded-2xl border-2 transition-all",
+                "w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all active:scale-[0.98]",
                 form.selectedProcedures.includes(otherProcedureKey)
                   ? "border-primary bg-primary/5 glass-card"
                   : "border-border/40 hover:border-border/80 hover:bg-white/40"
@@ -527,9 +526,9 @@ export default function ConsultationPage() {
                 dir="ltr"
               />
               {showCountryDropdown && (
-                <div className="absolute z-50 top-full mt-1 w-full max-h-60 overflow-y-auto bg-white rounded-xl shadow-lg border border-border/40">
+                <div className="absolute z-50 top-full mt-1 w-full max-h-60 overflow-y-auto glass-elevated rounded-xl shadow-lg border border-border/40">
                   {filteredCountries.length === 0 ? (
-                    <div className="p-3 text-sm text-muted-foreground text-center">
+                    <div className="p-4 text-sm text-muted-foreground text-center">
                       {isArabic ? "لا توجد نتائج" : "No results found"}
                     </div>
                   ) : (
@@ -543,7 +542,7 @@ export default function ConsultationPage() {
                           setShowCountryDropdown(false);
                         }}
                         className={cn(
-                          "w-full text-left px-4 py-2.5 text-sm hover:bg-primary/5 transition-colors",
+                          "w-full text-left px-4 py-3 text-sm hover:bg-primary/5 transition-colors",
                           form.nationality === country && "bg-primary/10 text-primary font-medium"
                         )}
                       >

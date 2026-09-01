@@ -75,7 +75,7 @@ export default function BeforeAfter() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                      <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
+                      <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
                         {isRtl ? "بعد" : "After"}
                       </div>
                     </div>

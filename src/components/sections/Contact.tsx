@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery, useMutation } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
@@ -15,8 +17,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useState } from "react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 
 const fadeInUp = {
@@ -24,16 +24,20 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
-const infoItems = [
-  { icon: Phone, key: "phone", detail: "+966 XX XXX XXXX" },
-  { icon: Mail, key: "email", detail: "info@dr-alhasan.com" },
-  { icon: MapPin, key: "location", detail: "lines" },
-  { icon: Clock, key: "hours", detail: "hoursDetail" },
-];
-
 export default function Contact() {
   const { t, dir } = useI18n();
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+
+  const phone = doctorSettings?.phoneNumber || "+966 XX XXX XXXX";
+  const email = doctorSettings?.email || "info@dr-alhasan.com";
+
+  const infoItems = [
+    { icon: Phone, key: "phone", detail: phone },
+    { icon: Mail, key: "email", detail: email },
+    { icon: MapPin, key: "location", detail: "lines" },
+    { icon: Clock, key: "hours", detail: "hoursDetail" },
+  ];
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const createConsultation = useMutation(api.consultations.create);
@@ -44,12 +48,12 @@ export default function Contact() {
 
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
+    const formEmail = formData.get("email") as string;
     const subject = formData.get("subject") as string;
     const message = formData.get("message") as string;
 
     try {
-      await createConsultation({ name, email, subject, message });
+      await createConsultation({ name, email: formEmail, subject, message });
       setSent(true);
       toast.success(
         dir === "rtl"

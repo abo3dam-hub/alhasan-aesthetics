@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { Link } from "react-router";
 import { Globe, Phone, Mail, MapPin } from "lucide-react";
 import doctorLogo from "/assets/3.jpg";
@@ -6,6 +8,10 @@ import doctorLogo from "/assets/3.jpg";
 export default function Footer() {
   const { t, dir, toggleLocale } = useI18n();
   const isRtl = dir === "rtl";
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+
+  const phone = doctorSettings?.phoneNumber || "+966 XX XXX XXXX";
+  const email = doctorSettings?.email || "info@dr-alhasan.com";
 
   return (
     <footer className="relative border-t border-border/40" dir={dir}>
@@ -63,11 +69,11 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">
                 <Phone className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">+966 XX XXX XXXX</span>
+                <span className="text-sm text-muted-foreground">{phone}</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Mail className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">info@dr-alhasan.com</span>
+                <span className="text-sm text-muted-foreground">{email}</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />

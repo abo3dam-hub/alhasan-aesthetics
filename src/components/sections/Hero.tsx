@@ -25,7 +25,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-[auto] md:min-h-screen flex items-center hero-gradient overflow-hidden"
+      className="relative min-h-[600px] md:min-h-screen flex items-center hero-gradient overflow-hidden"
     >
       {/* Decorative orbs */}
       <div className="absolute top-20 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(197, 168, 130, 0.15)" }} />
@@ -104,7 +104,7 @@ export default function Hero() {
             ].map((badge) => (
               <div
                 key={badge.text}
-                className="flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2.5 sm:py-3 glass-card rounded-2xl"
+                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 glass-card rounded-2xl"
               >
                 <div className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-primary/10 shrink-0">
                   <badge.icon className="h-4 w-4 text-primary" />

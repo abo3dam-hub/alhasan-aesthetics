@@ -162,16 +162,16 @@ export default function BeforeAfterPage() {
                           className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
                           style={{ left: `${sliderVal}%` }}
                         >
-                          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
+                          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-black/10">
                             <ChevronLeft className="h-3 w-3 text-foreground" />
                             <ChevronRight className="h-3 w-3 text-foreground" />
                           </div>
                         </div>
                         {/* Labels */}
-                        <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
+                        <div className="absolute top-3 start-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
                           {isRtl ? "قبل" : "Before"}
                         </div>
-                        <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
+                        <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
                           {isRtl ? "بعد" : "After"}
                         </div>
                         {/* Range Input */}

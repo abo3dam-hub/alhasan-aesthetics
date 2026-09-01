@@ -3,6 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useParams, Link } from "react-router";
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -147,6 +148,12 @@ export default function ProcedureDetail() {
     api.procedures.getBySlug,
     slug ? { slug } : "skip"
   );
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+
+  const phoneNumber = useMemo(() => {
+    const raw = doctorSettings?.phoneNumber || "";
+    return raw.replace(/[^0-9+]/g, "");
+  }, [doctorSettings]);
 
   // Use Convex data if available, otherwise fall back to translations
   const fallback = slug ? procedureData[slug] : undefined;
@@ -339,7 +346,7 @@ export default function ProcedureDetail() {
                   {isRtl ? "احجز استشارتك المجانية" : "Book Free Consultation"}
                 </Button>
               </Link>
-              <a href="tel:+966500000000">
+              <a href={`tel:${phoneNumber || '+966500000000'}`}>
                 <Button
                   variant="outline"
                   className="rounded-full px-8 py-6 text-base gap-2"
