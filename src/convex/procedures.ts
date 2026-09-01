@@ -20,6 +20,14 @@ export const listActive = query({
   },
 });
 
+export const listFeatured = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("procedures").withIndex("by_order").collect();
+    return all.filter((p) => p.isActive && p.isFeatured);
+  },
+});
+
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -65,10 +73,10 @@ export const create = mutation({
     price: v.optional(v.string()),
     image: v.optional(v.string()),
     gallery: v.optional(v.array(v.string())),
-    beforeImage: v.optional(v.string()),
-    afterImage: v.optional(v.string()),
-    isActive: v.boolean(),
-    order: v.number(),
+    beforeImage: v.optional(v.string()),      afterImage: v.optional(v.string()),
+      isActive: v.boolean(),
+      isFeatured: v.optional(v.boolean()),
+      order: v.number(),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -93,10 +101,10 @@ export const update = mutation({
     price: v.optional(v.string()),
     image: v.optional(v.string()),
     gallery: v.optional(v.array(v.string())),
-    beforeImage: v.optional(v.string()),
-    afterImage: v.optional(v.string()),
-    isActive: v.optional(v.boolean()),
-    order: v.optional(v.number()),
+    beforeImage: v.optional(v.string()),      afterImage: v.optional(v.string()),
+      isActive: v.optional(v.boolean()),
+      isFeatured: v.optional(v.boolean()),
+      order: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);

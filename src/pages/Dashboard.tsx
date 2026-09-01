@@ -13,7 +13,6 @@ import {
   LayoutDashboard,
   LogOut,
   FileText,
-  Star,
   HelpCircle,
   MessageSquare,
   Plus,
@@ -27,6 +26,7 @@ import {
   Image as ImageIcon,
   ArrowUp,
   ArrowDown,
+  Star,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
@@ -339,8 +339,19 @@ function ProceduresTab() {
                       "p-2 rounded-lg transition-colors",
                       proc.isActive ? "text-green-600 hover:bg-green-50" : "text-muted-foreground hover:bg-muted"
                     )}
+                    title={proc.isActive ? "Deactivate" : "Activate"}
                   >
                     {proc.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </button>
+                  <button
+                    onClick={async () => { await updateProcedure({ id: proc._id as any, isFeatured: !proc.isFeatured }); toast.success(proc.isFeatured ? "Unfeatured" : "Featured"); }}
+                    className={cn(
+                      "p-2 rounded-lg transition-colors",
+                      proc.isFeatured ? "text-amber-500 hover:bg-amber-50" : "text-muted-foreground hover:bg-muted"
+                    )}
+                    title={proc.isFeatured ? "Unfeature" : "Feature"}
+                  >
+                    <Star className={cn("h-4 w-4", proc.isFeatured && "fill-amber-400")} />
                   </button>
                   <button onClick={() => handleDelete(proc._id)} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                     <Trash2 className="h-4 w-4" />
@@ -388,6 +399,7 @@ function ProcedureForm({
       longDescriptionEn: fd.get("longDescriptionEn") as string,
       icon: selectedIcon,
       image: imageUrl || undefined,
+      isFeatured: !!fd.get("isFeatured"),
       category: (fd.get("category") as string) || "general",
       duration: (fd.get("duration") as string) || "1-2 hours",
       recovery: (fd.get("recovery") as string) || "1-2 weeks",
@@ -449,6 +461,10 @@ function ProcedureForm({
             <Label>Procedure Image</Label>
             <ImageUpload value={imageUrl} onChange={setImageUrl} label="Upload or paste image URL" />
           </div>
+          <div className="flex items-center gap-3">
+            <input type="checkbox" name="isFeatured" id="isFeatured" defaultChecked={existing?.isFeatured} className="rounded border-border" />
+            <Label htmlFor="isFeatured" className="cursor-pointer">Featured on homepage</Label>
+          </div>
           <div className="flex gap-3">
             <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : "Save Procedure"}</Button>
             <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
@@ -468,10 +484,12 @@ function BeforeAfterTab() {
   const procedures = useQuery(api.procedures.list);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const existing = editingId ? cases?.find((c) => c._id === editingId) : null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = {
       titleAr: fd.get("titleAr") as string,
@@ -491,6 +509,7 @@ function BeforeAfterTab() {
     }
     setShowForm(false);
     setEditingId(null);
+    setLoading(false);
   };
 
   return (
@@ -525,7 +544,7 @@ function BeforeAfterTab() {
               <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
               <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
+                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
               </div>
             </form>
@@ -575,10 +594,12 @@ function TestimonialsTab() {
   const removeTestimonial = useMutation(api.testimonials.remove);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const existing = editingId ? testimonials?.find((t) => t._id === editingId) : null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = {
       nameAr: fd.get("nameAr") as string,
@@ -596,6 +617,7 @@ function TestimonialsTab() {
     }
     setShowForm(false);
     setEditingId(null);
+    setLoading(false);
   };
 
   return (
@@ -620,7 +642,7 @@ function TestimonialsTab() {
               <div className="space-y-2"><Label>Text (AR)</Label><Textarea name="textAr" dir="rtl" rows={3} required defaultValue={existing?.textAr} /></div>
               <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
+                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
               </div>
             </form>
@@ -670,6 +692,7 @@ function FaqTab() {
   const removeFaq = useMutation(api.faq.remove);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const existing = editingId ? faqs?.find((f) => f._id === editingId) : null;
 
@@ -679,6 +702,7 @@ function FaqTab() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = {
       questionAr: fd.get("questionAr") as string,
@@ -695,6 +719,7 @@ function FaqTab() {
     }
     setShowForm(false);
     setEditingId(null);
+    setLoading(false);
   };
 
   return (

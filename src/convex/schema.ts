@@ -50,6 +50,7 @@ const schema = defineSchema(
       beforeImage: v.optional(v.string()),
       afterImage: v.optional(v.string()),
       isActive: v.boolean(),
+      isFeatured: v.optional(v.boolean()),
       order: v.number(),
     })
       .index("by_slug", ["slug"])

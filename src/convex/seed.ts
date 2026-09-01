@@ -59,6 +59,7 @@ export const seedAll = mutation({
         duration: "1-2 ساعات / 1-2 hours",
         recovery: "1-2 أسبوع / 1-2 weeks",
         isActive: true,
+        isFeatured: true,
         order: 1,
       },
       {
@@ -74,6 +75,7 @@ export const seedAll = mutation({
         duration: "3-5 ساعات / 3-5 hours",
         recovery: "2-3 أسابيع / 2-3 weeks",
         isActive: true,
+        isFeatured: true,
         order: 2,
       },
       {
@@ -89,6 +91,7 @@ export const seedAll = mutation({
         duration: "1-3 ساعات / 1-3 hours",
         recovery: "2-3 أسابيع / 2-3 weeks",
         isActive: true,
+        isFeatured: true,
         order: 3,
       },
       {
