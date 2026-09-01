@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
@@ -15,20 +17,19 @@ import {
   ArrowUpDown,
   Stethoscope,
   Ban,
+  Star,
+  Shield,
+  Zap,
+  Activity,
+  Sun,
+  Moon,
 } from "lucide-react";
 
-const procedures = [
-  { key: "blepharoplasty", slug: "blepharoplasty", icon: Eye },
-  { key: "faceNeckLift", slug: "face-neck-lift", icon: UserRound },
-  { key: "rhinoplasty", slug: "rhinoplasty", icon: SmilePlus },
-  { key: "liposuctionFat", slug: "liposuction-fat-transfer", icon: Droplets },
-  { key: "tummyTuck", slug: "tummy-tuck", icon: Scissors },
-  { key: "botox", slug: "botox", icon: Sparkles },
-  { key: "fillers", slug: "fillers", icon: Heart },
-  { key: "armThighLift", slug: "arm-thigh-lift", icon: ArrowUpDown },
-  { key: "breastSurgery", slug: "breast-augmentation-reduction", icon: Stethoscope },
-  { key: "scarRevision", slug: "scar-deformity-correction", icon: Ban },
-];
+// Icon mapping from string name to component
+const iconMap: Record<string, typeof Eye> = {
+  Eye, UserRound, SmilePlus, Droplets, Scissors, Sparkles,
+  Heart, ArrowUpDown, Stethoscope, Ban, Star, Shield, Zap, Activity, Sun, Moon,
+};
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -39,6 +40,18 @@ export default function Procedures() {
   const { t, dir } = useI18n();
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const cmsProcedures = useQuery(api.procedures.listActive);
+
+
+  // Use CMS procedures if available
+  const displayProcedures = cmsProcedures && cmsProcedures.length > 0
+    ? cmsProcedures.map((p) => ({
+        slug: p.slug,
+        title: dir === "rtl" ? p.titleAr : p.titleEn,
+        description: dir === "rtl" ? p.descriptionAr : p.descriptionEn,
+        icon: iconMap[p.icon] || Sparkles,
+      }))
+    : null;
 
   return (
     <section id="procedures" className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">
@@ -65,40 +78,42 @@ export default function Procedures() {
           </p>
         </motion.div>
 
-        {/* Grid */}
+        {/* Grid — CMS-driven when available */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5" dir={dir}>
-          {procedures.map((proc, i) => (
-            <motion.div
-              key={proc.key}
-              initial="hidden"
-              animate={inView ? "visible" : "hidden"}
-              variants={{
-                ...fadeInUp,
-                visible: {
-                  ...fadeInUp.visible,
-                  transition: { duration: 0.5, delay: 0.06 * i },
-                },
-              }}
-            >
-              <Link to={`/procedure/${proc.slug}`} className="block h-full">
-                <div className="glass-card rounded-3xl p-5 sm:p-6 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
-                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
-                    <proc.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
-                    {t.procedures[proc.key as keyof typeof t.procedures]}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
-                    {t.procedures[`${proc.key}Desc` as keyof typeof t.procedures]}
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
-                    {t.procedures.learnMore}
-                    <Arrow className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+          {displayProcedures
+            ? displayProcedures.map((proc, i) => (
+                <motion.div
+                  key={proc.slug}
+                  initial="hidden"
+                  animate={inView ? "visible" : "hidden"}
+                  variants={{
+                    ...fadeInUp,
+                    visible: {
+                      ...fadeInUp.visible,
+                      transition: { duration: 0.5, delay: 0.06 * i },
+                    },
+                  }}
+                >
+                  <Link to={`/procedure/${proc.slug}`} className="block h-full">
+                    <div className="glass-card rounded-3xl p-5 sm:p-6 h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
+                      <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
+                        <proc.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <h3 className="text-sm sm:text-base font-semibold text-foreground mb-2">
+                        {proc.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
+                        {proc.description}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary group-hover:gap-2.5 transition-all">
+                        {t.procedures.learnMore}
+                        <Arrow className="h-3.5 w-3.5" />
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))
+            : null}
         </div>
 
         {/* View All */}

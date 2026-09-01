@@ -248,6 +248,14 @@ function ProceduresTab() {
   const removeProcedure = useMutation(api.procedures.remove);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("all");
+
+  const filteredProcedures = procedures?.filter((p) => {
+    const matchesSearch = !search || p.titleEn.toLowerCase().includes(search.toLowerCase()) || p.titleAr.includes(search) || p.slug.includes(search.toLowerCase());
+    const matchesFilter = filterActive === "all" || (filterActive === "active" ? p.isActive : !p.isActive);
+    return matchesSearch && matchesFilter;
+  });
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
     await updateProcedure({ id: id as any, isActive: !isActive });
@@ -268,6 +276,16 @@ function ProceduresTab() {
         <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Procedure
         </Button>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Input placeholder="Search procedures..." value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
+        <select value={filterActive} onChange={(e) => setFilterActive(e.target.value as any)} className="border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
 
       {showForm && (
@@ -292,7 +310,7 @@ function ProceduresTab() {
         {!procedures || procedures.length === 0 ? (
           <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No procedures yet.</CardContent></Card>
         ) : (
-          procedures.map((proc, index) => (
+          (filteredProcedures || []).map((proc, index) => (
             <Card key={proc._id} className="border-border/60">
               <CardContent className="p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
@@ -354,6 +372,7 @@ function ProcedureForm({
   const [loading, setLoading] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState(existing?.icon || "Sparkles");
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const [imageUrl, setImageUrl] = useState(existing?.image || "");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -368,6 +387,7 @@ function ProcedureForm({
       longDescriptionAr: fd.get("longDescriptionAr") as string,
       longDescriptionEn: fd.get("longDescriptionEn") as string,
       icon: selectedIcon,
+      image: imageUrl || undefined,
       category: (fd.get("category") as string) || "general",
       duration: (fd.get("duration") as string) || "1-2 hours",
       recovery: (fd.get("recovery") as string) || "1-2 weeks",
@@ -425,6 +445,10 @@ function ProcedureForm({
           <div className="space-y-2"><Label>Short Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} required defaultValue={existing?.descriptionAr} placeholder="وصف مختصر..." /></div>
           <div className="space-y-2"><Label>Full Description (EN)</Label><Textarea name="longDescriptionEn" rows={4} required defaultValue={existing?.longDescriptionEn} placeholder="Detailed description..." /></div>
           <div className="space-y-2"><Label>Full Description (AR)</Label><Textarea name="longDescriptionAr" dir="rtl" rows={4} required defaultValue={existing?.longDescriptionAr} placeholder="وصف تفصيلي..." /></div>
+          <div className="space-y-2">
+            <Label>Procedure Image</Label>
+            <ImageUpload value={imageUrl} onChange={setImageUrl} label="Upload or paste image URL" />
+          </div>
           <div className="flex gap-3">
             <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : "Save Procedure"}</Button>
             <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
@@ -443,59 +467,66 @@ function BeforeAfterTab() {
   const removeCase = useMutation(api.beforeAfter.remove);
   const procedures = useQuery(api.procedures.list);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const existing = editingId ? cases?.find((c) => c._id === editingId) : null;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const data = {
+      titleAr: fd.get("titleAr") as string,
+      titleEn: fd.get("titleEn") as string,
+      procedureType: fd.get("procedureType") as string,
+      beforeImage: fd.get("beforeImage") as string || "",
+      afterImage: fd.get("afterImage") as string || "",
+      descriptionAr: (fd.get("descriptionAr") as string) || undefined,
+      descriptionEn: (fd.get("descriptionEn") as string) || undefined,
+    };
+    if (editingId) {
+      await updateCase({ id: editingId as any, ...data });
+      toast.success("Case updated");
+    } else {
+      await createCase({ ...data, isActive: true, order: cases?.length ?? 0 });
+      toast.success("Case added");
+    }
+    setShowForm(false);
+    setEditingId(null);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Before & After</h2>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2 bg-primary text-primary-foreground">
+        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Case
         </Button>
       </div>
 
       {showForm && (
         <Card className="border-border/60">
-          <CardHeader><CardTitle className="text-lg">Add Before & After Case</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{editingId ? "Edit Case" : "Add Before & After Case"}</CardTitle></CardHeader>
           <CardContent>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                await createCase({
-                  titleAr: fd.get("titleAr") as string,
-                  titleEn: fd.get("titleEn") as string,
-                  procedureType: fd.get("procedureType") as string,
-                  beforeImage: fd.get("beforeImage") as string || "/assets/placeholder.jpg",
-                  afterImage: fd.get("afterImage") as string || "/assets/placeholder.jpg",
-                  descriptionAr: (fd.get("descriptionAr") as string) || undefined,
-                  descriptionEn: (fd.get("descriptionEn") as string) || undefined,
-                  isActive: true,
-                  order: 0,
-                });
-                setShowForm(false);
-                toast.success("Case added");
-              }}
-              className="space-y-4"
-            >
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Title (EN)</Label><Input name="titleEn" required /></div>
-                <div className="space-y-2"><Label>Title (AR)</Label><Input name="titleAr" dir="rtl" required /></div>
+                <div className="space-y-2"><Label>Title (EN)</Label><Input name="titleEn" required defaultValue={existing?.titleEn} /></div>
+                <div className="space-y-2"><Label>Title (AR)</Label><Input name="titleAr" dir="rtl" required defaultValue={existing?.titleAr} /></div>
               </div>
               <div className="space-y-2">
                 <Label>Procedure Type</Label>
-                <select name="procedureType" className="w-full border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
+                <select name="procedureType" defaultValue={existing?.procedureType} className="w-full border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
                   {procedures?.map((p) => <option key={p._id} value={p.slug}>{p.titleEn}</option>)}
                 </select>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Before Image URL</Label><Input name="beforeImage" placeholder="/assets/before.jpg" /></div>
-                <div className="space-y-2"><Label>After Image URL</Label><Input name="afterImage" placeholder="/assets/after.jpg" /></div>
+                <div className="space-y-2"><Label>Before Image</Label><Input name="beforeImage" defaultValue={existing?.beforeImage} placeholder="Image URL or paste from Media tab" /></div>
+                <div className="space-y-2"><Label>After Image</Label><Input name="afterImage" defaultValue={existing?.afterImage} placeholder="Image URL or paste from Media tab" /></div>
               </div>
-              <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} /></div>
-              <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} /></div>
+              <p className="text-xs text-muted-foreground">Upload images in the Media tab, then paste the URL here.</p>
+              <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
+              <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">Save</Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
               </div>
             </form>
           </CardContent>
@@ -512,11 +543,13 @@ function BeforeAfterTab() {
                 <div className="min-w-0">
                   <p className="font-medium text-foreground truncate">{c.titleEn}</p>
                   <p className="text-sm text-muted-foreground">{c.procedureType}</p>
-                </div>              <div className="flex items-center gap-2 shrink-0">
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => { setEditingId(c._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
                   <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                     {c.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
-                  <button onClick={async () => { await removeCase({ id: c._id }); toast.success("Deleted"); }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                  <button onClick={async () => { if (confirm("Delete this case?")) { await removeCase({ id: c._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
@@ -524,9 +557,10 @@ function BeforeAfterTab() {
                     <button disabled={cases!.indexOf(c) === cases!.length - 1} onClick={() => swapOrder(cases!, cases!.indexOf(c), "down", (args) => updateCase(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
                   </div>
                 </div>
-              </CardContent>            </Card>
+              </CardContent>
+            </Card>
           ))
-      )}
+        )}
       </div>
     </div>
   );
@@ -540,37 +574,54 @@ function TestimonialsTab() {
   const updateTestimonial = useMutation(api.testimonials.update);
   const removeTestimonial = useMutation(api.testimonials.remove);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const existing = editingId ? testimonials?.find((t) => t._id === editingId) : null;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const data = {
+      nameAr: fd.get("nameAr") as string,
+      nameEn: fd.get("nameEn") as string,
+      textAr: fd.get("textAr") as string,
+      textEn: fd.get("textEn") as string,
+      rating: Number(fd.get("rating") as string) || 5,
+    };
+    if (editingId) {
+      await updateTestimonial({ id: editingId as any, ...data });
+      toast.success("Testimonial updated");
+    } else {
+      await createTestimonial({ ...data, isActive: true, order: testimonials?.length ?? 0 });
+      toast.success("Testimonial added");
+    }
+    setShowForm(false);
+    setEditingId(null);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Testimonials</h2>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2 bg-primary text-primary-foreground">
+        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Testimonial
         </Button>
       </div>
 
       {showForm && (
         <Card className="border-border/60">
-          <CardHeader><CardTitle className="text-lg">Add Testimonial</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{editingId ? "Edit Testimonial" : "Add Testimonial"}</CardTitle></CardHeader>
           <CardContent>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              await createTestimonial({ nameAr: fd.get("nameAr") as string, nameEn: fd.get("nameEn") as string, textAr: fd.get("textAr") as string, textEn: fd.get("textEn") as string, rating: Number(fd.get("rating") as string) || 5, isActive: true, order: 0 });
-              setShowForm(false);
-              toast.success("Testimonial added");
-            }} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Name (EN)</Label><Input name="nameEn" required /></div>
-                <div className="space-y-2"><Label>Name (AR)</Label><Input name="nameAr" dir="rtl" required /></div>
+                <div className="space-y-2"><Label>Name (EN)</Label><Input name="nameEn" required defaultValue={existing?.nameEn} /></div>
+                <div className="space-y-2"><Label>Name (AR)</Label><Input name="nameAr" dir="rtl" required defaultValue={existing?.nameAr} /></div>
               </div>
-              <div className="space-y-2"><Label>Text (EN)</Label><Textarea name="textEn" rows={3} required /></div>
-              <div className="space-y-2"><Label>Text (AR)</Label><Textarea name="textAr" dir="rtl" rows={3} required /></div>
-              <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={5} /></div>
+              <div className="space-y-2"><Label>Text (EN)</Label><Textarea name="textEn" rows={3} required defaultValue={existing?.textEn} /></div>
+              <div className="space-y-2"><Label>Text (AR)</Label><Textarea name="textAr" dir="rtl" rows={3} required defaultValue={existing?.textAr} /></div>
+              <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">Save</Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
               </div>
             </form>
           </CardContent>
@@ -591,10 +642,11 @@ function TestimonialsTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{t.textEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <button onClick={() => { setEditingId(t._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
                 <button onClick={async () => { await updateTestimonial({ id: t._id, isActive: !t.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                   {t.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
-                <button onClick={async () => { await removeTestimonial({ id: t._id }); toast.success("Deleted"); }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                <button onClick={async () => { if (confirm("Delete this testimonial?")) { await removeTestimonial({ id: t._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
@@ -617,36 +669,62 @@ function FaqTab() {
   const updateFaq = useMutation(api.faq.update);
   const removeFaq = useMutation(api.faq.remove);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const existing = editingId ? faqs?.find((f) => f._id === editingId) : null;
+
+  const filteredFaqs = faqs?.filter((f) => {
+    return !search || f.questionEn.toLowerCase().includes(search.toLowerCase()) || f.questionAr.includes(search) || f.answerEn.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const data = {
+      questionAr: fd.get("questionAr") as string,
+      questionEn: fd.get("questionEn") as string,
+      answerAr: fd.get("answerAr") as string,
+      answerEn: fd.get("answerEn") as string,
+    };
+    if (editingId) {
+      await updateFaq({ id: editingId as any, ...data });
+      toast.success("FAQ updated");
+    } else {
+      await createFaq({ ...data, isActive: true, order: faqs?.length ?? 0 });
+      toast.success("FAQ added");
+    }
+    setShowForm(false);
+    setEditingId(null);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">FAQ</h2>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2 bg-primary text-primary-foreground">
+        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Add FAQ
         </Button>
       </div>
 
+      {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Input placeholder="Search FAQ..." value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
+      </div>
+
       {showForm && (
         <Card className="border-border/60">
-          <CardHeader><CardTitle className="text-lg">Add FAQ</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{editingId ? "Edit FAQ" : "Add FAQ"}</CardTitle></CardHeader>
           <CardContent>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              await createFaq({ questionAr: fd.get("questionAr") as string, questionEn: fd.get("questionEn") as string, answerAr: fd.get("answerAr") as string, answerEn: fd.get("answerEn") as string, isActive: true, order: 0 });
-              setShowForm(false);
-              toast.success("FAQ added");
-            }} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Question (EN)</Label><Input name="questionEn" required /></div>
-                <div className="space-y-2"><Label>Question (AR)</Label><Input name="questionAr" dir="rtl" required /></div>
+                <div className="space-y-2"><Label>Question (EN)</Label><Input name="questionEn" required defaultValue={existing?.questionEn} /></div>
+                <div className="space-y-2"><Label>Question (AR)</Label><Input name="questionAr" dir="rtl" required defaultValue={existing?.questionAr} /></div>
               </div>
-              <div className="space-y-2"><Label>Answer (EN)</Label><Textarea name="answerEn" rows={3} required /></div>
-              <div className="space-y-2"><Label>Answer (AR)</Label><Textarea name="answerAr" dir="rtl" rows={3} required /></div>
+              <div className="space-y-2"><Label>Answer (EN)</Label><Textarea name="answerEn" rows={3} required defaultValue={existing?.answerEn} /></div>
+              <div className="space-y-2"><Label>Answer (AR)</Label><Textarea name="answerAr" dir="rtl" rows={3} required defaultValue={existing?.answerAr} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">Save</Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
               </div>
             </form>
           </CardContent>
@@ -656,7 +734,8 @@ function FaqTab() {
       <div className="space-y-3">
         {!faqs || faqs.length === 0 ? (
           <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No FAQ items yet.</CardContent></Card>
-        ) : faqs.map((f) => (
+        ) : (
+          (filteredFaqs || []).map((f) => (
           <Card key={f._id} className="border-border/60">
             <CardContent className="p-4 flex items-center justify-between gap-4">
               <div className="min-w-0">
@@ -664,10 +743,11 @@ function FaqTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{f.answerEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <button onClick={() => { setEditingId(f._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
                 <button onClick={async () => { await updateFaq({ id: f._id, isActive: !f.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                   {f.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
-                <button onClick={async () => { await removeFaq({ id: f._id }); toast.success("Deleted"); }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                <button onClick={async () => { if (confirm("Delete this FAQ?")) { await removeFaq({ id: f._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
@@ -677,7 +757,8 @@ function FaqTab() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ))
+      )}
       </div>
     </div>
   );
@@ -691,7 +772,7 @@ function SettingsTab() {
   const setSetting = useMutation(api.siteSettings.set);
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Record<string, string>>({
     doctorNameAr: "",
     doctorNameEn: "",
     whatsappNumber: "",
@@ -699,13 +780,26 @@ function SettingsTab() {
     email: "",
     addressAr: "",
     addressEn: "",
+    biographyAr: "",
+    biographyEn: "",
+    specializationsAr: "",
+    specializationsEn: "",
+    educationAr: "",
+    educationEn: "",
+    heroTitleAr: "",
+    heroTitleEn: "",
+    heroSubtitleAr: "",
+    heroSubtitleEn: "",
     instagram: "",
     facebook: "",
     twitter: "",
     snapchat: "",
+    tiktok: "",
+    workingHoursWeekdays: "9 AM - 6 PM",
+    workingHoursFriday: "",
+    workingHoursSaturday: "",
   });
 
-  // Initialize form from settings once loaded
   const [initialized, setInitialized] = useState(false);
   if (settings && !initialized) {
     setForm({
@@ -716,20 +810,38 @@ function SettingsTab() {
       email: settings.email || "",
       addressAr: settings.addressAr || "",
       addressEn: settings.addressEn || "",
+      biographyAr: settings.biographyAr || "",
+      biographyEn: settings.biographyEn || "",
+      specializationsAr: settings.specializationsAr || "",
+      specializationsEn: settings.specializationsEn || "",
+      educationAr: settings.educationAr || "",
+      educationEn: settings.educationEn || "",
+      heroTitleAr: settings.heroTitleAr || "",
+      heroTitleEn: settings.heroTitleEn || "",
+      heroSubtitleAr: settings.heroSubtitleAr || "",
+      heroSubtitleEn: settings.heroSubtitleEn || "",
       instagram: settings.socialMedia?.instagram || "",
       facebook: settings.socialMedia?.facebook || "",
       twitter: settings.socialMedia?.twitter || "",
       snapchat: settings.socialMedia?.snapchat || "",
+      tiktok: settings.socialMedia?.tiktok || "",
+      workingHoursWeekdays: settings.workingHoursWeekdays || "9 AM - 6 PM",
+      workingHoursFriday: settings.workingHoursFriday || "",
+      workingHoursSaturday: settings.workingHoursSaturday || "",
     });
     setInitialized(true);
   }
 
+  const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+
   const handleSave = async () => {
     setSaving(true);
     try {
+      // MERGE with existing settings to preserve any other fields
       await setSetting({
         key: "doctor",
         value: {
+          ...settings,
           doctorNameAr: form.doctorNameAr,
           doctorNameEn: form.doctorNameEn,
           whatsappNumber: form.whatsappNumber,
@@ -737,11 +849,25 @@ function SettingsTab() {
           email: form.email,
           addressAr: form.addressAr,
           addressEn: form.addressEn,
+          biographyAr: form.biographyAr,
+          biographyEn: form.biographyEn,
+          specializationsAr: form.specializationsAr,
+          specializationsEn: form.specializationsEn,
+          educationAr: form.educationAr,
+          educationEn: form.educationEn,
+          heroTitleAr: form.heroTitleAr,
+          heroTitleEn: form.heroTitleEn,
+          heroSubtitleAr: form.heroSubtitleAr,
+          heroSubtitleEn: form.heroSubtitleEn,
+          workingHoursWeekdays: form.workingHoursWeekdays,
+          workingHoursFriday: form.workingHoursFriday,
+          workingHoursSaturday: form.workingHoursSaturday,
           socialMedia: {
             instagram: form.instagram,
             facebook: form.facebook,
             twitter: form.twitter,
             snapchat: form.snapchat,
+            tiktok: form.tiktok,
           },
         },
       });
@@ -756,35 +882,86 @@ function SettingsTab() {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-foreground">Settings</h2>
 
+      {/* Doctor / Clinic Info */}
       <Card className="border-border/60">
         <CardHeader><CardTitle className="text-lg">Doctor / Clinic Information</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Doctor Name (EN)</Label><Input value={form.doctorNameEn} onChange={(e) => setForm({ ...form, doctorNameEn: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Doctor Name (AR)</Label><Input dir="rtl" value={form.doctorNameAr} onChange={(e) => setForm({ ...form, doctorNameAr: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Doctor Name (EN)</Label><Input value={form.doctorNameEn} onChange={(e) => updateField("doctorNameEn", e.target.value)} /></div>
+            <div className="space-y-2"><Label>Doctor Name (AR)</Label><Input dir="rtl" value={form.doctorNameAr} onChange={(e) => updateField("doctorNameAr", e.target.value)} /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>WhatsApp Number</Label><Input value={form.whatsappNumber} onChange={(e) => setForm({ ...form, whatsappNumber: e.target.value })} placeholder="+966XXXXXXXXX" /></div>
-            <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+            <div className="space-y-2"><Label>WhatsApp Number</Label><Input value={form.whatsappNumber} onChange={(e) => updateField("whatsappNumber", e.target.value)} placeholder="+966XXXXXXXXX" /></div>
+            <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
           </div>
-          <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+          <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} /></div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Address (EN)</Label><Textarea rows={2} value={form.addressEn} onChange={(e) => setForm({ ...form, addressEn: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Address (AR)</Label><Textarea dir="rtl" rows={2} value={form.addressAr} onChange={(e) => setForm({ ...form, addressAr: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Address (EN)</Label><Textarea rows={2} value={form.addressEn} onChange={(e) => updateField("addressEn", e.target.value)} /></div>
+            <div className="space-y-2"><Label>Address (AR)</Label><Textarea dir="rtl" rows={2} value={form.addressAr} onChange={(e) => updateField("addressAr", e.target.value)} /></div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Doctor Profile */}
+      <Card className="border-border/60">
+        <CardHeader><CardTitle className="text-lg">Doctor Profile</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>Biography (EN)</Label><Textarea rows={3} value={form.biographyEn} onChange={(e) => updateField("biographyEn", e.target.value)} placeholder="Doctor biography in English..." /></div>
+            <div className="space-y-2"><Label>Biography (AR)</Label><Textarea dir="rtl" rows={3} value={form.biographyAr} onChange={(e) => updateField("biographyAr", e.target.value)} placeholder="السيرة الذاتية بالعربية..." /></div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>Specializations (EN)</Label><Input value={form.specializationsEn} onChange={(e) => updateField("specializationsEn", e.target.value)} placeholder="e.g. Rhinoplasty, Facelift, Botox" /></div>
+            <div className="space-y-2"><Label>Specializations (AR)</Label><Input dir="rtl" value={form.specializationsAr} onChange={(e) => updateField("specializationsAr", e.target.value)} placeholder="مثلاً تجميل الأنف، شد الوجه، البوتوكس" /></div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>Education (EN)</Label><Input value={form.educationEn} onChange={(e) => updateField("educationEn", e.target.value)} placeholder="e.g. MD, Board Certified in Plastic Surgery" /></div>
+            <div className="space-y-2"><Label>Education (AR)</Label><Input dir="rtl" value={form.educationAr} onChange={(e) => updateField("educationAr", e.target.value)} placeholder="مثلاً دكتوراه في الطب، شهادة البورد" /></div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Hero Content */}
+      <Card className="border-border/60">
+        <CardHeader><CardTitle className="text-lg">Hero Section</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>Hero Title (EN)</Label><Input value={form.heroTitleEn} onChange={(e) => updateField("heroTitleEn", e.target.value)} placeholder="Your Beauty Deserves" /></div>
+            <div className="space-y-2"><Label>Hero Title (AR)</Label><Input dir="rtl" value={form.heroTitleAr} onChange={(e) => updateField("heroTitleAr", e.target.value)} placeholder="جمالك يستحق" /></div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>Hero Highlight (EN)</Label><Input value={form.heroSubtitleEn} onChange={(e) => updateField("heroSubtitleEn", e.target.value)} placeholder="The Finest Care" /></div>
+            <div className="space-y-2"><Label>Hero Highlight (AR)</Label><Input dir="rtl" value={form.heroSubtitleAr} onChange={(e) => updateField("heroSubtitleAr", e.target.value)} placeholder="أرقى العناية" /></div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Working Hours */}
+      <Card className="border-border/60">
+        <CardHeader><CardTitle className="text-lg">Working Hours</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="space-y-2"><Label>Sun - Thu</Label><Input value={form.workingHoursWeekdays} onChange={(e) => updateField("workingHoursWeekdays", e.target.value)} placeholder="9 AM - 6 PM" /></div>
+            <div className="space-y-2"><Label>Friday</Label><Input value={form.workingHoursFriday} onChange={(e) => updateField("workingHoursFriday", e.target.value)} placeholder="Closed" /></div>
+            <div className="space-y-2"><Label>Saturday</Label><Input value={form.workingHoursSaturday} onChange={(e) => updateField("workingHoursSaturday", e.target.value)} placeholder="Closed" /></div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Social Media */}
       <Card className="border-border/60">
         <CardHeader><CardTitle className="text-lg">Social Media</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Instagram URL</Label><Input value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value })} placeholder="https://instagram.com/..." /></div>
-            <div className="space-y-2"><Label>Facebook URL</Label><Input value={form.facebook} onChange={(e) => setForm({ ...form, facebook: e.target.value })} placeholder="https://facebook.com/..." /></div>
+            <div className="space-y-2"><Label>Instagram URL</Label><Input value={form.instagram} onChange={(e) => updateField("instagram", e.target.value)} placeholder="https://instagram.com/..." /></div>
+            <div className="space-y-2"><Label>Facebook URL</Label><Input value={form.facebook} onChange={(e) => updateField("facebook", e.target.value)} placeholder="https://facebook.com/..." /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Twitter / X URL</Label><Input value={form.twitter} onChange={(e) => setForm({ ...form, twitter: e.target.value })} placeholder="https://twitter.com/..." /></div>
-            <div className="space-y-2"><Label>Snapchat URL</Label><Input value={form.snapchat} onChange={(e) => setForm({ ...form, snapchat: e.target.value })} placeholder="https://snapchat.com/..." /></div>
+            <div className="space-y-2"><Label>Twitter / X URL</Label><Input value={form.twitter} onChange={(e) => updateField("twitter", e.target.value)} placeholder="https://twitter.com/..." /></div>
+            <div className="space-y-2"><Label>Snapchat URL</Label><Input value={form.snapchat} onChange={(e) => updateField("snapchat", e.target.value)} placeholder="https://snapchat.com/..." /></div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label>TikTok URL</Label><Input value={form.tiktok} onChange={(e) => updateField("tiktok", e.target.value)} placeholder="https://tiktok.com/@..." /></div>
           </div>
         </CardContent>
       </Card>

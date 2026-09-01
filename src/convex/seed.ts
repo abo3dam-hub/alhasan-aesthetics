@@ -35,6 +35,9 @@ export const seedAll = mutation({
         snapchat: "",
         tiktok: "",
       },
+      workingHoursWeekdays: "9 AM - 6 PM",
+      workingHoursFriday: "",
+      workingHoursSaturday: "",
     };
     await ctx.db.insert("siteSettings", {
       key: "doctor",

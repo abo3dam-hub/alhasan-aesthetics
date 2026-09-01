@@ -91,9 +91,9 @@ export default function Footer() {
             {/* Working Hours */}
             <div className="mt-4 pt-4 border-t border-border/30">
               <p className="text-xs font-medium text-foreground mb-2">{t.footer.workingHours}</p>
-              <p className="text-xs text-muted-foreground">{t.footer.weekdays}: 9 AM - 6 PM</p>
-              <p className="text-xs text-muted-foreground">{t.footer.friday}: {isRtl ? "مغلق" : "Closed"}</p>
-              <p className="text-xs text-muted-foreground">{t.footer.saturday}: {isRtl ? "مغلق" : "Closed"}</p>
+              <p className="text-xs text-muted-foreground">{t.footer.weekdays}: {doctorSettings?.workingHoursWeekdays || "9 AM - 6 PM"}</p>
+              <p className="text-xs text-muted-foreground">{t.footer.friday}: {doctorSettings?.workingHoursFriday || (isRtl ? "مغلق" : "Closed")}</p>
+              <p className="text-xs text-muted-foreground">{t.footer.saturday}: {doctorSettings?.workingHoursSaturday || (isRtl ? "مغلق" : "Closed")}</p>
             </div>
           </div>
         </div>
