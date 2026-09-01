@@ -1,6 +1,6 @@
 import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
@@ -12,12 +12,10 @@ import {
   Mail,
   MapPin,
   Clock,
-  Send,
-  Loader2,
   CheckCircle2,
+  MessageSquare,
 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useState, useMemo } from "react";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -38,37 +36,30 @@ export default function Contact() {
     { icon: MapPin, key: "location", detail: "lines" },
     { icon: Clock, key: "hours", detail: "hoursDetail" },
   ];
-  const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const createConsultation = useMutation(api.consultations.create);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const whatsappNumber = useMemo(() => {
+    const raw = doctorSettings?.whatsappNumber || "";
+    return raw.replace(/[^0-9]/g, "");
+  }, [doctorSettings]);
+
+  const isArabic = dir === "rtl";
+
+  const handleWhatsAppSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSending(true);
-
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
     const formEmail = formData.get("email") as string;
     const subject = formData.get("subject") as string;
     const message = formData.get("message") as string;
 
-    try {
-      await createConsultation({ name, email: formEmail, subject, message });
+    const text = isArabic
+      ? ["مرحباً دكتور الحسن،", "", `الاسم: ${name}`, `البريد: ${formEmail}`, `الموضوع: ${subject}`, "", message].join("\n")
+      : ["Hello Dr. Al Hasan,", "", `Name: ${name}`, `Email: ${formEmail}`, `Subject: ${subject}`, "", message].join("\n");
+
+    if (whatsappNumber) {
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
       setSent(true);
-      toast.success(
-        dir === "rtl"
-          ? "تم إرسال رسالتك بنجاح! سنتواصل معك قريباً."
-          : "Your message has been sent successfully! We'll get back to you soon."
-      );
-    } catch (error) {
-      console.error("Contact form error:", error);
-      toast.error(
-        dir === "rtl"
-          ? "حدث خطأ أثناء الإرسال. حاول مرة أخرى."
-          : "An error occurred while sending. Please try again."
-      );
-    } finally {
-      setSending(false);
     }
   };
 
@@ -158,12 +149,12 @@ export default function Contact() {
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
                   <h4 className="text-lg font-semibold text-foreground mb-2">
-                    {dir === "rtl" ? "تم الإرسال بنجاح!" : "Message Sent!"}
+                    {dir === "rtl" ? "تم فتح واتساب!" : "WhatsApp Opened!"}
                   </h4>
                   <p className="text-muted-foreground max-w-sm">
                     {dir === "rtl"
-                      ? "شكراً لتواصلك معنا. سنتواصل معك في أقرب وقت ممكن."
-                      : "Thank you for reaching out. We'll get back to you as soon as possible."}
+                      ? "تم فتح واتساب مع رسالتك. أرسلها الآن للتواصل معنا."
+                      : "WhatsApp has been opened with your message. Send it now to reach us."}
                   </p>
                   <Button
                     variant="outline"
@@ -178,7 +169,7 @@ export default function Contact() {
                   </Button>
                 </div>
               ) : (
-                <form id="contact-form" onSubmit={handleSubmit} className="space-y-5">
+                <form id="contact-form" onSubmit={handleWhatsAppSubmit} className="space-y-5">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="text-sm text-foreground">
@@ -234,20 +225,9 @@ export default function Contact() {
                   <Button
                     type="submit"
                     size="lg"
-                    disabled={sending}
-                    className="w-full sm:w-auto rounded-full bg-primary text-primary-foreground hover:bg-primary/90 px-8 h-12"
+                    className="w-full sm:w-auto rounded-full bg-primary text-primary-foreground hover:bg-primary/90 px-8 h-12 gap-2"
                   >
-                    {sending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {t.contact.sending}
-                      </>
-                    ) : (
-                      <>
-                        {t.contact.send}
-                        <Send className="h-4 w-4" />
-                      </>
-                    )}
+                      {t.contact.send}
                   </Button>
                 </form>
               )}

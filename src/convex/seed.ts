@@ -18,11 +18,22 @@ export const seedAll = mutation({
       email: "info@dr-alhasan.com",
       addressAr: "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي",
       addressEn: "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai",
+      biographyAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة.",
+      biographyEn: "Dr. Al Hasan Al Saiem is a board-certified aesthetic and plastic surgeon with over 15 years of experience transforming the lives of thousands of patients.",
+      specializationsAr: "شد الوجه والرقبة، تجميل الأنف، شفط وحقن الشحم، جميع إجراءات التجميل المتقدمة",
+      specializationsEn: "Face & Neck Lift, Rhinoplasty, Liposuction & Fat Transfer, All Advanced Aesthetic Procedures",
+      educationAr: "دكتوراه في الطب، شهادة البورد في الجراحة التجميلية",
+      educationEn: "MD, Board Certified in Plastic Surgery",
+      heroTitleAr: "جمالك يستحق",
+      heroTitleEn: "Your Beauty Deserves",
+      heroSubtitleAr: "أرقى العناية",
+      heroSubtitleEn: "The Finest Care",
       socialMedia: {
         instagram: "",
         facebook: "",
         twitter: "",
         snapchat: "",
+        tiktok: "",
       },
     };
     await ctx.db.insert("siteSettings", {

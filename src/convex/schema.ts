@@ -96,32 +96,12 @@ const schema = defineSchema(
       order: v.number(),
     })
       .index("by_order", ["order"])
-      .index("by_category", ["category"]),
-
-    // ─── Site Settings (CMS) ───
+      .index("by_category", ["category"]),    // ─── Site Settings (CMS) ───
     siteSettings: defineTable({
       key: v.string(),
       value: v.any(),
     }).index("by_key", ["key"]),
 
-    // ─── Consultation Requests (contact form → stored for admin view) ───
-    consultations: defineTable({
-      name: v.string(),
-      email: v.string(),
-      phone: v.optional(v.string()),
-      subject: v.string(),
-      message: v.string(),
-      userId: v.optional(v.id("users")),
-      status: v.union(
-        v.literal("new"),
-        v.literal("read"),
-        v.literal("replied"),
-        v.literal("archived"),
-      ),
-      reply: v.optional(v.string()),
-    })
-      .index("by_status", ["status"])
-      .index("by_user", ["userId"]),
   },
   {
     schemaValidation: false,

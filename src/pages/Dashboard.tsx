@@ -29,7 +29,7 @@ import {
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 
-type Tab = "overview" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "consultations" | "settings";
+type Tab = "overview" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "settings";
 
 const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
@@ -37,7 +37,7 @@ const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "beforeAfter", label: "Before & After", icon: ImageIcon },
   { key: "testimonials", label: "Testimonials", icon: Star },
   { key: "faq", label: "FAQ", icon: HelpCircle },
-  { key: "consultations", label: "Contact Messages", icon: MessageSquare },
+
   { key: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -107,7 +107,7 @@ export default function Dashboard() {
             {activeTab === "beforeAfter" && <BeforeAfterTab />}
             {activeTab === "testimonials" && <TestimonialsTab />}
             {activeTab === "faq" && <FaqTab />}
-            {activeTab === "consultations" && <ConsultationsTab />}
+
             {activeTab === "settings" && <SettingsTab />}
           </main>
         </div>
@@ -120,22 +120,18 @@ export default function Dashboard() {
 function OverviewTab() {
   const seedData = useMutation(api.seed.seedAll);
   const [seeding, setSeeding] = useState(false);
-  const consultations = useQuery(api.consultations.list);
   const procedures = useQuery(api.procedures.list);
   const testimonials = useQuery(api.testimonials.list);
   const faqs = useQuery(api.faq.list);
 
-  const totalConsultations = consultations?.length ?? 0;
-  const newConsultations = consultations?.filter((c) => c.status === "new").length ?? 0;
   const totalProcedures = procedures?.length ?? 0;
   const totalTestimonials = testimonials?.length ?? 0;
   const totalFaqs = faqs?.length ?? 0;
 
   const stats = [
     { label: "Procedures", value: totalProcedures, icon: FileText, color: "text-blue-500 bg-blue-50" },
-    { label: "Consultations", value: totalConsultations, icon: MessageSquare, color: "text-green-500 bg-green-50" },
-    { label: "New Messages", value: newConsultations, icon: Bell, color: "text-red-500 bg-red-50" },
     { label: "Testimonials", value: totalTestimonials, icon: Star, color: "text-amber-500 bg-amber-50" },
+    { label: "FAQ Items", value: totalFaqs, icon: HelpCircle, color: "text-green-500 bg-green-50" },
   ];
 
   const becomeAdmin = useMutation(api.users.becomeAdmin);
@@ -651,49 +647,7 @@ function FaqTab() {
   );
 }
 
-// ─── Consultations Tab ───
-function ConsultationsTab() {
-  const consultations = useQuery(api.consultations.list);
-  const updateStatus = useMutation(api.consultations.updateStatus);
 
-  const handleStatusChange = async (id: string, status: string) => {
-    await updateStatus({ id: id as any, status: status as any });
-    toast.success("Updated");
-  };
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Contact Messages</h2>
-      <div className="space-y-3">
-        {!consultations || consultations.length === 0 ? (
-          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No messages yet.</CardContent></Card>
-        ) : consultations.map((c) => (
-          <Card key={c._id} className="border-border/60">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground">{c.name}</p>
-                    <StatusBadge status={c.status} />
-                  </div>
-                  <p className="text-sm text-muted-foreground">{c.email}</p>
-                  <p className="text-sm font-medium text-foreground mt-1">{c.subject}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{c.message}</p>
-                </div>
-                <select value={c.status} onChange={(e) => handleStatusChange(c._id, e.target.value)} className="text-sm border border-border/60 rounded-lg px-2 py-1 bg-background shrink-0">
-                  <option value="new">New</option>
-                  <option value="read">Read</option>
-                  <option value="replied">Replied</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── Settings Tab ───
 function SettingsTab() {
@@ -808,14 +762,4 @@ function SettingsTab() {
   );
 }
 
-// ─── Status Badge ───
-function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; color: string }> = {
-    new: { label: "New", color: "bg-blue-100 text-blue-700" },
-    read: { label: "Read", color: "bg-gray-100 text-gray-700" },
-    replied: { label: "Replied", color: "bg-green-100 text-green-700" },
-    archived: { label: "Archived", color: "bg-gray-100 text-gray-500" },
-  };
-  const c = config[status] ?? { label: status, color: "bg-gray-100 text-gray-500" };
-  return <span className={cn("inline-flex px-2 py-0.5 rounded-full text-xs font-medium", c.color)}>{c.label}</span>;
-}
+
