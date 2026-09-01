@@ -40,7 +40,7 @@ export default function Footer() {
               <li><Link to="/before-after" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.beforeAfter}</Link></li>
               <li><Link to="/#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.testimonials}</Link></li>
               <li><Link to="/#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.faq}</Link></li>
-              <li><Link to="/booking" className="text-sm text-primary font-medium hover:text-primary/80 transition-colors">{t.nav.bookConsultation}</Link></li>
+              <li><Link to="/consultation" className="text-sm text-primary font-medium hover:text-primary/80 transition-colors">{t.nav.bookConsultation}</Link></li>
             </ul>
           </div>
 

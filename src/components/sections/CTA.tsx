@@ -43,7 +43,7 @@ export default function CTA() {
               </p>
 
               <div className="mt-8 sm:mt-10">
-                <Link to="/booking">
+                <Link to="/consultation">
                   <Button
                     size="lg"
                     className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"

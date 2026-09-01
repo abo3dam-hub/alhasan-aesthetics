@@ -88,7 +88,7 @@ export default function GlassNavbar() {
               )}
 
               {/* Book Consultation CTA */}
-              <Link to="/booking">
+              <Link to="/consultation">
                 <Button
                   size="sm"
                   className="hidden md:inline-flex bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 shadow-sm"

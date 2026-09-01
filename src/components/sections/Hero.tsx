@@ -73,7 +73,7 @@ export default function Hero() {
             variants={item}
             className="mt-6 sm:mt-10 flex flex-wrap gap-3 sm:gap-4"
           >
-            <Link to="/booking">
+            <Link to="/consultation">
               <Button
                 size="lg"
                 className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"

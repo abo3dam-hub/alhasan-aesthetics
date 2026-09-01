@@ -17,7 +17,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ProcedureDetail = lazy(() => import("./pages/ProcedureDetail.tsx"));
 const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage.tsx"));
-const BookingPage = lazy(() => import("./pages/BookingPage.tsx"));
+const ConsultationPage = lazy(() => import("./pages/ConsultationPage.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -129,7 +129,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/en" element={<Landing />} />
                 <Route path="/procedure/:slug" element={<ProcedureDetail />} />
                 <Route path="/before-after" element={<BeforeAfterPage />} />
-                <Route path="/booking" element={<BookingPage />} />
+                <Route path="/consultation" element={<ConsultationPage />} />
                 <Route
                   path="/auth"
                   element={<AuthPage redirectAfterAuth="/dashboard" />}
