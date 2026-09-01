@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { Database } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import {
   LayoutDashboard,
@@ -27,10 +27,12 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { ImageUpload } from "@/components/ImageUpload";
+import { useImageUpload } from "@/hooks/use-upload";
 
 // Generic reorder helper: swap order of two adjacent items using update mutations
 async function swapOrder(
@@ -1010,52 +1012,290 @@ function SettingsTab() {
   );
 }
 
+// ─── Media Upload Widget (standalone, for gallery) ───
+function ImageUploadUploadWidget() {
+  const { upload, uploading, error } = useImageUpload();
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File) => {
+    await upload(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+      onClick={() => inputRef.current?.click()}
+      className={cn(
+        "w-full h-36 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all",
+        dragOver
+          ? "border-primary bg-primary/5"
+          : "border-border/40 hover:border-primary/50 hover:bg-white/20",
+        uploading && "opacity-50 pointer-events-none"
+      )}
+    >
+      {uploading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          Uploading...
+        </div>
+      ) : (
+        <>
+          <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+          <p className="text-sm font-medium text-muted-foreground">
+            Click or drag to upload
+          </p>
+          <p className="text-[11px] text-muted-foreground/60 mt-1">
+            JPEG, PNG, WebP, GIF • Max 5MB
+          </p>
+        </>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        multiple
+        onChange={(e) => {
+          const files = e.target.files;
+          if (files) {
+            Array.from(files).forEach((f) => handleFile(f));
+          }
+          e.target.value = "";
+        }}
+        className="hidden"
+      />
+      {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+    </div>
+  );
+}
+
 // ─── Media Tab ───
 function MediaTab() {
-  const [mediaUrl, setMediaUrl] = useState("");
+  const mediaItems = useQuery(api.media.list);
+  const removeMedia = useMutation(api.media.remove);
+  const [search, setSearch] = useState("");
+  const [previewItem, setPreviewItem] = useState<
+    { url: string; name: string; type: string; size: number; storageId: string; _id: string } | null
+  >(null);
+
+  const filteredMedia = mediaItems?.filter((item) => {
+    if (!search) return true;
+    return item.name.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleCopyUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
+    toast.success("URL copied to clipboard!");
+  };
+
+  const handleDelete = async (item: { _id: string; storageId: string }) => {
+    if (!confirm("Delete this image? This cannot be undone.")) return;
+    try {
+      await removeMedia({ id: item._id as any });
+      toast.success("Image deleted");
+      setPreviewItem(null);
+    } catch {
+      toast.error("Failed to delete image");
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Media Library</h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-2xl font-bold text-foreground">Media Library</h2>
+        <span className="text-sm text-muted-foreground">
+          {mediaItems?.length ?? 0} images
+        </span>
+      </div>
 
+      {/* Upload Area */}
       <Card className="border-border/60">
-        <CardHeader><CardTitle className="text-lg">Upload Image</CardTitle></CardHeader>
-        <CardContent>
-          <ImageUpload
-            value={mediaUrl}
-            onChange={setMediaUrl}
-            label="Upload an image"
+        <CardContent className="p-5">
+          <ImageUploadUploadWidget />
+        </CardContent>
+      </Card>
+
+      {/* Search */}
+      {mediaItems && mediaItems.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input
+            placeholder="Search images..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="sm:max-w-xs"
           />
-          {mediaUrl && (
-            <div className="mt-4 space-y-3">
-              <Label>Image URL (copy to use in procedures, before/after, etc.)</Label>
-              <Input
-                value={mediaUrl}
-                readOnly
-                onClick={() => {
-                  navigator.clipboard.writeText(mediaUrl);
-                  toast.success("URL copied to clipboard!");
-                }}
-                className="cursor-pointer font-mono text-xs"
-              />
-              <p className="text-xs text-muted-foreground">
-                Click the URL above to copy it. Paste this URL in procedure images, before/after images, etc.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
-      <Card className="border-border/60">
-        <CardHeader><CardTitle className="text-lg">Quick Tips</CardTitle></CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>• Upload an image above, then copy the URL</p>
-          <p>• Paste the URL in procedure forms, before/after forms, etc.</p>
-          <p>• Supported formats: JPEG, PNG, WebP, GIF</p>
-          <p>• Maximum file size: 5MB</p>
-          <p>• Images are stored securely in Convex storage</p>
-        </CardContent>
-      </Card>
+      {/* Gallery Grid */}
+      {!mediaItems || mediaItems.length === 0 ? (
+        <Card className="border-border/60">
+          <CardContent className="p-12 text-center">
+            <ImageIcon className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg font-medium">No images yet</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">
+              Upload your first image above to get started.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {(filteredMedia || []).map((item) => (
+            <div
+              key={item._id}
+              className="group relative glass-card rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200"
+              onClick={() => setPreviewItem(item)}
+            >
+              <div className="aspect-square overflow-hidden bg-muted/30">
+                <img
+                  src={item.url}
+                  alt={item.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-2">
+                <p className="text-xs font-medium text-foreground truncate">
+                  {item.name}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {formatSize(item.size)}
+                </p>
+              </div>
+              {/* Hover actions */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleCopyUrl(item.url); }}
+                  className="p-2 rounded-full bg-white/90 hover:bg-white text-foreground shadow-md transition-colors"
+                  title="Copy URL"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                  className="p-2 rounded-full bg-white/90 hover:bg-red-50 text-red-500 shadow-md transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setPreviewItem(null)}
+        >
+          <div
+            className="relative bg-background rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setPreviewItem(null)}
+              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Image */}
+            <div className="bg-black/20 flex items-center justify-center p-4">
+              <img
+                src={previewItem.url}
+                alt={previewItem.name}
+                className="max-h-[60vh] max-w-full object-contain rounded-lg"
+              />
+            </div>
+
+            {/* Info & Actions */}
+            <div className="p-4 space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="font-medium text-foreground truncate">
+                    {previewItem.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {previewItem.type} • {formatSize(previewItem.size)}
+                  </p>
+                </div>
+              </div>
+
+              {/* URL field */}
+              <div className="flex gap-2">
+                <Input
+                  value={previewItem.url}
+                  readOnly
+                  className="font-mono text-xs flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyUrl(previewItem.url)}
+                  className="shrink-0 gap-1"
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </Button>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(previewItem.url);
+                    toast.success("URL copied! Paste it in any image field.");
+                  }}
+                  className="gap-1"
+                >
+                  Use in Procedure
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = previewItem.url;
+                    link.download = previewItem.name;
+                    link.click();
+                  }}
+                  className="gap-1"
+                >
+                  Download
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(previewItem)}
+                  className="gap-1 text-red-500 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

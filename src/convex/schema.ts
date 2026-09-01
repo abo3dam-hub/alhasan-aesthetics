@@ -102,7 +102,17 @@ const schema = defineSchema(
       order: v.number(),
     })
       .index("by_order", ["order"])
-      .index("by_category", ["category"]),    // ─── Site Settings (CMS) ───
+      .index("by_category", ["category"]),    // ─── Media Library ───
+    media: defineTable({
+      storageId: v.string(),
+      url: v.string(),
+      name: v.string(),
+      type: v.string(),
+      size: v.number(),
+      uploadedBy: v.optional(v.string()),
+    }).index("by_storageId", ["storageId"]),
+
+    // ─── Site Settings (CMS) ───
     siteSettings: defineTable({
       key: v.string(),
       value: v.any(),

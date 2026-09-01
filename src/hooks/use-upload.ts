@@ -9,6 +9,7 @@ interface UploadResult {
 
 export function useImageUpload() {
   const generateUploadUrl = useMutation(api.media.generateUploadUrl);
+  const recordUpload = useMutation(api.media.recordUpload);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +54,15 @@ export function useImageUpload() {
         const convexUrl = import.meta.env.VITE_CONVEX_URL as string;
         const url = `${convexUrl}/api/storage/${storageId}`;
 
+        // Record in media table
+        await recordUpload({
+          storageId,
+          url,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        });
+
         return { storageId, url };
       } catch (err) {
         setError(err instanceof Error ? err.message : "Upload failed");
@@ -61,7 +71,7 @@ export function useImageUpload() {
         setUploading(false);
       }
     },
-    [generateUploadUrl]
+    [generateUploadUrl, recordUpload],
   );
 
   const reset = useCallback(() => {
