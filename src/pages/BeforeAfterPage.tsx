@@ -9,15 +9,7 @@ import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
 import { cn } from "@/lib/utils";
 
-const procedureFilters = [
-  { key: "all", ar: "الكل", en: "All" },
-  { key: "rhinoplasty", ar: "تجميل الأنف", en: "Rhinoplasty" },
-  { key: "face-neck", ar: "شد الوجه والرقبة", en: "Face & Neck" },
-  { key: "blepharoplasty", ar: "شد الأجفان", en: "Blepharoplasty" },
-  { key: "liposuction", ar: "شفط الشحم", en: "Liposuction" },
-  { key: "tummy-tuck", ar: "شد البطن", en: "Tummy Tuck" },
-  { key: "breast", ar: "الثدي", en: "Breast" },
-];
+
 
 export default function BeforeAfterPage() {
   const { t, dir } = useI18n();
@@ -26,6 +18,17 @@ export default function BeforeAfterPage() {
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
 
   const cases = useQuery(api.beforeAfter.listActive);
+  const procedures = useQuery(api.procedures.listActive);
+
+  // Build filters dynamically from CMS procedures
+  const procedureFilters = [
+    { key: "all", ar: "الكل", en: "All" },
+    ...(procedures ?? []).map((p) => ({
+      key: p.slug,
+      ar: p.titleAr,
+      en: p.titleEn,
+    })),
+  ];
 
   const filteredCases =
     activeFilter === "all"

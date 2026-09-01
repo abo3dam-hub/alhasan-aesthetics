@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { Database } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import {
   LayoutDashboard,
@@ -25,11 +25,31 @@ import {
   ChevronDown,
   ChevronUp,
   Image as ImageIcon,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
+import { ImageUpload } from "@/components/ImageUpload";
 
-type Tab = "overview" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "settings";
+// Generic reorder helper: swap order of two adjacent items using update mutations
+async function swapOrder(
+  items: { _id: string; order: number }[],
+  index: number,
+  direction: "up" | "down",
+  updateMutation: (args: { id: any; order: number }) => Promise<any>,
+) {
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
+  if (targetIndex < 0 || targetIndex >= items.length) return;
+  const current = items[index];
+  const target = items[targetIndex];
+  await Promise.all([
+    updateMutation({ id: current._id as any, order: target.order }),
+    updateMutation({ id: target._id as any, order: current.order }),
+  ]);
+}
+
+type Tab = "overview" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "settings" | "media";
 
 const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
@@ -39,6 +59,7 @@ const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "faq", label: "FAQ", icon: HelpCircle },
 
   { key: "settings", label: "Settings", icon: Settings },
+  { key: "media", label: "Media", icon: ImageIcon },
 ];
 
 const iconOptions = [
@@ -109,6 +130,7 @@ export default function Dashboard() {
             {activeTab === "faq" && <FaqTab />}
 
             {activeTab === "settings" && <SettingsTab />}
+            {activeTab === "media" && <MediaTab />}
           </main>
         </div>
       </div>
@@ -270,7 +292,7 @@ function ProceduresTab() {
         {!procedures || procedures.length === 0 ? (
           <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No procedures yet.</CardContent></Card>
         ) : (
-          procedures.map((proc) => (
+          procedures.map((proc, index) => (
             <Card key={proc._id} className="border-border/60">
               <CardContent className="p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
@@ -305,6 +327,10 @@ function ProceduresTab() {
                   <button onClick={() => handleDelete(proc._id)} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
+                  <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
+                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -314,7 +340,6 @@ function ProceduresTab() {
     </div>
   );
 }
-
 function ProcedureForm({
   onSubmit,
   onCancel,
@@ -487,23 +512,26 @@ function BeforeAfterTab() {
                 <div className="min-w-0">
                   <p className="font-medium text-foreground truncate">{c.titleEn}</p>
                   <p className="text-sm text-muted-foreground">{c.procedureType}</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
+                </div>              <div className="flex items-center gap-2 shrink-0">
                   <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                     {c.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <button onClick={async () => { await removeCase({ id: c._id }); toast.success("Deleted"); }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
+                  <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
+                    <button disabled={cases!.indexOf(c) === 0} onClick={() => swapOrder(cases!, cases!.indexOf(c), "up", (args) => updateCase(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={cases!.indexOf(c) === cases!.length - 1} onClick={() => swapOrder(cases!, cases!.indexOf(c), "down", (args) => updateCase(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </CardContent>            </Card>
           ))
-        )}
+      )}
       </div>
     </div>
   );
 }
+
 
 // ─── Testimonials Tab ───
 function TestimonialsTab() {
@@ -569,6 +597,10 @@ function TestimonialsTab() {
                 <button onClick={async () => { await removeTestimonial({ id: t._id }); toast.success("Deleted"); }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
+                <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
+                  <button disabled={testimonials!.indexOf(t) === 0} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "up", (args) => updateTestimonial(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                  <button disabled={testimonials!.indexOf(t) === testimonials!.length - 1} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "down", (args) => updateTestimonial(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -638,6 +670,10 @@ function FaqTab() {
                 <button onClick={async () => { await removeFaq({ id: f._id }); toast.success("Deleted"); }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
+                <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
+                  <button disabled={faqs!.indexOf(f) === 0} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "up", (args) => updateFaq(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                  <button disabled={faqs!.indexOf(f) === faqs!.length - 1} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "down", (args) => updateFaq(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -762,4 +798,52 @@ function SettingsTab() {
   );
 }
 
+// ─── Media Tab ───
+function MediaTab() {
+  const [mediaUrl, setMediaUrl] = useState("");
 
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-foreground">Media Library</h2>
+
+      <Card className="border-border/60">
+        <CardHeader><CardTitle className="text-lg">Upload Image</CardTitle></CardHeader>
+        <CardContent>
+          <ImageUpload
+            value={mediaUrl}
+            onChange={setMediaUrl}
+            label="Upload an image"
+          />
+          {mediaUrl && (
+            <div className="mt-4 space-y-3">
+              <Label>Image URL (copy to use in procedures, before/after, etc.)</Label>
+              <Input
+                value={mediaUrl}
+                readOnly
+                onClick={() => {
+                  navigator.clipboard.writeText(mediaUrl);
+                  toast.success("URL copied to clipboard!");
+                }}
+                className="cursor-pointer font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                Click the URL above to copy it. Paste this URL in procedure images, before/after images, etc.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/60">
+        <CardHeader><CardTitle className="text-lg">Quick Tips</CardTitle></CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>• Upload an image above, then copy the URL</p>
+          <p>• Paste the URL in procedure forms, before/after forms, etc.</p>
+          <p>• Supported formats: JPEG, PNG, WebP, GIF</p>
+          <p>• Maximum file size: 5MB</p>
+          <p>• Images are stored securely in Convex storage</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

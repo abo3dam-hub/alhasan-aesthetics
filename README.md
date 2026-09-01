@@ -1,243 +1,142 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-## Overview
-
-A premium, bilingual (Arabic RTL / English LTR) aesthetic and plastic surgery website built with a luxury glassmorphism design. Features a WhatsApp-based consultation request system, a full Admin CMS dashboard, and Convex backend.
-
-**No patient accounts. No appointment database. No stored consultation requests.**
-
-The consultation flow is: **Form → Validate → Generate WhatsApp message → Open WhatsApp**.
+Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS and WhatsApp-based consultation flow.
 
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| React 19 | UI framework |
-| TypeScript | Type safety |
-| Vite | Build tool |
-| React Router | Client-side routing |
-| Tailwind CSS v4 | Utility-first styling |
-| Convex | Backend (DB, auth, functions) |
-| @convex-dev/auth | Authentication (email OTP) |
-| Framer Motion | Animations |
-| Lucide React | Icons |
-| Sonner | Toast notifications |
-| shadcn/ui | UI components |
+- **Frontend:** React 19 + TypeScript + Vite
+- **Backend/Database:** Convex
+- **Styling:** Tailwind CSS + Glassmorphism theme
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Routing:** React Router
+- **UI Components:** shadcn/ui
+- **Auth:** Convex Auth (Email OTP)
+- **i18n:** Custom AR/EN with RTL/LTR support
 
-## Design System
-
-**Theme:** Luxury Medical / Editorial / Light Glassmorphism
-**Typography:** Playfair Display (headings) + Inter (body) + Noto Kufi Arabic
-**Colors:** Warm Ivory, Deep Charcoal, Champagne, Warm Nude
-**Glass Effects:** `.glass-card`, `.glass-elevated`, `.glass-subtle`, `.glow-champagne`
-
-## Routes
-
-| Route | Component | Description |
-|---|---|---|
-| `/` | Landing | Full homepage (Arabic default) |
-| `/ar` | Landing | Arabic homepage |
-| `/en` | Landing | English homepage |
-| `/consultation` | ConsultationPage | Multi-step consultation form → WhatsApp |
-| `/procedure/:slug` | ProcedureDetail | Dynamic procedure detail page (CMS data) |
-| `/before-after` | BeforeAfterPage | Before/after gallery with slider |
-| `/auth` | AuthPage | Admin login (email OTP) |
-| `/dashboard` | Dashboard | Admin CMS (protected) |
-| `*` | NotFound | 404 page |
-
-## Navigation & Buttons
-
-### Navbar
-| Button | Destination |
-|---|---|
-| Logo | `/` |
-| Home | `/#home` (native scroll) |
-| About | `/#about` (native scroll) |
-| Procedures | `/#procedures` (native scroll) |
-| Before & After | `/before-after` |
-| Testimonials | `/#testimonials` (native scroll) |
-| FAQ | `/#faq` (native scroll) |
-| Contact | `/#contact` (native scroll) |
-| Language Toggle | Switches AR↔EN |
-| Book Consultation | `/consultation` |
-| Dashboard (if auth) | `/dashboard` |
-
-### Homepage Sections
-| Section | Button | Destination |
-|---|---|---|
-| Hero | "Book Your Consultation & Get Pricing" | `/consultation` |
-| Hero | "Explore Procedures" | Scrolls to `#procedures` |
-| Procedures | Each procedure card | `/procedure/:slug` |
-| Procedures | View All Results | `/before-after` |
-| Before/After | View All Results | `/before-after` |
-| CTA | "Book Your Consultation & Get Pricing" | `/consultation` |
-
-### Consultation Flow (WhatsApp)
-1. **Step 1:** Select procedures (multi-select from CMS) + "Other Procedure" option
-2. **Step 2:** Patient info (name, age, gender, nationality with searchable dropdown, residence)
-3. **Review:** Summary of entered information
-4. **Submit:** Generates WhatsApp message → opens `wa.me` with pre-filled text
-5. **No data stored** — form validates → generates message → opens WhatsApp
-
-### Before & After Page
-| Button | Destination |
-|---|---|
-| Back to Home | `/` |
-| Procedure filter buttons | Filter gallery |
-| Range slider | Compare before/after images |
-| Book Consultation CTA | `/consultation` |
-
-## Admin Dashboard (`/dashboard`)
-
-Protected by `requireAdmin()` — only authenticated users with `role: "admin"` can access.
-
-### Tabs
-
-| Tab | Capabilities |
-|---|---|
-| **Overview** | Stats, Seed Database button, Become Admin |
-| **Procedures** | Add/Edit/Delete with icon picker, bilingual content, category, duration, recovery |
-| **Before & After** | Add/Edit/Delete cases with procedure selection, before/after images |
-| **Testimonials** | Add/Edit/Delete with ratings, bilingual |
-| **FAQ** | Add/Edit/Delete with bilingual Q&A |
-| **Settings** | Doctor info, WhatsApp, phone, email, addresses, social media, hero content |
-
-### Settings Management
-- Doctor name (AR/EN)
-- WhatsApp number (configurable — not hardcoded)
-- Phone, email, addresses (AR/EN)
-- Doctor profile: biography, specializations, education (AR/EN)
-- Hero section content (AR/EN)
-- Social media links (Instagram, Facebook, Twitter, Snapchat, TikTok)
-
-## Database Schema (Convex)
-
-| Table | Fields | Purpose |
-|---|---|---|
-| `users` | name, email, role, phone... | Admin users (via Convex Auth) |
-| `procedures` | slug, titleAr/En, descriptionAr/En, icon, category, image, gallery, isActive, order | CMS-managed procedures |
-| `beforeAfter` | titleAr/En, procedureType, beforeImage, afterImage, isActive, order | Before/after cases |
-| `testimonials` | nameAr/En, textAr/En, rating, isActive, order | Patient testimonials |
-| `faq` | questionAr/En, answerAr/En, isActive, order | FAQ items |
-| `siteSettings` | key, value (any) | Doctor info, WhatsApp number, social links, hero content |
-
-**Removed tables:**
-- `consultations` — replaced by WhatsApp flow (no data stored)
-- `bookings` — removed (was deprecated)
-- `notifications` — removed (was deprecated)
-
-## Backend Security
-
-All CMS mutations (create/update/delete) are protected by `requireAdmin()` which verifies:
-1. User is authenticated
-2. User has `role: "admin"` in the database
-
-Public queries (listActive, getBySlug) are open for the public website.
-
-## Procedures (10)
-
-| # | Arabic | English | Slug |
-|---|---|---|---|
-| 1 | شد الأجفان العلوية والسفلية | Upper & Lower Eyelid Lift | `blepharoplasty` |
-| 2 | شد الوجه والرقبة | Face & Neck Lift | `face-neck-lift` |
-| 3 | تجميل الأنف | Rhinoplasty | `rhinoplasty` |
-| 4 | شفط الشحم وحقن الشحم | Liposuction & Fat Transfer | `liposuction-fat-transfer` |
-| 5 | شد البطن | Tummy Tuck | `tummy-tuck` |
-| 6 | حقن البوتوكس | Botox Injections | `botox` |
-| 7 | الفيلر | Fillers | `fillers` |
-| 8 | شد العضدين والفخذين | Arm & Thigh Lift | `arm-thigh-lift` |
-| 9 | تكبير/تصغير الثدي | Breast Augmentation/Reduction | `breast-augmentation-reduction` |
-| 10 | إصلاح الندب والتشوهات | Scar & Deformity Correction | `scar-deformity-correction` |
-
-## Doctor Information
-
-| Field | Value |
-|---|---|
-| Name (EN) | Dr. Al Hasan Al Saiem |
-| Name (AR) | د. الحسن الصايم |
-| Locations | Syria, Damascus, Lattakia / United Arab Emirates, Dubai |
-| Working Hours | Sun-Thu: 9 AM - 6 PM |
-| WhatsApp | Configurable via Admin Settings |
-
-## SEO
-
-- Comprehensive meta tags (title, description, keywords, author, robots)
-- Open Graph tags (og:type, og:title, og:description, og:image, og:url, og:locale)
-- Twitter Card tags
-- Structured Data (JSON-LD) — Physician schema with services and ratings
-- robots.txt with sitemap reference
-- sitemap.xml with all routes
-- Canonical URLs
-
-## Important Notes
-
-1. **No patient accounts** — The website is NOT a booking platform. Consultation requests go via WhatsApp.
-2. **No patient data stored** — The consultation form generates a WhatsApp message without persisting patient data.
-3. **Admin auth required** — All CMS mutations verify `role: "admin"` server-side.
-4. **WhatsApp number is configurable** — Set it in Admin Dashboard → Settings.
-5. **RTL/LTR** — Full Arabic RTL and English LTR support throughout.
-6. **ProcedureDetail is CMS-driven** — No hardcoded procedure data; all content comes from Convex.
-7. **Contact form uses WhatsApp** — Messages are sent via WhatsApp, not stored in a database.
-
-## Seed Data
-
-Click "Seed Data" in the Admin Dashboard Overview to populate:
-- 10 procedures with full bilingual content
-- 3 testimonials
-- 6 FAQ items
-- Doctor settings (name, WhatsApp number, addresses, biography, social media)
-
-## File Structure
+## Architecture
 
 ```
 src/
 ├── components/
-│   ├── Footer.tsx              # Site footer with links
-│   ├── GlassNavbar.tsx         # Glassmorphism navbar with mobile menu
-│   ├── LogoDropdown.tsx        # Logo dropdown for auth
-│   ├── RequireAuth.tsx         # Auth guard component
-│   └── sections/
-│       ├── About.tsx           # Doctor about section
-│       ├── BeforeAfter.tsx     # Before/after preview on homepage
-│       ├── CTA.tsx             # Call-to-action section
-│       ├── Contact.tsx         # Contact form (WhatsApp redirect)
-│       ├── FAQ.tsx             # FAQ accordion section
-│       ├── Hero.tsx            # Hero banner
-│       ├── Procedures.tsx      # Procedures grid section
-│       └── Testimonials.tsx    # Testimonials section
+│   ├── sections/        # Homepage sections (Hero, About, Procedures, etc.)
+│   ├── ui/              # shadcn/ui components
+│   ├── GlassNavbar.tsx  # Navigation with language toggle
+│   ├── Footer.tsx       # Site footer
+│   ├── ImageUpload.tsx  # Convex storage image upload component
+│   └── RequireAuth.tsx  # Auth guard
 ├── convex/
-│   ├── admin.ts                # requireAdmin() helper
-│   ├── auth.ts                 # Convex Auth config
-│   ├── auth.config.ts          # Auth provider config
-│   ├── auth/emailOtp.ts        # Email OTP provider
-│   ├── beforeAfter.ts          # Before/After CRUD (admin-protected)
-│   ├── consultations.ts        # DEPRECATED stub
-│   ├── faq.ts                  # FAQ CRUD (admin-protected)
-│   ├── http.ts                 # HTTP router
-│   ├── procedures.ts           # Procedure CRUD (admin-protected)
-│   ├── schema.ts               # Database schema
-│   ├── seed.ts                 # Seed data mutation
-│   ├── siteSettings.ts         # Site settings (admin-protected)
-│   ├── testimonials.ts         # Testimonials CRUD (admin-protected)
-│   ├── users.ts                # User queries + becomeAdmin
-│   └── _generated/             # Auto-generated Convex types
+│   ├── schema.ts        # Database schema
+│   ├── procedures.ts    # Procedures CRUD
+│   ├── beforeAfter.ts   # Before/After cases CRUD
+│   ├── testimonials.ts  # Testimonials CRUD
+│   ├── faq.ts           # FAQ CRUD
+│   ├── siteSettings.ts  # CMS settings (doctor, hero, site content)
+│   ├── users.ts         # User management + becomeAdmin
+│   ├── seed.ts          # Seed data
+│   ├── media.ts         # Image upload via Convex storage
+│   └── auth.ts          # Auth configuration
 ├── hooks/
-│   └── use-auth.ts             # Authentication hook
-├── i18n/
-│   ├── index.tsx               # I18nProvider + useI18n()
-│   └── types.ts                # Translation types
-├── locales/
-│   ├── ar.json                 # Arabic translations
-│   └── en.json                 # English translations
-├── pages/
-│   ├── Auth.tsx                # Admin login page
-│   ├── BeforeAfterPage.tsx     # Full before/after gallery
-│   ├── ConsultationPage.tsx    # Consultation form → WhatsApp
-│   ├── Dashboard.tsx           # Admin CMS dashboard
-│   ├── Landing.tsx             # Homepage assembly
-│   ├── NotFound.tsx            # 404 page
-│   └── ProcedureDetail.tsx     # Dynamic procedure page (CMS-driven)
-├── index.css                   # Global styles + glassmorphism
-├── main.tsx                    # App entry + routing
-└── lib/utils.ts                # Utility functions
+│   ├── use-auth.ts      # Auth hook
+│   └── use-upload.ts    # File upload hook
+├── i18n/                # Custom i18n with AR/EN translations
+├── locales/             # Translation files (ar.json, en.json)
+└── pages/
+    ├── Landing.tsx       # Homepage
+    ├── Auth.tsx          # Sign in / Sign up
+    ├── Dashboard.tsx     # Admin CMS Dashboard
+    ├── ConsultationPage.tsx  # WhatsApp consultation form
+    ├── ProcedureDetail.tsx   # Dynamic procedure page
+    ├── BeforeAfterPage.tsx   # Before/After gallery
+    └── NotFound.tsx         # 404 page
 ```
+
+## Features
+
+### Public Website
+- Fully bilingual Arabic (RTL) / English (LTR)
+- Glassmorphism premium medical design
+- Homepage with Hero, About, Procedures, Before/After, Testimonials, FAQ, Contact, CTA sections
+- Individual procedure pages (CMS-driven)
+- Before & After gallery with interactive slider + dynamic CMS filters
+- WhatsApp-based consultation form (no data stored)
+
+### Consultation Flow
+1. User selects procedures from CMS-loaded list + "Other Procedure"
+2. Fills personal info (name, age, gender, nationality, residence)
+3. Reviews summary
+4. Clicks "Send via WhatsApp" → generates professional AR/EN message
+5. Opens WhatsApp with pre-filled text
+6. **No patient data is stored in the database**
+
+### Admin Dashboard (CMS)
+| Tab | Capabilities |
+|---|---|
+| **Overview** | Stats, seed data, become admin |
+| **Procedures** | Create, Edit (with icon picker), Delete, Toggle active, **Reorder (↑↓)** |
+| **Before & After** | Create, Edit, Delete, Toggle active, **Reorder (↑↓)**, Image upload |
+| **Testimonials** | Create, Edit, Delete, Toggle active, **Reorder (↑↓)** |
+| **FAQ** | Create, Edit, Delete, Toggle active, **Reorder (↑↓)** |
+| **Settings** | Doctor info, WhatsApp, phone, email, addresses, biography, specializations, education, hero content, social media |
+| **Media** | Image upload via Convex storage, copy URL for use in CMS forms |
+
+### Image Management
+- Upload via `ImageUpload` component (Convex HTTP storage)
+- Admin uploads image → gets URL → pastes URL in procedure/BA/testimonial forms
+- Supported: JPEG, PNG, WebP, GIF (max 5MB)
+
+### SEO
+- Meta tags, Open Graph, Twitter Card
+- JSON-LD structured data (Physician schema)
+- robots.txt, sitemap.xml
+
+## Database Schema
+
+| Table | Purpose |
+|---|---|
+| `users` | Auth + admin role |
+| `procedures` | CMS-managed procedure list |
+| `beforeAfter` | Before & After cases |
+| `testimonials` | Patient testimonials |
+| `faq` | FAQ items |
+| `siteSettings` | Key/value CMS settings |
+
+## Environment Variables
+
+Managed through the project's Keys/API keys UI — do not edit `.env` files manually.
+
+## Development
+
+```bash
+# Install dependencies
+bun install
+
+# Start dev server (Freebuff runs this automatically)
+bun run dev
+
+# Convex dev (Freebuff runs with --once)
+bunx convex dev --once
+
+# Type check
+bun tsc -b --noEmit
+```
+
+## Accessing Admin Dashboard
+
+1. Navigate to `/auth`
+2. Sign in with any email (OTP will be sent)
+3. Navigate to `/dashboard`
+4. Click "Become Admin" (only first user can claim admin)
+5. Full CMS access granted
+
+## Deployment
+
+The project runs on Freebuff Web with Vite dev server + Convex backend. The GitHub repository is at `github.com/abo3dam-hub/alhasan-aesthetics`.
+
+## Design
+
+- **Theme:** Luxury Medical / Editorial / Minimal Glassmorphism
+- **Colors:** Warm Ivory, Deep Charcoal, Champagne, Warm Nude
+- **Style:** Light glassmorphism with layered translucent panels, controlled blur, subtle edge highlights
+- **Typography:** Serif luxury headings + clean sans-serif body
+- **Responsive:** Mobile-first with desktop optimization
