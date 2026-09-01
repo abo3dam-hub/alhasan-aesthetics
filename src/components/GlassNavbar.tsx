@@ -196,7 +196,7 @@ export default function GlassNavbar() {
                     </Button>
                   </Link>
                 )}
-                <Link to="/booking" onClick={() => setMobileOpen(false)}>
+                <Link to="/consultation" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full rounded-full bg-primary text-primary-foreground">
                     {t.nav.bookConsultation}
                   </Button>

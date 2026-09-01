@@ -60,9 +60,9 @@ export default function NotFound() {
                 <Arrow className="h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/booking">
+            <Link to="/consultation">
               <Button variant="outline" className="rounded-full px-8 gap-2">
-                {isRtl ? "احجز موعد" : "Book Appointment"}
+                {isRtl ? "احجز استشارتك" : "Book Consultation"}
                 <Arrow className="h-4 w-4" />
               </Button>
             </Link>

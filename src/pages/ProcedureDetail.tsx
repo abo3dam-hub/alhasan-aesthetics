@@ -333,7 +333,7 @@ export default function ProcedureDetail() {
                 : "Book your free consultation with Dr. Al Hasan Al Saiem to find out if this procedure is right for you."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to={`/booking?procedure=${slug}`}>
+              <Link to={`/consultation?procedure=${slug}`}>
                 <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-6 text-base gap-2">
                   <Calendar className="h-4 w-4" />
                   {isRtl ? "احجز استشارتك المجانية" : "Book Free Consultation"}
