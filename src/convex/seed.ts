@@ -9,6 +9,27 @@ export const seedAll = mutation({
       return "Data already seeded";
     }
 
+    // ─── Seed Doctor Settings ───
+    const doctorSettings = {
+      doctorNameAr: "د. الحسن الصايم",
+      doctorNameEn: "Dr. Al Hasan Al Saiem",
+      whatsappNumber: "+966500000000",
+      phone: "+966 XX XXX XXXX",
+      email: "info@dr-alhasan.com",
+      addressAr: "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي",
+      addressEn: "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai",
+      socialMedia: {
+        instagram: "",
+        facebook: "",
+        twitter: "",
+        snapchat: "",
+      },
+    };
+    await ctx.db.insert("siteSettings", {
+      key: "doctor",
+      value: doctorSettings,
+    });
+
     // ─── Seed Procedures ───
     const procedures = [
       {
@@ -239,7 +260,7 @@ export const seedAll = mutation({
       {
         questionAr: "ما هي طرق الدفع المتاحة؟",
         questionEn: "What payment options are available?",
-        answerAr: "نقبل多种 وسائل الدفع ونقدم خطط دفع مرنة. يمكن مناقشة جميع التفاصيل المالية خلال الاستشارة الأولى.",
+        answerAr: "نقبل وسائل الدفع المتعددة ونقدم خطط دفع مرنة. يمكن مناقشة جميع التفاصيل المالية خلال الاستشارة الأولى.",
         answerEn: "We accept various payment methods and offer flexible payment plans. All financial details can be discussed during your initial consultation.",
         isActive: true,
         order: 5,
@@ -258,6 +279,6 @@ export const seedAll = mutation({
       await ctx.db.insert("faq", f);
     }
 
-    return "Seeded successfully: 10 procedures, 3 testimonials, 6 FAQ items";
+    return "Seeded successfully: 10 procedures, 3 testimonials, 6 FAQ items, doctor settings";
   },
 });

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireAdmin } from "./admin";
 
 export const list = query({
   args: {},
@@ -64,10 +65,13 @@ export const create = mutation({
     price: v.optional(v.string()),
     image: v.optional(v.string()),
     gallery: v.optional(v.array(v.string())),
+    beforeImage: v.optional(v.string()),
+    afterImage: v.optional(v.string()),
     isActive: v.boolean(),
     order: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     return await ctx.db.insert("procedures", args);
   },
 });
@@ -89,10 +93,13 @@ export const update = mutation({
     price: v.optional(v.string()),
     image: v.optional(v.string()),
     gallery: v.optional(v.array(v.string())),
+    beforeImage: v.optional(v.string()),
+    afterImage: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
     order: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
     const filtered = Object.fromEntries(
       Object.entries(updates).filter(([, v]) => v !== undefined)
@@ -104,6 +111,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("procedures") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     await ctx.db.delete(args.id);
   },
 });

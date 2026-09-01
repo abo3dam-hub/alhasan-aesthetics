@@ -31,7 +31,7 @@ const schema = defineSchema(
       notes: v.optional(v.string()),
     }).index("email", ["email"]),
 
-    // ─── Procedures ───
+    // ─── Procedures (CMS-managed) ───
     procedures: defineTable({
       slug: v.string(),
       titleAr: v.string(),
@@ -47,6 +47,8 @@ const schema = defineSchema(
       price: v.optional(v.string()),
       image: v.optional(v.string()),
       gallery: v.optional(v.array(v.string())),
+      beforeImage: v.optional(v.string()),
+      afterImage: v.optional(v.string()),
       isActive: v.boolean(),
       order: v.number(),
     })
@@ -81,8 +83,7 @@ const schema = defineSchema(
       avatar: v.optional(v.string()),
       isActive: v.boolean(),
       order: v.number(),
-    })
-      .index("by_order", ["order"]),
+    }).index("by_order", ["order"]),
 
     // ─── FAQ ───
     faq: defineTable({
@@ -97,28 +98,13 @@ const schema = defineSchema(
       .index("by_order", ["order"])
       .index("by_category", ["category"]),
 
-    // ─── Bookings ───
-    bookings: defineTable({
-      userId: v.id("users"),
-      patientName: v.string(),
-      patientEmail: v.string(),
-      patientPhone: v.string(),
-      procedureType: v.string(),
-      preferredDate: v.string(),
-      preferredTime: v.string(),
-      message: v.optional(v.string()),
-      status: v.union(
-        v.literal("pending"),
-        v.literal("confirmed"),
-        v.literal("cancelled"),
-        v.literal("completed"),
-      ),
-      notes: v.optional(v.string()),
-    })
-      .index("by_user", ["userId"])
-      .index("by_status", ["status"]),
+    // ─── Site Settings (CMS) ───
+    siteSettings: defineTable({
+      key: v.string(),
+      value: v.any(),
+    }).index("by_key", ["key"]),
 
-    // ─── Consultation Requests ───
+    // ─── Consultation Requests (contact form → stored for admin view) ───
     consultations: defineTable({
       name: v.string(),
       email: v.string(),
@@ -136,22 +122,6 @@ const schema = defineSchema(
     })
       .index("by_status", ["status"])
       .index("by_user", ["userId"]),
-
-    // ─── Notifications ───
-    notifications: defineTable({
-      userId: v.id("users"),
-      title: v.string(),
-      message: v.string(),
-      type: v.union(
-        v.literal("booking"),
-        v.literal("consultation"),
-        v.literal("general"),
-      ),
-      isRead: v.boolean(),
-      link: v.optional(v.string()),
-    })
-      .index("by_user", ["userId"])
-      .index("by_unread", ["userId", "isRead"]),
   },
   {
     schemaValidation: false,

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireAdmin } from "./admin";
 
 export const list = query({
   args: {},
@@ -41,6 +42,7 @@ export const create = mutation({
     order: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     return await ctx.db.insert("beforeAfter", args);
   },
 });
@@ -60,6 +62,7 @@ export const update = mutation({
     order: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const { id, ...updates } = args;
     const filtered = Object.fromEntries(
       Object.entries(updates).filter(([, v]) => v !== undefined)
@@ -71,6 +74,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("beforeAfter") },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     await ctx.db.delete(args.id);
   },
 });
