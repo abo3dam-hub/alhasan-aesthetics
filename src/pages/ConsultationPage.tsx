@@ -148,28 +148,28 @@ export default function ConsultationPage() {
 
     if (step === 1) {
       if (form.selectedProcedures.length === 0) {
-        newErrors.selectedProcedures = isArabic ? "يرجى اختيار إجراء واحد على الأقل" : "Please select at least one procedure";
+        newErrors.selectedProcedures = t.consultation.procedureError;
       }
       if (form.selectedProcedures.includes(otherProcedureKey) && !form.otherProcedure.trim()) {
-        newErrors.otherProcedure = isArabic ? "يرجى ذكر الإجراء" : "Please specify the procedure";
+        newErrors.otherProcedure = t.consultation.otherError;
       }
     }
 
     if (step === 2) {
       if (!form.fullName.trim()) {
-        newErrors.fullName = isArabic ? "الاسم الثلاثي مطلوب" : "Full name is required";
+        newErrors.fullName = t.consultation.nameError;
       }
       if (!form.age.trim() || isNaN(Number(form.age)) || Number(form.age) < 1 || Number(form.age) > 120) {
-        newErrors.age = isArabic ? "يرجى إدخال عمر صحيح" : "Please enter a valid age";
+        newErrors.age = t.consultation.ageError;
       }
       if (!form.gender) {
-        newErrors.gender = isArabic ? "الجنس مطلوب" : "Gender is required";
+        newErrors.gender = t.consultation.genderError;
       }
       if (!form.nationality.trim()) {
-        newErrors.nationality = isArabic ? "الجنسية مطلوبة" : "Nationality is required";
+        newErrors.nationality = t.consultation.nationalityError;
       }
       if (!form.currentResidence.trim()) {
-        newErrors.currentResidence = isArabic ? "مكان الإقامة مطلوب" : "Current residence is required";
+        newErrors.currentResidence = t.consultation.residenceError;
       }
     }
 
@@ -279,15 +279,13 @@ export default function ConsultationPage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-sm font-medium text-primary mb-4">
               <Sparkles className="h-4 w-4" />
-              {isArabic ? "استشارة مجانية" : "Free Consultation"}
+              {t.consultation.badge}
             </div>
             <h1 className="text-3xl sm:text-4xl font-serif-luxury font-bold text-foreground mb-2">
-              {isArabic ? "احجز استشارتك ومعرفة الأسعار" : "Book Your Consultation & Get Pricing"}
+              {t.consultation.title}
             </h1>
             <p className="text-muted-foreground">
-              {isArabic
-                ? "اختر الإجراءات التي تهتم بها وسنتواصل معك عبر واتساب لتقديم العرض."
-                : "Select the procedures you're interested in and we'll reach out via WhatsApp with pricing."}
+              {t.consultation.subtitle}
             </p>
           </motion.div>
 
@@ -309,9 +307,7 @@ export default function ConsultationPage() {
                   "text-xs font-medium hidden sm:inline",
                   step >= s ? "text-foreground" : "text-muted-foreground"
                 )}>
-                  {s === 1
-                    ? isArabic ? "الإجراءات" : "Procedures"
-                    : isArabic ? "بياناتك" : "Your Info"}
+                  {s === 1 ? t.consultation.step1 : t.consultation.step2}
                 </span>
                 {s < 2 && (
                   <div className={cn(
@@ -334,14 +330,14 @@ export default function ConsultationPage() {
             className="space-y-3"
           >
             <h2 className="text-lg font-semibold text-foreground mb-2">
-              {isArabic ? "اختر الإجراءات المطلوبة" : "Select Procedures of Interest"}
+              {t.consultation.selectProcedures}
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              {isArabic ? "يمكنك اختيار أكثر من إجراء" : "You can select multiple procedures"}
+              {t.consultation.multiSelect}
             </p>
 
             {errors.selectedProcedures && (
-              <p className="text-sm text-red-500 mb-2">{errors.selectedProcedures}</p>
+              <p className="text-sm text-red-500 mb-2">{t.consultation.procedureError}</p>
             )}
 
             {procedureList.map((proc) => {
@@ -396,7 +392,7 @@ export default function ConsultationPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    {isArabic ? "إجراء آخر" : "Other Procedure"}
+                    {t.consultation.otherProcedure}
                   </p>
                 </div>
                 <div
@@ -419,16 +415,16 @@ export default function ConsultationPage() {
                 className="space-y-2 pl-4"
               >
                 <Label className="text-sm text-foreground">
-                  {isArabic ? "يرجى ذكر الإجراء" : "Please specify the procedure"}
+                  {t.consultation.specifyProcedure}
                 </Label>
                 <Input
                   value={form.otherProcedure}
                   onChange={(e) => updateForm("otherProcedure", e.target.value)}
-                  placeholder={isArabic ? "اكتب اسم الإجراء..." : "Type the procedure name..."}
+                  placeholder={t.consultation.specifyPlaceholder}
                   className="bg-white/40 border-border/50"
                 />
                 {errors.otherProcedure && (
-                  <p className="text-sm text-red-500">{errors.otherProcedure}</p>
+                  <p className="text-sm text-red-500">{t.consultation.otherError}</p>
                 )}
               </motion.div>
             )}
@@ -443,23 +439,22 @@ export default function ConsultationPage() {
             className="space-y-5"
           >
             <h2 className="text-lg font-semibold text-foreground mb-4">
-              {isArabic ? "بياناتك الشخصية" : "Your Information"}
+              {t.consultation.personalInfo}
             </h2>
 
             {/* Full Name */}
             <div className="space-y-2">
               <Label className="text-sm text-foreground flex items-center gap-2">
                 <User className="h-4 w-4 text-primary" />
-                {isArabic ? "الاسم الثلاثي" : "Full Name"} *
+                {t.consultation.fullName} *
               </Label>
               <Input
                 value={form.fullName}
                 onChange={(e) => updateForm("fullName", e.target.value)}
-                placeholder={isArabic ? "أدخل اسمك الكامل" : "Enter your full name"}
+                placeholder={t.consultation.fullNamePlaceholder}
                 className={cn("bg-white/40 border-border/50 h-12", errors.fullName && "border-red-400")}
                 dir={dir}
-              />
-              {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
+              />                {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
             </div>
 
             {/* Age & Gender */}
@@ -467,7 +462,7 @@ export default function ConsultationPage() {
               <div className="space-y-2">
                 <Label className="text-sm text-foreground flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
-                  {isArabic ? "العمر" : "Age"} *
+                  {t.consultation.age} *
                 </Label>
                 <Input
                   type="number"
@@ -475,7 +470,7 @@ export default function ConsultationPage() {
                   max={120}
                   value={form.age}
                   onChange={(e) => updateForm("age", e.target.value)}
-                  placeholder={isArabic ? "العمر" : "Age"}
+                  placeholder={t.consultation.age}
                   className={cn("bg-white/40 border-border/50 h-12", errors.age && "border-red-400")}
                 />
                 {errors.age && <p className="text-sm text-red-500">{errors.age}</p>}
@@ -484,7 +479,7 @@ export default function ConsultationPage() {
               <div className="space-y-2">
                 <Label className="text-sm text-foreground flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
-                  {isArabic ? "الجنس" : "Gender"} *
+                  {t.consultation.gender} *
                 </Label>
                 <div className="flex gap-2 h-12">
                   {genderOptions.map((opt) => (
@@ -511,7 +506,7 @@ export default function ConsultationPage() {
             <div className="space-y-2 relative">
               <Label className="text-sm text-foreground flex items-center gap-2">
                 <Globe className="h-4 w-4 text-primary" />
-                {isArabic ? "الجنسية" : "Nationality"} *
+                {t.consultation.nationality} *
               </Label>
               <Input
                 value={form.nationality || form.nationalitySearch}
@@ -521,15 +516,14 @@ export default function ConsultationPage() {
                   setShowCountryDropdown(true);
                 }}
                 onFocus={() => setShowCountryDropdown(true)}
-                placeholder={isArabic ? "ابحث عن جنسيتك..." : "Search your nationality..."}
+                placeholder={t.consultation.nationalityPlaceholder}
                 className={cn("bg-white/40 border-border/50 h-12", errors.nationality && "border-red-400")}
                 dir="ltr"
               />
               {showCountryDropdown && (
                 <div className="absolute z-50 top-full mt-1 w-full max-h-60 overflow-y-auto glass-elevated rounded-xl shadow-lg border border-border/40">
-                  {filteredCountries.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground text-center">
-                      {isArabic ? "لا توجد نتائج" : "No results found"}
+                  {filteredCountries.length === 0 ? (                      <div className="p-4 text-sm text-muted-foreground text-center">
+                      {t.consultation.noResults}
                     </div>
                   ) : (
                     filteredCountries.map((country) => (
@@ -559,12 +553,12 @@ export default function ConsultationPage() {
             <div className="space-y-2">
               <Label className="text-sm text-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                {isArabic ? "مكان الإقامة الحالي" : "Current Residence"} *
+                {t.consultation.currentResidence} *
               </Label>
               <Input
                 value={form.currentResidence}
                 onChange={(e) => updateForm("currentResidence", e.target.value)}
-                placeholder={isArabic ? "مثال: بيروت، لبنان" : "e.g., Beirut, Lebanon"}
+                placeholder={t.consultation.currentResidencePlaceholder}
                 className={cn("bg-white/40 border-border/50 h-12", errors.currentResidence && "border-red-400")}
                 dir={dir}
               />
@@ -575,11 +569,11 @@ export default function ConsultationPage() {
             <div className="glass-card rounded-2xl p-5 mt-6">
               <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" />
-                {isArabic ? "ملخص طلبك" : "Your Request Summary"}
+                {t.consultation.summary}
               </h3>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{isArabic ? "الإجراءات" : "Procedures"}</span>
+                  <span className="text-muted-foreground">{t.consultation.proceduresLabel}</span>
                   <span className="font-medium text-foreground text-end">
                     {procedureList
                       .filter((p) => form.selectedProcedures.includes(p.slug))
@@ -590,13 +584,13 @@ export default function ConsultationPage() {
                 </div>
                 {form.fullName && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isArabic ? "الاسم" : "Name"}</span>
+                    <span className="text-muted-foreground">{t.consultation.nameLabel}</span>
                     <span className="font-medium text-foreground">{form.fullName}</span>
                   </div>
                 )}
                 {form.age && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isArabic ? "العمر" : "Age"}</span>
+                    <span className="text-muted-foreground">{t.consultation.ageLabel}</span>
                     <span className="font-medium text-foreground">{form.age}</span>
                   </div>
                 )}
@@ -614,9 +608,9 @@ export default function ConsultationPage() {
               className="rounded-full px-6"
             >
               {isRtl ? (
-                <><ArrowRight className="h-4 w-4 mr-2" />السابق</>
+                <><ArrowRight className="h-4 w-4 mr-2" />{t.consultation.back}</>
               ) : (
-                <><ArrowLeft className="h-4 w-4 mr-2" />Back</>
+                <><ArrowLeft className="h-4 w-4 mr-2" />{t.consultation.back}</>
               )}
             </Button>
           ) : (
@@ -630,9 +624,9 @@ export default function ConsultationPage() {
               className="rounded-full px-8 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isRtl ? (
-                <>التالي<ArrowLeft className="h-4 w-4 ml-2" /></>
+                <>{t.consultation.next}<ArrowLeft className="h-4 w-4 ml-2" /></>
               ) : (
-                <>Next<ArrowRight className="h-4 w-4 ml-2" /></>
+                <>{t.consultation.next}<ArrowRight className="h-4 w-4 ml-2" /></>
               )}
             </Button>
           ) : (
@@ -643,7 +637,7 @@ export default function ConsultationPage() {
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
               </svg>
-              {isArabic ? "إرسال الطلب عبر WhatsApp" : "Send Request via WhatsApp"}
+              {t.consultation.sendWhatsApp}
             </Button>
           )}
         </div>

@@ -4,9 +4,9 @@ import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import { Link } from "react-router";
-import { useState } from "react";
+
 
 const placeholderCases = [
   { label: "Rhinoplasty", labelAr: "تجميل الأنف" },

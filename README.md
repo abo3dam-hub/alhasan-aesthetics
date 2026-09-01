@@ -19,7 +19,7 @@ src/
 ├── components/
 │   ├── sections/       # Homepage sections (Hero, About, Procedures, etc.)
 │   ├── ui/             # shadcn/ui components
-│   ├── Footer.tsx      # Dynamic footer (CMS-driven)
+│   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu
 │   ├── ImageUpload.tsx # Convex storage upload component
 │   └── RequireAuth.tsx # Auth guard
@@ -39,13 +39,13 @@ src/
 │   ├── Landing.tsx         # Homepage (all sections CMS-driven)
 │   ├── Dashboard.tsx       # Full Admin CMS dashboard
 │   ├── ProcedureDetail.tsx # Individual procedure page (CMS-driven)
-│   ├── BeforeAfterPage.tsx # Before & After gallery
-│   ├── ConsultationPage.tsx # WhatsApp consultation form (no data stored)
-│   ├── Auth.tsx            # Login/signup page
+│   ├── BeforeAfterPage.tsx # Before & After gallery with interactive slider
+│   ├── ConsultationPage.tsx # WhatsApp consultation form (3-step, no data stored)
+│   ├── Auth.tsx            # Login/signup page (Email OTP)
 │   └── NotFound.tsx        # 404 page
 ├── hooks/              # Custom hooks (auth, upload, mobile)
 ├── i18n/               # Internationalization system
-├── locales/            # ar.json, en.json translations
+├── locales/            # ar.json, en.json translations (full i18n coverage)
 └── index.css           # Glassmorphism theme + Tailwind
 ```
 
@@ -89,6 +89,8 @@ All CMS mutations are protected server-side via `requireAdmin()`. Public users c
 5. Opens `wa.me` with pre-filled text
 6. **No patient data is stored in the database**
 
+The consultation form uses translation keys for all labels, errors, and placeholders (full i18n coverage in `src/locales/ar.json` and `src/locales/en.json`).
+
 ## Public Website — CMS-Driven
 
 Every homepage section pulls data from Convex CMS:
@@ -102,7 +104,7 @@ Every homepage section pulls data from Convex CMS:
 | **Testimonials** | testimonials (listActive) | placeholder |
 | **FAQ** | faq (listActive) | translations |
 | **Contact** | siteSettings (phone, email, address) | — |
-| **Footer** | siteSettings (phone, email, address, hours) | — |
+| **Footer** | siteSettings (phone, email, address, hours) + procedures (listActive) | translations |
 
 ## Bilingual Support
 
@@ -111,6 +113,7 @@ Every homepage section pulls data from Convex CMS:
 - All CMS content has AR/EN fields
 - Language toggle in navbar and footer
 - WhatsApp messages generated in the correct language
+- Full i18n coverage: all UI strings, form labels, errors, and placeholders use translation keys
 
 ## Database Schema
 
@@ -144,6 +147,16 @@ Every homepage section pulls data from Convex CMS:
 - JSON-LD structured data (Physician schema)
 - robots.txt + sitemap.xml
 - Semantic HTML
+- Favicon + web app manifest
+
+## Responsive Design
+
+- Mobile-first with responsive breakpoints
+- Glassmorphism design system
+- RTL/LTR support
+- Mobile hamburger menu with slide-in animation
+- Optimized for 320px+ screens
+- Interactive before/after slider on gallery page
 
 ## Development
 
@@ -175,11 +188,3 @@ bun run build
 3. Set `VITE_CONVEX_URL` in environment
 4. Run `bunx convex deploy` for production Convex
 5. Seed data: call `seed:seedAll` from Convex dashboard (once)
-
-## Responsive Design
-
-- Mobile-first with responsive breakpoints
-- Glassmorphism design system
-- RTL/LTR support
-- Mobile hamburger menu
-- Optimized for 320px+ screens

@@ -9,12 +9,16 @@ export default function Footer() {
   const { t, dir, toggleLocale } = useI18n();
   const isRtl = dir === "rtl";
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+  const procedures = useQuery(api.procedures.listActive);
 
   const phone = doctorSettings?.phone || "+966 XX XXX XXXX";
   const email = doctorSettings?.email || "info@dr-alhasan.com";
   const addressEn = doctorSettings?.addressEn || "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai";
   const addressAr = doctorSettings?.addressAr || "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي";
   const address = isRtl ? addressAr : addressEn;
+
+  // Show up to 6 CMS procedures in the footer services list
+  const footerProcedures = procedures?.slice(0, 6) ?? [];
 
   return (
     <footer className="relative border-t border-border/40" dir={dir}>
@@ -53,16 +57,31 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Services */}
+          {/* Services — CMS-driven */}
           <div>
             <h3 className="font-semibold text-foreground mb-4 text-sm">{t.footer.services}</h3>
             <ul className="space-y-2.5">
-              <li><Link to="/procedure/rhinoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.rhinoplasty}</Link></li>
-              <li><Link to="/procedure/face-neck-lift" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.faceNeckLift}</Link></li>
-              <li><Link to="/procedure/blepharoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.blepharoplasty}</Link></li>
-              <li><Link to="/procedure/botox" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.botox}</Link></li>
-              <li><Link to="/procedure/fillers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.fillers}</Link></li>
-              <li><Link to="/procedure/tummy-tuck" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.tummyTuck}</Link></li>
+              {footerProcedures.length > 0 ? (
+                footerProcedures.map((proc) => (
+                  <li key={proc._id}>
+                    <Link
+                      to={`/procedure/${proc.slug}`}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {isRtl ? proc.titleAr : proc.titleEn}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li><Link to="/procedure/rhinoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.rhinoplasty}</Link></li>
+                  <li><Link to="/procedure/face-neck-lift" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.faceNeckLift}</Link></li>
+                  <li><Link to="/procedure/blepharoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.blepharoplasty}</Link></li>
+                  <li><Link to="/procedure/botox" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.botox}</Link></li>
+                  <li><Link to="/procedure/fillers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.fillers}</Link></li>
+                  <li><Link to="/procedure/tummy-tuck" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.tummyTuck}</Link></li>
+                </>
+              )}
             </ul>
           </div>
 
