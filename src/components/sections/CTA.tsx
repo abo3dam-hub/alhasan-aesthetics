@@ -1,4 +1,6 @@
 import { useI18n } from "@/i18n";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
@@ -12,8 +14,25 @@ const fadeInUp = {
 
 export default function CTA() {
   const { t, dir } = useI18n();
+  const isRtl = dir === "rtl";
+  const isArabic = isRtl;
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
-  const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const Arrow = isRtl ? ArrowLeft : ArrowRight;
+  const ctaCMS = useQuery(api.homepageSettings.getCTASettings);
+
+  if (ctaCMS?.enabled === false) return null;
+
+  const badge = ctaCMS?.badgeAr && ctaCMS?.badgeEn
+    ? (isArabic ? ctaCMS.badgeAr : ctaCMS.badgeEn) : null;
+  const title = ctaCMS?.titleAr && ctaCMS?.titleEn
+    ? (isArabic ? ctaCMS.titleAr : ctaCMS.titleEn)
+    : t.cta.title;
+  const subtitle = ctaCMS?.descriptionAr && ctaCMS?.descriptionEn
+    ? (isArabic ? ctaCMS.descriptionAr : ctaCMS.descriptionEn)
+    : t.cta.subtitle;
+  const buttonText = ctaCMS?.buttonTextAr && ctaCMS?.buttonTextEn
+    ? (isArabic ? ctaCMS.buttonTextAr : ctaCMS.buttonTextEn)
+    : t.cta.button;
 
   return (
     <section className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">
@@ -25,34 +44,41 @@ export default function CTA() {
           dir={dir}
         >
           <div className="glass-elevated rounded-3xl p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden glow-champagne">
-            {/* Decorative orbs */}
             <div className="absolute top-0 left-1/4 w-40 h-40 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-56 h-56 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative">
+              {badge && (
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-sm font-medium text-primary mb-4">
+                  <Sparkles className="h-4 w-4" />
+                  {badge}
+                </div>
+              )}
               <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 mb-6">
                 <Sparkles className="h-7 w-7 text-primary" />
               </div>
 
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-                <span className="text-foreground">{t.cta.title}</span>
+                <span className="text-foreground">{title}</span>
               </h2>
 
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                {t.cta.subtitle}
+                {subtitle}
               </p>
 
-              <div className="mt-8 sm:mt-10">
-                <Link to="/consultation">
-                  <Button
-                    size="lg"
-                    className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
-                  >
-                    {t.cta.button}
-                    <Arrow className="h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
+              {(ctaCMS?.buttonEnabled !== false) && (
+                <div className="mt-8 sm:mt-10">
+                  <Link to={ctaCMS?.buttonDestination || "/consultation"}>
+                    <Button
+                      size="lg"
+                      className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
+                    >
+                      {buttonText}
+                      <Arrow className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

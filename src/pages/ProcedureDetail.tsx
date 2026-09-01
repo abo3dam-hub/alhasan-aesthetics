@@ -3,7 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useParams, Link } from "react-router";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -32,6 +32,11 @@ export default function ProcedureDetail() {
   const phoneNumber = useMemo(() => {
     const raw = doctorSettings?.phone || "";
     return raw.replace(/[^0-9+]/g, "");
+  }, [doctorSettings]);
+
+  const whatsappNumber = useMemo(() => {
+    const raw = doctorSettings?.whatsappNumber || "";
+    return raw.replace(/[^0-9]/g, "");
   }, [doctorSettings]);
 
   // Use only CMS data from Convex
@@ -71,6 +76,27 @@ export default function ProcedureDetail() {
   const longDescription = isRtl
     ? displayData.longDescriptionAr
     : displayData.longDescriptionEn;
+
+  // Dynamic SEO
+  useEffect(() => {
+    const seoTitle = displayData.seoTitleAr && displayData.seoTitleEn
+      ? (isRtl ? displayData.seoTitleAr : displayData.seoTitleEn)
+      : title;
+    document.title = `${seoTitle} — Dr. Al Hasan`;
+
+    const seoDesc = displayData.seoDescriptionAr && displayData.seoDescriptionEn
+      ? (isRtl ? displayData.seoDescriptionAr : displayData.seoDescriptionEn)
+      : description;
+    if (seoDesc) {
+      let meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.setAttribute('content', seoDesc);
+    }
+
+    if (displayData.ogImage) {
+      let og = document.querySelector('meta[property="og:image"]');
+      if (og) og.setAttribute('content', displayData.ogImage);
+    }
+  }, [displayData, title, description, isRtl]);
 
   return (
     <div className="min-h-screen bg-background" dir={dir}>
@@ -210,7 +236,7 @@ export default function ProcedureDetail() {
                   {isRtl ? "احجز استشارتك المجانية" : "Book Free Consultation"}
                 </Button>
               </Link>
-              <a href={`tel:${phoneNumber || '+966500000000'}`}>
+              <a href={phoneNumber ? `tel:${phoneNumber}` : `/consultation`}>
                 <Button
                   variant="outline"
                   className="rounded-full px-8 py-6 text-base gap-2"

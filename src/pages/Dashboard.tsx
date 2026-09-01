@@ -49,15 +49,19 @@ async function swapOrder(
   ]);
 }
 
-type Tab = "overview" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "settings" | "media";
+import HomepageCMSTab from "@/components/dashboard/HomepageCMSTab";
+import SEOTab from "@/components/dashboard/SEOTab";
+
+type Tab = "overview" | "homepage" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "seo" | "settings" | "media";
 
 const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
+  { key: "homepage", label: "Homepage", icon: Settings },
   { key: "procedures", label: "Procedures", icon: FileText },
   { key: "beforeAfter", label: "Before & After", icon: ImageIcon },
   { key: "testimonials", label: "Testimonials", icon: Star },
   { key: "faq", label: "FAQ", icon: HelpCircle },
-
+  { key: "seo", label: "SEO", icon: Settings },
   { key: "settings", label: "Settings", icon: Settings },
   { key: "media", label: "Media", icon: ImageIcon },
 ];
@@ -124,11 +128,12 @@ export default function Dashboard() {
 
           <main className="flex-1 min-w-0">
             {activeTab === "overview" && <OverviewTab />}
+            {activeTab === "homepage" && <HomepageCMSTab />}
             {activeTab === "procedures" && <ProceduresTab />}
             {activeTab === "beforeAfter" && <BeforeAfterTab />}
             {activeTab === "testimonials" && <TestimonialsTab />}
             {activeTab === "faq" && <FaqTab />}
-
+            {activeTab === "seo" && <SEOTab />}
             {activeTab === "settings" && <SettingsTab />}
             {activeTab === "media" && <MediaTab />}
           </main>

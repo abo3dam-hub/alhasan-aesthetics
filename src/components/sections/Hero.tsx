@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles, Star, Award } from "lucide-react";
 import { Link } from "react-router";
+import doctorImg from "/assets/1.jpg";
 
 const container = {
   hidden: { opacity: 0 },
@@ -24,14 +25,41 @@ export default function Hero() {
   const isRtl = dir === "rtl";
   const Arrow = isRtl ? ArrowLeft : ArrowRight;
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+  const heroCMS = useQuery(api.homepageSettings.getHeroSettings);
 
-  // Use CMS hero content if available, otherwise fallback to translations
-  const heroTitle = isRtl
-    ? (doctorSettings?.heroTitleAr || t.hero.title)
-    : (doctorSettings?.heroTitleEn || t.hero.title);
-  const heroHighlight = isRtl
-    ? (doctorSettings?.heroSubtitleAr || t.hero.titleHighlight)
-    : (doctorSettings?.heroSubtitleEn || t.hero.titleHighlight);
+  // CMS → fallback to translations
+  const isArabic = isRtl;
+  const badge = heroCMS?.badgeAr && heroCMS?.badgeEn
+    ? (isArabic ? heroCMS.badgeAr : heroCMS.badgeEn)
+    : t.hero.badge;
+  const heroTitle = heroCMS?.titleAr && heroCMS?.titleEn
+    ? (isArabic ? heroCMS.titleAr : heroCMS.titleEn)
+    : (doctorSettings?.heroTitleAr || t.hero.title);
+  const heroHighlight = heroCMS?.subtitleAr && heroCMS?.subtitleEn
+    ? (isArabic ? heroCMS.subtitleAr : heroCMS.subtitleEn)
+    : (doctorSettings?.heroSubtitleAr || t.hero.titleHighlight);
+  const heroDescription = heroCMS?.descriptionAr && heroCMS?.descriptionEn
+    ? (isArabic ? heroCMS.descriptionAr : heroCMS.descriptionEn)
+    : t.hero.subtitle;
+  const ctaText = heroCMS?.ctaTextAr && heroCMS?.ctaTextEn
+    ? (isArabic ? heroCMS.ctaTextAr : heroCMS.ctaTextEn)
+    : t.hero.cta;
+  const ctaSecondaryText = heroCMS?.ctaSecondaryTextAr && heroCMS?.ctaSecondaryTextEn
+    ? (isArabic ? heroCMS.ctaSecondaryTextAr : heroCMS.ctaSecondaryTextEn)
+    : t.hero.ctaSecondary;
+  const heroImage = heroCMS?.image || doctorImg;
+
+  // Trust badges - CMS or translation defaults
+  const defaultTrustBadges = [
+    { labelAr: t.hero.trust1, labelEn: t.hero.trust1, icon: "award" },
+    { labelAr: t.hero.trust2, labelEn: t.hero.trust2, icon: "star" },
+    { labelAr: t.hero.trust3, labelEn: t.hero.trust3, icon: "sparkles" },
+  ];
+  const trustBadges = heroCMS?.trustBadges?.length > 0
+    ? heroCMS.trustBadges.filter((b: any) => b.enabled !== false)
+    : defaultTrustBadges;
+
+  const trustIconMap: Record<string, typeof Award> = { award: Award, star: Star, sparkles: Sparkles };
 
   return (
     <section
@@ -56,12 +84,14 @@ export default function Hero() {
           dir={dir}
         >
           {/* Badge */}
-          <motion.div variants={item}>
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs sm:text-sm font-medium text-muted-foreground mb-4 sm:mb-8">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              {t.hero.badge}
-            </span>
-          </motion.div>
+          {(heroCMS?.badgeEnabled !== false) && (
+            <motion.div variants={item}>
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs sm:text-sm font-medium text-muted-foreground mb-4 sm:mb-8">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                {badge}
+              </span>
+            </motion.div>
+          )}
 
           {/* Heading */}
           <motion.h1 variants={item} className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
@@ -72,60 +102,67 @@ export default function Hero() {
           </motion.h1>
 
           {/* Subtitle */}
-          <motion.p
-            variants={item}
-            className="mt-4 sm:mt-8 text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-xl"
-          >
-            {t.hero.subtitle}
-          </motion.p>
+          {heroDescription && (
+            <motion.p
+              variants={item}
+              className="mt-4 sm:mt-8 text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-xl"
+            >
+              {heroDescription}
+            </motion.p>
+          )}
 
           {/* CTAs */}
           <motion.div
             variants={item}
             className="mt-6 sm:mt-10 flex flex-wrap gap-3 sm:gap-4"
           >
-            <Link to="/consultation">
+            {(heroCMS?.ctaEnabled !== false) && (
+              <Link to="/consultation">
+                <Button
+                  size="lg"
+                  className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
+                >
+                  {ctaText}
+                  <Arrow className="h-4 w-4" />
+                </Button>
+              </Link>
+            )}
+            {(heroCMS?.ctaSecondaryEnabled !== false) && (
               <Button
                 size="lg"
-                className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
+                variant="outline"
+                onClick={() => document.getElementById("procedures")?.scrollIntoView({ behavior: "smooth" })}
+                className="rounded-full glass-card hover:bg-white/60 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base border-border/60"
               >
-                {t.hero.cta}
-                <Arrow className="h-4 w-4" />
+                {ctaSecondaryText}
               </Button>
-            </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => document.getElementById("procedures")?.scrollIntoView({ behavior: "smooth" })}
-              className="rounded-full glass-card hover:bg-white/60 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base border-border/60"
-            >
-              {t.hero.ctaSecondary}
-            </Button>
+            )}
           </motion.div>
 
           {/* Trust Badges */}
-          <motion.div
-            variants={item}
-            className="mt-8 sm:mt-16 flex flex-wrap gap-3 sm:gap-6"
-          >
-            {[
-              { icon: Award, text: t.hero.trust1 },
-              { icon: Star, text: t.hero.trust2 },
-              { icon: Sparkles, text: t.hero.trust3 },
-            ].map((badge) => (
-              <div
-                key={badge.text}
-                className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 glass-card rounded-2xl"
-              >
-                <div className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-primary/10 shrink-0">
-                  <badge.icon className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-xs sm:text-sm font-medium text-foreground/80 whitespace-nowrap">
-                  {badge.text}
-                </span>
-              </div>
-            ))}
-          </motion.div>
+          {trustBadges.length > 0 && (
+            <motion.div
+              variants={item}
+              className="mt-8 sm:mt-16 flex flex-wrap gap-3 sm:gap-6"
+            >
+              {trustBadges.map((badge: any, i: number) => {
+                const IconComp = trustIconMap[badge.icon || "award"] || Award;
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 glass-card rounded-2xl"
+                  >
+                    <div className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-primary/10 shrink-0">
+                      <IconComp className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-medium text-foreground/80 whitespace-nowrap">
+                      {isArabic ? badge.labelAr : badge.labelEn}
+                    </span>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
         </motion.div>
 
       </div>
