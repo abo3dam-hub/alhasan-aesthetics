@@ -1155,7 +1155,7 @@ function SettingsTab() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end" role="status" aria-live="polite">
         <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">
           {saving ? "Saving..." : "Save Settings"}
         </Button>

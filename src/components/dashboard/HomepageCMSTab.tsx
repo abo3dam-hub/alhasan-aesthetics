@@ -211,7 +211,7 @@ function HeroEditor() {
           <div className="space-y-2"><Label className="text-xs text-muted-foreground">Image Alt Text (AR)</Label><Input dir="rtl" value={form.imageAltAr || ""} onChange={(e) => update("imageAltAr", e.target.value)} placeholder="د. الحسن - جراحة تجميلية" /></div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Hero"}</Button>
         </div>
       </CardContent>
@@ -310,7 +310,7 @@ function AboutEditor() {
           <Button type="button" variant="outline" size="sm" onClick={() => update("stats", [...(form.stats || []), { icon: "award", value: "", labelAr: "", labelEn: "", enabled: true }])} className="gap-1"><Plus className="h-3 w-3" /> Add Stat</Button>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save About"}</Button>
         </div>
       </CardContent>
@@ -379,7 +379,7 @@ function CTAEditor() {
         </div>
         <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Destination</Label><Input value={form.buttonDestination || ""} onChange={(e) => update("buttonDestination", e.target.value)} placeholder="/consultation" /></div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save CTA"}</Button>
         </div>
       </CardContent>
@@ -423,7 +423,7 @@ function FooterEditor() {
           <div className="space-y-2"><Label className="text-xs text-muted-foreground">Footer Description (AR)</Label><Textarea dir="rtl" rows={3} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
         </div>
         <p className="text-xs text-muted-foreground">Social media links and contact info come from Doctor Settings.</p>
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Footer"}</Button>
         </div>
       </CardContent>
@@ -485,7 +485,7 @@ function SectionHeaderEditor({ sectionKey, label, fallbackKeys }: { sectionKey: 
           <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (AR)</Label><Textarea dir="rtl" rows={2} value={form.subtitleAr || ""} onChange={(e) => update("subtitleAr", e.target.value)} /></div>
         </div>
         <p className="text-xs text-muted-foreground">Leave fields blank to use default translations.</p>
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save"}</Button>
         </div>
       </CardContent>
@@ -549,7 +549,7 @@ function VisibilityEditor() {
             </button>
           </div>
         ))}
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Visibility"}</Button>
         </div>
       </CardContent>

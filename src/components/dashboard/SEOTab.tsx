@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { MediaSelector } from "@/components/MediaSelector";
 
 export default function SEOTab() {
   return (
@@ -43,10 +44,8 @@ function GlobalSEOEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "seo", value: form });
-      // Also update document title
       const title = form.siteTitleEn || form.siteTitleAr || document.title;
       if (title) document.title = title;
-      // Update meta description
       const desc = form.metaDescriptionEn || form.metaDescriptionAr;
       if (desc) {
         let meta = document.querySelector('meta[name="description"]');
@@ -70,10 +69,10 @@ function GlobalSEOEditor() {
           <div className="space-y-2"><Label className="text-xs text-muted-foreground">Meta Description (AR)</Label><Textarea dir="rtl" rows={3} value={form.metaDescriptionAr || ""} onChange={(e) => update("metaDescriptionAr", e.target.value)} placeholder="طبيب متخصص في الجراحة التجميلية..." /></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">OG Image URL</Label><Input value={form.ogImage || ""} onChange={(e) => update("ogImage", e.target.value)} placeholder="https://..." /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">OG Image</Label><MediaSelector value={form.ogImage || ""} onChange={(url) => update("ogImage", url)} label="Select OG image" /></div>
           <div className="space-y-2"><Label className="text-xs text-muted-foreground">Canonical Base URL</Label><Input value={form.canonicalBase || ""} onChange={(e) => update("canonicalBase", e.target.value)} placeholder="https://dr-alhasan.com" /></div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save SEO"}</Button>
         </div>
       </CardContent>
