@@ -146,13 +146,13 @@ export default function Procedures() {
           variants={fadeInUp}
           className="text-center mt-10 sm:mt-12"
         >
-          <Link to="/before-after">
+          <Link to="/procedures">
             <Button
               variant="outline"
               size="lg"
               className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
             >
-              {t.beforeAfter.viewAll}
+              {t.procedures.viewAll}
               <Arrow className="h-4 w-4" />
             </Button>
           </Link>

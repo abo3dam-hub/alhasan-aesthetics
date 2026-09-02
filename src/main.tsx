@@ -16,6 +16,8 @@ const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ProcedureDetail = lazy(() => import("./pages/ProcedureDetail.tsx"));
+const ProceduresPage = lazy(() => import("./pages/ProceduresPage.tsx"));
+const ContactPage = lazy(() => import("./pages/ContactPage.tsx"));
 const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage.tsx"));
 const ConsultationPage = lazy(() => import("./pages/ConsultationPage.tsx"));
 
@@ -127,7 +129,9 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/" element={<Landing />} />
                 <Route path="/ar" element={<Landing />} />
                 <Route path="/en" element={<Landing />} />
+                <Route path="/procedures" element={<ProceduresPage />} />
                 <Route path="/procedure/:slug" element={<ProcedureDetail />} />
+                <Route path="/contact" element={<ContactPage />} />
                 <Route path="/before-after" element={<BeforeAfterPage />} />
                 <Route path="/consultation" element={<ConsultationPage />} />
                 <Route

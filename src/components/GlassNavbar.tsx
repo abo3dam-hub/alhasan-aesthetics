@@ -12,14 +12,14 @@ import doctorAvatar from "/assets/3.jpg";
 const hashLinks = [
   { key: "home" as const, href: "/#home" },
   { key: "about" as const, href: "/#about" },
-  { key: "procedures" as const, href: "/#procedures" },
   { key: "testimonials" as const, href: "/#testimonials" },
   { key: "faq" as const, href: "/#faq" },
-  { key: "contact" as const, href: "/#contact" },
 ];
 
 const routeLinks = [
+  { key: "procedures" as const, href: "/procedures" },
   { key: "beforeAfter" as const, href: "/before-after" },
+  { key: "contact" as const, href: "/contact" },
 ];
 
 export default function GlassNavbar() {

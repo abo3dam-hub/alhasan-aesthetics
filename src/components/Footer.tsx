@@ -58,15 +58,16 @@ export default function Footer() {
 
             {/* Social Media Links */}
             {socialLinks.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-3 mt-5">
                 {socialLinks.map((link) => (
                   <a
                     key={link.icon}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+                    className="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 hover:bg-primary/25 hover:scale-110 transition-all duration-300 cursor-pointer"
                     aria-label={link.label}
+                    title={link.label}
                   >
                     <SocialIcon name={link.icon} />
                   </a>
@@ -79,12 +80,13 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4 text-sm">{t.footer.quickLinks}</h3>
             <ul className="space-y-2.5">
-              <li><a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.home}</a></li>
+              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.home}</Link></li>
               <li><a href="/#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.about}</a></li>
-              <li><a href="/#procedures" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.procedures}</a></li>
+              <li><Link to="/procedures" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.procedures}</Link></li>
               <li><Link to="/before-after" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.beforeAfter}</Link></li>
               <li><a href="/#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.testimonials}</a></li>
               <li><a href="/#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.faq}</a></li>
+              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.nav.contact}</Link></li>
               <li><Link to="/consultation" className="text-sm text-primary font-medium hover:text-primary/80 transition-colors">{t.nav.bookConsultation}</Link></li>
             </ul>
           </div>
@@ -165,7 +167,7 @@ export default function Footer() {
 
 // Simple inline social icons (SVG)
 function SocialIcon({ name }: { name: string }) {
-  const iconClass = "h-4 w-4 text-primary";
+  const iconClass = "h-5 w-5 text-primary group-hover:scale-110 transition-transform";
   switch (name) {
     case "instagram":
       return (

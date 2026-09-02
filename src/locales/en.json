@@ -170,6 +170,25 @@
     "nationalityError": "Nationality is required",
     "residenceError": "Current residence is required"
   },
+  "proceduresPage": {
+    "title": "Our Procedures",
+    "subtitle": "Discover our comprehensive range of aesthetic and plastic surgery procedures, each designed to deliver natural, refined results.",
+    "allProcedures": "All Procedures",
+    "viewDetails": "View Details",
+    "cta": "Book a Consultation",
+    "backHome": "Back to Home",
+    "noProcedures": "No procedures available yet. Please check back soon.",
+    "duration": "Duration",
+    "recovery": "Recovery",
+    "price": "Price",
+    "viewGallery": "View Gallery"
+  },
+  "contactPage": {
+    "title": "Contact Us",
+    "subtitle": "We'd love to hear from you. Reach out to us for consultations, questions, or to learn more about our services.",
+    "backHome": "Back to Home",
+    "consultationCta": "Book a Free Consultation"
+  },
   "common": {
     "language": "English",
     "switchLang": "العربية"

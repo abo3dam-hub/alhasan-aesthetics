@@ -365,7 +365,7 @@ export default function ProcedureDetail() {
                 "@type": "ListItem",
                 position: 2,
                 name: isRtl ? "الإجراءات" : "Procedures",
-                item: typeof window !== "undefined" ? `${window.location.origin}/#procedures` : "",
+                item: typeof window !== "undefined" ? `${window.location.origin}/procedures` : "",
               },
               {
                 "@type": "ListItem",
