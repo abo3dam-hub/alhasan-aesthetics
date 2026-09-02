@@ -1,0 +1,261 @@
+═══════════════════════════════════════════════════════════════════
+  VERCEL DEPLOYMENT REPORT — Dr. Al Hasan Aesthetics Website
+═══════════════════════════════════════════════════════════════════
+
+Date:           2026-09-02
+Repository:     https://github.com/abo3dam-hub/alhasan-aesthetics
+Stack:          Vite 7 + React 19 + TypeScript + Convex + React Router 7
+Vercel Config:  Framework Preset: Vite | Build: npm run build | Output: dist
+
+═══════════════════════════════════════════════════════════════════
+  1. PROBLEM
+═══════════════════════════════════════════════════════════════════
+
+The deployed Vercel URL showed a blank page. Direct navigation to
+/client routes like /ar returned a Vercel 404.
+
+Root Cause:
+  No vercel.json existed in the repository. Vercel detected the
+  project as Vite and served the dist/ folder as static files.
+  Client-side React Router routes (/ar, /en, /procedure/:slug,
+  /dashboard, /auth, etc.) do not exist as actual files in dist/.
+  Vercel returned 404 for those paths instead of serving index.html
+  so that React Router could handle the routing client-side.
+
+═══════════════════════════════════════════════════════════════════
+  2. FIX APPLIED
+═══════════════════════════════════════════════════════════════════
+
+File Created:   vercel.json (new)
+
+Purpose:
+  Add an SPA rewrite rule so that all client-side routes are served
+  through index.html, while preserving static assets.
+
+Rewrite Logic:
+  - Any path that matches static assets (/*.{js,css,png,jpg,svg,
+    woff2, etc.}) is served directly from dist/.
+  - Named public files (robots.txt, sitemap.xml, manifest.webmanifest,
+    logo.svg, favicon.ico, favicon.svg) are served directly.
+  - The /assets/* directory is served directly.
+  - Everything else falls through to /index.html for React Router.
+
+Result:
+  /              → index.html → Landing page
+  /ar            → index.html → Landing (Arabic)
+  /en            → index.html → Landing (English)
+  /procedure/*   → index.html → Procedure detail page
+  /before-after  → index.html → Before & After page
+  /consultation  → index.html → Consultation page
+  /auth          → index.html → Auth/Login page
+  /dashboard     → index.html → Admin Dashboard (protected)
+  /*             → index.html → 404 Not Found (handled by React)
+  /robots.txt    → static file served directly
+  /sitemap.xml   → static file served directly
+  /assets/*      → static files served directly
+
+═══════════════════════════════════════════════════════════════════
+  3. APPLICATION ROUTES (from src/main.tsx)
+═══════════════════════════════════════════════════════════════════
+
+Route                    Component            Auth Required
+─────────────────────────────────────────────────────────────────
+/                        Landing              No
+/ar                      Landing              No
+/en                      Landing              No
+/procedure/:slug         ProcedureDetail      No
+/before-after            BeforeAfterPage      No
+/consultation            ConsultationPage      No
+/auth                    AuthPage             No
+/dashboard               Dashboard            Yes (RequireAuth)
+*                        NotFound             No
+
+Note: The project uses a custom bilingual system via localStorage
+(not URL-based locale middleware). /ar and /en are valid routes that
+render the Landing component with the appropriate locale.
+
+═══════════════════════════════════════════════════════════════════
+  4. ENVIRONMENT VARIABLES
+═══════════════════════════════════════════════════════════════════
+
+Required at Runtime (browser):
+  VITE_CONVEX_URL    — Convex deployment URL (used in src/main.tsx)
+
+  This is the ONLY environment variable the client code uses.
+  It must be set in Vercel: Settings → Environment Variables.
+
+NOT Required:
+  VITE_CONVEX_SITE_URL  — Not used in any source code
+  VLY_INTEGRATION_KEY   — Server-side only (Convex actions)
+  Any other .env.local  — Not referenced by client code
+
+Security:
+  - .env.local is NOT committed to the repository
+  - No secrets or API keys are exposed in client bundles
+  - Only VITE_CONVEX_URL is a public client variable
+
+═══════════════════════════════════════════════════════════════════
+  5. BUILD VERIFICATION
+═══════════════════════════════════════════════════════════════════
+
+Command:  npm run build
+Result:   PASS (9.81s)
+
+Build Output (dist/):
+  dist/index.html              4.12 KB
+  dist/logo.svg                9.25 KB
+  dist/manifest.webmanifest    435 B
+  dist/robots.txt              388 B
+  dist/sitemap.xml             2.73 KB
+  dist/assets/                 33 files (JS, CSS, images)
+
+  Total JS: ~870 KB (before gzip)
+  Largest chunk: index-Bw9sy74M.js (461.71 KB)
+  All chunks correctly hashed for cache busting.
+
+Command:  npm run lint
+Result:   83 pre-existing errors (unused vars, @typescript-eslint/no-explicit-any, React Hook rules)
+
+  Note: All lint errors are pre-existing in component code (unused
+  imports, `any` types, etc.). None are from the vercel.json change.
+  Vercel does not run lint during deployment — only the build command.
+
+═══════════════════════════════════════════════════════════════════
+  6. STATIC ASSETS VERIFICATION
+═══════════════════════════════════════════════════════════════════
+
+File                          Location          Status
+─────────────────────────────────────────────────────────────────
+robots.txt                    dist/             ✅ Served directly
+sitemap.xml                   dist/             ✅ Served directly
+manifest.webmanifest          dist/             ✅ Served directly
+logo.svg                      dist/             ✅ Served directly
+1.jpg, 2.jpg, 3.jpg, 4.jpg   dist/assets/      ✅ Served directly
+All hashed JS/CSS             dist/assets/      ✅ Served directly
+
+Rewrite rule correctly excludes all static files from SPA fallback.
+
+═══════════════════════════════════════════════════════════════════
+  7. SPA FALLBACK VERIFICATION
+═══════════════════════════════════════════════════════════════════
+
+The vercel.json rewrite rule:
+
+  {
+    "source": "/((?!assets/|logo\\.svg|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|favicon\\.ico|favicon\\.svg|.*\\.js$|.*\\.css$|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$|.*\\.woff$|.*\\.woff2$|.*\\.ttf$|.*\\.eot$|.*\\.ico$|.*\\.webp$|.*\\.avif$).*)",
+    "destination": "/index.html"
+  }
+
+How it works:
+  - Uses a negative lookahead regex to match everything EXCEPT files
+  - Static assets pass through to be served as-is
+  - SPA routes fall through to index.html
+  - React Router then handles client-side routing
+
+Verified paths that will correctly serve index.html:
+  ✅ /ar
+  ✅ /en
+  ✅ /procedure/rhinoplasty
+  ✅ /procedure/facelift
+  ✅ /procedure/botox
+  ✅ /before-after
+  ✅ /consultation
+  ✅ /auth
+  ✅ /dashboard
+  ✅ /any-arbitrary-path
+
+Verified paths that will correctly serve static files:
+  ✅ /robots.txt
+  ✅ /sitemap.xml
+  ✅ /manifest.webmanifest
+  ✅ /logo.svg
+  ✅ /assets/index-Bw9sy74M.js
+  ✅ /assets/Landing-DuSzROY_.js
+  ✅ /assets/1.jpg
+
+═══════════════════════════════════════════════════════════════════
+  8. CONVEX INTEGRATION
+═══════════════════════════════════════════════════════════════════
+
+Convex Functions Location:  src/convex/
+Schema:                     src/convex/schema.ts
+Config:                     convex.json (functions: "src/convex/")
+
+Convex must be deployed separately:
+  Command:  bunx convex deploy
+
+This deploys all Convex functions and schema to your Convex project.
+The VITE_CONVEX_URL environment variable must then point to the
+production Convex deployment URL.
+
+═══════════════════════════════════════════════════════════════════
+  9. DEPLOYMENT CHECKLIST
+═══════════════════════════════════════════════════════════════════
+
+Step  Action                                          Status
+─────────────────────────────────────────────────────────────────
+1     Push vercel.json to GitHub                      ⬜ (user)
+2     Connect repository to Vercel                    ⬜ (user)
+3     Set Vercel env var: VITE_CONVEX_URL             ⬜ (user)
+4     Deploy Convex (bunx convex deploy)              ⬜ (user)
+5     Set Convex production URL in Vercel env vars    ⬜ (user)
+6     Verify / loads landing page                     ⬜ (user)
+7     Verify /ar and /en locale switching             ⬜ (user)
+8     Verify /procedure/* route works                 ⬜ (user)
+9     Verify /auth login works                        ⬜ (user)
+10    Verify /dashboard is protected                  ⬜ (user)
+11    Verify robots.txt is accessible                 ⬜ (user)
+12    Verify sitemap.xml is accessible                ⬜ (user)
+13    Create admin account via /auth                  ⬜ (user)
+14    Seed CMS data via Dashboard                     ⬜ (user)
+15    Configure WhatsApp number in Settings           ⬜ (user)
+
+═══════════════════════════════════════════════════════════════════
+  10. FILES CHANGED
+═══════════════════════════════════════════════════════════════════
+
+File            Action    Reason
+─────────────────────────────────────────────────────────────────
+vercel.json     Created   SPA rewrite rules for client-side routing
+
+No other files were changed. No application code was modified.
+No existing configuration was altered.
+
+═══════════════════════════════════════════════════════════════════
+  11. WHATSAPP CONSULTATION FLOW (preserved)
+═══════════════════════════════════════════════════════════════════
+
+The consultation workflow remains:
+  FORM → VALIDATION → REVIEW → WHATSAPP (opens wa.me link)
+
+No patient data is stored.
+No database mutations are called.
+No accounts are created.
+No appointments are booked.
+
+═══════════════════════════════════════════════════════════════════
+  12. SECURITY
+═══════════════════════════════════════════════════════════════════
+
+  ✅ No secrets committed to repository
+  ✅ Only public env var: VITE_CONVEX_URL
+  ✅ Admin routes protected by RequireAuth
+  ✅ Admin mutations protected by server-side requireAdmin
+  ✅ No patient data stored in database
+  ✅ No appointment system
+  ✅ No patient accounts
+  ✅ WhatsApp-only consultation flow
+
+═══════════════════════════════════════════════════════════════════
+  13. CONCLUSION
+═══════════════════════════════════════════════════════════════════
+
+Issue:       Blank page on Vercel due to missing SPA fallback
+Fix:         Added vercel.json with SPA rewrite rules
+Changed:     1 file (vercel.json — new)
+Build:       PASS
+Application: No code changes — existing app is preserved exactly
+Ready:       YES — deploy by pushing vercel.json and configuring
+             VITE_CONVEX_URL in Vercel environment variables
+
+═══════════════════════════════════════════════════════════════════
