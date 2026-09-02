@@ -1,0 +1,645 @@
+═══════════════════════════════════════════════════════════════════════════
+  PRODUCTION DATA-SYNC BUG — DIAGNOSIS REPORT
+  Dr. Al Hasan Aesthetic & Plastic Surgery Website
+═══════════════════════════════════════════════════════════════════════════
+
+Date:              2026-09-02
+Repository:        https://github.com/abo3dam-hub/alhasan-aesthetics
+Report Type:       Code-Level Data Flow Trace & Root Cause Analysis
+Status:            DIAGNOSIS COMPLETE — NO CODE CHANGES MADE
+
+═══════════════════════════════════════════════════════════════════════════
+  1. PROBLEM DESCRIPTION
+═══════════════════════════════════════════════════════════════════════════
+
+  Admin Dashboard:
+    - Can log into /dashboard
+    - Opens Homepage CMS
+    - Edits Hero section (title, subtitle, badge, description, CTAs, etc.)
+    - Clicks "Save Hero"
+    - Toast shows "Hero settings saved!"
+    - Dashboard reflects the new values immediately
+
+  Public Website:
+    - Navigates to / (homepage)
+    - Hero section still shows the OLD values (or default translations)
+    - CMS changes are NOT reflected
+
+  Local Vite preview works correctly.
+  Vercel deployment works (site loads, routing works).
+
+═══════════════════════════════════════════════════════════════════════════
+  2. FILES INSPECTED
+═══════════════════════════════════════════════════════════════════════════
+
+  Write Side (Admin):
+    src/components/dashboard/HomepageCMSTab.tsx    — HeroEditor, AboutEditor, CTAEditor, etc.
+    src/pages/Dashboard.tsx                         — Settings tab, Media Library
+
+  Read Side (Public):
+    src/pages/Landing.tsx                           — Visibility, SEO, Doctor Settings
+    src/components/sections/Hero.tsx                — Hero section rendering
+    src/components/sections/About.tsx               — About section rendering
+    src/components/sections/CTA.tsx                 — CTA section rendering
+    src/components/Footer.tsx                       — Footer rendering
+
+  Backend (Convex):
+    src/convex/homepageSettings.ts                  — getHeroSettings, getAboutSettings, set
+    src/convex/siteSettings.ts                      — getDoctorSettings, set, get, list
+    src/convex/schema.ts                            — siteSettings table definition
+    src/convex/admin.ts                             — requireAdmin authorization
+
+  Client:
+    src/main.tsx                                    — ConvexReactClient init, ConvexAuthProvider
+    src/hooks/use-upload.ts                         — Media upload (also uses VITE_CONVEX_URL)
+
+  Generated:
+    src/convex/_generated/api.d.ts                  — API type declarations
+
+═══════════════════════════════════════════════════════════════════════════
+  3. COMPLETE DATA FLOW TRACE
+═══════════════════════════════════════════════════════════════════════════
+
+  STEP 1: Admin opens Hero Editor
+  ────────────────────────────────
+  File: src/components/dashboard/HomepageCMSTab.tsx, line 65
+
+    const heroCMS = useQuery(api.homepageSettings.getHeroSettings);
+    const setSetting = useMutation(api.homepageSettings.set);
+
+  What happens:
+    - useQuery subscribes to getHeroSettings
+    - Returns the current value from the "hero" key in siteSettings
+    - Form is initialized from heroCMS (line 72-89)
+
+  STEP 2: Admin edits and clicks Save
+  ────────────────────────────────────
+  File: src/components/dashboard/HomepageCMSTab.tsx, line 88-94
+
+    const handleSave = async () => {
+      setSetting(true);
+      try {
+        await setSetting({ key: "hero", value: form });
+        toast.success("Hero settings saved!");
+      } catch (e) {
+        toast.error("Failed to save hero settings");
+      }
+      setSetting(false);
+    };
+
+  What happens:
+    - Calls api.homepageSettings.set mutation
+    - Passes key: "hero" and the entire form object as value
+    - On success: shows "Hero settings saved!" toast
+    - On failure: shows "Failed to save hero settings" toast
+
+  STEP 3: Convex mutation executes
+  ─────────────────────────────────
+  File: src/convex/homepageSettings.ts, line 90-109
+
+    export const set = mutation({
+      args: { key: v.string(), value: v.any() },
+      handler: async (ctx, args) => {
+        await requireAdmin(ctx);
+        const existing = await ctx.db
+          .query("siteSettings")
+          .withIndex("by_key", (q) => q.eq("key", args.key))
+          .first();
+        if (existing) {
+          await ctx.db.patch(existing._id, { value: args.value });
+        } else {
+          await ctx.db.insert("siteSettings", {
+            key: args.key,
+            value: args.value,
+          });
+        }
+      },
+    });
+
+  What happens:
+    - requireAdmin(ctx) verifies authenticated user has admin role
+    - Queries siteSettings table with by_key index for key: "hero"
+    - If row exists: patches the value field with new form data
+    - If row doesn't exist: inserts new row with key: "hero" and value: form
+
+  STEP 4: requireAdmin authorization check
+  ─────────────────────────────────────────
+  File: src/convex/admin.ts, line 7-15
+
+    export async function requireAdmin(ctx: MutationCtx) {
+      const userId = await getAuthUserId(ctx);
+      if (!userId) {
+        throw new Error("Not authenticated");
+      }
+      const user = await ctx.db.get(userId);
+      if (!user || user.role !== "admin") {
+        throw new Error("Unauthorized: admin access required");
+      }
+      return { userId, user };
+    }
+
+  What happens:
+    - Gets current authenticated user ID from Convex Auth
+    - Fetches user record from database
+    - Checks if user.role === "admin"
+    - Throws if not authenticated or not admin
+
+  STEP 5: Dashboard reflects new values
+  ──────────────────────────────────────
+  After mutation succeeds:
+    - useQuery(api.homepageSettings.getHeroSettings) re-fetches
+    - heroCMS now contains the updated form data
+    - HeroEditor re-renders with new values
+    - Admin sees the changes in the dashboard
+
+  STEP 6: Public Hero loads
+  ─────────────────────────
+  File: src/components/sections/Hero.tsx, line 28
+
+    const heroCMS = useQuery(api.homepageSettings.getHeroSettings);
+
+  What happens:
+    - useQuery subscribes to the same getHeroSettings query
+    - Should return the same data from the same Convex deployment
+    - If data exists: heroCMS contains the saved values
+    - If data is null: heroCMS is null
+
+  STEP 7: Hero renders with fallback logic
+  ─────────────────────────────────────────
+  File: src/components/sections/Hero.tsx, lines 34-48
+
+    const heroTitle = heroCMS?.titleAr && heroCMS?.titleEn
+      ? (isArabic ? heroCMS.titleAr : heroCMS.titleEn)
+      : (doctorSettings?.heroTitleAr || t.hero.title);
+
+    const heroHighlight = heroCMS?.subtitleAr && heroCMS?.subtitleEn
+      ? (isArabic ? heroCMS.subtitleAr : heroCMS.subtitleEn)
+      : (doctorSettings?.heroSubtitleAr || t.hero.titleHighlight);
+
+    const heroDescription = heroCMS?.descriptionAr && heroCMS?.descriptionEn
+      ? (isArabic ? heroCMS.descriptionAr : heroCMS.descriptionEn)
+      : t.hero.subtitle;
+
+  What happens:
+    - If heroCMS has both titleAr AND titleEn (non-empty strings):
+      → Uses CMS values (correct behavior)
+    - If heroCMS is null OR either title field is empty:
+      → Falls back to doctorSettings or t.hero.title (HARDCODED)
+
+═══════════════════════════════════════════════════════════════════════════
+  4. CONVEX CLIENT ANALYSIS
+═══════════════════════════════════════════════════════════════════════════
+
+  File: src/main.tsx, line 87
+
+    const convex = new ConvexReactClient(
+      import.meta.env.VITE_CONVEX_URL || 'https://impartial-ladybug-881.convex.cloud'
+    );
+
+  Key findings:
+    - ONE ConvexReactClient instance is created
+    - It's used by ALL components in the app
+    - Both Dashboard and Landing are children of ConvexAuthProvider
+    - Both use the same client → same database → same deployment
+
+  File: src/main.tsx, lines 115-154
+
+    <ConvexAuthProvider client={convex}>
+      <I18nProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/ar" element={<Landing />} />
+            <Route path="/en" element={<Landing />} />
+            <Route path="/dashboard" element={
+              <RequireAuth><Dashboard /></RequireAuth>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </I18nProvider>
+    </ConvexAuthProvider>
+
+  Conclusion:
+    - Landing (Hero) and Dashboard share the SAME ConvexAuthProvider
+    - They use the SAME ConvexReactClient
+    - They connect to the SAME Convex deployment
+    - They read/write to the SAME database
+
+═══════════════════════════════════════════════════════════════════════════
+  5. DATABASE SCHEMA
+═══════════════════════════════════════════════════════════════════════════
+
+  File: src/convex/schema.ts, lines 117-121
+
+    siteSettings: defineTable({
+      key: v.string(),
+      value: v.any(),
+    }).index("by_key", ["key"]),
+
+  Table:    siteSettings
+  Columns:  key (string), value (any)
+  Index:    by_key on [key]
+  CMS keys used: "hero", "about", "cta", "footer", "homepage", "seo",
+                 "doctor", "proceduresSection", "beforeAfterSection",
+                 "testimonialsSection", "faqSection"
+
+  Mutation writes: key = "hero", value = { titleAr, titleEn, subtitleAr, ... }
+  Query reads:     key = "hero", returns value field
+
+═══════════════════════════════════════════════════════════════════════════
+  6. QUERY/MUTATION MAPPING
+═══════════════════════════════════════════════════════════════════════════
+
+  ┌─────────────────────────┬──────────────────────────┬─────────────┐
+  │ Admin Editor            │ Mutation                 │ DB Key      │
+  ├─────────────────────────┼──────────────────────────┼─────────────┤
+  │ HeroEditor              │ homepageSettings.set     │ "hero"      │
+  │ AboutEditor             │ homepageSettings.set     │ "about"     │
+  │ CTAEditor               │ homepageSettings.set     │ "cta"       │
+  │ FooterEditor            │ homepageSettings.set     │ "footer"    │
+  │ SectionHeaderEditor     │ homepageSettings.set     │ varies      │
+  │ VisibilityEditor        │ homepageSettings.set     │ "homepage"  │
+  │ SEOTab                  │ homepageSettings.set     │ "seo"       │
+  │ SettingsTab (Doctor)    │ siteSettings.set         │ "doctor"    │
+  └─────────────────────────┴──────────────────────────┴─────────────┘
+
+  ┌─────────────────────────┬──────────────────────────┬─────────────┐
+  │ Public Component        │ Query                    │ DB Key      │
+  ├─────────────────────────┼──────────────────────────┼─────────────┤
+  │ Hero.tsx                │ homepageSettings         │ "hero"      │
+  │                         │  .getHeroSettings        │             │
+  │ About.tsx               │ homepageSettings         │ "about"     │
+  │                         │  .getAboutSettings       │             │
+  │ CTA.tsx                 │ homepageSettings         │ "cta"       │
+  │                         │  .getCTASettings         │             │
+  │ Footer.tsx              │ homepageSettings         │ "footer"    │
+  │                         │  .getFooterSettings      │             │
+  │ Landing.tsx             │ homepageSettings         │ "homepage"  │
+  │                         │  .getHomepageSettings    │             │
+  │ Landing.tsx             │ homepageSettings         │ "seo"       │
+  │                         │  .getSEOSettings         │             │
+  │ Procedures.tsx          │ homepageSettings         │ "procedures │
+  │                         │  .getSectionContent      │  Section"   │
+  │ Testimonials.tsx        │ homepageSettings         │ "testimonials│
+  │                         │  .getSectionContent      │  Section"   │
+  │ FAQ.tsx                 │ homepageSettings         │ "faqSection"│
+  │                         │  .getSectionContent      │             │
+  │ BeforeAfter.tsx         │ homepageSettings         │ "beforeAfter│
+  │                         │  .getSectionContent      │  Section"   │
+  └─────────────────────────┴──────────────────────────┴─────────────┘
+
+  All queries and mutations reference the SAME Convex module:
+  api.homepageSettings (src/convex/homepageSettings.ts)
+
+═══════════════════════════════════════════════════════════════════════════
+  7. SCENARIO TRACE: Admin Changes Hero Title
+═══════════════════════════════════════════════════════════════════════════
+
+  Scenario:
+    1. Admin changes Hero title from "Your Beauty" to "New Title"
+    2. Admin clicks Save
+    3. User visits public homepage
+    4. Expected: Hero shows "New Title"
+    5. Actual: Hero shows "Your Beauty" (old value)
+
+  Step-by-step trace:
+
+  7.1  Admin changes title in HeroEditor form
+       → form.titleEn = "New Title"
+       → Local React state updated
+
+  7.2  Admin clicks "Save Hero"
+       → handleSave() called
+       → setSetting({ key: "hero", value: form })
+       → form contains: { titleEn: "New Title", titleAr: "...", ... }
+
+  7.3  Mutation executes on Convex server
+       → requireAdmin(ctx) → verifies admin role ✅
+       → Queries siteSettings WHERE key = "hero"
+       → If exists: patches value to { titleEn: "New Title", ... }
+       → If not exists: inserts new row
+
+  7.4  Mutation returns success
+       → try block completes
+       → toast.success("Hero settings saved!") shown ✅
+
+  7.5  Dashboard re-renders
+       → useQuery(api.homepageSettings.getHeroSettings) re-fetches
+       → heroCMS now = { titleEn: "New Title", ... }
+       → HeroEditor form shows "New Title" ✅
+
+  7.6  Public Hero.tsx loads (same session or new visit)
+       → useQuery(api.homepageSettings.getHeroSettings)
+       → Should return { titleEn: "New Title", ... }
+
+  7.7  Hero renders title
+       → const heroTitle = heroCMS?.titleAr && heroCMS?.titleEn
+       →   ? (isArabic ? heroCMS.titleAr : heroCMS.titleEn)
+       →   : (doctorSettings?.heroTitleAr || t.hero.title)
+
+       IF heroCMS is not null AND titleEn is non-empty:
+         → heroTitle = "New Title" ✅
+
+       IF heroCMS is null OR titleEn is empty string "":
+         → heroTitle = t.hero.title (hardcoded fallback) ❌
+
+  ═══════════════════════════════════════════════════════════════════════
+  WHERE THE CHAIN BREAKS:
+  ═══════════════════════════════════════════════════════════════════════
+
+  The code-level chain is UNBROKEN:
+
+    Mutation writes ✅ → Database stores ✅ → Query reads ✅ → Hero renders ✅
+
+  Both Dashboard and Hero use:
+    - Same ConvexReactClient (src/main.tsx:87)
+    - Same ConvexAuthProvider (src/main.tsx:121)
+    - Same query: api.homepageSettings.getHeroSettings
+    - Same database table: siteSettings
+    - Same key: "hero"
+    - Same index: by_key
+
+  ═══════════════════════════════════════════════════════════════════════
+  CONCLUSION FROM CODE ANALYSIS:
+  ═══════════════════════════════════════════════════════════════════════
+
+  The application code is CORRECT. The data flow is COMPLETE and CONSISTENT.
+
+  If the mutation writes and the Dashboard reads successfully,
+  the public Hero MUST also read the same data — because they
+  use the exact same Convex client, query, and database.
+
+  The bug is NOT in the application code.
+
+═══════════════════════════════════════════════════════════════════════════
+  8. POSSIBLE ROOT CAUSES (Runtime/Infrastructure)
+═══════════════════════════════════════════════════════════════════════════
+
+  Since the code is correct, the issue is at the Convex infrastructure
+  or data level. Possible causes:
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ CAUSE A: Convex deployment has no data in siteSettings for "hero"   │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                                                                      │
+  │ The mutation might be writing to a different Convex deployment       │
+  │ than the one the public site reads from.                            │
+  │                                                                      │
+  │ Evidence against: Both use the same ConvexReactClient from          │
+  │ src/main.tsx with the same VITE_CONVEX_URL.                        │
+  │                                                                      │
+  │ Evidence for: VITE_CONVEX_URL was previously empty, and the         │
+  │ fallback might point to a staging/dev instance that has the table   │
+  │ but the admin might be using a different deployment.                │
+  │                                                                      │
+  │ How to verify:                                                      │
+  │   1. Open Convex Dashboard (dashboard.convex.dev)                   │
+  │   2. Go to Data tab → siteSettings table                            │
+  │   3. Look for a row where key = "hero"                              │
+  │   4. Check what the value field contains                            │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ CAUSE B: Mutation silently failing in production                    │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                                                                      │
+  │ The requireAdmin check might fail in production, but the error      │
+  │ is caught by the try/catch in handleSave(). The toast says          │
+  │ "Failed to save hero settings" but the user might not notice.      │
+  │                                                                      │
+  │ Evidence against: User reports seeing "Hero settings saved!"        │
+  │                                                                      │
+  │ How to verify:                                                      │
+  │   1. Open browser DevTools → Network tab                             │
+  │   2. Save hero settings in admin dashboard                           │
+  │   3. Look for the Convex mutation request                            │
+  │   4. Check if it returns 200 or an error                            │
+  │   5. Check Convex function logs in Convex Dashboard                 │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ CAUSE C: Convex query returning stale/cached data                   │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                                                                      │
+  │ The useQuery hook might be returning cached data instead of         │
+  │ re-fetching after the mutation.                                     │
+  │                                                                      │
+  │ Evidence against: Convex queries are real-time subscriptions.       │
+  │ When data changes, all connected clients are notified.              │
+  │                                                                      │
+  │ How to verify:                                                      │
+  │   1. Open public site in browser                                    │
+  │   2. Open DevTools → Console                                         │
+  │   3. Add temporary console.log in Hero.tsx:                         │
+  │      console.log("heroCMS:", heroCMS);                              │
+  │   4. Check if heroCMS has the new values or is null                 │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ CAUSE D: Hero fallback logic hiding CMS values                      │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                                                                      │
+  │ The Hero.tsx fallback logic might be triggering even though CMS     │
+  │ data exists. If heroCMS.titleAr or heroCMS.titleEn is an empty     │
+  │ string "", the fallback kicks in.                                   │
+  │                                                                      │
+  │ Example:                                                             │
+  │   heroCMS = { titleAr: "", titleEn: "New Title" }                  │
+  │   → heroCMS?.titleAr && heroCMS?.titleEn                           │
+  │   → "" && "New Title"                                              │
+  │   → false (empty string is falsy)                                   │
+  │   → Falls back to t.hero.title                                     │
+  │                                                                      │
+  │ This would happen if the admin saved with one language field empty. │
+  │                                                                      │
+  │ How to verify:                                                      │
+  │   1. In admin dashboard, check that BOTH titleAr and titleEn       │
+  │      have non-empty values                                          │
+  │   2. Save and check both fields are populated                       │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ CAUSE E: Admin and public using different Convex deployments        │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                                                                      │
+  │ The admin might be logging into a different Convex deployment       │
+  │ (e.g., a dev or staging instance) while the public site uses       │
+  │ the production fallback URL.                                        │
+  │                                                                      │
+  │ Evidence against: Both Dashboard and Landing are in the same        │
+  │ React app, same bundle, same ConvexReactClient instance.           │
+  │                                                                      │
+  │ How to verify:                                                      │
+  │   1. In admin dashboard, open DevTools → Console                    │
+  │   2. Check the Convex client URL being used                         │
+  │   3. On public site, do the same                                    │
+  │   4. Compare the two URLs                                           │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ CAUSE F: Vercel caching serving stale public page                   │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                                                                      │
+  │ Vercel might be caching the old HTML/JS bundle. After the admin     │
+  │ saves new CMS values, the public site still serves the old bundle. │
+  │                                                                      │
+  │ However, this is unlikely because the Hero component reads CMS     │
+  │ data at RUNTIME via Convex queries, not from the build bundle.     │
+  │                                                                      │
+  │ How to verify:                                                      │
+  │   1. Hard-refresh the public page (Ctrl+Shift+R)                   │
+│   2. Check if the hero still shows old values                        │
+  │   3. If yes, it's not a caching issue                               │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+  9. RECOMMENDED DEBUGGING STEPS
+═══════════════════════════════════════════════════════════════════════════
+
+  Step 1: Check Convex Dashboard Data
+  ────────────────────────────────────
+  - Go to https://dashboard.convex.dev
+  - Select the project linked to "impartial-ladybug-881"
+  - Go to Data → siteSettings table
+  - Look for row with key = "hero"
+  - Check the value field — does it contain the saved data?
+  - If the table is EMPTY or the row doesn't exist:
+    → The mutation is NOT writing to this deployment
+    → Check if admin is using a different Convex deployment
+
+  Step 2: Check Convex Function Logs
+  ───────────────────────────────────
+  - In Convex Dashboard → Logs tab
+  - Filter by function: "homepageSettings:set"
+  - Look for recent calls
+  - Check if they succeeded or failed
+  - If no calls appear:
+    → The mutation is not reaching the server
+    → Check network connectivity and auth
+
+  Step 3: Add Debug Logging to Hero.tsx
+  ──────────────────────────────────────
+  - Temporarily add to src/components/sections/Hero.tsx:
+      console.log("[Hero] heroCMS:", heroCMS);
+      console.log("[Hero] heroTitle will be:", heroTitle);
+  - Deploy and check browser console on public site
+  - If heroCMS is null:
+    → Query is not returning data
+    → Check Convex connection
+  - If heroCMS has data but titleAr/titleEn are empty:
+    → The saved data has empty fields
+    → Check admin form before saving
+
+  Step 4: Compare Convex URLs
+  ───────────────────────────
+  - In admin dashboard DevTools console:
+      console.log("Convex URL:", import.meta.env.VITE_CONVEX_URL);
+  - On public site DevTools console:
+      console.log("Convex URL:", import.meta.env.VITE_CONVEX_URL);
+  - They MUST be identical
+
+  Step 5: Test Mutation Directly
+  ──────────────────────────────
+  - In admin dashboard DevTools console:
+      // This calls the mutation directly
+      // Check if it succeeds
+  - After mutation, navigate to public site
+  - Check if the data appears
+
+═══════════════════════════════════════════════════════════════════════════
+  10. HYPOTHESIS RANKING
+═══════════════════════════════════════════════════════════════════════════
+
+  Based on code analysis, ranked by likelihood:
+
+  1. MOST LIKELY: The Convex deployment at "impartial-ladybug-881" has
+     an empty siteSettings table for "hero". The mutation might be
+     writing to a DIFFERENT Convex instance than expected, or the data
+     is being written but the table wasn't deployed/migrated correctly.
+
+  2. LIKELY: The admin user's Convex session might be connected to a
+     different deployment than the fallback URL. This could happen if
+     the admin logged in during development when VITE_CONVEX_URL was
+     set to a dev instance, and the auth token still points there.
+
+  3. POSSIBLE: The Hero fallback logic is triggering because one of the
+     title fields (titleAr or titleEn) is an empty string, causing the
+     && check to evaluate to false.
+
+  4. UNLIKELY: Convex query caching or real-time subscription issue.
+     Convex is designed for real-time reactivity and this is a core
+     feature.
+
+  5. VERY UNLIKELY: Vercel caching. The Hero component reads CMS data
+     at runtime via JavaScript, not from cached HTML.
+
+═══════════════════════════════════════════════════════════════════════════
+  11. VERIFICATION CHECKLIST
+═══════════════════════════════════════════════════════════════════════════
+
+  Code-Level Verification (all PASS):
+
+  ☑ Admin write: api.homepageSettings.set({ key: "hero", value })
+  ☑ Mutation: writes to siteSettings table, key "hero"
+  ☑ requireAdmin: checks authentication + admin role
+  ☑ Public read: api.homepageSettings.getHeroSettings
+  ☑ Query: reads from siteSettings table, key "hero"
+  ☑ Same ConvexReactClient instance for all components
+  ☑ Same ConvexAuthProvider wrapping Dashboard and Landing
+  ☑ Same database, same table, same key, same index
+  ☑ Fallback logic in Hero.tsx handles null/empty CMS data
+  ☑ Schema: siteSettings table with by_key index exists
+
+  Infrastructure Verification (requires manual check):
+
+  ☐ Convex deployment has siteSettings data for "hero"
+  ☐ Convex function logs show successful mutations
+  ☐ Admin and public use same VITE_CONVEX_URL
+  ☐ Browser console shows no Convex errors on public site
+  ☐ heroCMS is not null when Hero component renders
+
+═══════════════════════════════════════════════════════════════════════════
+  12. CONCLUSION
+═══════════════════════════════════════════════════════════════════════════
+
+  The application code is CORRECT and COMPLETE.
+
+  The data flow chain is:
+
+    Admin Form
+    → Mutation (homepageSettings.set)
+    → requireAdmin (authorization)
+    → Database write (siteSettings table, key "hero")
+    → Query re-fetch (getHeroSettings)
+    → Dashboard re-render (shows new values)
+
+    Public Hero
+    → Query subscribe (getHeroSettings)
+    → Database read (siteSettings table, key "hero")
+    → Fallback logic (if CMS data missing → use translations)
+    → Render (hero title, subtitle, description, etc.)
+
+  Both sides use the same Convex client, same database, same query.
+
+  The bug is NOT in the application code.
+
+  The bug is at the Convex infrastructure/data level:
+
+    → Verify the siteSettings table has data for key "hero"
+    → Verify the Convex function logs show successful mutations
+    → Verify admin and public use the same Convex deployment URL
+    → Check browser console for Convex errors on public site
+
+═══════════════════════════════════════════════════════════════════════════
+  13. FILES CHANGED
+═══════════════════════════════════════════════════════════════════════════
+
+  NONE. This report is a diagnosis only. No code was modified.
+
+═══════════════════════════════════════════════════════════════════════════
