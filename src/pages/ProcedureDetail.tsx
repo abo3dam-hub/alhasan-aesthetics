@@ -42,44 +42,18 @@ export default function ProcedureDetail() {
   // Use only CMS data from Convex
   const displayData = convexProcedure ?? null;
 
-  if (convexProcedure === undefined) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
+  // Derived values — computed here so useEffect can reference them safely
+  const title = displayData ? (isRtl ? displayData.titleAr : displayData.titleEn) : "";
+  const description = displayData ? (isRtl ? displayData.descriptionAr : displayData.descriptionEn) : "";
+  const longDescription = displayData
+    ? (isRtl ? displayData.longDescriptionAr : displayData.longDescriptionEn)
+    : "";
+  const gallery = displayData?.gallery || [];
 
-  if (!displayData) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground" dir={dir}>
-        <GlassNavbar />
-        <h1 className="text-2xl font-bold mb-4">
-          {isRtl ? "الإجراء غير موجود" : "Procedure not found"}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {isRtl
-            ? "الإجراء الذي تبحث عنه غير متاح حالياً."
-            : "The procedure you're looking for is not available."}
-        </p>
-        <Link to="/">
-          <Button variant="outline">
-            {isRtl ? "العودة للرئيسية" : "Back to Home"}
-          </Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const title = isRtl ? displayData.titleAr : displayData.titleEn;
-  const description = isRtl ? displayData.descriptionAr : displayData.descriptionEn;
-  const longDescription = isRtl
-    ? displayData.longDescriptionAr
-    : displayData.longDescriptionEn;
-  const gallery = displayData.gallery || [];
-
-  // Dynamic SEO
+  // Dynamic SEO — must be called BEFORE any early returns (React Hook rules)
   useEffect(() => {
+    if (!displayData) return;
+
     const seoTitle = displayData.seoTitleAr && displayData.seoTitleEn
       ? (isRtl ? displayData.seoTitleAr : displayData.seoTitleEn)
       : title;
@@ -108,7 +82,36 @@ export default function ProcedureDetail() {
     setOrCreateMeta("twitter:title", seoTitle);
     if (seoDesc) setOrCreateMeta("twitter:description", seoDesc);
     if (displayData.ogImage) setOrCreateMeta("twitter:image", displayData.ogImage);
-  }, [displayData, title, description, isRtl]);
+  }, [displayData, isRtl, title, description]);
+
+  if (convexProcedure === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!displayData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground" dir={dir}>
+        <GlassNavbar />
+        <h1 className="text-2xl font-bold mb-4">
+          {isRtl ? "الإجراء غير موجود" : "Procedure not found"}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {isRtl
+            ? "الإجراء الذي تبحث عنه غير متاح حالياً."
+            : "The procedure you're looking for is not available."}
+        </p>
+        <Link to="/">
+          <Button variant="outline">
+            {isRtl ? "العودة للرئيسية" : "Back to Home"}
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background" dir={dir}>
