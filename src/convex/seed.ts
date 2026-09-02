@@ -1,5 +1,199 @@
 import { mutation } from "./_generated/server";
 
+/**
+ * Seed default procedures idempotently.
+ * Only creates procedures whose slug does not already exist.
+ * Safe to run multiple times — never overwrites existing records.
+ */
+export const seedProcedures = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const defaultProcedures = [
+      {
+        slug: "upper-lower-eyelid-lift",
+        titleAr: "شد الأجفان العلوية والسفلية",
+        titleEn: "Upper & Lower Eyelid Lift",
+        descriptionAr: "تجديد مظهر العينين من خلال شد الجفون العلوية والسفلية لإزالة التجاعيد وإطلالة أكثر شباباً",
+        descriptionEn: "Rejuvenating the eyes by lifting upper and lower eyelids to remove wrinkles and restore a youthful appearance",
+        longDescriptionAr: "شد الأجفان (Blepharoplasty) هو إجراء دقيق يهدف إلى تجديد مظهر منطقة العينين. يعالج الترهلات والتجاعيد في الجفون العلوية والسفلية، مما يمنح المريض مظهراً أكثر نعومة وشباباً.\n\nهذا الإجراء يمكن أن يحسن الرؤية في بعض الحالات التي يعيق فيها ترهل الجفن العلوي الرؤية. يتم التخدير الموضعي أو العام حسب الحالة، ويستغرق الإجراء من ساعة إلى ساعتين.\n\nيتم التخطيط للإجراء خلال استشارة مخصصة يقيّم فيها الطبيب حاجة المريض ويشرح خطوات العملية ومتطلبات التعافي.",
+        longDescriptionEn: "Blepharoplasty is a precise procedure aimed at rejuvenating the eye area. It addresses sagging and wrinkles in the upper and lower eyelids, giving patients a smoother, more rested appearance.\n\nThis procedure can also improve vision in cases where upper eyelid sagging obstructs sight. Performed under local or general anesthesia depending on the case, taking 1-2 hours.\n\nA personalized consultation is conducted to assess the patient's needs and explain the procedure and recovery requirements.",
+        icon: "Eye",
+        category: "face",
+        duration: "1-2 ساعات",
+        recovery: "1-2 أسابيع",
+        isActive: true,
+        isFeatured: true,
+        order: 1,
+      },
+      {
+        slug: "face-neck-lift",
+        titleAr: "شد الوجه والرقبة",
+        titleEn: "Face & Neck Lift",
+        descriptionAr: "إعادة الشباب والحيوية للوجه والرقبة بأحدث تقنيات الشد المتقدمة",
+        descriptionEn: "Restoring youth and vitality to the face and neck with the latest advanced lifting techniques",
+        longDescriptionAr: "شد الوجه والرقبة هو إجراء تجميلي متقدم يهدف إلى استعادة مظهر أكثر شباباً وحيوية للوجه والرقبة. يعالج التجاعيد والترهّلات وفقدان التوتة الطبيعية في منطقة الوجه والرقبة.\n\nيستخدم د. الحسن الصايم تقنيات متقدمة تضمن نتائج طبيعية دون مظهر مشدود بشكل مفرط. يشمل الإجراء عادة شد الطبقات العميقة من الوجه مع شد الجلد الزائد.\n\nتبدأ الاستشارة بتقييم بنية الوجه ومتطلبات المريض وتوقعاته، مع شرح شامل لخطوات الإجراء ومراحل التعافي.",
+        longDescriptionEn: "Face & Neck Lift is an advanced cosmetic procedure aimed at restoring a more youthful and vibrant appearance to the face and neck. It addresses wrinkles, sagging, and loss of natural volume.\n\nDr. Al Hasan Al Saiem uses advanced techniques that ensure natural results without an overly pulled appearance. The procedure typically involves tightening deep facial layers along with removing excess skin.\n\nA personalized consultation is conducted to assess facial structure and explain the expected outcomes and recovery plan.",
+        icon: "UserRound",
+        category: "face",
+        duration: "3-5 ساعات",
+        recovery: "2-3 أسابيع",
+        isActive: true,
+        isFeatured: true,
+        order: 2,
+      },
+      {
+        slug: "rhinoplasty",
+        titleAr: "تجميل الأنف",
+        titleEn: "Rhinoplasty",
+        descriptionAr: "تصميم وتشكيل الأنف لتحقيق تناغم مثالي مع ملامح الوجه",
+        descriptionEn: "Sculpting and reshaping the nose to achieve ideal harmony with facial features",
+        longDescriptionAr: "تجميل الأنف (Rhinoplasty) هو إجراء جراحي متقدم يهدف إلى تحسين شكل الأنف وتناسبه مع ملامح الوجه. يمكن أن يعالج مشاكل وظيفية مثل انحراف الحاجز الأنفي بالإضافة إلى التحسينات التجميلية.\n\nيتم الإجراء عادة تحت التخدير العام ويستغرق من ساعة إلى 3 ساعات حسب تعقيد الحالة. تتطلب فترة التعافي أسبوعين من الراحة مع بعض التورم الذي يختفي تدريجياً.\n\nتبدأ الاستشارة بتقييم شامل لبنية الأنف ومتطلبات المريض وتوقعاته، مع شرح شامل لخطوات الإجراء ومراحل التعافي.",
+        longDescriptionEn: "Rhinoplasty is an advanced surgical procedure aimed at improving the shape of the nose and its proportion with facial features. It can also address functional issues such as deviated septum alongside cosmetic improvements.\n\nThe procedure is typically performed under general anesthesia and takes 1-3 hours depending on case complexity. Recovery requires about two weeks of rest with gradually resolving swelling.\n\nThe consultation begins with a comprehensive assessment of nasal structure and patient expectations, with thorough explanation of the procedure and recovery stages.",
+        icon: "SmilePlus",
+        category: "face",
+        duration: "1-3 ساعات",
+        recovery: "2-3 أسابيع",
+        isActive: true,
+        isFeatured: true,
+        order: 3,
+      },
+      {
+        slug: "liposuction-fat-transfer",
+        titleAr: "شفط الشحم وحقن الشحم",
+        titleEn: "Liposuction & Fat Transfer",
+        descriptionAr: "تشكيل الجسم وإزالة الدهون العنيدة مع إعادة حقن الشحم في المناطق المطلوبة",
+        descriptionEn: "Body contouring and removal of stubborn fat with fat reinjection in desired areas",
+        longDescriptionAr: "شفط الشحم وحقنه هو إجراء مزدوج يهدف إلى إزالة الدهون العنيدة من مناطق معينة في الجسم واستخدامها لملء ومنح حجم في مناطق أخرى تحتاج إلى التكبير.\n\nيتم الإجراء تحت التخدير العام أو الموضعي حسب حجم المنطقة المستهدفة. يستغرق من ساعتين إلى 4 ساعات حسب تعقيد الحالة.\n\nالنتائج النهائية تظهر بعد اختبار التورم بشكل كامل، ويجب الحفاظ على نمط حياة صحي لتحقيق أفضل النتائج على المدى الطويل.",
+        longDescriptionEn: "Liposuction & Fat Transfer is a dual procedure that targets stubborn fat deposits in specific body areas and uses the harvested fat to add volume elsewhere.\n\nThe procedure is performed under general or local anesthesia depending on the targeted area size. It takes 2-4 hours depending on case complexity.\n\nFinal results become visible after swelling fully subsides, and maintaining a healthy lifestyle is important for long-lasting outcomes.",
+        icon: "Droplets",
+        category: "body",
+        duration: "2-4 ساعات",
+        recovery: "2-3 أسابيع",
+        isActive: true,
+        isFeatured: false,
+        order: 4,
+      },
+      {
+        slug: "tummy-tuck",
+        titleAr: "شد البطن",
+        titleEn: "Tummy Tuck",
+        descriptionAr: "شد وتجميل البطن للحصول على مظهر أنحف وأكثر تنسقاً",
+        descriptionEn: "Abdominoplasty for a flatter, more toned and contoured abdomen",
+        longDescriptionAr: "شد البطن (Tummy Tuck) هو إجراء جراحي يهدف إلى إزالة الجلد الزائد والدهون من منطقة البطن وشد عضلات جدار البطن للحصول على مظهر أنعم وأكثر تنسقاً.\n\nيُناسب هذا الإجراء النساء بعد الحمل أو من فقد وزناً بشكل كبير ويعاني من ترهل الجلد في منطقة البطن. يتم التخدير العام ويستغرق الإجراء من ساعتين إلى 4 ساعات.\n\nتبدأ الاستشارة بتقييم حالة البطن وتوقعات المريض، مع شرح شامل لخطوات الإجراء ومراحل التعافي والنتائج المتوقعة.",
+        longDescriptionEn: "Tummy Tuck is a surgical procedure aimed at removing excess skin and fat from the abdomen while tightening the abdominal wall muscles for a smoother, more contoured appearance.\n\nThis procedure is suitable for women after pregnancy or those who have lost significant weight and experience abdominal skin laxity. Performed under general anesthesia, taking 2-4 hours.\n\nThe consultation begins with assessing the abdominal condition and patient expectations, with thorough explanation of the procedure, recovery stages, and expected outcomes.",
+        icon: "Scissors",
+        category: "body",
+        duration: "2-4 ساعات",
+        recovery: "3-4 أسابيع",
+        isActive: true,
+        isFeatured: false,
+        order: 5,
+      },
+      {
+        slug: "botox-injections",
+        titleAr: "حقن البوتوكس",
+        titleEn: "Botox Injections",
+        descriptionAr: "تجميل تجاعيد الوجه وإطلالة شبابية طبيعية من خلال حقن البوتوكس المتقدم",
+        descriptionEn: "Smoothing facial wrinkles and achieving a natural youthful look with advanced Botox",
+        longDescriptionAr: "حقن البوتوكس هو من أكثر الإجراءات التجميلية شيوعاً في العالم. يُستخدم لعلاج التجاعيد النشطة والخطوط الدقيقة في مناطق مختلفة من الوجه مثل الجبهة وحول العينين وال[line between eyebrows].\n\nالنتيجة تظهر خلال 3 إلى 7 أيام ويستمر تأثيره من 3 إلى 6 أشهر. الإجراء غير جراحي ويستغرق 15 إلى 30 دقيقة مع الحد الأدنى من وقت التعافي.\n\nتبدأ الاستشارة بتقييم بنية الوجه وحركة عضلات الوجه، مع شرح شامل لآليات العمل والمدة المتوقعة والنتائج.",
+        longDescriptionEn: "Botox injections are among the most popular cosmetic procedures worldwide. Used to treat active wrinkles and fine lines in various facial areas including the forehead, around the eyes, and between the eyebrows.\n\nResults appear within 3 to 7 days and last 3 to 6 months. The procedure is non-surgical, taking 15 to 30 minutes with minimal downtime.\n\nThe consultation begins with assessing facial structure and muscle movement, with thorough explanation of how it works, expected duration, and outcomes.",
+        icon: "Sparkles",
+        category: "face",
+        duration: "15-30 دقيقة",
+        recovery: "بدون نقاهة",
+        isActive: true,
+        isFeatured: false,
+        order: 6,
+      },
+      {
+        slug: "fillers",
+        titleAr: "الفيلر",
+        titleEn: "Fillers",
+        descriptionAr: "حشو وترطيب البشرة وتحسين ملامح الوجه بشكل طبيعي",
+        descriptionEn: "Volume restoration, skin hydration, and natural facial feature enhancement",
+        longDescriptionAr: "الفيلر (Hyaluronic Acid Fillers) هو حمض هيالورونيك طبيعي يُحقن تحت البشرة لترطيبها وملء التجاعيد ومنح الوجه حجم自然而 Academy. يُستخدم لتحسين ملامح الوجه مثل الشفاه والخدود والمنطقة حول الفم.\n\nالنتيجة فورية وتظهر مباشرة بعد الإجراء، ويستمر التأثير من 6 إلى 12 شهراً حسب نوع الفيلر والمنطقة المعالجة. الإجراء غير جراحي ويستغرق 30 إلى 60 دقيقة.\n\nتبدأ الاستشارة بتقييم بنية الوجه وتوقعات المريض، مع شرح شامل للخيارات المتاحة والنتائج المتوقعة.",
+        longDescriptionEn: "Dermal Fillers is a natural hyaluronic acid substance injected under the skin to hydrate it, fill wrinkles, and add natural volume to facial features. Used to enhance features such as lips, cheeks, and the area around the mouth.\n\nResults are immediate and visible right after the procedure, lasting 6-12 months depending on the filler type and treated area. The procedure is non-surgical, taking 30-60 minutes.\n\nThe consultation begins with assessing facial structure and patient expectations, with thorough explanation of available options and expected outcomes.",
+        icon: "Heart",
+        category: "face",
+        duration: "30-60 دقيقة",
+        recovery: "بدون نقاهة",
+        isActive: true,
+        isFeatured: false,
+        order: 7,
+      },
+      {
+        slug: "arm-thigh-lift",
+        titleAr: "شد العضدين والفخذين",
+        titleEn: "Arm & Thigh Lift",
+        descriptionAr: "شد وتجميل الذراعين والفخذين للحصول على مظهر متناسق ومشدود",
+        descriptionEn: "Lifting and contouring the arms and thighs for a slimmer, more toned appearance",
+        longDescriptionAr: "شد العضدين أو الفخذين هو إجراء جراحي يهدف إلى إزالة الجلد الزائد والدهون من الذراعين أو الفخذين للحصول على مظهر أكثر شباباً وتناسقاً.\n\nيُناسب هذا الإجراء من فقد وزناً بشكل كبير ويعاني من ترهل الجلد في هذه المناطق. يتم التخدير العام ويستغرق الإجراء من ساعتين إلى 4 ساعات.\n\nتبدأ الاستشارة بتقييم حالة الجلد والبنية السفلية، مع شرح شامل لخطوات الإجراء ومراحل التعافي.",
+        longDescriptionEn: "Arm or Thigh Lift is a surgical procedure aimed at removing excess skin and fat from the arms or thighs for a more youthful, contoured appearance.\n\nThis procedure is suitable for those who have lost significant weight and experience skin laxity in these areas. Performed under general anesthesia, taking 2-4 hours.\n\nThe consultation begins with assessing skin condition and underlying structure, with thorough explanation of the procedure and recovery stages.",
+        icon: "ArrowUpDown",
+        category: "body",
+        duration: "2-4 ساعات",
+        recovery: "3-4 أسابيع",
+        isActive: true,
+        isFeatured: false,
+        order: 8,
+      },
+      {
+        slug: "breast-augmentation-reduction",
+        titleAr: "تكبير وتصغير الثدي",
+        titleEn: "Breast Augmentation / Reduction",
+        descriptionAr: "تحسين شكل وحجم الصدر لتحقيق مظهر طبيعي ومتناسق",
+        descriptionEn: "Enhancing the shape and size of the breasts for a natural, proportional look",
+        longDescriptionAr: "تكبير أو تصغير الثدي هو إجراء جراحي يهدف إلى تحقيق الحجم والشكل المثالي للصدر بما يتناسب مع بنية الجسم.\n\nيتوفر خياران رئيسيان: استخدام زرعات (硅胶) أو نقل الدهون الذاتية لتكبير الثدي، أو إزالة الجلد والأنسجة الزائدة لتصغير الثدي. يتم التخدير العام ويستغرق الإجراء من ساعة إلى 3 ساعات.\n\nتبدأ الاستشارة بتقييم بنية الصدر وتوقعات المريض، مع شرح شامل للخيارات والنتائج المتوقعة ومراحل التعافي.",
+        longDescriptionEn: "Breast Augmentation or Reduction is a surgical procedure aimed at achieving the ideal size and shape for the chest in proportion with body structure.\n\nTwo main options are available: implants or autologous fat transfer for augmentation, or removal of excess skin and tissue for reduction. Performed under general anesthesia, taking 1-3 hours.\n\nThe consultation begins with assessing chest structure and patient expectations, with thorough explanation of options, expected outcomes, and recovery stages.",
+        icon: "Stethoscope",
+        category: "body",
+        duration: "1-3 ساعات",
+        recovery: "2-3 أسابيع",
+        isActive: true,
+        isFeatured: false,
+        order: 9,
+      },
+      {
+        slug: "scar-deformity-correction",
+        titleAr: "إصلاح الندب والتشوهات",
+        titleEn: "Scar & Deformity Correction",
+        descriptionAr: "إزالة وتحسين مظهر الندب والتشوهات بأحدث التقنيات الطبية",
+        descriptionEn: "Improving and minimizing the appearance of scars and deformities with the latest techniques",
+        longDescriptionAr: "إصلاح الندب والتشوهات هو إجراء متعدد التقنيات يهدف إلى تحسين مظهر الندب الناتج عن الإصابات أو العمليات الجراحية السابقة أو الحروق.\n\nتتوفر تقنيات متعددة تشمل الحقن الموضعي، العلاج بالليزر، والجراحة التصحيحية. يختار الطبيب التقنية المناسبة حسب نوع الندبة وموقعها وعمقها.\n\nتبدأ الاستشارة بتقييم الندبة و_mocking خطة العلاج المناسبة، مع شرح شامل للخيارات والنتائج المتوقعة.",
+        longDescriptionEn: "Scar & Deformity Correction is a multi-technique procedure aimed at improving the appearance of scars resulting from injuries, previous surgeries, or burns.\n\nMultiple techniques are available including local injections, laser treatment, and corrective surgery. The physician selects the appropriate technique based on scar type, location, and depth.\n\nThe consultation begins with scar assessment and developing an appropriate treatment plan, with thorough explanation of options and expected outcomes.",
+        icon: "Ban",
+        category: "revision",
+        duration: "30 دقيقة - 3 ساعات",
+        recovery: "1-4 أسابيع",
+        isActive: true,
+        isFeatured: false,
+        order: 10,
+      },
+    ];
+
+    let created = 0;
+    let skipped = 0;
+
+    for (const proc of defaultProcedures) {
+      // Check if this slug already exists
+      const existing = await ctx.db
+        .query("procedures")
+        .withIndex("by_slug", (q) => q.eq("slug", proc.slug))
+        .first();
+
+      if (existing) {
+        skipped++;
+        continue;
+      }
+
+      await ctx.db.insert("procedures", proc);
+      created++;
+    }
+
+    return `Procedures seed complete: ${created} created, ${skipped} already existed (skipped).`;
+  },
+});
+
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {

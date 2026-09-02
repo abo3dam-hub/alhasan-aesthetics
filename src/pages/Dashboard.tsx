@@ -168,7 +168,9 @@ export default function Dashboard() {
 // ─── Overview Tab ───
 function OverviewTab() {
   const seedData = useMutation(api.seed.seedAll);
+  const seedProcedures = useMutation(api.seed.seedProcedures);
   const [seeding, setSeeding] = useState(false);
+  const [seedingProcedures, setSeedingProcedures] = useState(false);
   const procedures = useQuery(api.procedures.list);
   const testimonials = useQuery(api.testimonials.list);
   const faqs = useQuery(api.faq.list);
@@ -231,6 +233,40 @@ function OverviewTab() {
         ))}
       </div>
 
+      {/* Seed Procedures Button */}
+      <Card className="border-border/60">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-xl bg-green-50 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Seed Default Procedures</p>
+                <p className="text-sm text-muted-foreground">Create 10 default procedures (safe to run multiple times)</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={seedingProcedures}
+              onClick={async () => {
+                setSeedingProcedures(true);
+                try {
+                  const result = await seedProcedures();
+                  toast.success(result || "Procedures seeded!");
+                } catch (e) {
+                  toast.error("Failed to seed procedures.");
+                }
+                setSeedingProcedures(false);
+              }}
+            >
+              {seedingProcedures ? "Seeding..." : "Seed Procedures"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="border-border/60">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
@@ -239,8 +275,8 @@ function OverviewTab() {
                 <Database className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <p className="font-medium text-foreground">Seed Database</p>
-                <p className="text-sm text-muted-foreground">Populate procedures, testimonials, FAQ, and settings</p>
+                <p className="font-medium text-foreground">Seed Full Database</p>
+                <p className="text-sm text-muted-foreground">Populate all data (procedures, testimonials, FAQ, settings)</p>
               </div>
             </div>
             <Button
@@ -258,7 +294,7 @@ function OverviewTab() {
                 setSeeding(false);
               }}
             >
-              {seeding ? "Seeding..." : "Seed Data"}
+              {seeding ? "Seeding..." : "Seed Full Data"}
             </Button>
           </div>
         </CardContent>
