@@ -41,6 +41,17 @@ export default function Landing() {
       let ogMeta = document.querySelector('meta[property="og:image"]');
       if (ogMeta) ogMeta.setAttribute("content", seoCMS.ogImage);
     }
+
+    // Twitter/X card meta
+    const setOrCreateMeta = (attr: string, val: string) => {
+      let meta = document.querySelector(`meta[name="${attr}"], meta[property="${attr}"]`);
+      if (meta) meta.setAttribute("content", val);
+      else { meta = document.createElement("meta"); meta.setAttribute("name", attr); meta.setAttribute("content", val); document.head.appendChild(meta); }
+    };
+    setOrCreateMeta("twitter:card", "summary_large_image");
+    if (title) setOrCreateMeta("twitter:title", title);
+    if (desc) setOrCreateMeta("twitter:description", desc);
+    if (seoCMS?.ogImage) setOrCreateMeta("twitter:image", seoCMS.ogImage);
   }, [seoCMS, doctorSettings, dir]);
 
   // Default all visible if no settings saved

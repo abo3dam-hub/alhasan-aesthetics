@@ -46,6 +46,7 @@ import {
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { ImageUpload } from "@/components/ImageUpload";
+import { MediaSelector } from "@/components/MediaSelector";
 import { useImageUpload } from "@/hooks/use-upload";
 
 // Generic reorder helper: swap order of two adjacent items using update mutations
@@ -355,7 +356,7 @@ function ProceduresTab() {
                       setShowForm(true);
                     }}
                     className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
-                    title="Edit"
+                    title="Edit" aria-label="Edit"
                   >
                     <FileText className="h-4 w-4" />
                   </button>
@@ -383,8 +384,8 @@ function ProceduresTab() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move up"><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move down"><ArrowDown className="h-3 w-3" /></button>
                   </div>
                 </div>
               </CardContent>
@@ -525,40 +526,45 @@ function ProcedureForm({
             <Label className="text-base font-semibold">Images</Label>
             <div className="space-y-2">
               <Label>Main Image</Label>
-              <ImageUpload value={imageUrl} onChange={setImageUrl} label="Procedure main image" />
+              <MediaSelector value={imageUrl} onChange={setImageUrl} label="Select procedure image" />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Before Image</Label>
-                <ImageUpload value={beforeImageUrl} onChange={setBeforeImageUrl} label="Before image" />
+                <MediaSelector value={beforeImageUrl} onChange={setBeforeImageUrl} label="Select before image" />
               </div>
               <div className="space-y-2">
                 <Label>After Image</Label>
-                <ImageUpload value={afterImageUrl} onChange={setAfterImageUrl} label="After image" />
+                <MediaSelector value={afterImageUrl} onChange={setAfterImageUrl} label="Select after image" />
               </div>
             </div>
             <div className="space-y-2">
               <Label>OG Image (for social sharing)</Label>
-              <ImageUpload value={ogImageUrl} onChange={setOgImageUrl} label="OG image" />
+              <MediaSelector value={ogImageUrl} onChange={setOgImageUrl} label="Select OG image" />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center justify-between">
                 <span>Gallery Images</span>
                 <Button type="button" variant="outline" size="sm" onClick={() => addGalleryImage("")}>+ Add Image</Button>
               </Label>
+              <p className="text-xs text-muted-foreground">Drag order: use arrows to reorder gallery images.</p>
               <div className="space-y-3">
                 {galleryUrls.map((url, i) => (
                   <div key={i} className="flex gap-2 items-start">
                     <div className="flex-1">
-                      <ImageUpload value={url} onChange={(newUrl) => {
+                      <MediaSelector value={url} onChange={(newUrl) => {
                         const updated = [...galleryUrls];
                         updated[i] = newUrl;
                         setGalleryUrls(updated);
                       }} label={`Gallery image ${i + 1}`} />
                     </div>
-                    <Button type="button" variant="ghost" size="icon" className="mt-7 text-red-500 hover:text-red-600" onClick={() => removeGalleryImage(i)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex flex-col gap-0.5 mt-7">
+                      <button type="button" disabled={i === 0} onClick={() => { const updated = [...galleryUrls]; [updated[i-1], updated[i]] = [updated[i], updated[i-1]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
+                      <button type="button" disabled={i === galleryUrls.length - 1} onClick={() => { const updated = [...galleryUrls]; [updated[i], updated[i+1]] = [updated[i+1], updated[i]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
+                      <button type="button" className="p-1 text-red-500 hover:bg-red-50 rounded" onClick={() => removeGalleryImage(i)}>
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -603,6 +609,21 @@ function BeforeAfterTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const existing = editingId ? cases?.find((c) => c._id === editingId) : null;
+  const [baBeforeImage, setBaBeforeImage] = useState("");
+  const [baAfterImage, setBaAfterImage] = useState("");
+
+  // Initialize B&A image state when editing
+  if (existing && baBeforeImage === "" && baAfterImage === "" && !showForm) {
+    // Will be set when form opens
+  }
+
+  const handleOpenBAForm = (id: string | null) => {
+    setEditingId(id);
+    setShowForm(true);
+    const c = id ? cases?.find((c) => c._id === id) : null;
+    setBaBeforeImage(c?.beforeImage || "");
+    setBaAfterImage(c?.afterImage || "");
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -613,8 +634,8 @@ function BeforeAfterTab() {
       titleAr: fd.get("titleAr") as string,
       titleEn: fd.get("titleEn") as string,
       procedureType: fd.get("procedureType") as string,
-      beforeImage: fd.get("beforeImage") as string || "",
-      afterImage: fd.get("afterImage") as string || "",
+      beforeImage: baBeforeImage || "",
+      afterImage: baAfterImage || "",
       descriptionAr: (fd.get("descriptionAr") as string) || undefined,
       descriptionEn: (fd.get("descriptionEn") as string) || undefined,
       patientAge: ageVal ? Number(ageVal) : undefined,
@@ -635,7 +656,7 @@ function BeforeAfterTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Before & After</h2>
-        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
+        <Button onClick={() => handleOpenBAForm(null)} className="gap-2 bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Case
         </Button>
       </div>
@@ -655,11 +676,12 @@ function BeforeAfterTab() {
                   {procedures?.map((p) => <option key={p._id} value={p.slug}>{p.titleEn}</option>)}
                 </select>
               </div>
+              <input type="hidden" name="beforeImage" value={baBeforeImage} />
+              <input type="hidden" name="afterImage" value={baAfterImage} />
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Before Image</Label><Input name="beforeImage" defaultValue={existing?.beforeImage} placeholder="Image URL or paste from Media tab" /></div>
-                <div className="space-y-2"><Label>After Image</Label><Input name="afterImage" defaultValue={existing?.afterImage} placeholder="Image URL or paste from Media tab" /></div>
+                <MediaSelector value={baBeforeImage} onChange={setBaBeforeImage} label="Before Image" />
+                <MediaSelector value={baAfterImage} onChange={setBaAfterImage} label="After Image" />
               </div>
-              <p className="text-xs text-muted-foreground">Upload images in the Media tab, then paste the URL here.</p>
               <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
               <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
               <div className="space-y-2"><Label>Patient Age (optional)</Label><Input name="patientAge" type="number" min={1} max={120} defaultValue={existing?.patientAge ?? ""} placeholder="e.g. 35" /></div>
@@ -684,7 +706,7 @@ function BeforeAfterTab() {
                   <p className="text-sm text-muted-foreground">{c.procedureType}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => { setEditingId(c._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
+                  <button onClick={() => handleOpenBAForm(c._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
                   <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                     {c.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
@@ -716,6 +738,14 @@ function TestimonialsTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const existing = editingId ? testimonials?.find((t) => t._id === editingId) : null;
+  const [testAvatar, setTestAvatar] = useState("");
+
+  const handleOpenTestForm = (id: string | null) => {
+    setEditingId(id);
+    setShowForm(true);
+    const t = id ? testimonials?.find((t) => t._id === id) : null;
+    setTestAvatar(t?.avatar || "");
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -727,7 +757,7 @@ function TestimonialsTab() {
       textAr: fd.get("textAr") as string,
       textEn: fd.get("textEn") as string,
       rating: Number(fd.get("rating") as string) || 5,
-      avatar: (fd.get("avatar") as string) || undefined,
+      avatar: testAvatar || undefined,
       procedureType: (fd.get("procedureType") as string) || undefined,
     };
     if (editingId) {
@@ -766,7 +796,8 @@ function TestimonialsTab() {
                 <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
                 <div className="space-y-2"><Label>Procedure Type (optional)</Label><Input name="procedureType" defaultValue={existing?.procedureType} placeholder="e.g. rhinoplasty" /></div>
               </div>
-              <div className="space-y-2"><Label>Avatar URL (optional)</Label><Input name="avatar" defaultValue={existing?.avatar} placeholder="https://... or paste from Media" /></div>
+              <input type="hidden" name="avatar" value={testAvatar} />
+              <MediaSelector value={testAvatar} onChange={setTestAvatar} label="Avatar Image (optional)" />
               <div className="flex gap-3">
                 <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
@@ -790,7 +821,7 @@ function TestimonialsTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{t.textEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => { setEditingId(t._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
+                <button onClick={() => handleOpenTestForm(t._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
                 <button onClick={async () => { await updateTestimonial({ id: t._id, isActive: !t.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                   {t.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>

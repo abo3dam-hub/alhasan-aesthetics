@@ -97,6 +97,17 @@ export default function ProcedureDetail() {
       let og = document.querySelector('meta[property="og:image"]');
       if (og) og.setAttribute('content', displayData.ogImage);
     }
+
+    // Twitter card
+    const setOrCreateMeta = (attr: string, val: string) => {
+      let meta = document.querySelector(`meta[name="${attr}"], meta[property="${attr}"]`);
+      if (meta) meta.setAttribute("content", val);
+      else { meta = document.createElement("meta"); meta.setAttribute("name", attr); meta.setAttribute("content", val); document.head.appendChild(meta); }
+    };
+    setOrCreateMeta("twitter:card", "summary_large_image");
+    setOrCreateMeta("twitter:title", seoTitle);
+    if (seoDesc) setOrCreateMeta("twitter:description", seoDesc);
+    if (displayData.ogImage) setOrCreateMeta("twitter:image", displayData.ogImage);
   }, [displayData, title, description, isRtl]);
 
   return (
@@ -319,6 +330,52 @@ export default function ProcedureDetail() {
           </motion.div>
         </div>
       </section>
+
+      {/* Person / Physician Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: isRtl ? (doctorSettings?.doctorNameAr || "د. الحسن الصايم") : (doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem"),
+            jobTitle: isRtl ? "استشاري جراحة تجميلية" : "Aesthetic & Plastic Surgery Consultant",
+            medicalSpecialty: ["PlasticSurgery", "DermatologicCosmeticProcedures"],
+            telephone: doctorSettings?.phone || undefined,
+            email: doctorSettings?.email || undefined,
+          }),
+        }}
+      />
+
+      {/* BreadcrumbList Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: isRtl ? "الرئيسية" : "Home",
+                item: typeof window !== "undefined" ? window.location.origin : "",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: isRtl ? "الإجراءات" : "Procedures",
+                item: typeof window !== "undefined" ? `${window.location.origin}/#procedures` : "",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: title,
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

@@ -48,6 +48,11 @@ export default function Hero() {
     ? (isArabic ? heroCMS.ctaSecondaryTextAr : heroCMS.ctaSecondaryTextEn)
     : t.hero.ctaSecondary;
   const heroImage = heroCMS?.image || doctorImg;
+  const doctorName = doctorSettings?.doctorNameEn || "Dr. Al Hasan";
+  const doctorNameAr = doctorSettings?.doctorNameAr || "د. الحسن الصايم";
+  const heroImageAlt = isArabic
+    ? (heroCMS?.imageAltAr || heroCMS?.imageAltEn || doctorNameAr || "د. الحسن الصايم")
+    : (heroCMS?.imageAltEn || heroCMS?.imageAltAr || doctorName || "Dr. Al Hasan");
 
   // Trust badges - CMS or translation defaults
   const defaultTrustBadges = [

@@ -209,3 +209,12 @@
 .glow-champagne {
   box-shadow: 0 0 40px rgba(197, 168, 130, 0.15);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
