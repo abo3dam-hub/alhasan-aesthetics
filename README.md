@@ -213,8 +213,24 @@ bun run build
 
 ## Deployment
 
-1. Push to GitHub
-2. Connect to Vercel/Freebuff
-3. Set `VITE_CONVEX_URL` in environment
-4. Run `bunx convex deploy` for production Convex
-5. Seed data: click "Seed Data" in the Dashboard Overview tab (once)
+### Production Setup
+
+1. **Convex production:** Run `bunx convex deploy` (requires Convex account)
+2. **Hosting:** Deploy to Freebuff/Vercel with:
+   - Build command: `bun run build`
+   - Output directory: `dist`
+   - Environment variable: `VITE_CONVEX_URL` (your Convex production URL)
+3. **Admin account:** Visit `/auth` → sign up → click "Become Admin" (first user only)
+4. **Seed data:** Go to Dashboard → Overview → click "Seed Data" (once)
+5. **WhatsApp:** Configure real WhatsApp number in Dashboard → Settings
+6. **Content:** Upload doctor image, hero image, procedure images via Media Library
+7. **Domain:** Connect custom domain + configure DNS + verify HTTPS
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_CONVEX_URL` | Yes | Convex deployment URL (set in hosting platform) |
+
+All secrets are managed through the hosting platform's environment variables UI.
+Never commit secrets to source code.
