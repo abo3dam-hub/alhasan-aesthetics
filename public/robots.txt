@@ -1,4 +1,13 @@
+# Dr. Al Hasan — Aesthetic & Plastic Surgery Website
+# https://dr-alhasan.com
+
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
 
+# Sitemap
+# Static fallback: /sitemap.xml (served from this domain)
+# Dynamic (recommended): https://<convex-project>.convex.site/sitemap.xml
+# The dynamic sitemap auto-reflects CMS-managed procedures.
 Sitemap: https://dr-alhasan.com/sitemap.xml

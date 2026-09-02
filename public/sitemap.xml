@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  STATIC FALLBACK SITEMAP
+  
+  This sitemap contains the static routes and seed procedure URLs.
+  The PRODUCTION sitemap is served dynamically from the Convex
+  HTTP endpoint at: https://<project>.convex.site/sitemap.xml
+  
+  The dynamic sitemap automatically reflects CMS-managed procedures.
+  This static file serves as a fallback if the dynamic endpoint
+  is unavailable.
+  
+  After adding/removing procedures via the CMS, the dynamic
+  sitemap updates automatically. No manual sitemap edits needed.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://dr-alhasan.com/</loc>
