@@ -52,6 +52,9 @@ export default function Landing() {
   return (
     <div className="min-h-screen">
       <GlassNavbar />
+      <a href="#home" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:start-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg">
+        Skip to main content
+      </a>
       <main>
         {isVisible("hero") && <Hero />}
         {isVisible("about") && <About />}
@@ -63,6 +66,27 @@ export default function Landing() {
         {isVisible("contact") && <Contact />}
       </main>
       <Footer />
+
+      {/* MedicalOrganization Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MedicalBusiness",
+            name: doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem",
+            description: seoCMS?.metaDescriptionEn || "Aesthetic & Plastic Surgery by Dr. Al Hasan Al Saiem",
+            telephone: doctorSettings?.phone || undefined,
+            email: doctorSettings?.email || undefined,
+            address: doctorSettings?.addressEn ? {
+              "@type": "PostalAddress",
+              streetAddress: doctorSettings.addressEn,
+            } : undefined,
+            medicalSpecialty: ["PlasticSurgery", "DermatologicCosmeticProcedures"],
+            url: typeof window !== "undefined" ? window.location.origin : undefined,
+          }),
+        }}
+      />
     </div>
   );
 }

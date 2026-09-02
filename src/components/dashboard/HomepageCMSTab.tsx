@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageUpload } from "@/components/ImageUpload";
 
@@ -294,6 +294,10 @@ function AboutEditor() {
               <div className="space-y-1"><Label className="text-xs">AR</Label><Input dir="rtl" value={stat.labelAr} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], labelAr: e.target.value }; update("stats", s); }} /></div>
               <label className="flex items-center gap-1 text-xs pb-1"><input type="checkbox" checked={stat.enabled !== false} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], enabled: e.target.checked }; update("stats", s); }} className="rounded" /> On</label>
               <button type="button" onClick={() => update("stats", form.stats.filter((_: any, j: number) => j !== i))} className="p-1 text-red-500 hover:bg-red-50 rounded pb-1"><Trash2 className="h-3 w-3" /></button>
+              <div className="flex flex-col gap-0.5 pb-1">
+                <button type="button" disabled={i === 0} onClick={() => { const s = [...form.stats]; [s[i-1], s[i]] = [s[i], s[i-1]]; update("stats", s); }} className="p-1 text-muted-foreground hover:bg-muted rounded disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
+                <button type="button" disabled={i === (form.stats?.length ?? 1) - 1} onClick={() => { const s = [...form.stats]; [s[i], s[i+1]] = [s[i+1], s[i]]; update("stats", s); }} className="p-1 text-muted-foreground hover:bg-muted rounded disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
+              </div>
             </div>
           ))}
           <Button type="button" variant="outline" size="sm" onClick={() => update("stats", [...(form.stats || []), { icon: "award", value: "", labelAr: "", labelEn: "", enabled: true }])} className="gap-1"><Plus className="h-3 w-3" /> Add Stat</Button>

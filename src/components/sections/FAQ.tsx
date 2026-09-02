@@ -105,6 +105,27 @@ export default function FAQ() {
           </motion.div>
         </div>
       </div>
+
+      {/* FAQPage Structured Data */}
+      {displayFaqs && displayFaqs.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: displayFaqs.map((faq: any) => ({
+                "@type": "Question",
+                name: isRtl ? faq.questionAr : faq.questionEn,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: isRtl ? faq.answerAr : faq.answerEn,
+                },
+              })),
+            }),
+          }}
+        />
+      )}
     </section>
   );
 }

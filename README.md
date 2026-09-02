@@ -148,9 +148,10 @@ Every homepage section pulls data from Convex with translation fallbacks:
 
 ## Image Management
 
-- Upload via Media tab in Dashboard
+- Upload via Media tab in Dashboard (multi-file, drag & drop)
 - Images stored in Convex storage
-- Copy URL and paste into procedure/BA/testimonial forms
+- Safe deletion: checks all CMS references before allowing delete
+- Upload date tracking per image
 - Hero image and doctor image use ImageUpload component
 - Supported: JPEG, PNG, WebP, GIF (max 5MB)
 
@@ -161,6 +162,15 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - RTL/LTR support
 - Mobile hamburger menu with slide-in animation
 - Interactive before/after slider on gallery page
+
+## SEO & Structured Data
+
+- Global SEO (title, description, OG image) via admin
+- Per-procedure SEO (title, description, OG image)
+- Dynamic meta tags per route
+- FAQPage JSON-LD structured data
+- MedicalBusiness JSON-LD structured data
+- Skip navigation link for accessibility
 
 ## Routes
 

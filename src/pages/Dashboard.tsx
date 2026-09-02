@@ -28,6 +28,20 @@ import {
   ArrowDown,
   Star,
   X,
+  Sparkles,
+  UserRound,
+  SmilePlus,
+  Droplets,
+  Scissors,
+  Heart,
+  ArrowUpDown,
+  Stethoscope,
+  Ban,
+  Shield,
+  Zap,
+  Activity,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
@@ -73,6 +87,11 @@ const iconOptions = [
   "Heart", "ArrowUpDown", "Stethoscope", "Ban", "Star", "Shield",
   "Zap", "Activity", "Sun", "Moon",
 ];
+
+const iconMap: Record<string, typeof Sparkles> = {
+  Eye, UserRound, SmilePlus, Droplets, Scissors, Sparkles,
+  Heart, ArrowUpDown, Stethoscope, Ban, Star, Shield, Zap, Activity, Sun, Moon,
+};
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -473,12 +492,25 @@ function ProcedureForm({
                 <ChevronDown className="h-4 w-4" />
               </button>
               {showIconPicker && (
-                <div className="absolute z-50 top-full mt-1 w-full bg-white rounded-xl shadow-lg border border-border/40 p-2 grid grid-cols-4 gap-1">
-                  {iconOptions.map((icon) => (
-                    <button key={icon} type="button" onClick={() => { setSelectedIcon(icon); setShowIconPicker(false); }} className={cn("p-2 rounded-lg text-sm text-center hover:bg-primary/10 transition-colors", selectedIcon === icon && "bg-primary/10 font-bold")}>
-                      {icon}
-                    </button>
-                  ))}
+                <div className="absolute z-50 top-full mt-1 w-full bg-white rounded-xl shadow-lg border border-border/40 p-3 max-h-64 overflow-y-auto">
+                  <input type="text" placeholder="Search icons..." className="w-full mb-2 px-3 py-1.5 border border-border/60 rounded-lg text-sm bg-white" onChange={(e) => {
+                    const query = e.target.value.toLowerCase();
+                    document.querySelectorAll('[data-icon-btn]').forEach((btn) => {
+                      const name = (btn as HTMLElement).dataset.iconName || "";
+                      (btn as HTMLElement).style.display = name.toLowerCase().includes(query) ? "" : "none";
+                    });
+                  }} />
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
+                    {iconOptions.map((icon) => {
+                      const IconComp = iconMap[icon] || Sparkles;
+                      return (
+                        <button key={icon} type="button" data-icon-btn data-icon-name={icon} onClick={() => { setSelectedIcon(icon); setShowIconPicker(false); }} className={cn("p-2 rounded-lg flex flex-col items-center gap-1 hover:bg-primary/10 transition-colors", selectedIcon === icon && "bg-primary/10 ring-1 ring-primary")}>
+                          <IconComp className="h-5 w-5 text-primary" />
+                          <span className="text-[9px] text-muted-foreground leading-none truncate w-full text-center">{icon}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -1175,6 +1207,8 @@ function MediaTab() {
   const [previewItem, setPreviewItem] = useState<
     { url: string; name: string; type: string; size: number; storageId: string; _id: string } | null
   >(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ _id: string; url: string; name: string } | null>(null);
+  const deleteRefs = useQuery(api.media.checkReferences, deleteTarget ? { url: deleteTarget.url } : "skip");
 
   const filteredMedia = mediaItems?.filter((item) => {
     if (!search) return true;
@@ -1192,12 +1226,17 @@ function MediaTab() {
     toast.success("URL copied to clipboard!");
   };
 
-  const handleDelete = async (item: { _id: string; storageId: string }) => {
-    if (!confirm("Delete this image? This cannot be undone.")) return;
+  const handleDelete = async (item: { _id: string; storageId: string; url: string; name: string }) => {
+    setDeleteTarget({ _id: item._id, url: item.url, name: item.name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await removeMedia({ id: item._id as any });
+      await removeMedia({ id: deleteTarget._id as any });
       toast.success("Image deleted");
-      setPreviewItem(null);
+      if (previewItem?._id === deleteTarget._id) setPreviewItem(null);
+      setDeleteTarget(null);
     } catch {
       toast.error("Failed to delete image");
     }
@@ -1262,9 +1301,16 @@ function MediaTab() {
                 <p className="text-xs font-medium text-foreground truncate">
                   {item.name}
                 </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {formatSize(item.size)}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-muted-foreground">
+                    {formatSize(item.size)}
+                  </p>
+                  {item.uploadedAt && (
+                    <p className="text-[10px] text-muted-foreground">
+                      {new Date(item.uploadedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </div>
               {/* Hover actions */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
@@ -1374,13 +1420,66 @@ function MediaTab() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleDelete(previewItem)}
+                  onClick={() => handleDelete({ ...previewItem, url: previewItem.url })}
                   className="gap-1 text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation with Reference Check */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div className="relative bg-background rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Delete Image</h3>
+                <p className="text-sm text-muted-foreground truncate">{deleteTarget.name}</p>
+              </div>
+            </div>
+
+            {deleteRefs && deleteRefs.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm text-amber-600 font-medium">This image is referenced by:</p>
+                <ul className="space-y-1">
+                  {deleteRefs.map((ref: string) => (
+                    <li key={ref} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />
+                      {ref}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-muted-foreground mt-2">Deleting this will break those references.</p>
+              </div>
+            ) : deleteRefs !== undefined ? (
+              <p className="text-sm text-muted-foreground">This image is not referenced by any content.</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Checking references...</p>
+            )}
+
+            <div className="flex gap-3 justify-end pt-2">
+              <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+              <Button
+                size="sm"
+                variant={deleteRefs && deleteRefs.length > 0 ? "destructive" : "destructive"}
+                disabled={deleteRefs === undefined}
+                onClick={confirmDelete}
+                className={deleteRefs && deleteRefs.length > 0 ? "" : "bg-red-600 text-white hover:bg-red-700"}
+              >
+                {deleteRefs && deleteRefs.length > 0 ? "Delete Anyway" : "Delete"}
+              </Button>
             </div>
           </div>
         </div>
