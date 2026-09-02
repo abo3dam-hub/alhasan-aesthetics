@@ -51,7 +51,7 @@ export function useImageUpload() {
         const storageId = result.storageId;
 
         // Get the public URL
-        const convexUrl = import.meta.env.VITE_CONVEX_URL as string;
+        const convexUrl = import.meta.env.VITE_CONVEX_URL || 'https://impartial-ladybug-881.convex.cloud';
         const url = `${convexUrl}/api/storage/${storageId}`;
 
         // Record in media table
