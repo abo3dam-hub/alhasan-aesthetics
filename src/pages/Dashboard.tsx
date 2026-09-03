@@ -50,6 +50,7 @@ import { MediaSelector } from "@/components/MediaSelector";
 import { useImageUpload } from "@/hooks/use-upload";
 import { useResolvedMedia } from "@/hooks/use-resolved-media";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { MediaDiagnostics } from "@/components/MediaDiagnostics";
 
 // Generic reorder helper: swap order of two adjacent items using update mutations
 async function swapOrder(
@@ -1353,8 +1354,8 @@ function MediaTab() {
   const [previewItem, setPreviewItem] = useState<
     { url: string; resolvedUrl?: string; name: string; type: string; size: number; storageId: string; _id: string } | null
   >(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ _id: string; url: string; name: string } | null>(null);
-  const deleteRefs = useQuery(api.media.checkReferences, deleteTarget ? { url: deleteTarget.url } : "skip");
+  const [deleteTarget, setDeleteTarget] = useState<{ _id: string; storageId: string; name: string } | null>(null);
+  const deleteRefs = useQuery(api.media.checkReferences, deleteTarget ? { storageId: deleteTarget.storageId } : "skip");
 
   const resolvedMediaItems = useResolvedMedia(mediaItems);
 
@@ -1375,7 +1376,7 @@ function MediaTab() {
   };
 
   const handleDelete = async (item: { _id: string; storageId: string; url: string; name: string }) => {
-    setDeleteTarget({ _id: item._id, url: item.url, name: item.name });
+    setDeleteTarget({ _id: item._id, storageId: item.storageId, name: item.name });
   };
 
   const confirmDelete = async () => {
@@ -1444,6 +1445,9 @@ function MediaTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Diagnostics */}
+      <MediaDiagnostics />
 
       {/* Search */}
       {mediaItems && mediaItems.length > 0 && (

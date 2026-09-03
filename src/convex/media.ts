@@ -78,8 +78,9 @@ function extractStorageIdFromUrl(url: string): string | null {
  * 1. Empty → return empty string
  * 2. Data URI → return as-is
  * 3. Plain storageId (no protocol) → resolve via ctx.storage.getUrl()
- * 4. URL containing storageId → look up media record, resolve via storageId
- * 5. Valid URL (no storageId found) → return as-is
+ * 4. URL containing storageId → extract and resolve via ctx.storage.getUrl()
+ * 5. URL matching a media record → find storageId and resolve
+ * 6. Valid URL (no storageId found) → return as-is
  */
 export const resolveUrl = query({
   args: { ref: v.string() },
@@ -95,18 +96,22 @@ export const resolveUrl = query({
       try {
         const resolved = await ctx.storage.getUrl(ref as any);
         if (resolved) return resolved;
-      } catch { /* fall through */ }
-      return ref;
+      } catch (e) {
+        // Storage object may not exist — fall through
+      }
+      // Could not resolve — return empty to trigger "No image" state
+      return "";
     }
 
     // It's a URL — try to extract storageId from it
     const extractedId = extractStorageIdFromUrl(ref);
     if (extractedId) {
-      // Found a storageId in the URL — resolve via Convex storage
       try {
         const resolved = await ctx.storage.getUrl(extractedId as any);
         if (resolved) return resolved;
-      } catch { /* fall through */ }
+      } catch (e) {
+        // Fall through to media record lookup
+      }
     }
 
     // Try looking up the media record by this URL to find its storageId
@@ -116,11 +121,14 @@ export const resolveUrl = query({
         try {
           const resolved = await ctx.storage.getUrl(item.storageId as any);
           if (resolved) return resolved;
-        } catch { /* fall through */ }
+        } catch (e) {
+          // Storage object may not exist
+        }
       }
     }
 
-    // No resolution possible — return original URL as fallback
+    // No resolution possible — return original URL as last-resort fallback
+    // Only return it if it looks like a real URL (not a raw storageId accidentally reaching here)
     return ref;
   },
 });
@@ -189,37 +197,33 @@ export const resolveUrls = query({
   },
 });
 
-/** Check if a media URL is referenced by any CMS content */
+/**
+ * Check if a media storageId is referenced by any CMS content.
+ * Matches against both storageId fields and URL fields for maximum compatibility.
+ */
 export const checkReferences = query({
-  args: { url: v.string() },
+  args: { storageId: v.string() },
   handler: async (ctx, args) => {
-    const url = args.url;
+    const sid = args.storageId;
     const refs: string[] = [];
-
-    // Check hero image
-    const hero = await ctx.db
-      .query("siteSettings")
-      .withIndex("by_key", (q) => q.eq("key", "hero"))
-      .first();
-    if (hero?.value?.image === url) refs.push("Hero Image");
 
     // Check about image
     const about = await ctx.db
       .query("siteSettings")
       .withIndex("by_key", (q) => q.eq("key", "about"))
       .first();
-    if (about?.value?.image === url) refs.push("Doctor Profile");
+    if (about?.value?.image === sid) refs.push("Doctor Profile");
 
     // Check all procedures
     const procedures = await ctx.db.query("procedures").collect();
     for (const p of procedures) {
-      if (p.image === url) refs.push(`Procedure: ${p.titleEn}`);
-      if (p.ogImage === url) refs.push(`Procedure OG: ${p.titleEn}`);
-      if (p.beforeImage === url) refs.push(`Procedure Before: ${p.titleEn}`);
-      if (p.afterImage === url) refs.push(`Procedure After: ${p.titleEn}`);
+      if (p.image === sid) refs.push(`Procedure: ${p.titleEn}`);
+      if (p.ogImage === sid) refs.push(`Procedure OG: ${p.titleEn}`);
+      if (p.beforeImage === sid) refs.push(`Procedure Before: ${p.titleEn}`);
+      if (p.afterImage === sid) refs.push(`Procedure After: ${p.titleEn}`);
       if (p.gallery) {
-        for (const gUrl of p.gallery) {
-          if (gUrl === url) refs.push(`Procedure Gallery: ${p.titleEn}`);
+        for (const g of p.gallery) {
+          if (g === sid) refs.push(`Procedure Gallery: ${p.titleEn}`);
         }
       }
     }
@@ -227,14 +231,14 @@ export const checkReferences = query({
     // Check all before/after cases
     const cases = await ctx.db.query("beforeAfter").collect();
     for (const c of cases) {
-      if (c.beforeImage === url) refs.push(`B&A Before: ${c.titleEn}`);
-      if (c.afterImage === url) refs.push(`B&A After: ${c.titleEn}`);
+      if (c.beforeImage === sid) refs.push(`B&A Before: ${c.titleEn}`);
+      if (c.afterImage === sid) refs.push(`B&A After: ${c.titleEn}`);
     }
 
     // Check all testimonials
     const testimonials = await ctx.db.query("testimonials").collect();
     for (const t of testimonials) {
-      if (t.avatar === url) refs.push(`Testimonial: ${t.nameEn}`);
+      if (t.avatar === sid) refs.push(`Testimonial: ${t.nameEn}`);
     }
 
     // Check SEO OG image
@@ -242,11 +246,50 @@ export const checkReferences = query({
       .query("siteSettings")
       .withIndex("by_key", (q) => q.eq("key", "seo"))
       .first();
-    if (seo?.value?.ogImage === url) refs.push("Global SEO OG Image");
-
-    // CTA section is text/design only — no image field exposed in Dashboard or public site
+    if (seo?.value?.ogImage === sid) refs.push("Global SEO OG Image");
 
     return refs;
+  },
+});
+
+/**
+ * Diagnostic query — inspects all media records and tests storage resolution.
+ * Returns detailed info for debugging the image system.
+ */
+export const diagnostic = query({
+  args: {},
+  handler: async (ctx) => {
+    const items = await ctx.db.query("media").collect();
+    const results = [];
+    for (const item of items) {
+      let resolvedUrl = "";
+      let storageExists = false;
+      let error = "";
+      try {
+        const url = await ctx.storage.getUrl(item.storageId as any);
+        if (url) {
+          resolvedUrl = url;
+          storageExists = true;
+        }
+      } catch (e) {
+        error = e instanceof Error ? e.message : String(e);
+      }
+      results.push({
+        _id: item._id,
+        storageId: item.storageId,
+        url: item.url,
+        name: item.name,
+        type: item.type,
+        size: item.size,
+        storageExists,
+        resolvedUrl,
+        error,
+      });
+    }
+    return {
+      totalRecords: items.length,
+      items: results,
+    };
   },
 });
 
