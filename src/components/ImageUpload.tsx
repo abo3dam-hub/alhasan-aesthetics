@@ -20,7 +20,8 @@ export function ImageUpload({ value, onChange, label, className }: ImageUploadPr
   const handleFile = async (file: File) => {
     const result = await upload(file);
     if (result) {
-      onChange(result.url);
+      // Pass storageId as the canonical reference, not the URL
+      onChange(result.storageId);
     }
   };
 

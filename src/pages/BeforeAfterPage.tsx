@@ -8,6 +8,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
 import { cn } from "@/lib/utils";
+import { ResolvedImage } from "@/components/ResolvedImage";
 
 
 
@@ -140,25 +141,26 @@ export default function BeforeAfterPage() {
                       {/* Before/After Slider */}
                       <div className="relative aspect-[4/3] overflow-hidden">
                         {/* After (background) */}
-                        <img
-                          src={caseItem.afterImage}
+                        <ResolvedImage
+                          ref={caseItem.afterImage}
                           alt="After"
-                          className="absolute inset-0 w-full h-full object-cover"
+                          imgClassName="absolute inset-0 w-full h-full object-cover"
+                          fallbackClassName="absolute inset-0"
                         />
                         {/* Before (clipped) */}
                         <div
                           className="absolute inset-0 overflow-hidden"
                           style={{ width: `${sliderVal}%` }}
                         >
-                          <img
-                            src={caseItem.beforeImage}
-                            alt="Before"
-                            className="absolute inset-0 w-full h-full object-cover"
-                            style={{
-                              width: `${100 / (sliderVal / 100)}%`,
-                              maxWidth: "none",
-                            }}
-                          />
+                          <div style={{ width: `${10000 / Math.max(sliderVal, 1)}%`, maxWidth: "none" }}>
+                            <ResolvedImage
+                              ref={caseItem.beforeImage}
+                              alt="Before"
+                              imgClassName="w-full h-full object-cover"
+                              fallbackClassName="w-full h-full"
+                              lazy={false}
+                            />
+                          </div>
                         </div>
                         {/* Slider Handle */}
                         <div

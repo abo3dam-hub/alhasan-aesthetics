@@ -6,6 +6,7 @@ import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
 import { Link } from "react-router";
+import { ResolvedImage } from "@/components/ResolvedImage";
 
 
 const placeholderCases = [
@@ -71,10 +72,10 @@ export default function BeforeAfter() {
                 >
                   <div className="glass-card rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
                     <div className="relative aspect-square overflow-hidden">
-                      <img
-                        src={c.afterImage}
+                      <ResolvedImage
+                        ref={c.afterImage}
                         alt={isRtl ? c.titleAr : c.titleEn}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                       <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">

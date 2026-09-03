@@ -59,10 +59,27 @@ export const getFileUrl = query({
 });
 
 /**
+ * Extract a Convex storageId from a URL if present.
+ * Convex storage URLs typically end with /api/storage/<storageId>
+ * or contain the storageId as a path segment.
+ */
+function extractStorageIdFromUrl(url: string): string | null {
+  // Match Convex storage URL pattern: .../api/storage/<storageId>
+  const match = url.match(/\/api\/storage\/([^/?#]+)/);
+  if (match) return match[1];
+  return null;
+}
+
+/**
  * Resolve an image reference to a working URL.
- * Handles: absolute URLs, storageIds, and legacy/broken references.
- * If the input looks like a Convex storageId (no protocol prefix),
- * it resolves via ctx.storage.getUrl(). Otherwise returns as-is.
+ * Handles: storageIds, absolute URLs, data URIs, and legacy references.
+ * 
+ * Resolution priority:
+ * 1. Empty → return empty string
+ * 2. Data URI → return as-is
+ * 3. Plain storageId (no protocol) → resolve via ctx.storage.getUrl()
+ * 4. URL containing storageId → look up media record, resolve via storageId
+ * 5. Valid URL (no storageId found) → return as-is
  */
 export const resolveUrl = query({
   args: { ref: v.string() },
@@ -70,43 +87,103 @@ export const resolveUrl = query({
     const ref = args.ref;
     if (!ref || ref === "") return "";
 
-    // Already a full URL — return as-is
-    if (ref.startsWith("http://") || ref.startsWith("https://") || ref.startsWith("data:")) {
+    // Data URI — return as-is
+    if (ref.startsWith("data:")) return ref;
+
+    // Plain storageId (no protocol prefix)
+    if (!ref.startsWith("http://") && !ref.startsWith("https://")) {
+      try {
+        const resolved = await ctx.storage.getUrl(ref as any);
+        if (resolved) return resolved;
+      } catch { /* fall through */ }
       return ref;
     }
 
-    // Looks like a storageId (no protocol) — resolve via Convex storage
-    try {
-      const resolved = await ctx.storage.getUrl(ref as any);
-      return resolved || ref;
-    } catch {
-      return ref;
+    // It's a URL — try to extract storageId from it
+    const extractedId = extractStorageIdFromUrl(ref);
+    if (extractedId) {
+      // Found a storageId in the URL — resolve via Convex storage
+      try {
+        const resolved = await ctx.storage.getUrl(extractedId as any);
+        if (resolved) return resolved;
+      } catch { /* fall through */ }
     }
+
+    // Try looking up the media record by this URL to find its storageId
+    const allMedia = await ctx.db.query("media").collect();
+    for (const item of allMedia) {
+      if (item.url === ref && item.storageId) {
+        try {
+          const resolved = await ctx.storage.getUrl(item.storageId as any);
+          if (resolved) return resolved;
+        } catch { /* fall through */ }
+      }
+    }
+
+    // No resolution possible — return original URL as fallback
+    return ref;
   },
 });
 
 /**
  * Resolve multiple image references at once for efficient batch loading.
+ * Uses the same resolution logic as resolveUrl for consistency.
  */
 export const resolveUrls = query({
   args: { refs: v.array(v.string()) },
   handler: async (ctx, args) => {
     const results: Record<string, string> = {};
+    // Pre-fetch all media records for URL→storageId lookups
+    const allMedia = await ctx.db.query("media").collect();
+    const urlToStorageId = new Map<string, string>();
+    for (const item of allMedia) {
+      if (item.url && item.storageId) {
+        urlToStorageId.set(item.url, item.storageId);
+      }
+    }
+
     for (const ref of args.refs) {
       if (!ref || ref === "") {
         results[ref] = "";
         continue;
       }
-      if (ref.startsWith("http://") || ref.startsWith("https://") || ref.startsWith("data:")) {
+
+      // Data URI
+      if (ref.startsWith("data:")) {
         results[ref] = ref;
         continue;
       }
-      try {
-        const resolved = await ctx.storage.getUrl(ref as any);
-        results[ref] = resolved || ref;
-      } catch {
+
+      // Plain storageId
+      if (!ref.startsWith("http://") && !ref.startsWith("https://")) {
+        try {
+          const resolved = await ctx.storage.getUrl(ref as any);
+          if (resolved) { results[ref] = resolved; continue; }
+        } catch { /* fall through */ }
         results[ref] = ref;
+        continue;
       }
+
+      // URL — try extracting storageId
+      const extractedId = extractStorageIdFromUrl(ref);
+      if (extractedId) {
+        try {
+          const resolved = await ctx.storage.getUrl(extractedId as any);
+          if (resolved) { results[ref] = resolved; continue; }
+        } catch { /* fall through */ }
+      }
+
+      // Try media record lookup
+      const mediaStorageId = urlToStorageId.get(ref);
+      if (mediaStorageId) {
+        try {
+          const resolved = await ctx.storage.getUrl(mediaStorageId as any);
+          if (resolved) { results[ref] = resolved; continue; }
+        } catch { /* fall through */ }
+      }
+
+      // Fallback
+      results[ref] = ref;
     }
     return results;
   },

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
+import { ResolvedImage } from "@/components/ResolvedImage";
 import {
   ArrowRight,
   ArrowLeft,
@@ -127,11 +128,10 @@ export default function ProceduresPage() {
                       {/* Image or Icon */}
                       {proc.image ? (
                         <div className="relative aspect-[16/10] overflow-hidden">
-                          <img
-                            src={proc.image}
+                          <ResolvedImage
+                            ref={proc.image}
                             alt={proc.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            loading="lazy"
+                            imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                           <div className="absolute bottom-4 start-4">

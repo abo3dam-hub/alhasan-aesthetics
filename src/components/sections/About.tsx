@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
 import doctorImg from "/assets/1.jpg";
+import { ResolvedImage } from "@/components/ResolvedImage";
 
 const statIconMap: Record<string, typeof Award> = {
   clock: Clock,
@@ -80,12 +81,20 @@ export default function About() {
               <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-primary/20 via-secondary/15 to-primary/10 blur-sm" />
               <div className="relative glass-elevated rounded-[2rem] overflow-hidden glow-champagne">
                 <div className="aspect-[3/4] overflow-hidden">
-                  <img
-                    src={doctorImage}
-                    alt={isArabic ? doctorNameAr : doctorName}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
-                    loading="lazy"
-                  />
+                  {aboutCMS?.image ? (
+                    <ResolvedImage
+                      ref={aboutCMS.image}
+                      alt={isArabic ? doctorNameAr : doctorName}
+                      imgClassName="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                    />
+                  ) : (
+                    <img
+                      src={doctorImg}
+                      alt={isArabic ? doctorNameAr : doctorName}
+                      className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                      loading="lazy"
+                    />
+                  )}
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">

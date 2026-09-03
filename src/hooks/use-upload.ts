@@ -2,7 +2,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState, useCallback } from "react";
 
-interface UploadResult {
+export interface UploadResult {
   storageId: string;
   url: string;
 }

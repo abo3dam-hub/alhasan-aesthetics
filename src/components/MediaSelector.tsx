@@ -11,7 +11,7 @@ import { ResolvedImage } from "@/components/ResolvedImage";
 
 interface MediaSelectorProps {
   value: string;
-  onChange: (url: string) => void;
+  onChange: (storageIdOrUrl: string) => void;
   label?: string;
   className?: string;
 }
@@ -53,7 +53,7 @@ export function MediaSelector({ value, onChange, label, className }: MediaSelect
           selectedUrl={value}
           search={search}
           onSearch={setSearch}
-          onSelect={(url) => { onChange(url); setIsOpen(false); setSearch(""); }}
+          onSelect={(storageId) => { onChange(storageId); setIsOpen(false); setSearch(""); }}
           onClose={() => { setIsOpen(false); setSearch(""); }}
         />
       )}
@@ -68,7 +68,7 @@ function MediaLibraryModal({
   onSelect,
   onClose,
 }: {
-  selectedUrl: string;
+  selectedUrl: string; // This is the stored value (storageId or legacy URL)
   search: string;
   onSearch: (s: string) => void;
   onSelect: (url: string) => void;
@@ -164,12 +164,12 @@ function MediaLibraryModal({
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
               {filtered.map((item) => {
-                const isSelected = selectedUrl === item.url;
+                const isSelected = selectedUrl === item.storageId || selectedUrl === item.url;
                 return (
                   <button
                     key={item._id}
                     type="button"
-                    onClick={() => onSelect(item.url)}
+                    onClick={() => onSelect(item.storageId)}
                     className={cn(
                       "relative aspect-square rounded-xl overflow-hidden border-2 transition-all hover:shadow-md group",
                       isSelected ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-border/60"
