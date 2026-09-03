@@ -103,7 +103,7 @@ export default function Procedures() {
                     <div className="glass-card rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
                       {proc.image ? (
                         <div className="relative aspect-[4/3] overflow-hidden">
-                          <ResolvedImage ref={proc.image} alt={proc.title} imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <ResolvedImage ref={proc.image} alt={proc.title} imgClassName="w-full h-full object-fill group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         </div>
                       ) : (

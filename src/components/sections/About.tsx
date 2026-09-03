@@ -85,13 +85,13 @@ export default function About() {
                     <ResolvedImage
                       ref={aboutCMS.image}
                       alt={isArabic ? doctorNameAr : doctorName}
-                      imgClassName="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                      imgClassName="w-full h-full object-fill object-center transition-transform duration-700 hover:scale-105"
                     />
                   ) : (
                     <img
                       src={doctorImg}
                       alt={isArabic ? doctorNameAr : doctorName}
-                      className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                      className="w-full h-full object-fill object-center transition-transform duration-700 hover:scale-105"
                       loading="lazy"
                     />
                   )}
