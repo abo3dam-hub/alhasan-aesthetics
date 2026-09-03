@@ -75,7 +75,7 @@ export default function BeforeAfter() {
                       <ResolvedImage
                         ref={c.afterImage}
                         alt={isRtl ? c.titleAr : c.titleEn}
-                        imgClassName="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                       <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
