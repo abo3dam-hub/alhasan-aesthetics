@@ -103,7 +103,7 @@ export function ResolvedImage({
     <img
       src={resolved}
       alt={alt}
-      className={cn("w-full h-full object-fill", imgClassName)}
+      className={cn("w-full h-full object-cover", imgClassName)}
       loading={lazy ? "lazy" : "eager"}
       onError={() => setLoadError(true)}
     />

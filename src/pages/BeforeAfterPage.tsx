@@ -144,7 +144,7 @@ export default function BeforeAfterPage() {
                         <ResolvedImage
                           ref={caseItem.afterImage}
                           alt="After"
-                          imgClassName="absolute inset-0 w-full h-full object-fill"
+                          imgClassName="absolute inset-0 w-full h-full object-cover"
                           fallbackClassName="absolute inset-0"
                         />
                         {/* Before (clipped) */}
@@ -156,7 +156,7 @@ export default function BeforeAfterPage() {
                             <ResolvedImage
                               ref={caseItem.beforeImage}
                               alt="Before"
-                              imgClassName="w-full h-full object-fill"
+                              imgClassName="w-full h-full object-cover"
                               fallbackClassName="w-full h-full"
                               lazy={false}
                             />
