@@ -131,7 +131,7 @@ export default function ProceduresPage() {
                           <ResolvedImage
                             ref={proc.image}
                             alt={proc.title}
-                            imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            imgClassName="w-full h-full group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                           <div className="absolute bottom-4 start-4">

@@ -176,7 +176,7 @@ export default function ProcedureDetail() {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="mt-8 rounded-2xl overflow-hidden glass-elevated"
             >
-              <ResolvedImage ref={displayData.image} alt={title} imgClassName="w-full h-64 sm:h-80 lg:h-96 object-cover" lazy={false} />
+              <ResolvedImage ref={displayData.image} alt={title} imgClassName="w-full h-64 sm:h-80 lg:h-96" lazy={false} />
             </motion.div>
           )}
 
@@ -285,7 +285,7 @@ export default function ProcedureDetail() {
                 {gallery.map((url, i) => (
                   <div key={i} className="glass-card rounded-2xl overflow-hidden">
                     <div className="aspect-square">
-                      <ResolvedImage ref={url} alt={`${title} gallery ${i + 1}`} imgClassName="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                      <ResolvedImage ref={url} alt={`${title} gallery ${i + 1}`} imgClassName="w-full h-full hover:scale-105 transition-transform duration-300" />
                     </div>
                   </div>
                 ))}
