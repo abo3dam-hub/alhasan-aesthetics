@@ -124,6 +124,34 @@ export const checkReferences = query({
   },
 });
 
+/**
+ * Repair media records that have a storageId but no usable URL.
+ * Idempotent — only updates records where url is empty/missing.
+ */
+export const repairUrls = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const convexUrl = process.env.CONVEX_SITE_URL || "";
+    if (!convexUrl) {
+      return "Cannot determine Convex site URL for repair.";
+    }
+    const items = await ctx.db.query("media").collect();
+    let repaired = 0;
+    let skipped = 0;
+    for (const item of items) {
+      if (!item.url || item.url === "" || item.url.startsWith("blob:")) {
+        const newUrl = `${convexUrl}/api/storage/${item.storageId}`;
+        await ctx.db.patch(item._id, { url: newUrl });
+        repaired++;
+      } else {
+        skipped++;
+      }
+    }
+    return `Media URL repair: ${repaired} records repaired, ${skipped} already valid.`;
+  },
+});
+
 /** Update media metadata (alt text) */
 export const updateMedia = mutation({
   args: {

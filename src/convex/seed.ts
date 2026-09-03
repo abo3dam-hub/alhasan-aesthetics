@@ -194,6 +194,228 @@ export const seedProcedures = mutation({
   },
 });
 
+/**
+ * Seed homepage CMS settings, doctor settings, and section headers.
+ * Idempotent — only fills in missing/empty fields. Never overwrites.
+ */
+export const seedHomepageSettings = mutation({
+  args: {},
+  handler: async (ctx) => {
+    let created = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    // Helper: upsert a siteSettings record, only filling empty fields
+    async function upsertSettings(key: string, newValue: Record<string, any>) {
+      const existing = await ctx.db
+        .query("siteSettings")
+        .withIndex("by_key", (q) => q.eq("key", key))
+        .first();
+
+      if (existing) {
+        // Merge: only fill in fields that are empty/missing in the existing value
+        const current = existing.value as Record<string, any>;
+        const merged: Record<string, any> = { ...current };
+        let changed = false;
+        for (const [k, v] of Object.entries(newValue)) {
+          if (v !== undefined && v !== null) {
+            // For nested objects (like socialMedia, stats, trustBadges), merge deeply
+            if (
+              typeof v === "object" && !Array.isArray(v) && v !== null &&
+              typeof current[k] === "object" && !Array.isArray(current[k]) && current[k] !== null
+            ) {
+              const nestedMerged: Record<string, any> = { ...current[k] };
+              for (const [nk, nv] of Object.entries(v as Record<string, any>)) {
+                if (nv !== undefined && nv !== null && (nestedMerged[nk] === undefined || nestedMerged[nk] === null || nestedMerged[nk] === "")) {
+                  nestedMerged[nk] = nv;
+                  changed = true;
+                }
+              }
+              merged[k] = nestedMerged;
+            } else if (
+              current[k] === undefined || current[k] === null || current[k] === ""
+            ) {
+              merged[k] = v;
+              changed = true;
+            }
+          }
+        }
+        if (changed) {
+          await ctx.db.patch(existing._id, { value: merged });
+          updated++;
+        } else {
+          skipped++;
+        }
+      } else {
+        await ctx.db.insert("siteSettings", { key, value: newValue });
+        created++;
+      }
+    }
+
+    // ─── Doctor Settings ───
+    await upsertSettings("doctor", {
+      doctorNameAr: "د. الحسن الصايم",
+      doctorNameEn: "Dr. Al Hasan Al Saiem",
+      whatsappNumber: "+966500000000",
+      phone: "+966 XX XXX XXXX",
+      email: "info@dr-alhasan.com",
+      addressAr: "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي",
+      addressEn: "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai",
+      biographyAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة.",
+      biographyEn: "Dr. Al Hasan Al Saiem is a board-certified aesthetic and plastic surgeon with over 15 years of experience transforming the lives of thousands of patients.",
+      specializationsAr: "شد الوجه والرقبة، تجميل الأنف، شفط وحقن الشحم، جميع إجراءات التجميل المتقدمة",
+      specializationsEn: "Face & Neck Lift, Rhinoplasty, Liposuction & Fat Transfer, All Advanced Aesthetic Procedures",
+      educationAr: "دكتوراه في الطب، شهادة البورد في الجراحة التجميلية",
+      educationEn: "MD, Board Certified in Plastic Surgery",
+      heroTitleAr: "جمالك يستحق",
+      heroTitleEn: "Your Beauty Deserves",
+      heroSubtitleAr: "أرقى العناية",
+      heroSubtitleEn: "The Finest Care",
+      socialMedia: {
+        instagram: "",
+        facebook: "",
+        twitter: "",
+        snapchat: "",
+        tiktok: "",
+      },
+      workingHoursWeekdays: "9 AM - 6 PM",
+      workingHoursFriday: "",
+      workingHoursSaturday: "",
+    });
+
+    // ─── Hero Section CMS ───
+    await upsertSettings("hero", {
+      badgeAr: "جراحة تجميلية وتجميلية",
+      badgeEn: "Aesthetic & Plastic Surgery",
+      titleAr: "جمالك يستحق",
+      titleEn: "Your Beauty Deserves",
+      subtitleAr: "أرقى العناية",
+      subtitleEn: "The Finest Care",
+      descriptionAr: "نحول رؤيتك إلى واقع بأحدث التقنيات الجراحية وبمعايير عالمية. ثقتك وجمالك هما أولويتنا المطلقة.",
+      descriptionEn: "We bring your vision to life with the latest surgical techniques and world-class standards. Your trust and beauty are our absolute priority.",
+      ctaTextAr: "احجز استشارتك ومعرفة الأسعار",
+      ctaTextEn: "Book Your Consultation",
+      ctaSecondaryTextAr: "استكشف الإجراءات",
+      ctaSecondaryTextEn: "Explore Procedures",
+      badgeEnabled: true,
+      ctaEnabled: true,
+      ctaSecondaryEnabled: true,
+      trustBadges: [
+        { labelAr: "+١٥ سنة خبرة", labelEn: "+15 Years Experience", icon: "award", enabled: true },
+        { labelAr: "+٥٠٠٠ عملية ناجحة", labelEn: "+5000 Successful Surgeries", icon: "star", enabled: true },
+        { labelAr: "نتائج طبيعية ١٠٠٪", labelEn: "100% Natural Results", icon: "sparkles", enabled: true },
+      ],
+    });
+
+    // ─── About Section CMS ───
+    await upsertSettings("about", {
+      badgeAr: "عن الدكتور الحسن الصايم",
+      badgeEn: "About Dr. Al Hasan",
+      titleAr: "خبرة تجمع بين",
+      titleEn: "Expertise That Merges",
+      titleHighlightAr: "العلم والجمال",
+      titleHighlightEn: "Science & Beauty",
+      descriptionAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة. متخصص في شد الوجه والرقبة، تجميل الأنف، شفط وحقن الشحم، وجميع إجراءات التجميل المتقدمة.",
+      descriptionEn: "Dr. Al Hasan Al Saiem is a board-certified aesthetic and plastic surgeon with over 15 years of experience. Specializing in Face & Neck Lift, Rhinoplasty, Liposuction & Fat Transfer, and all advanced aesthetic procedures.",
+      stats: [
+        { icon: "clock", value: "15+", labelAr: "سنوات خبرة", labelEn: "Years Experience", enabled: true },
+        { icon: "heart", value: "5000+", labelAr: "إجراء ناجح", labelEn: "Successful Procedures", enabled: true },
+        { icon: "users", value: "99%", labelAr: "نسبة الرضا", labelEn: "Patient Satisfaction", enabled: true },
+        { icon: "award", value: "10+", labelAr: "شهادة دولية", labelEn: "Certifications", enabled: true },
+      ],
+    });
+
+    // ─── CTA Section CMS ───
+    await upsertSettings("cta", {
+      enabled: true,
+      badgeAr: "لا تنتظر أكثر",
+      badgeEn: "Don't Wait Any Longer",
+      titleAr: "مستعد لتغيير حياتك؟",
+      titleEn: "Ready to Transform Your Life?",
+      descriptionAr: "احجز استشارتك المجانية اليوم واكتشف كيف يمكننا تحقيق رؤيتك الجمالية.",
+      descriptionEn: "Book your free consultation today and discover how we can bring your aesthetic vision to life.",
+      buttonTextAr: "احجز استشارتك",
+      buttonTextEn: "Book Your Consultation",
+      buttonEnabled: true,
+      buttonDestination: "/consultation",
+    });
+
+    // ─── Footer CMS ───
+    await upsertSettings("footer", {
+      descriptionAr: "د. الحسن الصايم — استشاري جراحة تجميلية متخصص في تحقيق نتائج طبيعية ومتقنة بأعلى معايير الجودة العالمية.",
+      descriptionEn: "Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery specialist delivering natural, refined results with the highest international quality standards.",
+    });
+
+    // ─── Homepage Visibility ───
+    await upsertSettings("homepage", {
+      hero: true,
+      about: true,
+      procedures: true,
+      beforeAfter: true,
+      testimonials: true,
+      faq: true,
+      cta: true,
+      contact: true,
+    });
+
+    // ─── Section Headers ───
+    await upsertSettings("proceduresSection", {
+      badgeAr: "إجراءاتنا",
+      badgeEn: "Our Procedures",
+      titleAr: "خدماتنا",
+      titleEn: "Our",
+      titleHighlightAr: "التجميلية",
+      titleHighlightEn: "Procedures",
+      subtitleAr: "نقدم مجموعة شاملة من الإجراءات التجميلية المتقدمة المصممة بعناية لتحقيق نتائج طبيعية ومتقنة.",
+      subtitleEn: "We offer a comprehensive range of advanced aesthetic procedures carefully designed to achieve natural, refined results.",
+    });
+
+    await upsertSettings("beforeAfterSection", {
+      badgeAr: "قبل وبعد",
+      badgeEn: "Before & After",
+      titleAr: "نتائج",
+      titleEn: "Results",
+      titleHighlightAr: "تحدث عن نفسها",
+      titleHighlightEn: "Speak for Themselves",
+      subtitleAr: "نفخر بعرض نتائج حقيقية لمرضانا. كل حالة هي قصة نجاح فريدة.",
+      subtitleEn: "We are proud to showcase real results from our patients. Every case is a unique success story.",
+    });
+
+    await upsertSettings("testimonialsSection", {
+      badgeAr: "تجارب المرضى",
+      badgeEn: "Patient Stories",
+      titleAr: "ماذا يقول",
+      titleEn: "What",
+      titleHighlightAr: "مرضانا",
+      titleHighlightEn: "Our Patients Say",
+      subtitleAr: "قصص حقيقية من مرضى عاشوا تجربة استثنائية معنا.",
+      subtitleEn: "Real stories from patients who experienced exceptional care with us.",
+    });
+
+    await upsertSettings("faqSection", {
+      badgeAr: "الأسئلة الشائعة",
+      badgeEn: "FAQ",
+      titleAr: "الأسئلة",
+      titleEn: "Frequently Asked",
+      titleHighlightAr: "الأكثر شيوعاً",
+      titleHighlightEn: "Questions",
+      subtitleAr: "إجابات على الأسئلة الأكثر تكراراً حول إجراءاتنا وخدماتنا.",
+      subtitleEn: "Answers to the most commonly asked questions about our procedures and services.",
+    });
+
+    // ─── SEO Settings ───
+    await upsertSettings("seo", {
+      siteTitleAr: "د. الحسن الصايم — جراحة تجميلية",
+      siteTitleEn: "Dr. Al Hasan — Aesthetic & Plastic Surgery",
+      metaDescriptionAr: "استشاري جراحة تجميلية بخبرة أكثر من ١٥ عاماً. نتائج طبيعية ومتقنة بأعلى معايير الجودة العالمية.",
+      metaDescriptionEn: "Board-certified aesthetic surgeon with 15+ years of experience. Natural, refined results with the highest international quality standards.",
+      canonicalBase: "https://dr-alhasan.com",
+    });
+
+    return `Homepage CMS seed complete: ${created} settings created, ${updated} settings updated (filled empty fields), ${skipped} settings already complete (skipped).`;
+  },
+});
+
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {

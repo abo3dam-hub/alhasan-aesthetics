@@ -19,9 +19,9 @@ export default function Footer() {
   const addressAr = doctorSettings?.addressAr || "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي";
   const address = isRtl ? addressAr : addressEn;
 
-  const footerDescription = footerCMS?.descriptionAr && footerCMS?.descriptionEn
-    ? (isArabic ? footerCMS.descriptionAr : footerCMS.descriptionEn)
-    : t.footer.description;
+  const footerDescription = isArabic
+    ? (footerCMS?.descriptionAr || t.footer.description)
+    : (footerCMS?.descriptionEn || t.footer.description);
 
   const footerProcedures = procedures?.slice(0, 6) ?? [];
 

@@ -41,16 +41,16 @@ export default function FAQ() {
             className="lg:col-span-2"
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
-              {sectionCMS?.badgeAr && sectionCMS?.badgeEn ? (isArabic ? sectionCMS.badgeAr : sectionCMS.badgeEn) : t.faq.badge}
+              {isArabic ? (sectionCMS?.badgeAr || t.faq.badge) : (sectionCMS?.badgeEn || t.faq.badge)}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-              <span className="text-foreground">{sectionCMS?.titleAr && sectionCMS?.titleEn ? (isArabic ? sectionCMS.titleAr : sectionCMS.titleEn) : t.faq.title}</span>{" "}
+              <span className="text-foreground">{isArabic ? (sectionCMS?.titleAr || t.faq.title) : (sectionCMS?.titleEn || t.faq.title)}</span>{" "}
               <span className="block font-serif-luxury text-primary mt-1">
-                {sectionCMS?.titleHighlightAr && sectionCMS?.titleHighlightEn ? (isArabic ? sectionCMS.titleHighlightAr : sectionCMS.titleHighlightEn) : t.faq.titleHighlight}
+                {isArabic ? (sectionCMS?.titleHighlightAr || t.faq.titleHighlight) : (sectionCMS?.titleHighlightEn || t.faq.titleHighlight)}
               </span>
             </h2>
             <p className="mt-4 sm:mt-6 text-base text-muted-foreground leading-relaxed">
-              {sectionCMS?.subtitleAr && sectionCMS?.subtitleEn ? (isArabic ? sectionCMS.subtitleAr : sectionCMS.subtitleEn) : t.faq.subtitle}
+              {isArabic ? (sectionCMS?.subtitleAr || t.faq.subtitle) : (sectionCMS?.subtitleEn || t.faq.subtitle)}
             </p>
           </motion.div>
 

@@ -33,22 +33,22 @@ export default function About() {
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
   const aboutCMS = useQuery(api.homepageSettings.getAboutSettings);
 
-  // CMS → fallback chain
-  const description = aboutCMS?.descriptionAr && aboutCMS?.descriptionEn
-    ? (isArabic ? aboutCMS.descriptionAr : aboutCMS.descriptionEn)
-    : (doctorSettings?.biographyAr || t.about.description);
+  // CMS → per-language fallback (each language checked independently)
+  const description = isArabic
+    ? (aboutCMS?.descriptionAr || doctorSettings?.biographyAr || t.about.description)
+    : (aboutCMS?.descriptionEn || doctorSettings?.biographyEn || t.about.description);
 
-  const badge = aboutCMS?.badgeAr && aboutCMS?.badgeEn
-    ? (isArabic ? aboutCMS.badgeAr : aboutCMS.badgeEn)
-    : t.about.badge;
+  const badge = isArabic
+    ? (aboutCMS?.badgeAr || t.about.badge)
+    : (aboutCMS?.badgeEn || t.about.badge);
 
-  const title = aboutCMS?.titleAr && aboutCMS?.titleEn
-    ? (isArabic ? aboutCMS.titleAr : aboutCMS.titleEn)
-    : t.about.title;
+  const title = isArabic
+    ? (aboutCMS?.titleAr || t.about.title)
+    : (aboutCMS?.titleEn || t.about.title);
 
-  const titleHighlight = aboutCMS?.titleHighlightAr && aboutCMS?.titleHighlightEn
-    ? (isArabic ? aboutCMS.titleHighlightAr : aboutCMS.titleHighlightEn)
-    : t.about.titleHighlight;
+  const titleHighlight = isArabic
+    ? (aboutCMS?.titleHighlightAr || t.about.titleHighlight)
+    : (aboutCMS?.titleHighlightEn || t.about.titleHighlight);
 
   const doctorImage = aboutCMS?.image || doctorImg;
   const doctorName = doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem";

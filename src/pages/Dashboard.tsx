@@ -169,8 +169,10 @@ export default function Dashboard() {
 function OverviewTab() {
   const seedData = useMutation(api.seed.seedAll);
   const seedProcedures = useMutation(api.seed.seedProcedures);
+  const seedHomepage = useMutation(api.seed.seedHomepageSettings);
   const [seeding, setSeeding] = useState(false);
   const [seedingProcedures, setSeedingProcedures] = useState(false);
+  const [seedingHomepage, setSeedingHomepage] = useState(false);
   const procedures = useQuery(api.procedures.list);
   const testimonials = useQuery(api.testimonials.list);
   const faqs = useQuery(api.faq.list);
@@ -233,6 +235,40 @@ function OverviewTab() {
         ))}
       </div>
 
+      {/* Seed CMS Settings Button */}
+      <Card className="border-border/60">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Settings className="h-5 w-5 text-emerald-500" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Seed CMS Settings</p>
+                <p className="text-sm text-muted-foreground">Populate missing Hero, About, CTA, Footer, Section Headers, SEO, and Doctor settings (safe — never overwrites)</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={seedingHomepage}
+              onClick={async () => {
+                setSeedingHomepage(true);
+                try {
+                  const result = await seedHomepage();
+                  toast.success(result || "CMS settings seeded!");
+                } catch (e) {
+                  toast.error("Failed to seed CMS settings.");
+                }
+                setSeedingHomepage(false);
+              }}
+            >
+              {seedingHomepage ? "Seeding..." : "Seed CMS Settings"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Seed Procedures Button */}
       <Card className="border-border/60">
         <CardContent className="p-5">
@@ -276,7 +312,7 @@ function OverviewTab() {
               </div>
               <div>
                 <p className="font-medium text-foreground">Seed Full Database</p>
-                <p className="text-sm text-muted-foreground">Populate all data (procedures, testimonials, FAQ, settings)</p>
+                <p className="text-sm text-muted-foreground">Populate procedures, testimonials, and FAQ (skips if procedures exist)</p>
               </div>
             </div>
             <Button

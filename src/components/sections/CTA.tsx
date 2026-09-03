@@ -22,17 +22,16 @@ export default function CTA() {
 
   if (ctaCMS?.enabled === false) return null;
 
-  const badge = ctaCMS?.badgeAr && ctaCMS?.badgeEn
-    ? (isArabic ? ctaCMS.badgeAr : ctaCMS.badgeEn) : null;
-  const title = ctaCMS?.titleAr && ctaCMS?.titleEn
-    ? (isArabic ? ctaCMS.titleAr : ctaCMS.titleEn)
-    : t.cta.title;
-  const subtitle = ctaCMS?.descriptionAr && ctaCMS?.descriptionEn
-    ? (isArabic ? ctaCMS.descriptionAr : ctaCMS.descriptionEn)
-    : t.cta.subtitle;
-  const buttonText = ctaCMS?.buttonTextAr && ctaCMS?.buttonTextEn
-    ? (isArabic ? ctaCMS.buttonTextAr : ctaCMS.buttonTextEn)
-    : t.cta.button;
+  const badge = isArabic ? (ctaCMS?.badgeAr || null) : (ctaCMS?.badgeEn || null);
+  const title = isArabic
+    ? (ctaCMS?.titleAr || t.cta.title)
+    : (ctaCMS?.titleEn || t.cta.title);
+  const subtitle = isArabic
+    ? (ctaCMS?.descriptionAr || t.cta.subtitle)
+    : (ctaCMS?.descriptionEn || t.cta.subtitle);
+  const buttonText = isArabic
+    ? (ctaCMS?.buttonTextAr || t.cta.button)
+    : (ctaCMS?.buttonTextEn || t.cta.button);
 
   return (
     <section className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">

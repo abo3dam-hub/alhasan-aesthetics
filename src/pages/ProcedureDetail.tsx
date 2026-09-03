@@ -54,14 +54,14 @@ export default function ProcedureDetail() {
   useEffect(() => {
     if (!displayData) return;
 
-    const seoTitle = displayData.seoTitleAr && displayData.seoTitleEn
-      ? (isRtl ? displayData.seoTitleAr : displayData.seoTitleEn)
-      : title;
+    const seoTitle = isRtl
+      ? (displayData.seoTitleAr || title)
+      : (displayData.seoTitleEn || title);
     document.title = `${seoTitle} — Dr. Al Hasan`;
 
-    const seoDesc = displayData.seoDescriptionAr && displayData.seoDescriptionEn
-      ? (isRtl ? displayData.seoDescriptionAr : displayData.seoDescriptionEn)
-      : description;
+    const seoDesc = isRtl
+      ? (displayData.seoDescriptionAr || description)
+      : (displayData.seoDescriptionEn || description);
     if (seoDesc) {
       let meta = document.querySelector('meta[name="description"]');
       if (meta) meta.setAttribute('content', seoDesc);

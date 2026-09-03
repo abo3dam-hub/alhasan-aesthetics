@@ -22,16 +22,14 @@ export default function Landing() {
   // Dynamic SEO
   useEffect(() => {
     const isArabic = dir === "rtl";
-    const title = seoCMS?.siteTitleEn && seoCMS?.siteTitleAr
-      ? (isArabic ? seoCMS.siteTitleAr : seoCMS.siteTitleEn)
-      : (doctorSettings?.doctorNameEn
-        ? `${doctorSettings.doctorNameEn} — Aesthetic & Plastic Surgery`
-        : document.title);
+    const title = isArabic
+      ? (seoCMS?.siteTitleAr || (doctorSettings?.doctorNameEn ? `${doctorSettings.doctorNameEn} — Aesthetic & Plastic Surgery` : document.title))
+      : (seoCMS?.siteTitleEn || (doctorSettings?.doctorNameEn ? `${doctorSettings.doctorNameEn} — Aesthetic & Plastic Surgery` : document.title));
     if (title) document.title = title;
 
-    const desc = seoCMS?.metaDescriptionEn && seoCMS?.metaDescriptionAr
-      ? (isArabic ? seoCMS.metaDescriptionAr : seoCMS.metaDescriptionEn)
-      : undefined;
+    const desc = isArabic
+      ? (seoCMS?.metaDescriptionAr || undefined)
+      : (seoCMS?.metaDescriptionEn || undefined);
     if (desc) {
       let meta = document.querySelector('meta[name="description"]');
       if (meta) meta.setAttribute("content", desc);

@@ -27,26 +27,26 @@ export default function Hero() {
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
   const heroCMS = useQuery(api.homepageSettings.getHeroSettings);
 
-  // CMS → fallback to translations
+  // CMS → per-language fallback (each language checked independently)
   const isArabic = isRtl;
-  const badge = heroCMS?.badgeAr && heroCMS?.badgeEn
-    ? (isArabic ? heroCMS.badgeAr : heroCMS.badgeEn)
-    : t.hero.badge;
-  const heroTitle = heroCMS?.titleAr && heroCMS?.titleEn
-    ? (isArabic ? heroCMS.titleAr : heroCMS.titleEn)
-    : (doctorSettings?.heroTitleAr || t.hero.title);
-  const heroHighlight = heroCMS?.subtitleAr && heroCMS?.subtitleEn
-    ? (isArabic ? heroCMS.subtitleAr : heroCMS.subtitleEn)
-    : (doctorSettings?.heroSubtitleAr || t.hero.titleHighlight);
-  const heroDescription = heroCMS?.descriptionAr && heroCMS?.descriptionEn
-    ? (isArabic ? heroCMS.descriptionAr : heroCMS.descriptionEn)
-    : t.hero.subtitle;
-  const ctaText = heroCMS?.ctaTextAr && heroCMS?.ctaTextEn
-    ? (isArabic ? heroCMS.ctaTextAr : heroCMS.ctaTextEn)
-    : t.hero.cta;
-  const ctaSecondaryText = heroCMS?.ctaSecondaryTextAr && heroCMS?.ctaSecondaryTextEn
-    ? (isArabic ? heroCMS.ctaSecondaryTextAr : heroCMS.ctaSecondaryTextEn)
-    : t.hero.ctaSecondary;
+  const badge = isArabic
+    ? (heroCMS?.badgeAr || t.hero.badge)
+    : (heroCMS?.badgeEn || t.hero.badge);
+  const heroTitle = isArabic
+    ? (heroCMS?.titleAr || doctorSettings?.heroTitleAr || t.hero.title)
+    : (heroCMS?.titleEn || doctorSettings?.heroTitleEn || t.hero.title);
+  const heroHighlight = isArabic
+    ? (heroCMS?.subtitleAr || doctorSettings?.heroSubtitleAr || t.hero.titleHighlight)
+    : (heroCMS?.subtitleEn || doctorSettings?.heroSubtitleEn || t.hero.titleHighlight);
+  const heroDescription = isArabic
+    ? (heroCMS?.descriptionAr || t.hero.subtitle)
+    : (heroCMS?.descriptionEn || t.hero.subtitle);
+  const ctaText = isArabic
+    ? (heroCMS?.ctaTextAr || t.hero.cta)
+    : (heroCMS?.ctaTextEn || t.hero.cta);
+  const ctaSecondaryText = isArabic
+    ? (heroCMS?.ctaSecondaryTextAr || t.hero.ctaSecondary)
+    : (heroCMS?.ctaSecondaryTextEn || t.hero.ctaSecondary);
   const heroImage = heroCMS?.image || doctorImg;
   const doctorName = doctorSettings?.doctorNameEn || "Dr. Al Hasan";
   const doctorNameAr = doctorSettings?.doctorNameAr || "د. الحسن الصايم";

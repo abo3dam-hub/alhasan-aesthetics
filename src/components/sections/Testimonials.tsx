@@ -43,14 +43,14 @@ export default function Testimonials() {
           dir={dir}
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
-            {sectionCMS?.badgeAr && sectionCMS?.badgeEn ? (isArabic ? sectionCMS.badgeAr : sectionCMS.badgeEn) : t.testimonials.badge}
+            {isArabic ? (sectionCMS?.badgeAr || t.testimonials.badge) : (sectionCMS?.badgeEn || t.testimonials.badge)}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            <span className="text-foreground">{sectionCMS?.titleAr && sectionCMS?.titleEn ? (isArabic ? sectionCMS.titleAr : sectionCMS.titleEn) : t.testimonials.title}</span>{" "}
-            <span className="font-serif-luxury text-primary">{sectionCMS?.titleHighlightAr && sectionCMS?.titleHighlightEn ? (isArabic ? sectionCMS.titleHighlightAr : sectionCMS.titleHighlightEn) : t.testimonials.titleHighlight}</span>
+            <span className="text-foreground">{isArabic ? (sectionCMS?.titleAr || t.testimonials.title) : (sectionCMS?.titleEn || t.testimonials.title)}</span>{" "}
+            <span className="font-serif-luxury text-primary">{isArabic ? (sectionCMS?.titleHighlightAr || t.testimonials.titleHighlight) : (sectionCMS?.titleHighlightEn || t.testimonials.titleHighlight)}</span>
           </h2>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
-            {sectionCMS?.subtitleAr && sectionCMS?.subtitleEn ? (isArabic ? sectionCMS.subtitleAr : sectionCMS.subtitleEn) : t.testimonials.subtitle}
+            {isArabic ? (sectionCMS?.subtitleAr || t.testimonials.subtitle) : (sectionCMS?.subtitleEn || t.testimonials.subtitle)}
           </p>
         </motion.div>
 
