@@ -58,6 +58,60 @@ export const getFileUrl = query({
   },
 });
 
+/**
+ * Resolve an image reference to a working URL.
+ * Handles: absolute URLs, storageIds, and legacy/broken references.
+ * If the input looks like a Convex storageId (no protocol prefix),
+ * it resolves via ctx.storage.getUrl(). Otherwise returns as-is.
+ */
+export const resolveUrl = query({
+  args: { ref: v.string() },
+  handler: async (ctx, args) => {
+    const ref = args.ref;
+    if (!ref || ref === "") return "";
+
+    // Already a full URL — return as-is
+    if (ref.startsWith("http://") || ref.startsWith("https://") || ref.startsWith("data:")) {
+      return ref;
+    }
+
+    // Looks like a storageId (no protocol) — resolve via Convex storage
+    try {
+      const resolved = await ctx.storage.getUrl(ref as any);
+      return resolved || ref;
+    } catch {
+      return ref;
+    }
+  },
+});
+
+/**
+ * Resolve multiple image references at once for efficient batch loading.
+ */
+export const resolveUrls = query({
+  args: { refs: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const results: Record<string, string> = {};
+    for (const ref of args.refs) {
+      if (!ref || ref === "") {
+        results[ref] = "";
+        continue;
+      }
+      if (ref.startsWith("http://") || ref.startsWith("https://") || ref.startsWith("data:")) {
+        results[ref] = ref;
+        continue;
+      }
+      try {
+        const resolved = await ctx.storage.getUrl(ref as any);
+        results[ref] = resolved || ref;
+      } catch {
+        results[ref] = ref;
+      }
+    }
+    return results;
+  },
+});
+
 /** Check if a media URL is referenced by any CMS content */
 export const checkReferences = query({
   args: { url: v.string() },
@@ -121,29 +175,36 @@ export const checkReferences = query({
 
 /**
  * Repair media records that have a storageId but no usable URL.
- * Idempotent — only updates records where url is empty/missing.
+ * Uses ctx.storage.getUrl() for reliable, canonical URL generation.
+ * Idempotent — only updates records where url is empty/missing/broken.
  */
 export const repairUrls = mutation({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const convexUrl = process.env.CONVEX_SITE_URL || "";
-    if (!convexUrl) {
-      return "Cannot determine Convex site URL for repair.";
-    }
     const items = await ctx.db.query("media").collect();
     let repaired = 0;
     let skipped = 0;
+    let failed = 0;
     for (const item of items) {
-      if (!item.url || item.url === "" || item.url.startsWith("blob:")) {
-        const newUrl = `${convexUrl}/api/storage/${item.storageId}`;
-        await ctx.db.patch(item._id, { url: newUrl });
-        repaired++;
+      const needsRepair = !item.url || item.url === "" || item.url.startsWith("blob:");
+      if (needsRepair) {
+        try {
+          const resolved = await ctx.storage.getUrl(item.storageId as any);
+          if (resolved) {
+            await ctx.db.patch(item._id, { url: resolved });
+            repaired++;
+          } else {
+            failed++;
+          }
+        } catch {
+          failed++;
+        }
       } else {
         skipped++;
       }
     }
-    return `Media URL repair: ${repaired} records repaired, ${skipped} already valid.`;
+    return `Media URL repair: ${repaired} repaired, ${skipped} already valid, ${failed} failed.`;
   },
 });
 

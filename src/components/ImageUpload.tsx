@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useRef } from "react";
+import { ResolvedImage } from "@/components/ResolvedImage";
 
 interface ImageUploadProps {
   value?: string;
@@ -44,11 +45,9 @@ export function ImageUpload({ value, onChange, label, className }: ImageUploadPr
 
       {value ? (
         <div className="relative group">
-          <img
-            src={value}
-            alt="Preview"
-            className="w-full h-32 object-cover rounded-lg border border-border/40"
-          />
+          <div className="w-full h-32 rounded-lg border border-border/40 overflow-hidden">
+            <ResolvedImage ref={value} alt="Preview" />
+          </div>
           <button
             type="button"
             onClick={() => onChange("")}

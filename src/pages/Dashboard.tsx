@@ -48,6 +48,8 @@ import { cn } from "@/lib/utils";
 import { ImageUpload } from "@/components/ImageUpload";
 import { MediaSelector } from "@/components/MediaSelector";
 import { useImageUpload } from "@/hooks/use-upload";
+import { useResolvedMedia } from "@/hooks/use-resolved-media";
+import { ResolvedImage } from "@/components/ResolvedImage";
 
 // Generic reorder helper: swap order of two adjacent items using update mutations
 async function swapOrder(
@@ -1349,12 +1351,14 @@ function MediaTab() {
   const [repairing, setRepairing] = useState(false);
   const [repairResult, setRepairResult] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<
-    { url: string; name: string; type: string; size: number; storageId: string; _id: string } | null
+    { url: string; resolvedUrl?: string; name: string; type: string; size: number; storageId: string; _id: string } | null
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<{ _id: string; url: string; name: string } | null>(null);
   const deleteRefs = useQuery(api.media.checkReferences, deleteTarget ? { url: deleteTarget.url } : "skip");
 
-  const filteredMedia = mediaItems?.filter((item) => {
+  const resolvedMediaItems = useResolvedMedia(mediaItems);
+
+  const filteredMedia = resolvedMediaItems?.filter((item) => {
     if (!search) return true;
     return item.name.toLowerCase().includes(search.toLowerCase());
   });
@@ -1470,14 +1474,13 @@ function MediaTab() {
             <div
               key={item._id}
               className="group relative glass-card rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200"
-              onClick={() => setPreviewItem(item)}
+              onClick={() => setPreviewItem({ ...item, resolvedUrl: item.resolvedUrl })}
             >
               <div className="aspect-square overflow-hidden bg-muted/30">
-                <img
-                  src={item.url}
+                <ResolvedImage
+                  ref={item.storageId}
                   alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
+                  fallbackClassName="aspect-square"
                 />
               </div>
               <div className="p-2">
@@ -1498,7 +1501,7 @@ function MediaTab() {
               {/* Hover actions */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleCopyUrl(item.url); }}
+                  onClick={(e) => { e.stopPropagation(); handleCopyUrl(item.resolvedUrl || item.url); }}
                   className="p-2 rounded-full bg-white/90 hover:bg-white text-foreground shadow-md transition-colors"
                   title="Copy URL"
                 >
@@ -1537,10 +1540,11 @@ function MediaTab() {
 
             {/* Image */}
             <div className="bg-black/20 flex items-center justify-center p-4">
-              <img
-                src={previewItem.url}
+              <ResolvedImage
+                ref={previewItem.storageId}
                 alt={previewItem.name}
-                className="max-h-[60vh] max-w-full object-contain rounded-lg"
+                imgClassName="max-h-[60vh] max-w-full object-contain rounded-lg"
+                fallbackClassName="max-h-[60vh] w-full"
               />
             </div>
 
@@ -1560,14 +1564,13 @@ function MediaTab() {
               {/* URL field */}
               <div className="flex gap-2">
                 <Input
-                  value={previewItem.url}
-                  readOnly
+                                    value={previewItem.resolvedUrl || previewItem.url} readOnly
                   className="font-mono text-xs flex-1"
                 />
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleCopyUrl(previewItem.url)}
+                  onClick={() => handleCopyUrl(previewItem.resolvedUrl || previewItem.url)}
                   className="shrink-0 gap-1"
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1580,7 +1583,7 @@ function MediaTab() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    navigator.clipboard.writeText(previewItem.url);
+                    navigator.clipboard.writeText(previewItem.resolvedUrl || previewItem.url);
                     toast.success("URL copied! Paste it in any image field.");
                   }}
                   className="gap-1"
@@ -1592,7 +1595,7 @@ function MediaTab() {
                   size="sm"
                   onClick={() => {
                     const link = document.createElement("a");
-                    link.href = previewItem.url;
+                    link.href = previewItem.resolvedUrl || previewItem.url;
                     link.download = previewItem.name;
                     link.click();
                   }}

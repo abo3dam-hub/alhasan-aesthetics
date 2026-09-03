@@ -7,6 +7,7 @@ import { ImageIcon, Search, X, Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useImageUpload } from "@/hooks/use-upload";
+import { ResolvedImage } from "@/components/ResolvedImage";
 
 interface MediaSelectorProps {
   value: string;
@@ -25,7 +26,7 @@ export function MediaSelector({ value, onChange, label, className }: MediaSelect
       <div className="flex items-center gap-3">
         {value ? (
           <div className="relative group w-24 h-24 rounded-xl overflow-hidden border border-border/60">
-            <img src={value} alt="" className="w-full h-full object-cover" />
+            <ResolvedImage ref={value} alt="" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
               <button type="button" onClick={() => setIsOpen(true)} className="p-1.5 rounded-full bg-white/90 hover:bg-white text-foreground shadow-sm" aria-label="Replace image">
                 <Upload className="h-3.5 w-3.5" />
@@ -176,11 +177,9 @@ function MediaLibraryModal({
                     aria-label={`Select ${item.name}`}
                     aria-pressed={isSelected}
                   >
-                    <img
-                      src={item.url}
+                    <ResolvedImage
+                      ref={item.storageId}
                       alt={item.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isSelected && (
