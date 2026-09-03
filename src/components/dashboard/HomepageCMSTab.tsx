@@ -85,9 +85,7 @@ function HeroEditor() {
       badgeEnabled: heroCMS.badgeEnabled !== false,
       ctaEnabled: heroCMS.ctaEnabled !== false,
       ctaSecondaryEnabled: heroCMS.ctaSecondaryEnabled !== false,
-      image: heroCMS.image || "",
-      imageAltAr: heroCMS.imageAltAr || "",
-      imageAltEn: heroCMS.imageAltEn || "",
+      // Hero image fields intentionally unused — Hero section is text/design only
       trustBadges: heroCMS.trustBadges || [
         { labelAr: "+١٥ سنة خبرة", labelEn: "+15 Years Experience", icon: "award", enabled: true },
         { labelAr: "+٥٠٠٠ عملية ناجحة", labelEn: "+5000 Successful Surgeries", icon: "star", enabled: true },
@@ -201,15 +199,7 @@ function HeroEditor() {
           }} className="gap-1"><Plus className="h-3 w-3" /> Add Badge</Button>
         </div>
 
-        {/* Hero Image */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Hero Image (optional)</Label>
-          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select hero image" />
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Image Alt Text (EN)</Label><Input value={form.imageAltEn || ""} onChange={(e) => update("imageAltEn", e.target.value)} placeholder="Dr. Al Hasan - Aesthetic Surgery" /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Image Alt Text (AR)</Label><Input dir="rtl" value={form.imageAltAr || ""} onChange={(e) => update("imageAltAr", e.target.value)} placeholder="د. الحسن - جراحة تجميلية" /></div>
-        </div>
+        {/* Hero Image — INTENTIONALLY UNUSED: Hero section is text/design only, no image rendered */}
 
         <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Hero"}</Button>

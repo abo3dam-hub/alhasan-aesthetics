@@ -177,14 +177,22 @@ function OverviewTab() {
   const testimonials = useQuery(api.testimonials.list);
   const faqs = useQuery(api.faq.list);
 
+  const siteSettings = useQuery(api.siteSettings.list);
+  const beforeAfterCases = useQuery(api.beforeAfter.list);
+  const mediaItems = useQuery(api.media.list);
+
   const totalProcedures = procedures?.length ?? 0;
   const totalTestimonials = testimonials?.length ?? 0;
   const totalFaqs = faqs?.length ?? 0;
+  const totalSiteSettings = siteSettings?.length ?? 0;
+  const totalBeforeAfter = beforeAfterCases?.length ?? 0;
+  const totalMedia = mediaItems?.length ?? 0;
 
   const stats = [
     { label: "Procedures", value: totalProcedures, icon: FileText, color: "text-blue-500 bg-blue-50" },
     { label: "Testimonials", value: totalTestimonials, icon: Star, color: "text-amber-500 bg-amber-50" },
     { label: "FAQ Items", value: totalFaqs, icon: HelpCircle, color: "text-green-500 bg-green-50" },
+    { label: "Media", value: totalMedia, icon: ImageIcon, color: "text-purple-500 bg-purple-50" },
   ];
 
   const becomeAdmin = useMutation(api.users.becomeAdmin);
@@ -234,6 +242,36 @@ function OverviewTab() {
           </Card>
         ))}
       </div>
+
+      {/* CMS Health Check */}
+      <Card className="border-border/60">
+        <CardContent className="p-5">
+          <h3 className="font-medium text-foreground mb-4">CMS Health Check</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { label: "Site Settings", count: totalSiteSettings, status: totalSiteSettings > 0 ? "OK" : "EMPTY" },
+              { label: "Procedures", count: totalProcedures, status: totalProcedures > 0 ? "OK" : "EMPTY" },
+              { label: "Before & After", count: totalBeforeAfter, status: totalBeforeAfter > 0 ? "OK" : "EMPTY" },
+              { label: "Testimonials", count: totalTestimonials, status: totalTestimonials > 0 ? "OK" : "EMPTY" },
+              { label: "FAQ", count: totalFaqs, status: totalFaqs > 0 ? "OK" : "EMPTY" },
+              { label: "Media", count: totalMedia, status: totalMedia > 0 ? "OK" : "EMPTY" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center justify-between p-3 rounded-lg border border-border/40">
+                <span className="text-sm text-muted-foreground">{item.label}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">{item.count}</span>
+                  <span className={cn(
+                    "text-xs font-medium px-2 py-0.5 rounded-full",
+                    item.status === "OK" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                  )}>
+                    {item.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Seed CMS Settings Button */}
       <Card className="border-border/60">

@@ -113,12 +113,7 @@ export const checkReferences = query({
       .first();
     if (seo?.value?.ogImage === url) refs.push("Global SEO OG Image");
 
-    // Check CTA
-    const cta = await ctx.db
-      .query("siteSettings")
-      .withIndex("by_key", (q) => q.eq("key", "cta"))
-      .first();
-    if (cta?.value?.image === url) refs.push("CTA Image");
+    // CTA section is text/design only — no image field exposed in Dashboard or public site
 
     return refs;
   },
