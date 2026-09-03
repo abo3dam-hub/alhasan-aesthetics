@@ -419,11 +419,12 @@ export const seedHomepageSettings = mutation({
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
-    // Check if data already exists
+    let created = 0;
+    let skipped = 0;
+
+    // ─── Check if procedures exist ───
     const existingProcedures = await ctx.db.query("procedures").first();
-    if (existingProcedures) {
-      return "Data already seeded";
-    }
+    if (!existingProcedures) {
 
     // ─── Seed Doctor Settings ───
     const doctorSettings = {
@@ -620,8 +621,12 @@ export const seedAll = mutation({
     for (const proc of procedures) {
       await ctx.db.insert("procedures", proc);
     }
+    created++;
+    } // end if (!existingProcedures)
 
-    // ─── Seed Testimonials ───
+    // ─── Seed Testimonials (independent) ───
+    const existingTestimonials = await ctx.db.query("testimonials").first();
+    if (!existingTestimonials) {
     const testimonials = [
       {
         nameAr: "سارة أ.",
@@ -655,8 +660,11 @@ export const seedAll = mutation({
     for (const t of testimonials) {
       await ctx.db.insert("testimonials", t);
     }
+    } // end if (!existingTestimonials)
 
-    // ─── Seed FAQ ───
+    // ─── Seed FAQ (independent) ───
+    const existingFaq = await ctx.db.query("faq").first();
+    if (!existingFaq) {
     const faqs = [
       {
         questionAr: "كيف أعرف الإجراء المناسب لي؟",
@@ -711,7 +719,8 @@ export const seedAll = mutation({
     for (const f of faqs) {
       await ctx.db.insert("faq", f);
     }
+    } // end if (!existingFaq)
 
-    return "Seeded successfully: 10 procedures, 3 testimonials, 6 FAQ items, doctor settings";
+    return `Seed complete: procedures ${existingProcedures ? "already exist" : "created"}, testimonials ${existingTestimonials ? "already exist" : "created"}, FAQ ${existingFaq ? "already exist" : "created"}`;
   },
 });

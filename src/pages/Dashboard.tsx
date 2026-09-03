@@ -1306,7 +1306,10 @@ function ImageUploadUploadWidget() {
 function MediaTab() {
   const mediaItems = useQuery(api.media.list);
   const removeMedia = useMutation(api.media.remove);
+  const repairUrls = useMutation(api.media.repairUrls);
   const [search, setSearch] = useState("");
+  const [repairing, setRepairing] = useState(false);
+  const [repairResult, setRepairResult] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<
     { url: string; name: string; type: string; size: number; storageId: string; _id: string } | null
   >(null);
@@ -1358,6 +1361,45 @@ function MediaTab() {
       <Card className="border-border/60">
         <CardContent className="p-5">
           <ImageUploadUploadWidget />
+        </CardContent>
+      </Card>
+
+      {/* Repair Media URLs */}
+      <Card className="border-border/60">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-xl bg-amber-50 flex items-center justify-center">
+                <Settings className="h-5 w-5 text-amber-500" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Repair Media URLs</p>
+                <p className="text-sm text-muted-foreground">Fix media records with broken/empty URLs (idempotent)</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={repairing}
+              onClick={async () => {
+                setRepairing(true);
+                setRepairResult(null);
+                try {
+                  const result = await repairUrls();
+                  setRepairResult(result || "Done");
+                  toast.success(result || "Media URLs repaired!");
+                } catch (e) {
+                  toast.error("Failed to repair media URLs.");
+                }
+                setRepairing(false);
+              }}
+            >
+              {repairing ? "Repairing..." : "Repair Media URLs"}
+            </Button>
+          </div>
+          {repairResult && (
+            <p className="mt-3 text-sm text-muted-foreground">{repairResult}</p>
+          )}
         </CardContent>
       </Card>
 
