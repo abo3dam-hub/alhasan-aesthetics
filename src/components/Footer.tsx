@@ -3,6 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Link } from "react-router";
 import { Globe, Phone, Mail, MapPin } from "lucide-react";
+import { ResolvedImage } from "@/components/ResolvedImage";
 import doctorLogo from "/assets/3.jpg";
 
 export default function Footer() {
@@ -43,11 +44,15 @@ export default function Footer() {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-4">
-              <img
-                src={doctorLogo}
-                alt="Dr. Al Hasan Al Saiem"
-                className="h-12 w-12 rounded-xl object-cover border border-border/40"
-              />
+              {doctorSettings?.navbarPhoto ? (
+                <ResolvedImage ref={doctorSettings.navbarPhoto} alt="Dr. Al Hasan Al Saiem" className="h-12 w-12 rounded-xl object-cover border border-border/40" imgClassName="w-full h-full rounded-xl object-cover" lazy={false} />
+              ) : (
+                <img
+                  src={doctorLogo}
+                  alt="Dr. Al Hasan Al Saiem"
+                  className="h-12 w-12 rounded-xl object-cover border border-border/40"
+                />
+              )}
               <span className="font-serif-luxury text-lg font-semibold text-foreground">
                 {t.nav.logo}
               </span>

@@ -1095,6 +1095,7 @@ function SettingsTab() {
     workingHoursWeekdays: "9 AM - 6 PM",
     workingHoursFriday: "",
     workingHoursSaturday: "",
+    navbarPhoto: "",
   });
 
   const [initialized, setInitialized] = useState(false);
@@ -1125,6 +1126,7 @@ function SettingsTab() {
       workingHoursWeekdays: settings.workingHoursWeekdays || "9 AM - 6 PM",
       workingHoursFriday: settings.workingHoursFriday || "",
       workingHoursSaturday: settings.workingHoursSaturday || "",
+      navbarPhoto: settings.navbarPhoto || "",
     });
     setInitialized(true);
   }
@@ -1159,6 +1161,7 @@ function SettingsTab() {
           workingHoursWeekdays: form.workingHoursWeekdays,
           workingHoursFriday: form.workingHoursFriday,
           workingHoursSaturday: form.workingHoursSaturday,
+          navbarPhoto: form.navbarPhoto,
           socialMedia: {
             instagram: form.instagram,
             facebook: form.facebook,
@@ -1197,6 +1200,7 @@ function SettingsTab() {
             <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
           </div>
           <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} /></div>
+          <div className="space-y-2"><Label>Navbar Photo</Label><MediaSelector value={form.navbarPhoto} onChange={(val) => updateField("navbarPhoto", val)} label="Select navbar photo" /></div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2"><Label>Address (EN)</Label><Textarea rows={2} value={form.addressEn} onChange={(e) => updateField("addressEn", e.target.value)} /></div>
             <div className="space-y-2"><Label>Address (AR)</Label><Textarea dir="rtl" rows={2} value={form.addressAr} onChange={(e) => updateField("addressAr", e.target.value)} /></div>

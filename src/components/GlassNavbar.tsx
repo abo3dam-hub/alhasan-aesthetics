@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { ResolvedImage } from "@/components/ResolvedImage";
 import doctorAvatar from "/assets/3.jpg";
 
 // Hash-scroll links use native <a> so the browser handles smooth scrolling.
@@ -25,6 +28,7 @@ const routeLinks = [
 export default function GlassNavbar() {
   const { t, dir, toggleLocale } = useI18n();
   const { isAuthenticated, user } = useAuth();
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isRtl = dir === "rtl";
 
@@ -43,11 +47,15 @@ export default function GlassNavbar() {
             {/* Logo */}
             <a href="/" className="flex items-center gap-3 shrink-0">
               <div className="relative">
-                <img
-                  src={doctorAvatar}
-                  alt="Dr. AlHasan"
-                  className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
-                />
+                {doctorSettings?.navbarPhoto ? (
+                  <ResolvedImage ref={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
+                ) : (
+                  <img
+                    src={doctorAvatar}
+                    alt="Dr. AlHasan"
+                    className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
+                  />
+                )}
                 <div className="absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-white" />
               </div>
               <span className="font-serif-luxury text-lg sm:text-xl font-semibold text-foreground tracking-tight">
@@ -155,11 +163,15 @@ export default function GlassNavbar() {
             >
               <div className="flex items-center justify-between p-4 border-b border-border/40">
                 <a href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                  <img
-                    src={doctorAvatar}
-                    alt="Dr. AlHasan"
-                    className="h-9 w-9 rounded-full object-cover border-2 border-primary/30"
-                  />
+                  {doctorSettings?.navbarPhoto ? (
+                    <ResolvedImage ref={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-9 w-9 rounded-full object-cover border-2 border-primary/30" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
+                  ) : (
+                    <img
+                      src={doctorAvatar}
+                      alt="Dr. AlHasan"
+                      className="h-9 w-9 rounded-full object-cover border-2 border-primary/30"
+                    />
+                  )}
                   <span className="font-serif-luxury text-lg font-semibold">{t.nav.logo}</span>
                 </a>
                 <button
