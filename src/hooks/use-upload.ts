@@ -7,6 +7,18 @@ export interface UploadResult {
   url: string;
 }
 
+/**
+ * Upload hook — the canonical image upload path.
+ *
+ * Flow:
+ *   file → generateUploadUrl → Convex Storage → storageId
+ *   → recordUpload(storageId) → media record
+ *
+ * The `url` field in the media table is a LEGACY field kept for backward
+ * compatibility with old records. New uploads store an empty string here.
+ * The frontend resolves ALL images through storageId → ctx.storage.getUrl().
+ * Never use media.url as the source of truth for new uploads.
+ */
 export function useImageUpload() {
   const generateUploadUrl = useMutation(api.media.generateUploadUrl);
   const recordUpload = useMutation(api.media.recordUpload);
@@ -50,21 +62,19 @@ export function useImageUpload() {
         const result = await response.json();
         const storageId = result.storageId;
 
-        // Get the public URL
-        const convexUrl = import.meta.env.VITE_CONVEX_URL || 'https://impartial-ladybug-881.convex.cloud';
-        const url = `${convexUrl}/api/storage/${storageId}`;
-
         // Record in media table
+        // url is a legacy field — stored empty for new uploads.
+        // All image resolution goes through storageId → ctx.storage.getUrl().
         await recordUpload({
           storageId,
-          url,
+          url: "", // LEGACY: empty for new uploads. Resolution via storageId only.
           name: file.name,
           type: file.type,
           size: file.size,
           alt: file.name.replace(/\.[^.]+$/, ""),
         });
 
-        return { storageId, url };
+        return { storageId, url: "" };
       } catch (err) {
         setError(err instanceof Error ? err.message : "Upload failed");
         return null;
