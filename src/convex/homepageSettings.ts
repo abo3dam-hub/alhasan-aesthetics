@@ -26,6 +26,18 @@ export const getAboutSettings = query({
   },
 });
 
+// ─── Information Card (patient guide between About & Procedures) ───
+export const getInformationCardSettings = query({
+  args: {},
+  handler: async (ctx) => {
+    const result = await ctx.db
+      .query("siteSettings")
+      .withIndex("by_key", (q) => q.eq("key", "informationCard"))
+      .first();
+    return result?.value ?? null;
+  },
+});
+
 // ─── CTA Settings ───
 export const getCTASettings = query({
   args: {},

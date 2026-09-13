@@ -24,15 +24,21 @@ import { cn } from "@/lib/utils";
 
 // Fallback procedures (used when CMS data isn't loaded yet)
 const fallbackProcedures = [
-  { slug: "blepharoplasty", titleAr: "شد الأجفان العلوية والسفلية", titleEn: "Upper & Lower Eyelid Lift" },
+  { slug: "upper-eyelid-lift", titleAr: "شد الجفن العلوي", titleEn: "Upper Eyelid Lift" },
+  { slug: "lower-eyelid-lift", titleAr: "شد الجفن السفلي", titleEn: "Lower Eyelid Lift" },
   { slug: "face-neck-lift", titleAr: "شد الوجه والرقبة", titleEn: "Face & Neck Lift" },
   { slug: "rhinoplasty", titleAr: "تجميل الأنف", titleEn: "Rhinoplasty" },
   { slug: "liposuction-fat-transfer", titleAr: "شفط الشحم وحقن الشحم", titleEn: "Liposuction & Fat Transfer" },
   { slug: "tummy-tuck", titleAr: "شد البطن", titleEn: "Tummy Tuck" },
-  { slug: "botox", titleAr: "حقن البوتوكس", titleEn: "Botox Injections" },
+  { slug: "botox-injections", titleAr: "حقن البوتوكس", titleEn: "Botox Injections" },
   { slug: "fillers", titleAr: "الفيلر", titleEn: "Fillers" },
-  { slug: "arm-thigh-lift", titleAr: "شد العضدين والفخذين", titleEn: "Arm & Thigh Lift" },
-  { slug: "breast-augmentation-reduction", titleAr: "تكبير/تصغير الثدي", titleEn: "Breast Augmentation / Reduction" },
+  { slug: "arm-lift", titleAr: "شد العضدين", titleEn: "Arm Lift" },
+  { slug: "thigh-lift", titleAr: "شد الفخذين", titleEn: "Thigh Lift" },
+  { slug: "breast-augmentation", titleAr: "تكبير الثدي", titleEn: "Breast Augmentation" },
+  { slug: "breast-reduction-and-lift", titleAr: "تصغير وشد الثدي", titleEn: "Breast Reduction & Lift" },
+  { slug: "breast-lift", titleAr: "شد الثدي", titleEn: "Breast Lift" },
+  { slug: "breast-lift-with-implants", titleAr: "شد الثدي مع بروتيز", titleEn: "Breast Lift with Implants" },
+  { slug: "prominent-ear-correction", titleAr: "إصلاح بروز الأذنين", titleEn: "Prominent Ear Correction" },
   { slug: "scar-deformity-correction", titleAr: "إصلاح الندب والتشوهات", titleEn: "Scar & Deformity Correction" },
 ];
 

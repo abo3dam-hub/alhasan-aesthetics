@@ -50,7 +50,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dr-alhasan.com/procedure/blepharoplasty</loc>
+    <loc>https://dr-alhasan.com/procedure/upper-eyelid-lift</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dr-alhasan.com/procedure/lower-eyelid-lift</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -65,7 +70,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dr-alhasan.com/procedure/botox</loc>
+    <loc>https://dr-alhasan.com/procedure/botox-injections</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -75,12 +80,37 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dr-alhasan.com/procedure/arm-thigh-lift</loc>
+    <loc>https://dr-alhasan.com/procedure/arm-lift</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dr-alhasan.com/procedure/breast-augmentation-reduction</loc>
+    <loc>https://dr-alhasan.com/procedure/thigh-lift</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dr-alhasan.com/procedure/breast-augmentation</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dr-alhasan.com/procedure/breast-reduction-and-lift</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dr-alhasan.com/procedure/breast-lift</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dr-alhasan.com/procedure/breast-lift-with-implants</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dr-alhasan.com/procedure/prominent-ear-correction</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -30,7 +30,7 @@ http.route({
   method: "GET",
   handler: httpAction(async (ctx) => {
     // Fetch active procedures from the CMS database
-    let activeProcedures: { slug: string; active?: boolean }[] = [];
+    let activeProcedures: { slug: string; isActive?: boolean }[] = [];
     try {
       activeProcedures = await ctx.runQuery(api.procedures.listActive);
     } catch {
@@ -51,7 +51,8 @@ http.route({
 
     // Dynamic procedure pages from CMS
     for (const proc of activeProcedures) {
-      if (proc.slug && proc.active !== false) {
+      // Note: real field is `isActive` (listActive already filters inactive).
+      if (proc.slug && proc.isActive !== false) {
         xml += `  <url>\n`;
         xml += `    <loc>${DOMAIN}/procedure/${proc.slug}</loc>\n`;
         xml += `    <changefreq>monthly</changefreq>\n`;

@@ -12,6 +12,8 @@ import {
   BadgeCheck,
   Phone,
   Calendar,
+  Layers,
+  RefreshCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
@@ -27,6 +29,20 @@ export default function ProcedureDetail() {
   const convexProcedure = useQuery(
     api.procedures.getBySlug,
     slug ? { slug } : "skip"
+  );
+  const parentProc = useQuery(
+    api.procedures.getBySlug,
+    convexProcedure?.parentSlug ? { slug: convexProcedure.parentSlug } : "skip"
+  );
+  const childOptions = useQuery(
+    api.procedures.listChildren,
+    convexProcedure && !convexProcedure.parentSlug ? { parentSlug: convexProcedure.slug } : "skip"
+  );
+  const supersededProcs = useQuery(
+    api.procedures.getBySlugs,
+    convexProcedure?.supersededBy && convexProcedure.supersededBy.length > 0
+      ? { slugs: convexProcedure.supersededBy }
+      : "skip"
   );
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
 
@@ -83,12 +99,76 @@ export default function ProcedureDetail() {
     setOrCreateMeta("twitter:title", seoTitle);
     if (seoDesc) setOrCreateMeta("twitter:description", seoDesc);
     if (displayData.ogImage) setOrCreateMeta("twitter:image", displayData.ogImage);
+
+    // Legacy / inactive records (e.g. the old combined URLs) must not be
+    // indexed — they only exist to redirect users to the new structure.
+    if (displayData.isActive === false) {
+      let robots = document.querySelector('meta[name="robots"]');
+      if (!robots) {
+        robots = document.createElement("meta");
+        robots.setAttribute("name", "robots");
+        document.head.appendChild(robots);
+      }
+      robots.setAttribute("content", "noindex, nofollow");
+    }
   }, [displayData, isRtl, title, description]);
 
   if (convexProcedure === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // Legacy combined record (inactive + supersededBy) → reorganization notice
+  // with links to the procedures that replaced it. Users on old URLs land
+  // here instead of a 404 (see migration.ts -> LEGACY_PROCEDURES).
+  if (displayData && displayData.isActive === false) {
+    const legacySlugs = (displayData.supersededBy || []).filter(
+      (s: string) => (supersededProcs || []).some((p) => p.slug === s)
+    );
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground px-4" dir={dir}>
+        <GlassNavbar />
+        <div className="max-w-2xl w-full text-center">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-3xl bg-primary/10 mb-6">
+            <RefreshCcw className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3">
+            {isRtl ? "تم إعادة تنظيم هذا الإجراء" : "This procedure has been reorganized"}
+          </h1>
+          <p className="text-muted-foreground mb-2">
+            {isRtl ? "لتحسين دقة المعلومات، تم تقسيم الإجراء «" : "For greater clarity, the procedure “"}
+            {isRtl ? displayData.titleAr : displayData.titleEn}
+            {isRtl ? "» إلى إجراءات أكثر تحديداً:" : "” has been split into more specific procedures:"}
+          </p>
+          {legacySlugs.length > 0 ? (
+            <div className="flex flex-col gap-3 mt-6">
+              {(supersededProcs || []).map((p) => (
+                <Link key={p.slug} to={`/procedure/${p.slug}`}>
+                  <div className="glass-card rounded-2xl p-4 hover:bg-white/60 transition-all text-start">
+                    <p className="font-semibold text-foreground">{isRtl ? p.titleAr : p.titleEn}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{isRtl ? p.descriptionAr : p.descriptionEn}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Link to="/procedures" className="inline-block mt-6">
+              <Button variant="outline" className="rounded-full">
+                {isRtl ? "عرض جميع الإجراءات" : "View all procedures"}
+              </Button>
+            </Link>
+          )}
+          <div className="mt-8">
+            <Link to="/procedures">
+              <Button variant="outline" className="rounded-full">
+                {isRtl ? "العودة لصفحة الإجراءات" : "Back to Procedures"}
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -128,18 +208,18 @@ export default function ProcedureDetail() {
             className="mb-8"
           >
             <Link
-              to="/"
+              to={parentProc ? `/procedure/${parentProc.slug}` : "/procedures"}
               className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {isRtl ? (
                 <>
-                  العودة للرئيسية
+                  {parentProc ? parentProc.titleAr : "العودة للصفحة الرئيسية"}
                   <ArrowRight className="h-4 w-4" />
                 </>
               ) : (
                 <>
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Home
+                  {parentProc ? parentProc.titleEn : "Back to Procedures"}
                 </>
               )}
             </Link>
@@ -150,6 +230,25 @@ export default function ProcedureDetail() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            {parentProc && (
+              <Link
+                to={`/procedure/${parentProc.slug}`}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-sm font-medium text-primary mb-3 hover:bg-white/60 transition-colors"
+              >
+                {isRtl ? (
+                  <>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                    جزء من «{parentProc.titleAr}»
+                  </>
+                ) : (
+                  <>
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Part of “{parentProc.titleEn}”
+                  </>
+                )}
+              </Link>
+            )}
+
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-sm font-medium text-primary mb-6">
               <BadgeCheck className="h-4 w-4" />
               {isRtl ? "إجراء طبي متخصص" : "Specialized Procedure"}
@@ -217,6 +316,53 @@ export default function ProcedureDetail() {
           </motion.div>
         </div>
       </section>
+
+      {/* Treatment Options (sub-procedures of a group) */}
+      {childOptions && childOptions.length > 0 && (
+        <section className="pt-16">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-2xl font-serif-luxury font-bold text-foreground mb-3">
+                {isRtl ? "خيارات العلاج" : "Treatment Options"}
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                {isRtl
+                  ? "اختر الخيار الأنسب لك لعرض التفاصيل الكاملة."
+                  : "Choose the option that best fits you to see the full details."}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-5">
+                {childOptions.map((child) => (
+                  <Link key={child.slug} to={`/procedure/${child.slug}`}>
+                    <div className="glass-card rounded-2xl p-6 hover:bg-white/60 hover:shadow-lg transition-all group h-full">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-primary/10 text-primary">
+                          <Layers className="h-5 w-5" />
+                        </div>
+                        {isRtl ? (
+                          <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        ) : (
+                          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        )}
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        {isRtl ? child.titleAr : child.titleEn}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {isRtl ? child.descriptionAr : child.descriptionEn}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* Full Description */}
       <section className="py-16">
@@ -371,9 +517,19 @@ export default function ProcedureDetail() {
                 name: isRtl ? "الإجراءات" : "Procedures",
                 item: typeof window !== "undefined" ? `${window.location.origin}/procedures` : "",
               },
+              ...(parentProc
+                ? [
+                    {
+                      "@type": "ListItem",
+                      position: 3,
+                      name: isRtl ? parentProc.titleAr : parentProc.titleEn,
+                      item: typeof window !== "undefined" ? `${window.location.origin}/procedure/${parentProc.slug}` : "",
+                    },
+                  ]
+                : []),
               {
                 "@type": "ListItem",
-                position: 3,
+                position: parentProc ? 4 : 3,
                 name: title,
               },
             ],

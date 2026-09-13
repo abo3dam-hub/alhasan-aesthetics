@@ -57,10 +57,13 @@ const schema = defineSchema(
       isActive: v.boolean(),
       isFeatured: v.optional(v.boolean()),
       order: v.number(),
+      parentSlug: v.optional(v.string()),
+      supersededBy: v.optional(v.array(v.string())),
     })
       .index("by_slug", ["slug"])
       .index("by_category", ["category"])
-      .index("by_order", ["order"]),
+      .index("by_order", ["order"])
+      .index("by_parentSlug", ["parentSlug"]),
 
     // ─── Before & After Cases ───
     beforeAfter: defineTable({

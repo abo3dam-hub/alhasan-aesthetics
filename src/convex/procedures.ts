@@ -16,7 +16,9 @@ export const listActive = query({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("procedures").withIndex("by_order").collect();
-    return all.filter((p) => p.isActive);
+    // Sub-procedures (parentSlug set) are presented inside their parent page,
+    // so they are excluded from the top-level active listing.
+    return all.filter((p) => p.isActive && !p.parentSlug);
   },
 });
 
@@ -24,7 +26,26 @@ export const listFeatured = query({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("procedures").withIndex("by_order").collect();
-    return all.filter((p) => p.isActive && p.isFeatured);
+    return all.filter((p) => p.isActive && p.isFeatured && !p.parentSlug);
+  },
+});
+
+/** Active sub-procedures of a parent group (order preserved). */
+export const listChildren = query({
+  args: { parentSlug: v.string() },
+  handler: async (ctx, args) => {
+    const all = await ctx.db.query("procedures").withIndex("by_order").collect();
+    return all.filter((p) => p.isActive && p.parentSlug === args.parentSlug);
+  },
+});
+
+/** Active procedures matching a set of slugs (used for legacy redirect hints). */
+export const getBySlugs = query({
+  args: { slugs: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    if (args.slugs.length === 0) return [];
+    const all = await ctx.db.query("procedures").withIndex("by_order").collect();
+    return all.filter((p) => p.isActive && args.slugs.includes(p.slug));
   },
 });
 
@@ -72,16 +93,19 @@ export const create = mutation({
     recovery: v.string(),
     price: v.optional(v.string()),
     image: v.optional(v.string()),
-    gallery: v.optional(v.array(v.string())),      beforeImage: v.optional(v.string()),
-      afterImage: v.optional(v.string()),
-      seoTitleAr: v.optional(v.string()),
-      seoTitleEn: v.optional(v.string()),
-      seoDescriptionAr: v.optional(v.string()),
-      seoDescriptionEn: v.optional(v.string()),
-      ogImage: v.optional(v.string()),
-      isActive: v.boolean(),
-      isFeatured: v.optional(v.boolean()),
-      order: v.number(),
+    gallery: v.optional(v.array(v.string())),
+    beforeImage: v.optional(v.string()),
+    afterImage: v.optional(v.string()),
+    seoTitleAr: v.optional(v.string()),
+    seoTitleEn: v.optional(v.string()),
+    seoDescriptionAr: v.optional(v.string()),
+    seoDescriptionEn: v.optional(v.string()),
+    ogImage: v.optional(v.string()),
+    isActive: v.boolean(),
+    isFeatured: v.optional(v.boolean()),
+    order: v.number(),
+    parentSlug: v.optional(v.string()),
+    supersededBy: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -113,9 +137,11 @@ export const update = mutation({
     seoDescriptionAr: v.optional(v.string()),
     seoDescriptionEn: v.optional(v.string()),
     ogImage: v.optional(v.string()),
-      isActive: v.optional(v.boolean()),
-      isFeatured: v.optional(v.boolean()),
-      order: v.optional(v.number()),
+    isActive: v.optional(v.boolean()),
+    isFeatured: v.optional(v.boolean()),
+    order: v.optional(v.number()),
+    parentSlug: v.optional(v.string()),
+    supersededBy: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);

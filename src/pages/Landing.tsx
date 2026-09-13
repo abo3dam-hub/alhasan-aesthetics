@@ -1,6 +1,7 @@
 import GlassNavbar from "@/components/GlassNavbar";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
+import InformationCard from "@/components/sections/InformationCard";
 import Procedures from "@/components/sections/Procedures";
 import BeforeAfter from "@/components/sections/BeforeAfter";
 import Testimonials from "@/components/sections/Testimonials";
@@ -67,6 +68,7 @@ export default function Landing() {
       <main>
         {isVisible("hero") && <Hero />}
         {isVisible("about") && <About />}
+        {isVisible("informationCard") && <InformationCard />}
         {isVisible("procedures") && <Procedures />}
         {isVisible("beforeAfter") && <BeforeAfter />}
         {isVisible("testimonials") && <Testimonials />}

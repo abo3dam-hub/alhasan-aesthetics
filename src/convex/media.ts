@@ -214,6 +214,13 @@ export const checkReferences = query({
       .first();
     if (about?.value?.image === sid) refs.push("Doctor Profile");
 
+    // Check information card image (homepage patient guide)
+    const infoCard = await ctx.db
+      .query("siteSettings")
+      .withIndex("by_key", (q) => q.eq("key", "informationCard"))
+      .first();
+    if (infoCard?.value?.image === sid) refs.push("Homepage Information Card");
+
     // Check all procedures
     const procedures = await ctx.db.query("procedures").collect();
     for (const p of procedures) {

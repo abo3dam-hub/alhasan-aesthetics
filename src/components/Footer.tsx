@@ -112,8 +112,8 @@ export default function Footer() {
                 <>
                   <li><Link to="/procedure/rhinoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.rhinoplasty}</Link></li>
                   <li><Link to="/procedure/face-neck-lift" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.faceNeckLift}</Link></li>
-                  <li><Link to="/procedure/blepharoplasty" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.blepharoplasty}</Link></li>
-                  <li><Link to="/procedure/botox" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.botox}</Link></li>
+                  <li><Link to="/procedure/upper-eyelid-lift" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.blepharoplasty}</Link></li>
+                  <li><Link to="/procedure/botox-injections" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.botox}</Link></li>
                   <li><Link to="/procedure/fillers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.fillers}</Link></li>
                   <li><Link to="/procedure/tummy-tuck" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.procedures.tummyTuck}</Link></li>
                 </>

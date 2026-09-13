@@ -18,6 +18,7 @@ export default function HomepageCMSTab() {
   const sections = [
     { key: "hero", label: "Hero Section" },
     { key: "about", label: "About Section" },
+    { key: "information-card", label: "Information Card (Patient Guide)" },
     { key: "procedures-header", label: "Procedures Section Header" },
     { key: "beforeAfter-header", label: "Before & After Section Header" },
     { key: "testimonials-header", label: "Testimonials Section Header" },
@@ -45,6 +46,7 @@ export default function HomepageCMSTab() {
             <div className="mt-2">
               {section.key === "hero" && <HeroEditor />}
               {section.key === "about" && <AboutEditor />}
+              {section.key === "information-card" && <InformationCardEditor />}
               {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label="Procedures" fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
               {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label="Before & After" fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
               {section.key === "testimonials-header" && <SectionHeaderEditor sectionKey="testimonialsSection" label="Testimonials" fallbackKeys={{ badge: "testimonials.badge", title: "testimonials.title", titleHighlight: "testimonials.titleHighlight", subtitle: "testimonials.subtitle" }} />}
@@ -308,6 +310,131 @@ function AboutEditor() {
   );
 }
 
+// ─── Information Card Editor ───
+interface InformationCardForm {
+  enabled: boolean;
+  badgeAr: string;
+  badgeEn: string;
+  titleAr: string;
+  titleEn: string;
+  contentAr: string;
+  contentEn: string;
+  image: string;
+  ctaTextAr: string;
+  ctaTextEn: string;
+  ctaLink: string;
+  ctaEnabled: boolean;
+}
+
+function InformationCardEditor() {
+  const infoCMS = useQuery(api.homepageSettings.getInformationCardSettings);
+  const setSetting = useMutation(api.homepageSettings.set);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<InformationCardForm | null>(null);
+  const [initialized, setInitialized] = useState(false);
+
+  if (infoCMS && form === null && !initialized) {
+    setForm({
+      enabled: infoCMS.enabled !== false,
+      badgeAr: infoCMS.badgeAr || "",
+      badgeEn: infoCMS.badgeEn || "",
+      titleAr: infoCMS.titleAr || "",
+      titleEn: infoCMS.titleEn || "",
+      contentAr: infoCMS.contentAr || "",
+      contentEn: infoCMS.contentEn || "",
+      image: infoCMS.image || "",
+      ctaTextAr: infoCMS.ctaTextAr || "",
+      ctaTextEn: infoCMS.ctaTextEn || "",
+      ctaLink: infoCMS.ctaLink || "/consultation",
+      ctaEnabled: infoCMS.ctaEnabled !== false,
+    });
+    setInitialized(true);
+  }
+
+  const update = (key: keyof InformationCardForm, value: string | boolean) =>
+    setForm((p) => (p ? { ...p, [key]: value } : p));
+
+  const handleSave = async () => {
+    if (!form) return;
+    setSaving(true);
+    try {
+      await setSetting({ key: "informationCard", value: form });
+      toast.success("Information card saved!");
+    } catch {
+      toast.error("Failed to save");
+    }
+    setSaving(false);
+  };
+
+  if (!form) {
+    return (
+      <Card className="border-border/60">
+        <CardContent className="p-8 text-center text-muted-foreground text-sm">
+          Loading information card…
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader>
+        <CardTitle className="text-lg">Information Card (Patient Guide)</CardTitle>
+        <p className="text-xs text-muted-foreground">Shown on the homepage between the About section and Our Procedures.</p>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => update("enabled", e.target.checked)} className="rounded" /> Section Enabled</label>
+
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Badge / Eyebrow</Label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="Patient Guide" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="معلومات مهمة" /></div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Title</Label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Textarea rows={2} value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Information Every Woman Considering Cosmetic Surgery Should Know" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Textarea dir="rtl" rows={2} value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="معلومات على كل سيدة تنوي إجراء جراحة تجميلية معرفتها" /></div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Body Content</Label>
+          <p className="text-xs text-muted-foreground">Separate paragraphs with a blank line.</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Content (EN)</Label><Textarea rows={7} value={form.contentEn || ""} onChange={(e) => update("contentEn", e.target.value)} /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Content (AR)</Label><Textarea dir="rtl" rows={7} value={form.contentAr || ""} onChange={(e) => update("contentAr", e.target.value)} /></div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Image (optional)</Label>
+          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select card image" />
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">Call-to-Action Button</Label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaEnabled} onChange={(e) => update("ctaEnabled", e.target.checked)} className="rounded" /> Enabled</label>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Text (EN)</Label><Input value={form.ctaTextEn || ""} onChange={(e) => update("ctaTextEn", e.target.value)} placeholder="Book Your Consultation" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Text (AR)</Label><Input dir="rtl" value={form.ctaTextAr || ""} onChange={(e) => update("ctaTextAr", e.target.value)} placeholder="احجزي استشارتك" /></div>
+          </div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Destination</Label><Input value={form.ctaLink || ""} onChange={(e) => update("ctaLink", e.target.value)} placeholder="/consultation" /></div>
+        </div>
+
+        <div className="flex justify-end" role="status" aria-live="polite">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Information Card"}</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── CTA Editor ───
 function CTAEditor() {
   const ctaCMS = useQuery(api.homepageSettings.getCTASettings);
@@ -495,6 +622,7 @@ function VisibilityEditor() {
     setVisibility({
       hero: homepageCMS.hero !== false,
       about: homepageCMS.about !== false,
+      informationCard: homepageCMS.informationCard !== false,
       procedures: homepageCMS.procedures !== false,
       beforeAfter: homepageCMS.beforeAfter !== false,
       testimonials: homepageCMS.testimonials !== false,
@@ -519,6 +647,7 @@ function VisibilityEditor() {
   const sections = [
     { key: "hero", label: "Hero" },
     { key: "about", label: "About" },
+    { key: "informationCard", label: "Information Card" },
     { key: "procedures", label: "Procedures" },
     { key: "beforeAfter", label: "Before & After" },
     { key: "testimonials", label: "Testimonials" },
