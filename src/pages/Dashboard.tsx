@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/convex/_generated/api";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvex } from "convex/react";
 import { Database } from "lucide-react";
 import { useState, useCallback, useRef, useMemo } from "react";
 import { toast } from "sonner";
@@ -177,8 +177,33 @@ function OverviewTab() {
   const [seedingProcedures, setSeedingProcedures] = useState(false);
   const [seedingHomepage, setSeedingHomepage] = useState(false);
   const migrateStructure = useMutation(api.migration.migrateProcedureStructure);
-  const migrationStatus = useQuery(api.migration.getMigrationStatus);
   const [migrating, setMigrating] = useState(false);
+  const convex = useConvex();
+  const [migrationStatus, setMigrationStatus] = useState<{
+    legacyRecords: { slug: string; isActive: boolean; supersededBy?: string[] }[];
+    subProcedures: { titleAr: string; slug: string; isActive: boolean; parentSlug?: string }[];
+    newProceduresCount: number;
+    oldCombinedStillActive: boolean;
+  } | null>(null);
+  const [migrationStatusError, setMigrationStatusError] = useState(false);
+
+  const checkMigrationStatus = useCallback(async () => {
+    try {
+      const status = (await convex.query(api.migration.getMigrationStatus)) as {
+        legacyRecords: { slug: string; isActive: boolean; supersededBy?: string[] }[];
+        subProcedures: { titleAr: string; slug: string; isActive: boolean; parentSlug?: string }[];
+        newProceduresCount: number;
+        oldCombinedStillActive: boolean;
+      };
+      setMigrationStatus(status);
+      setMigrationStatusError(false);
+    } catch (e) {
+      console.warn("[migration] Status query failed (backend not deployed yet?):", e);
+      setMigrationStatus(null);
+      setMigrationStatusError(true);
+    }
+  }, [convex]);
+
   const procedures = useQuery(api.procedures.list);
   const testimonials = useQuery(api.testimonials.list);
   const faqs = useQuery(api.faq.list);
@@ -372,6 +397,11 @@ function OverviewTab() {
                     )}
                   </div>
                 )}
+                {migrationStatusError && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Migration status unavailable — the Convex backend hasn&apos;t been updated yet (deploy it, then click &quot;Check Status&quot;).
+                  </p>
+                )}
               </div>
             </div>
             <Button
@@ -382,6 +412,7 @@ function OverviewTab() {
                 try {
                   const result = await migrateStructure();
                   toast.success(result || "Structure migration complete!");
+                  await checkMigrationStatus();
                 } catch (e) {
                   toast.error("Migration failed. See console for details.");
                   console.error(e);
@@ -391,6 +422,14 @@ function OverviewTab() {
               className="bg-primary text-primary-foreground shrink-0"
             >
               {migrating ? "Migrating..." : "Run Structure Migration"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={checkMigrationStatus}
+              className="shrink-0"
+            >
+              Check Status
             </Button>
           </div>
         </CardContent>

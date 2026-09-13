@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ImageUpload } from "@/components/ImageUpload";
 import { MediaSelector } from "@/components/MediaSelector";
 
@@ -46,7 +47,11 @@ export default function HomepageCMSTab() {
             <div className="mt-2">
               {section.key === "hero" && <HeroEditor />}
               {section.key === "about" && <AboutEditor />}
-              {section.key === "information-card" && <InformationCardEditor />}
+              {section.key === "information-card" && (
+                <ErrorBoundary fallback={<div className="p-4 rounded-xl border border-border/60 text-sm text-muted-foreground">Information card settings will appear after the Convex backend is updated.</div>}>
+                  <InformationCardEditor />
+                </ErrorBoundary>
+              )}
               {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label="Procedures" fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
               {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label="Before & After" fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
               {section.key === "testimonials-header" && <SectionHeaderEditor sectionKey="testimonialsSection" label="Testimonials" fallbackKeys={{ badge: "testimonials.badge", title: "testimonials.title", titleHighlight: "testimonials.titleHighlight", subtitle: "testimonials.subtitle" }} />}

@@ -9,6 +9,7 @@ import FAQ from "@/components/sections/FAQ";
 import Contact from "@/components/sections/Contact";
 import CTA from "@/components/sections/CTA";
 import Footer from "@/components/Footer";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useEffect } from "react";
@@ -68,7 +69,11 @@ export default function Landing() {
       <main>
         {isVisible("hero") && <Hero />}
         {isVisible("about") && <About />}
-        {isVisible("informationCard") && <InformationCard />}
+        {isVisible("informationCard") && (
+          <ErrorBoundary>
+            <InformationCard />
+          </ErrorBoundary>
+        )}
         {isVisible("procedures") && <Procedures />}
         {isVisible("beforeAfter") && <BeforeAfter />}
         {isVisible("testimonials") && <Testimonials />}
