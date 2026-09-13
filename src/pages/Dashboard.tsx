@@ -226,36 +226,25 @@ function OverviewTab() {
     { label: "Media", value: totalMedia, icon: ImageIcon, color: "text-purple-500 bg-purple-50" },
   ];
 
-  const becomeAdmin = useMutation(api.users.becomeAdmin);
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
-  const [becomingAdmin, setBecomingAdmin] = useState(false);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Dashboard Overview</h2>
-        {!isAdmin && (
-          <Button
-            size="sm"
-            className="gap-2 bg-primary text-primary-foreground"
-            disabled={becomingAdmin}
-            onClick={async () => {
-              setBecomingAdmin(true);
-              try {
-                await becomeAdmin();
-                toast.success("You are now an admin!");
-                window.location.reload();
-              } catch (e) {
-                toast.error(e instanceof Error ? e.message : "Failed");
-              }
-              setBecomingAdmin(false);
-            }}
-          >
-            {becomingAdmin ? "..." : "Become Admin"}
-          </Button>
-        )}
       </div>
+      {!isAdmin && (
+        <Card className="border-border/60 bg-amber-50/50">
+          <CardContent className="p-5">
+            <p className="text-sm text-amber-800">
+              You are signed in but do not have an administrator role, so CMS
+              changes are disabled. Contact an administrator if this is a
+              mistake.
+            </p>
+          </CardContent>
+        </Card>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <Card key={stat.label} className="border-border/60">

@@ -10,7 +10,6 @@
 
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
-import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as beforeAfter from "../beforeAfter.js";
 import type * as faq from "../faq.js";
 import type * as homepageSettings from "../homepageSettings.js";
@@ -32,7 +31,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
-  "auth/emailOtp": typeof auth_emailOtp;
   beforeAfter: typeof beforeAfter;
   faq: typeof faq;
   homepageSettings: typeof homepageSettings;
