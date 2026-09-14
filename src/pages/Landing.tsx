@@ -68,18 +68,20 @@ export default function Landing() {
       </a>
       <main>
         {isVisible("hero") && <Hero />}
-        {isVisible("about") && <About />}
-        {isVisible("informationCard") && (
-          <ErrorBoundary>
-            <InformationCard />
-          </ErrorBoundary>
-        )}
-        {isVisible("procedures") && <Procedures />}
-        {isVisible("beforeAfter") && <BeforeAfter />}
-        {isVisible("testimonials") && <Testimonials />}
-        {isVisible("faq") && <FAQ />}
-        {isVisible("cta") && <CTA />}
-        {isVisible("contact") && <Contact />}
+        <div className="cvv">{isVisible("about") && <About />}</div>
+        <div className="cvv">
+          {isVisible("informationCard") && (
+            <ErrorBoundary>
+              <InformationCard />
+            </ErrorBoundary>
+          )}
+        </div>
+        <div className="cvv">{isVisible("procedures") && <Procedures />}</div>
+        <div className="cvv">{isVisible("beforeAfter") && <BeforeAfter />}</div>
+        <div className="cvv">{isVisible("testimonials") && <Testimonials />}</div>
+        <div className="cvv">{isVisible("faq") && <FAQ />}</div>
+        <div className="cvv">{isVisible("cta") && <CTA />}</div>
+        <div className="cvv">{isVisible("contact") && <Contact />}</div>
       </main>
       <Footer />
 

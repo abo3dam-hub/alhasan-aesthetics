@@ -1,8 +1,7 @@
 import { useI18n } from "@/i18n";
 import { Link } from "react-router";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowRight, ArrowLeft } from "lucide-react";
+import { Home, ArrowRight, ArrowLeft, Stethoscope, Calendar } from "lucide-react";
 
 export default function NotFound() {
   const { dir } = useI18n();
@@ -11,64 +10,67 @@ export default function NotFound() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden" dir={dir}>
-      {/* Background gradient */}
+      {/* Background */}
       <div className="absolute inset-0 hero-gradient" />
+      <div className="absolute top-16 left-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl" aria-hidden="true" />
+      <div className="absolute bottom-16 right-10 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" aria-hidden="true" />
+      <div className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
+      <div className="absolute bottom-1/4 left-1/4 h-40 w-40 rounded-full bg-secondary/10 blur-2xl" aria-hidden="true" />
 
-      {/* Decorative elements */}
-      <div className="absolute top-20 left-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute bottom-20 right-10 h-80 w-80 rounded-full bg-secondary/5 blur-3xl" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative text-center px-4"
-      >
-        {/* Large 404 */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
-          <span className="text-[120px] sm:text-[180px] font-bold font-serif-luxury text-primary/10 leading-none select-none">
+      <div className="relative text-center px-4">
+        {/* Big 404 watermark */}
+        <div className="animate-fade-up mb-8">
+          <span className="text-[110px] sm:text-[180px] font-bold font-serif-luxury text-primary/10 leading-none select-none drop-shadow-sm">
             404
           </span>
-        </motion.div>
+        </div>
 
-        {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-elevated rounded-3xl p-8 sm:p-12 max-w-md mx-auto glow-champagne"
-        >
+        {/* Glass card */}
+        <div className="animate-fade-up-slow glass-elevated rounded-3xl p-8 sm:p-12 max-w-md mx-auto glow-champagne -mt-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-xs font-medium text-primary mb-6">
+            <Stethoscope className="h-4 w-4" />
+            {isRtl ? "جراحة تجميلية وطب تجميل" : "Aesthetic & Plastic Surgery"}
+          </div>
+
           <h1 className="text-2xl sm:text-3xl font-serif-luxury font-bold text-foreground mb-3">
             {isRtl ? "الصفحة غير موجودة" : "Page Not Found"}
           </h1>
           <p className="text-muted-foreground mb-8 leading-relaxed">
             {isRtl
-              ? "عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها. لا تقلق، يمكنك العودة للصفحة الرئيسية."
-              : "Sorry, the page you're looking for doesn't exist or has been moved. Don't worry, you can head back to the homepage."}
+              ? "عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها. لا تقلق، يمكنك استكشاف الإجراءات أو حجز استشارة من هنا."
+              : "Sorry, the page you're looking for doesn't exist or has been moved. You can explore our procedures or book a consultation instead."}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 gap-2">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-7 gap-2 w-full sm:w-auto">
                 <Home className="h-4 w-4" />
-                {isRtl ? "العودة للرئيسية" : "Back to Home"}
+                {isRtl ? "الرئيسية" : "Home"}
+              </Button>
+            </Link>
+            <Link to="/procedures">
+              <Button variant="outline" className="rounded-full px-7 gap-2 w-full sm:w-auto">
+                <Stethoscope className="h-4 w-4" />
+                {isRtl ? "الإجراءات" : "Procedures"}
                 <Arrow className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/consultation">
-              <Button variant="outline" className="rounded-full px-8 gap-2">
-                {isRtl ? "احجز استشارتك" : "Book Consultation"}
-                <Arrow className="h-4 w-4" />
+              <Button variant="outline" className="rounded-full px-7 gap-2 w-full sm:w-auto">
+                <Calendar className="h-4 w-4" />
+                {isRtl ? "حجز استشارة" : "Consultation"}
               </Button>
             </Link>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+
+        {/* Small aide hint */}
+        <p className="animate-fade-up-slow mt-8 text-xs text-muted-foreground/70">
+          {isRtl
+            ? "إن كتبت الرابط يدويًا، تأكد من كتابته بشكل صحيح"
+            : "If you typed the address manually, please double-check the spelling"}
+        </p>
+      </div>
     </div>
   );
 }
