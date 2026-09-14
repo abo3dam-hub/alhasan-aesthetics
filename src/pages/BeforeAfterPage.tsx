@@ -13,7 +13,7 @@ import { ResolvedImage } from "@/components/ResolvedImage";
 
 
 export default function BeforeAfterPage() {
-  const { t, dir } = useI18n();
+  const { dir } = useI18n();
   const isRtl = dir === "rtl";
   const [activeFilter, setActiveFilter] = useState("all");
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
@@ -142,7 +142,7 @@ export default function BeforeAfterPage() {
                       <div className="relative aspect-[4/3] overflow-hidden">
                         {/* After (background) */}
                         <ResolvedImage
-                          ref={caseItem.afterImage}
+                          storageId={caseItem.afterImage}
                           alt="After"
                           imgClassName="absolute inset-0 w-full h-full object-cover"
                           fallbackClassName="absolute inset-0"
@@ -154,7 +154,7 @@ export default function BeforeAfterPage() {
                         >
                           <div style={{ width: `${10000 / Math.max(sliderVal, 1)}%`, maxWidth: "none" }}>
                             <ResolvedImage
-                              ref={caseItem.beforeImage}
+                              storageId={caseItem.beforeImage}
                               alt="Before"
                               imgClassName="w-full h-full object-cover"
                               fallbackClassName="w-full h-full"

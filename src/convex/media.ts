@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./admin";
+import type { Id } from "./_generated/dataModel";
 
 /** Generate a signed upload URL for file uploads */
 export const generateUploadUrl = mutation({
@@ -54,7 +55,7 @@ export const getByStorageId = query({
 export const getFileUrl = query({
   args: { storageId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.storage.getUrl(args.storageId as any);
+    return await ctx.storage.getUrl(args.storageId as Id<"_storage">);
   },
 });
 
@@ -94,9 +95,9 @@ export const resolveUrl = query({
     // Plain storageId (no protocol prefix)
     if (!ref.startsWith("http://") && !ref.startsWith("https://")) {
       try {
-        const resolved = await ctx.storage.getUrl(ref as any);
+        const resolved = await ctx.storage.getUrl(ref as Id<"_storage">);
         if (resolved) return resolved;
-      } catch (e) {
+      } catch {
         // Storage object may not exist — fall through
       }
       // Could not resolve — return empty to trigger "No image" state
@@ -107,9 +108,9 @@ export const resolveUrl = query({
     const extractedId = extractStorageIdFromUrl(ref);
     if (extractedId) {
       try {
-        const resolved = await ctx.storage.getUrl(extractedId as any);
+        const resolved = await ctx.storage.getUrl(extractedId as Id<"_storage">);
         if (resolved) return resolved;
-      } catch (e) {
+      } catch {
         // Fall through to media record lookup
       }
     }
@@ -119,9 +120,9 @@ export const resolveUrl = query({
     for (const item of allMedia) {
       if (item.url === ref && item.storageId) {
         try {
-          const resolved = await ctx.storage.getUrl(item.storageId as any);
+          const resolved = await ctx.storage.getUrl(item.storageId as Id<"_storage">);
           if (resolved) return resolved;
-        } catch (e) {
+        } catch {
           // Storage object may not exist
         }
       }
@@ -165,7 +166,7 @@ export const resolveUrls = query({
       // Plain storageId
       if (!ref.startsWith("http://") && !ref.startsWith("https://")) {
         try {
-          const resolved = await ctx.storage.getUrl(ref as any);
+          const resolved = await ctx.storage.getUrl(ref as Id<"_storage">);
           if (resolved) { results[ref] = resolved; continue; }
         } catch { /* fall through */ }
         results[ref] = ref;
@@ -176,7 +177,7 @@ export const resolveUrls = query({
       const extractedId = extractStorageIdFromUrl(ref);
       if (extractedId) {
         try {
-          const resolved = await ctx.storage.getUrl(extractedId as any);
+          const resolved = await ctx.storage.getUrl(extractedId as Id<"_storage">);
           if (resolved) { results[ref] = resolved; continue; }
         } catch { /* fall through */ }
       }
@@ -185,7 +186,7 @@ export const resolveUrls = query({
       const mediaStorageId = urlToStorageId.get(ref);
       if (mediaStorageId) {
         try {
-          const resolved = await ctx.storage.getUrl(mediaStorageId as any);
+          const resolved = await ctx.storage.getUrl(mediaStorageId as Id<"_storage">);
           if (resolved) { results[ref] = resolved; continue; }
         } catch { /* fall through */ }
       }
@@ -273,7 +274,7 @@ export const diagnostic = query({
       let storageExists = false;
       let error = "";
       try {
-        const url = await ctx.storage.getUrl(item.storageId as any);
+        const url = await ctx.storage.getUrl(item.storageId as Id<"_storage">);
         if (url) {
           resolvedUrl = url;
           storageExists = true;
@@ -317,7 +318,7 @@ export const repairUrls = mutation({
       const needsRepair = !item.url || item.url === "" || item.url.startsWith("blob:");
       if (needsRepair) {
         try {
-          const resolved = await ctx.storage.getUrl(item.storageId as any);
+          const resolved = await ctx.storage.getUrl(item.storageId as Id<"_storage">);
           if (resolved) {
             await ctx.db.patch(item._id, { url: resolved });
             repaired++;
@@ -360,7 +361,7 @@ export const remove = mutation({
     const item = await ctx.db.get(args.id);
     if (item) {
       try {
-        await ctx.storage.delete(item.storageId as any);
+        await ctx.storage.delete(item.storageId as Id<"_storage">);
       } catch {
         // File may already be gone from storage
       }

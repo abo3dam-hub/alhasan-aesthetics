@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import { useI18n } from "@/i18n";
 
 export default function Landing() {
-  const { t, dir } = useI18n();
+  const { dir } = useI18n();
   const visibility = useQuery(api.homepageSettings.getHomepageSettings);
   const seoCMS = useQuery(api.homepageSettings.getSEOSettings);
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
@@ -33,12 +33,12 @@ export default function Landing() {
       ? (seoCMS?.metaDescriptionAr || undefined)
       : (seoCMS?.metaDescriptionEn || undefined);
     if (desc) {
-      let meta = document.querySelector('meta[name="description"]');
+      const meta = document.querySelector('meta[name="description"]');
       if (meta) meta.setAttribute("content", desc);
     }
 
     if (seoCMS?.ogImage) {
-      let ogMeta = document.querySelector('meta[property="og:image"]');
+      const ogMeta = document.querySelector('meta[property="og:image"]');
       if (ogMeta) ogMeta.setAttribute("content", seoCMS.ogImage);
     }
 

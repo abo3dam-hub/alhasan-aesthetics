@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Locale, Translations } from "./types";
 import ar from "../locales/ar.json";
 import en from "../locales/en.json";
@@ -47,7 +47,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   );
 
   // Set initial dir on mount
-  useMemo(() => {
+  useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
   }, [locale]);

@@ -81,7 +81,7 @@ export default function Testimonials() {
                     <div className="mt-6 pt-5 border-t border-border/30">
                       <div className="flex items-center gap-3">
                         {item.avatar ? (
-                          <ResolvedImage ref={item.avatar} alt={isRtl ? item.nameAr : item.nameEn} imgClassName="h-10 w-10 rounded-full object-cover shrink-0" lazy={false} />
+                          <ResolvedImage storageId={item.avatar} alt={isRtl ? item.nameAr : item.nameEn} imgClassName="h-10 w-10 rounded-full object-cover shrink-0" lazy={false} />
                         ) : (
                           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
                             {(isRtl ? item.nameAr : item.nameEn).charAt(0)}

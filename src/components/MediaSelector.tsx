@@ -1,7 +1,6 @@
 import { api } from "@/convex/_generated/api";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ImageIcon, Search, X, Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,7 @@ export function MediaSelector({ value, onChange, label, className }: MediaSelect
       <div className="flex items-center gap-3">
         {value ? (
           <div className="relative group w-24 h-24 rounded-xl overflow-hidden border border-border/60">
-            <ResolvedImage ref={value} alt="" />
+            <ResolvedImage storageId={value} alt="" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
               <button type="button" onClick={() => setIsOpen(true)} className="p-1.5 rounded-full bg-white/90 hover:bg-white text-foreground shadow-sm" aria-label="Replace image">
                 <Upload className="h-3.5 w-3.5" />
@@ -178,7 +177,7 @@ function MediaLibraryModal({
                     aria-pressed={isSelected}
                   >
                     <ResolvedImage
-                      ref={item.storageId}
+                      storageId={item.storageId}
                       alt={item.name}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -10,8 +10,68 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ImageUpload } from "@/components/ImageUpload";
 import { MediaSelector } from "@/components/MediaSelector";
+
+interface TrustBadge {
+  labelAr: string;
+  labelEn: string;
+  icon: string;
+  enabled: boolean;
+}
+
+interface AboutStat {
+  icon: string;
+  value: string;
+  labelAr: string;
+  labelEn: string;
+  enabled: boolean;
+}
+
+interface HeroFormFields {
+  badgeAr: string;
+  badgeEn: string;
+  titleAr: string;
+  titleEn: string;
+  subtitleAr: string;
+  subtitleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  ctaTextAr: string;
+  ctaTextEn: string;
+  ctaSecondaryTextAr: string;
+  ctaSecondaryTextEn: string;
+  badgeEnabled: boolean;
+  ctaEnabled: boolean;
+  ctaSecondaryEnabled: boolean;
+  trustBadges: TrustBadge[];
+}
+
+interface AboutFormFields {
+  badgeAr: string;
+  badgeEn: string;
+  titleAr: string;
+  titleEn: string;
+  titleHighlightAr: string;
+  titleHighlightEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  image: string;
+  stats: AboutStat[];
+}
+
+interface CTAFormFields {
+  enabled: boolean;
+  badgeAr: string;
+  badgeEn: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  buttonTextAr: string;
+  buttonTextEn: string;
+  buttonEnabled: boolean;
+  buttonDestination: string;
+}
 
 export default function HomepageCMSTab() {
   const [activeSection, setActiveSection] = useState<string | null>("hero");
@@ -72,7 +132,7 @@ function HeroEditor() {
   const heroCMS = useQuery(api.homepageSettings.getHeroSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<Record<string, any>>({});
+  const [form, setForm] = useState<HeroFormFields>({} as HeroFormFields);
   const [initialized, setInitialized] = useState(false);
 
   if (heroCMS && !initialized) {
@@ -102,14 +162,14 @@ function HeroEditor() {
     setInitialized(true);
   }
 
-  const update = (key: string, value: any) => setForm((p) => ({ ...p, [key]: value }));
+  const update = (key: keyof HeroFormFields, value: string | boolean | TrustBadge[]) => setForm((p) => ({ ...p, [key]: value }));
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await setSetting({ key: "hero", value: form });
       toast.success("Hero settings saved!");
-    } catch (e) {
+    } catch {
       toast.error("Failed to save hero settings");
     }
     setSaving(false);
@@ -185,7 +245,7 @@ function HeroEditor() {
         {/* Trust Badges */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Trust Badges</Label>
-          {(form.trustBadges || []).map((badge: any, i: number) => (
+          {(form.trustBadges || []).map((badge, i) => (
             <div key={i} className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-end">
               <div className="space-y-1"><Label className="text-xs">EN</Label><Input value={badge.labelEn} onChange={(e) => {
                 const badges = [...form.trustBadges]; badges[i] = { ...badges[i], labelEn: e.target.value }; update("trustBadges", badges);
@@ -197,7 +257,7 @@ function HeroEditor() {
                 const badges = [...form.trustBadges]; badges[i] = { ...badges[i], enabled: e.target.checked }; update("trustBadges", badges);
               }} className="rounded" /> On</label>
               <button type="button" onClick={() => {
-                const badges = form.trustBadges.filter((_: any, j: number) => j !== i); update("trustBadges", badges);
+                const badges = form.trustBadges.filter((_, j) => j !== i); update("trustBadges", badges);
               }} className="p-1 text-red-500 hover:bg-red-50 rounded"><Trash2 className="h-3 w-3" /></button>
             </div>
           ))}
@@ -221,7 +281,7 @@ function AboutEditor() {
   const aboutCMS = useQuery(api.homepageSettings.getAboutSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<Record<string, any>>({});
+  const [form, setForm] = useState<AboutFormFields>({} as AboutFormFields);
   const [initialized, setInitialized] = useState(false);
 
   if (aboutCMS && !initialized) {
@@ -241,14 +301,14 @@ function AboutEditor() {
     setInitialized(true);
   }
 
-  const update = (key: string, value: any) => setForm((p) => ({ ...p, [key]: value }));
+  const update = (key: keyof AboutFormFields, value: string | AboutStat[]) => setForm((p) => ({ ...p, [key]: value }));
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await setSetting({ key: "about", value: form });
       toast.success("About settings saved!");
-    } catch (e) { toast.error("Failed to save"); }
+    } catch { toast.error("Failed to save"); }
     setSaving(false);
   };
 
@@ -290,14 +350,14 @@ function AboutEditor() {
         {/* Stats */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Statistics</Label>
-          {(form.stats || []).map((stat: any, i: number) => (
+          {(form.stats || []).map((stat, i) => (
             <div key={i} className="grid grid-cols-2 sm:grid-cols-6 gap-2 items-end">
               <div className="space-y-1"><Label className="text-xs">Value</Label><Input value={stat.value} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], value: e.target.value }; update("stats", s); }} placeholder="15+" /></div>
               <div className="space-y-1"><Label className="text-xs">Icon</Label><select value={stat.icon} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], icon: e.target.value }; update("stats", s); }} className="w-full border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">{iconOptions.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
               <div className="space-y-1"><Label className="text-xs">EN</Label><Input value={stat.labelEn} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], labelEn: e.target.value }; update("stats", s); }} /></div>
               <div className="space-y-1"><Label className="text-xs">AR</Label><Input dir="rtl" value={stat.labelAr} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], labelAr: e.target.value }; update("stats", s); }} /></div>
               <label className="flex items-center gap-1 text-xs pb-1"><input type="checkbox" checked={stat.enabled !== false} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], enabled: e.target.checked }; update("stats", s); }} className="rounded" /> On</label>
-              <button type="button" onClick={() => update("stats", form.stats.filter((_: any, j: number) => j !== i))} className="p-1 text-red-500 hover:bg-red-50 rounded pb-1"><Trash2 className="h-3 w-3" /></button>
+              <button type="button" onClick={() => update("stats", form.stats.filter((_, j) => j !== i))} className="p-1 text-red-500 hover:bg-red-50 rounded pb-1"><Trash2 className="h-3 w-3" /></button>
               <div className="flex flex-col gap-0.5 pb-1">
                 <button type="button" disabled={i === 0} onClick={() => { const s = [...form.stats]; [s[i-1], s[i]] = [s[i], s[i-1]]; update("stats", s); }} className="p-1 text-muted-foreground hover:bg-muted rounded disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
                 <button type="button" disabled={i === (form.stats?.length ?? 1) - 1} onClick={() => { const s = [...form.stats]; [s[i], s[i+1]] = [s[i+1], s[i]]; update("stats", s); }} className="p-1 text-muted-foreground hover:bg-muted rounded disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
@@ -445,7 +505,7 @@ function CTAEditor() {
   const ctaCMS = useQuery(api.homepageSettings.getCTASettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<Record<string, any>>({});
+  const [form, setForm] = useState<CTAFormFields>({} as CTAFormFields);
   const [initialized, setInitialized] = useState(false);
 
   if (ctaCMS && !initialized) {
@@ -461,14 +521,14 @@ function CTAEditor() {
     setInitialized(true);
   }
 
-  const update = (key: string, value: any) => setForm((p) => ({ ...p, [key]: value }));
+  const update = (key: keyof CTAFormFields, value: string | boolean) => setForm((p) => ({ ...p, [key]: value }));
 
   const handleSave = async () => {
     setSaving(true);
     try {
       await setSetting({ key: "cta", value: form });
       toast.success("CTA settings saved!");
-    } catch (e) { toast.error("Failed to save"); }
+    } catch { toast.error("Failed to save"); }
     setSaving(false);
   };
 
@@ -532,7 +592,7 @@ function FooterEditor() {
     try {
       await setSetting({ key: "footer", value: form });
       toast.success("Footer settings saved!");
-    } catch (e) { toast.error("Failed to save"); }
+    } catch { toast.error("Failed to save"); }
     setSaving(false);
   };
 
@@ -554,7 +614,7 @@ function FooterEditor() {
 }
 
 // ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter) ───
-function SectionHeaderEditor({ sectionKey, label, fallbackKeys }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
+function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
   const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: sectionKey });
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -582,7 +642,7 @@ function SectionHeaderEditor({ sectionKey, label, fallbackKeys }: { sectionKey: 
     try {
       await setSetting({ key: sectionKey, value: form });
       toast.success(`${label} section header saved!`);
-    } catch (e) { toast.error("Failed to save"); }
+    } catch { toast.error("Failed to save"); }
     setSaving(false);
   };
 
@@ -645,7 +705,7 @@ function VisibilityEditor() {
     try {
       await setSetting({ key: "homepage", value: visibility });
       toast.success("Visibility settings saved!");
-    } catch (e) { toast.error("Failed to save"); }
+    } catch { toast.error("Failed to save"); }
     setSaving(false);
   };
 

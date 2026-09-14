@@ -28,7 +28,6 @@ export function MediaDiagnostics() {
   const { totalRecords, items } = diagnostic;
   const resolved = items.filter((i) => i.storageExists);
   const failed = items.filter((i) => !i.storageExists);
-  const withUrl = items.filter((i) => i.url && i.url !== "");
   const emptyUrl = items.filter((i) => !i.url || i.url === "");
 
   return (

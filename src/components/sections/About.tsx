@@ -21,6 +21,15 @@ const defaultStats = [
   { icon: "award", value: "10+", key: "certification" },
 ];
 
+interface AboutStatInfo {
+  icon?: string;
+  value?: string;
+  labelAr?: string;
+  labelEn?: string;
+  enabled?: boolean;
+  key?: string;
+}
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
@@ -51,13 +60,12 @@ export default function About() {
     ? (aboutCMS?.titleHighlightAr || t.about.titleHighlight)
     : (aboutCMS?.titleHighlightEn || t.about.titleHighlight);
 
-  const doctorImage = aboutCMS?.image || doctorImg;
   const doctorName = doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem";
   const doctorNameAr = doctorSettings?.doctorNameAr || "د. الحسن الصايم";
 
   // Stats — CMS or default
-  const stats = aboutCMS?.stats?.length > 0
-    ? aboutCMS.stats.filter((s: any) => s.enabled !== false)
+  const stats: AboutStatInfo[] = aboutCMS?.stats?.length > 0
+    ? aboutCMS.stats.filter((s: AboutStatInfo) => s.enabled !== false)
     : defaultStats;
 
   // Primary stat (shown as floating badge)
@@ -83,7 +91,7 @@ export default function About() {
                 <div className="aspect-[3/4] overflow-hidden">
                   {aboutCMS?.image ? (
                     <ResolvedImage
-                      ref={aboutCMS.image}
+                      storageId={aboutCMS.image}
                       alt={isArabic ? doctorNameAr : doctorName}
                       imgClassName="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
                     />
@@ -169,7 +177,7 @@ export default function About() {
             {/* Stats Grid */}
             {stats.length > 0 && (
               <div className="mt-10 grid grid-cols-2 gap-4">
-                {stats.map((stat: any, i: number) => {
+                {stats.map((stat: AboutStatInfo, i: number) => {
                   const StatIcon = statIconMap[stat.icon || "award"] || Award;
                   return (
                     <div

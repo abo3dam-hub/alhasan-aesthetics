@@ -14,15 +14,12 @@ import {
   LogOut,
   FileText,
   HelpCircle,
-  MessageSquare,
   Plus,
   Trash2,
   Eye,
   EyeOff,
-  Bell,
   Settings,
   ChevronDown,
-  ChevronUp,
   Image as ImageIcon,
   ArrowUp,
   ArrowDown,
@@ -45,27 +42,32 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
-import { ImageUpload } from "@/components/ImageUpload";
 import { MediaSelector } from "@/components/MediaSelector";
 import { useImageUpload } from "@/hooks/use-upload";
 import { useResolvedMedia } from "@/hooks/use-resolved-media";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { MediaDiagnostics } from "@/components/MediaDiagnostics";
+import type { Id } from "@/convex/_generated/dataModel";
+
+interface OrderableItem<TId> {
+  _id: TId;
+  order: number;
+}
 
 // Generic reorder helper: swap order of two adjacent items using update mutations
-async function swapOrder(
-  items: { _id: string; order: number }[],
+async function swapOrder<TId>(
+  items: OrderableItem<TId>[],
   index: number,
   direction: "up" | "down",
-  updateMutation: (args: { id: any; order: number }) => Promise<any>,
+  updateMutation: (args: { id: TId; order: number }) => Promise<unknown>,
 ) {
   const targetIndex = direction === "up" ? index - 1 : index + 1;
   if (targetIndex < 0 || targetIndex >= items.length) return;
   const current = items[index];
   const target = items[targetIndex];
   await Promise.all([
-    updateMutation({ id: current._id as any, order: target.order }),
-    updateMutation({ id: target._id as any, order: current.order }),
+    updateMutation({ id: current._id, order: target.order }),
+    updateMutation({ id: target._id, order: current.order }),
   ]);
 }
 
@@ -315,7 +317,7 @@ function OverviewTab() {
                 try {
                   const result = await seedHomepage();
                   toast.success(result || "CMS settings seeded!");
-                } catch (e) {
+                } catch {
                   toast.error("Failed to seed CMS settings.");
                 }
                 setSeedingHomepage(false);
@@ -349,7 +351,7 @@ function OverviewTab() {
                 try {
                   const result = await seedProcedures();
                   toast.success(result || "Procedures seeded!");
-                } catch (e) {
+                } catch {
                   toast.error("Failed to seed procedures.");
                 }
                 setSeedingProcedures(false);
@@ -445,7 +447,7 @@ function OverviewTab() {
                 try {
                   const result = await seedData();
                   toast.success(result || "Data seeded successfully!");
-                } catch (e) {
+                } catch {
                   toast.error("Data may already exist or an error occurred.");
                 }
                 setSeeding(false);
@@ -467,7 +469,7 @@ function ProceduresTab() {
   const updateProcedure = useMutation(api.procedures.update);
   const removeProcedure = useMutation(api.procedures.remove);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<Id<"procedures"> | null>(null);
   const [search, setSearch] = useState("");
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("all");
 
@@ -477,14 +479,14 @@ function ProceduresTab() {
     return matchesSearch && matchesFilter;
   });
 
-  const handleToggleActive = async (id: string, isActive: boolean) => {
-    await updateProcedure({ id: id as any, isActive: !isActive });
+  const handleToggleActive = async (id: Id<"procedures">, isActive: boolean) => {
+    await updateProcedure({ id, isActive: !isActive });
     toast.success("Procedure updated");
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: Id<"procedures">) => {
     if (confirm("Are you sure you want to delete this procedure?")) {
-      await removeProcedure({ id: id as any });
+      await removeProcedure({ id });
       toast.success("Procedure deleted");
     }
   };
@@ -501,7 +503,7 @@ function ProceduresTab() {
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Input placeholder="Search procedures..." value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
-        <select value={filterActive} onChange={(e) => setFilterActive(e.target.value as any)} className="border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
+        <select value={filterActive} onChange={(e) => setFilterActive(e.target.value as "all" | "active" | "inactive")} className="border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
           <option value="all">All</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
@@ -513,7 +515,7 @@ function ProceduresTab() {
           editingId={editingId}
           onSubmit={async (data) => {
             if (editingId) {
-              await updateProcedure({ id: editingId as any, ...data });
+              await updateProcedure({ id: editingId, ...data });
               toast.success("Procedure updated");
             } else {
               await createProcedure(data);
@@ -564,7 +566,7 @@ function ProceduresTab() {
                     {proc.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <button
-                    onClick={async () => { await updateProcedure({ id: proc._id as any, isFeatured: !proc.isFeatured }); toast.success(proc.isFeatured ? "Unfeatured" : "Featured"); }}
+                    onClick={async () => { await updateProcedure({ id: proc._id, isFeatured: !proc.isFeatured }); toast.success(proc.isFeatured ? "Unfeatured" : "Featured"); }}
                     className={cn(
                       "p-2 rounded-lg transition-colors",
                       proc.isFeatured ? "text-amber-500 hover:bg-amber-50" : "text-muted-foreground hover:bg-muted"
@@ -577,8 +579,8 @@ function ProceduresTab() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move up"><ArrowUp className="h-3 w-3" /></button>
-                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", (args) => updateProcedure(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move down"><ArrowDown className="h-3 w-3" /></button>
+                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", updateProcedure)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move up"><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", updateProcedure)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move down"><ArrowDown className="h-3 w-3" /></button>
                   </div>
                 </div>
               </CardContent>
@@ -594,9 +596,35 @@ function ProcedureForm({
   onCancel,
   editingId,
 }: {
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: {
+    slug: string;
+    titleAr: string;
+    titleEn: string;
+    descriptionAr: string;
+    descriptionEn: string;
+    longDescriptionAr: string;
+    longDescriptionEn: string;
+    icon: string;
+    category: string;
+    duration: string;
+    recovery: string;
+    price?: string;
+    image?: string;
+    gallery?: string[];
+    beforeImage?: string;
+    afterImage?: string;
+    seoTitleAr?: string;
+    seoTitleEn?: string;
+    seoDescriptionAr?: string;
+    seoDescriptionEn?: string;
+    ogImage?: string;
+    isActive: boolean;
+    isFeatured?: boolean;
+    order: number;
+    parentSlug?: string;
+  }) => Promise<void>;
   onCancel: () => void;
-  editingId: string | null;
+  editingId: Id<"procedures"> | null;
 }) {
   const procedures = useQuery(api.procedures.list);
   const existing = editingId ? procedures?.find((p) => p._id === editingId) : null;
@@ -822,18 +850,13 @@ function BeforeAfterTab() {
   const removeCase = useMutation(api.beforeAfter.remove);
   const procedures = useQuery(api.procedures.list);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<Id<"beforeAfter"> | null>(null);
   const [loading, setLoading] = useState(false);
   const existing = editingId ? cases?.find((c) => c._id === editingId) : null;
   const [baBeforeImage, setBaBeforeImage] = useState("");
   const [baAfterImage, setBaAfterImage] = useState("");
 
-  // Initialize B&A image state when editing
-  if (existing && baBeforeImage === "" && baAfterImage === "" && !showForm) {
-    // Will be set when form opens
-  }
-
-  const handleOpenBAForm = (id: string | null) => {
+  const handleOpenBAForm = (id: Id<"beforeAfter"> | null) => {
     setEditingId(id);
     setShowForm(true);
     const c = id ? cases?.find((c) => c._id === id) : null;
@@ -857,7 +880,7 @@ function BeforeAfterTab() {
       patientAge: ageVal ? Number(ageVal) : undefined,
     };
     if (editingId) {
-      await updateCase({ id: editingId as any, ...data });
+      await updateCase({ id: editingId, ...data });
       toast.success("Case updated");
     } else {
       await createCase({ ...data, isActive: true, order: cases?.length ?? 0 });
@@ -930,8 +953,8 @@ function BeforeAfterTab() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                    <button disabled={cases!.indexOf(c) === 0} onClick={() => swapOrder(cases!, cases!.indexOf(c), "up", (args) => updateCase(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                    <button disabled={cases!.indexOf(c) === cases!.length - 1} onClick={() => swapOrder(cases!, cases!.indexOf(c), "down", (args) => updateCase(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                    <button disabled={cases!.indexOf(c) === 0} onClick={() => swapOrder(cases!, cases!.indexOf(c), "up", updateCase)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={cases!.indexOf(c) === cases!.length - 1} onClick={() => swapOrder(cases!, cases!.indexOf(c), "down", updateCase)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
                   </div>
                 </div>
               </CardContent>
@@ -951,12 +974,12 @@ function TestimonialsTab() {
   const updateTestimonial = useMutation(api.testimonials.update);
   const removeTestimonial = useMutation(api.testimonials.remove);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<Id<"testimonials"> | null>(null);
   const [loading, setLoading] = useState(false);
   const existing = editingId ? testimonials?.find((t) => t._id === editingId) : null;
   const [testAvatar, setTestAvatar] = useState("");
 
-  const handleOpenTestForm = (id: string | null) => {
+  const handleOpenTestForm = (id: Id<"testimonials"> | null) => {
     setEditingId(id);
     setShowForm(true);
     const t = id ? testimonials?.find((t) => t._id === id) : null;
@@ -977,7 +1000,7 @@ function TestimonialsTab() {
       procedureType: (fd.get("procedureType") as string) || undefined,
     };
     if (editingId) {
-      await updateTestimonial({ id: editingId as any, ...data });
+      await updateTestimonial({ id: editingId, ...data });
       toast.success("Testimonial updated");
     } else {
       await createTestimonial({ ...data, isActive: true, order: testimonials?.length ?? 0 });
@@ -1045,8 +1068,8 @@ function TestimonialsTab() {
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                  <button disabled={testimonials!.indexOf(t) === 0} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "up", (args) => updateTestimonial(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                  <button disabled={testimonials!.indexOf(t) === testimonials!.length - 1} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "down", (args) => updateTestimonial(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                  <button disabled={testimonials!.indexOf(t) === 0} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "up", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                  <button disabled={testimonials!.indexOf(t) === testimonials!.length - 1} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "down", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
                 </div>
               </div>
             </CardContent>
@@ -1064,8 +1087,7 @@ function FaqTab() {
   const updateFaq = useMutation(api.faq.update);
   const removeFaq = useMutation(api.faq.remove);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<Id<"faq"> | null>(null);
   const [search, setSearch] = useState("");
   const existing = editingId ? faqs?.find((f) => f._id === editingId) : null;
 
@@ -1075,7 +1097,6 @@ function FaqTab() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     const fd = new FormData(e.currentTarget);
     const data = {
       questionAr: fd.get("questionAr") as string,
@@ -1085,7 +1106,7 @@ function FaqTab() {
       category: (fd.get("category") as string) || undefined,
     };
     if (editingId) {
-      await updateFaq({ id: editingId as any, ...data });
+      await updateFaq({ id: editingId, ...data });
       toast.success("FAQ updated");
     } else {
       await createFaq({ ...data, isActive: true, order: faqs?.length ?? 0 });
@@ -1093,7 +1114,6 @@ function FaqTab() {
     }
     setShowForm(false);
     setEditingId(null);
-    setLoading(false);
   };
 
   return (
@@ -1151,8 +1171,8 @@ function FaqTab() {
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                  <button disabled={faqs!.indexOf(f) === 0} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "up", (args) => updateFaq(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                  <button disabled={faqs!.indexOf(f) === faqs!.length - 1} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "down", (args) => updateFaq(args as any))} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                  <button disabled={faqs!.indexOf(f) === 0} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "up", updateFaq)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
+                  <button disabled={faqs!.indexOf(f) === faqs!.length - 1} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "down", updateFaq)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
                 </div>
               </div>
             </CardContent>
@@ -1275,7 +1295,7 @@ function SettingsTab() {
         },
       });
       toast.success("Settings saved successfully!");
-    } catch (e) {
+    } catch {
       toast.error("Failed to save settings. Make sure you're logged in as admin.");
     }
     setSaving(false);
@@ -1489,7 +1509,7 @@ function MediaTab() {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await removeMedia({ id: deleteTarget._id as any });
+      await removeMedia({ id: deleteTarget._id as Id<"media"> });
       toast.success("Image deleted");
       if (previewItem?._id === deleteTarget._id) setPreviewItem(null);
       setDeleteTarget(null);
@@ -1538,7 +1558,7 @@ function MediaTab() {
                   const result = await repairUrls();
                   setRepairResult(result || "Done");
                   toast.success(result || "Media URLs repaired!");
-                } catch (e) {
+                } catch {
                   toast.error("Failed to repair media URLs.");
                 }
                 setRepairing(false);
@@ -1589,7 +1609,7 @@ function MediaTab() {
             >
               <div className="aspect-square overflow-hidden bg-muted/30">
                 <ResolvedImage
-                  ref={item.storageId}
+                  storageId={item.storageId}
                   alt={item.name}
                   fallbackClassName="aspect-square"
                 />
@@ -1652,7 +1672,7 @@ function MediaTab() {
             {/* Image */}
             <div className="bg-black/20 flex items-center justify-center p-4">
               <ResolvedImage
-                ref={previewItem.storageId}
+                storageId={previewItem.storageId}
                 alt={previewItem.name}
                 imgClassName="max-h-[60vh] max-w-full object-contain rounded-lg"
                 fallbackClassName="max-h-[60vh] w-full"

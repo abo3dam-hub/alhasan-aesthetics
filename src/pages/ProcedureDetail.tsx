@@ -23,7 +23,7 @@ import { ResolvedImage } from "@/components/ResolvedImage";
 
 export default function ProcedureDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const { t, dir } = useI18n();
+  const { dir } = useI18n();
   const isRtl = dir === "rtl";
 
   const convexProcedure = useQuery(
@@ -51,11 +51,6 @@ export default function ProcedureDetail() {
     return raw.replace(/[^0-9+]/g, "");
   }, [doctorSettings]);
 
-  const whatsappNumber = useMemo(() => {
-    const raw = doctorSettings?.whatsappNumber || "";
-    return raw.replace(/[^0-9]/g, "");
-  }, [doctorSettings]);
-
   // Use only CMS data from Convex
   const displayData = convexProcedure ?? null;
 
@@ -80,12 +75,12 @@ export default function ProcedureDetail() {
       ? (displayData.seoDescriptionAr || description)
       : (displayData.seoDescriptionEn || description);
     if (seoDesc) {
-      let meta = document.querySelector('meta[name="description"]');
+      const meta = document.querySelector('meta[name="description"]');
       if (meta) meta.setAttribute('content', seoDesc);
     }
 
     if (displayData.ogImage) {
-      let og = document.querySelector('meta[property="og:image"]');
+      const og = document.querySelector('meta[property="og:image"]');
       if (og) og.setAttribute('content', displayData.ogImage);
     }
 
@@ -275,7 +270,7 @@ export default function ProcedureDetail() {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="mt-8 rounded-2xl overflow-hidden glass-elevated"
             >
-              <ResolvedImage ref={displayData.image} alt={title} imgClassName="w-full h-64 sm:h-80 lg:h-96 object-cover" lazy={false} />
+              <ResolvedImage storageId={displayData.image} alt={title} imgClassName="w-full h-64 sm:h-80 lg:h-96 object-cover" lazy={false} />
             </motion.div>
           )}
 
@@ -400,7 +395,7 @@ export default function ProcedureDetail() {
                 {displayData.beforeImage && (
                   <div className="glass-card rounded-2xl overflow-hidden">
                     <div className="relative aspect-square">
-                      <ResolvedImage ref={displayData.beforeImage} alt={`${title} - ${isRtl ? "قبل" : "Before"}`} imgClassName="w-full h-full object-cover" lazy={false} />
+                      <ResolvedImage storageId={displayData.beforeImage} alt={`${title} - ${isRtl ? "قبل" : "Before"}`} imgClassName="w-full h-full object-cover" lazy={false} />
                       <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">{isRtl ? "قبل" : "Before"}</div>
                     </div>
                   </div>
@@ -408,7 +403,7 @@ export default function ProcedureDetail() {
                 {displayData.afterImage && (
                   <div className="glass-card rounded-2xl overflow-hidden">
                     <div className="relative aspect-square">
-                      <ResolvedImage ref={displayData.afterImage} alt={`${title} - ${isRtl ? "بعد" : "After"}`} imgClassName="w-full h-full object-cover" lazy={false} />
+                      <ResolvedImage storageId={displayData.afterImage} alt={`${title} - ${isRtl ? "بعد" : "After"}`} imgClassName="w-full h-full object-cover" lazy={false} />
                       <div className="absolute top-3 end-3 px-3 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">{isRtl ? "بعد" : "After"}</div>
                     </div>
                   </div>
@@ -431,7 +426,7 @@ export default function ProcedureDetail() {
                 {gallery.map((url, i) => (
                   <div key={i} className="glass-card rounded-2xl overflow-hidden">
                     <div className="aspect-square">
-                      <ResolvedImage ref={url} alt={`${title} gallery ${i + 1}`} imgClassName="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                      <ResolvedImage storageId={url} alt={`${title} gallery ${i + 1}`} imgClassName="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                     </div>
                   </div>
                 ))}

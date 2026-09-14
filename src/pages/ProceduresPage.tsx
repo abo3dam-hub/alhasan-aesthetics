@@ -129,7 +129,7 @@ export default function ProceduresPage() {
                       {proc.image ? (
                         <div className="relative aspect-[16/10] overflow-hidden">
                           <ResolvedImage
-                            ref={proc.image}
+                            storageId={proc.image}
                             alt={proc.title}
                             imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />

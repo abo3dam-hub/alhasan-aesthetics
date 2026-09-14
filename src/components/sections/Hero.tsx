@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles, Star, Award } from "lucide-react";
 import { Link } from "react-router";
-import doctorImg from "/assets/1.jpg";
 
 const container = {
   hidden: { opacity: 0 },
@@ -19,6 +18,13 @@ const item = {
   hidden: { opacity: 0, y: 30 },
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
+
+interface TrustBadgeInfo {
+  labelAr?: string;
+  labelEn?: string;
+  icon?: string;
+  enabled?: boolean;
+}
 
 export default function Hero() {
   const { t, dir } = useI18n();
@@ -47,12 +53,6 @@ export default function Hero() {
   const ctaSecondaryText = isArabic
     ? (heroCMS?.ctaSecondaryTextAr || t.hero.ctaSecondary)
     : (heroCMS?.ctaSecondaryTextEn || t.hero.ctaSecondary);
-  const heroImage = heroCMS?.image || doctorImg;
-  const doctorName = doctorSettings?.doctorNameEn || "Dr. Al Hasan";
-  const doctorNameAr = doctorSettings?.doctorNameAr || "د. الحسن الصايم";
-  const heroImageAlt = isArabic
-    ? (heroCMS?.imageAltAr || heroCMS?.imageAltEn || doctorNameAr || "د. الحسن الصايم")
-    : (heroCMS?.imageAltEn || heroCMS?.imageAltAr || doctorName || "Dr. Al Hasan");
 
   // Trust badges - CMS or translation defaults
   const defaultTrustBadges = [
@@ -60,8 +60,8 @@ export default function Hero() {
     { labelAr: t.hero.trust2, labelEn: t.hero.trust2, icon: "star" },
     { labelAr: t.hero.trust3, labelEn: t.hero.trust3, icon: "sparkles" },
   ];
-  const trustBadges = heroCMS?.trustBadges?.length > 0
-    ? heroCMS.trustBadges.filter((b: any) => b.enabled !== false)
+  const trustBadges: TrustBadgeInfo[] = heroCMS?.trustBadges?.length > 0
+    ? heroCMS.trustBadges.filter((b: TrustBadgeInfo) => b.enabled !== false)
     : defaultTrustBadges;
 
   const trustIconMap: Record<string, typeof Award> = { award: Award, star: Star, sparkles: Sparkles };
@@ -150,7 +150,7 @@ export default function Hero() {
               variants={item}
               className="mt-8 sm:mt-16 flex flex-wrap gap-3 sm:gap-6"
             >
-              {trustBadges.map((badge: any, i: number) => {
+              {trustBadges.map((badge: TrustBadgeInfo, i: number) => {
                 const IconComp = trustIconMap[badge.icon || "award"] || Award;
                 return (
                   <div

@@ -56,7 +56,7 @@ export default function InformationCard() {
             <div className="relative min-h-64 lg:min-h-full">
               {image ? (
                 <ResolvedImage
-                  ref={image}
+                  storageId={image}
                   alt={badge}
                   imgClassName="absolute inset-0 w-full h-full object-cover object-center"
                   lazy={false}

@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import GlassNavbar from "@/components/GlassNavbar";
 import { cn } from "@/lib/utils";
@@ -75,11 +74,6 @@ const countries = [
   "Uruguay","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe",
 ];
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
-};
-
 type FormData = {
   selectedProcedures: string[];
   otherProcedure: string;
@@ -96,7 +90,6 @@ type FormErrors = Partial<Record<keyof FormData, string>>;
 export default function ConsultationPage() {
   const { t, dir, locale } = useI18n();
   const isRtl = dir === "rtl";
-  const Arrow = isRtl ? ArrowLeft : ArrowRight;
   const isArabic = locale === "ar";
 
   const procedures = useQuery(api.procedures.listActive);

@@ -13,7 +13,6 @@ import {
   MapPin,
   Clock,
   CheckCircle2,
-  MessageSquare,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 

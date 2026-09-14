@@ -1,6 +1,5 @@
 import { useImageUpload } from "@/hooks/use-upload";
-import { Button } from "@/components/ui/button";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { X, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useRef } from "react";
 import { ResolvedImage } from "@/components/ResolvedImage";
@@ -47,7 +46,7 @@ export function ImageUpload({ value, onChange, label, className }: ImageUploadPr
       {value ? (
         <div className="relative group">
           <div className="w-full h-32 rounded-lg border border-border/40 overflow-hidden">
-            <ResolvedImage ref={value} alt="Preview" />
+            <ResolvedImage storageId={value} alt="Preview" />
           </div>
           <button
             type="button"

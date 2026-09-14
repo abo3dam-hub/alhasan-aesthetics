@@ -48,11 +48,11 @@ function GlobalSEOEditor() {
       if (title) document.title = title;
       const desc = form.metaDescriptionEn || form.metaDescriptionAr;
       if (desc) {
-        let meta = document.querySelector('meta[name="description"]');
+        const meta = document.querySelector('meta[name="description"]');
         if (meta) meta.setAttribute("content", desc);
       }
       toast.success("SEO settings saved!");
-    } catch (e) { toast.error("Failed to save"); }
+    } catch { toast.error("Failed to save"); }
     setSaving(false);
   };
 

@@ -47,7 +47,7 @@ export const seedHomepageSettings = mutation({
     let skipped = 0;
 
     // Helper: upsert a siteSettings record, only filling empty fields
-    async function upsertSettings(key: string, newValue: Record<string, any>) {
+    async function upsertSettings(key: string, newValue: Record<string, unknown>) {
       const existing = await ctx.db
         .query("siteSettings")
         .withIndex("by_key", (q) => q.eq("key", key))
@@ -55,8 +55,8 @@ export const seedHomepageSettings = mutation({
 
       if (existing) {
         // Merge: only fill in fields that are empty/missing in the existing value
-        const current = existing.value as Record<string, any>;
-        const merged: Record<string, any> = { ...current };
+        const current = existing.value as Record<string, unknown>;
+        const merged: Record<string, unknown> = { ...current };
         let changed = false;
         for (const [k, v] of Object.entries(newValue)) {
           if (v !== undefined && v !== null) {
@@ -65,8 +65,8 @@ export const seedHomepageSettings = mutation({
               typeof v === "object" && !Array.isArray(v) && v !== null &&
               typeof current[k] === "object" && !Array.isArray(current[k]) && current[k] !== null
             ) {
-              const nestedMerged: Record<string, any> = { ...current[k] };
-              for (const [nk, nv] of Object.entries(v as Record<string, any>)) {
+              const nestedMerged: Record<string, unknown> = { ...(current[k] as Record<string, unknown>) };
+              for (const [nk, nv] of Object.entries(v as Record<string, unknown>)) {
                 if (nv !== undefined && nv !== null && (nestedMerged[nk] === undefined || nestedMerged[nk] === null || nestedMerged[nk] === "")) {
                   nestedMerged[nk] = nv;
                   changed = true;
@@ -266,9 +266,6 @@ export const seedHomepageSettings = mutation({
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
-    let created = 0;
-    let skipped = 0;
-
     // ─── Check if procedures exist ───
     const existingProcedures = await ctx.db.query("procedures").first();
     if (!existingProcedures) {
@@ -313,8 +310,7 @@ export const seedAll = mutation({
 
     for (const proc of procedures) {
       await ctx.db.insert("procedures", proc);
-    }
-    created++;
+      }
     } // end if (!existingProcedures)
 
     // ─── Seed Testimonials (independent) ───

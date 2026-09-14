@@ -67,7 +67,7 @@ export default function FAQ() {
             <div className="glass-elevated rounded-3xl p-2 sm:p-3">
               <Accordion type="single" collapsible className="w-full">
                 {displayFaqs
-                  ? displayFaqs.map((faq, i) => (
+                  ? displayFaqs.map((faq) => (
                       <AccordionItem
                         key={faq._id}
                         value={faq._id}
@@ -114,7 +114,7 @@ export default function FAQ() {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "FAQPage",
-              mainEntity: displayFaqs.map((faq: any) => ({
+              mainEntity: displayFaqs.map((faq) => ({
                 "@type": "Question",
                 name: isRtl ? faq.questionAr : faq.questionEn,
                 acceptedAnswer: {

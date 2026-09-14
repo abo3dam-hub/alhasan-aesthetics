@@ -27,7 +27,7 @@ const routeLinks = [
 
 export default function GlassNavbar() {
   const { t, dir, toggleLocale } = useI18n();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isRtl = dir === "rtl";
@@ -48,7 +48,7 @@ export default function GlassNavbar() {
             <a href="/" className="flex items-center gap-3 shrink-0">
               <div className="relative">
                 {doctorSettings?.navbarPhoto ? (
-                  <ResolvedImage ref={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
+                  <ResolvedImage storageId={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
                 ) : (
                   <img
                     src={doctorAvatar}
@@ -164,7 +164,7 @@ export default function GlassNavbar() {
               <div className="flex items-center justify-between p-4 border-b border-border/40">
                 <a href="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
                   {doctorSettings?.navbarPhoto ? (
-                    <ResolvedImage ref={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-9 w-9 rounded-full object-cover border-2 border-primary/30" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
+                    <ResolvedImage storageId={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-9 w-9 rounded-full object-cover border-2 border-primary/30" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
                   ) : (
                     <img
                       src={doctorAvatar}

@@ -73,7 +73,7 @@ export default function BeforeAfter() {
                   <div className="glass-card rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
                     <div className="relative aspect-square overflow-hidden">
                       <ResolvedImage
-                        ref={c.afterImage}
+                        storageId={c.afterImage}
                         alt={isRtl ? c.titleAr : c.titleEn}
                         imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />

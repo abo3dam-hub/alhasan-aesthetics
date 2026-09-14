@@ -1,7 +1,7 @@
 "use client";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ImageIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,32 +20,30 @@ import { cn } from "@/lib/utils";
  * These are DIFFERENT states and must not be conflated.
  */
 export function ResolvedImage({
-  ref,
+  storageId,
   alt = "",
   className,
   imgClassName,
   fallbackClassName,
   lazy = true,
 }: {
-  ref: string | undefined | null;
+  storageId: string | undefined | null;
   alt?: string;
   className?: string;
   imgClassName?: string;
   fallbackClassName?: string;
   lazy?: boolean;
 }) {
-  const [loadError, setLoadError] = useState(false);
-  const safeRef = ref || "";
+  const [failedRef, setFailedRef] = useState<string | null>(null);
+  const safeRef = storageId || "";
+  const loadError = failedRef === safeRef;
 
   const resolved = useQuery(
     api.media.resolveUrl,
     safeRef ? { ref: safeRef } : "skip"
   );
 
-  // Reset loadError when the reference changes
-  useEffect(() => {
-    setLoadError(false);
-  }, [safeRef]);
+  // Reset loadError when the reference changes (failedRef !== safeRef)
 
   // ── Empty reference → No image ──
   if (!safeRef) {
@@ -105,7 +103,7 @@ export function ResolvedImage({
       alt={alt}
       className={cn("w-full h-full object-cover", imgClassName)}
       loading={lazy ? "lazy" : "eager"}
-      onError={() => setLoadError(true)}
+      onError={() => setFailedRef(safeRef)}
     />
   );
 }
