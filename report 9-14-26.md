@@ -1,7 +1,7 @@
 # تقرير وضع المشروع — 14-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `2a4b583` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `5e6b943` (شجرة نظيفة، مرفوع لـ GitHub)
 
 ---
 
@@ -9,7 +9,7 @@
 
 | الجهة | الحالة |
 |---|---|
-| GitHub `main` | `2a4b583` — متطابق مع فروع العمل، نظيف |
+| GitHub `main` | `5e6b943` — متطابق مع فروع العمل، نظيف |
 | Convex **Production** | `kindly-anaconda-422` — Auth مفعّل، البيانات مستعادة، الكود الحكومي حالي |
 | Convex **Dev** | `gregarious-perch-128` |
 | Vercel `dralhasan` | نشط — الاسم المستعار `https://dralhasan-three.vercel.app` يخدم آخر build |
@@ -184,6 +184,14 @@
 - **تحقق:** eslint 0 أخطاء، `tsc -b` و`vite build` ناجحان؛ اختبار render لجميع الأيقونات الـ16 + دقة كل slug عبر `renderToStaticMarkup` (ALL OK).
 - `2a4b583` — feat: expressive procedure icons - semantic registry + custom anatomical SVGs.
 
+### ٢.٢٢ صور تجارب المرضى (مصغّرات + متصفّحة Lightbox)
+- **المطلوب:** رفع صور لكل تجربة، تظهر كمصغّرات في الشاشة الرئيسية، وعند النقر تُتصفّح + رفع من لوحة التحكم مع تلميح نسبة الأبعاد.
+- **البيانات:** حقل جديد `images: v.optional(v.array(v.string()))` في جدول `testimonials` (storageIds) + تمريره في `create`/`update` (`src/convex/testimonials.ts`).
+- **لوحة التحكم:** مكوّن `ImageGalleryInput` جديد (`src/components/ImageGalleryInput.tsx`) لرفع عدة صور عبر Convex Storage مع مصغّرات وحذف فردي، وتلميح النسبة: *"تُعرض كمصغّرات في قسم تجارب المرضى ويمكن تصفّحها — يُنصح 4:3 (أفقي) أو 3:4 عمودي؛ تُقصّ تلقائيًا من المنتصف"*. شارة صغيرة في قائمة التجارب تعرض عدد الصور.
+- **الواجهة:** `Testimonials.tsx` يعرض شريط مصغّرات (حتى 3 + "+N") داخل بطاقة التجربة، والنقر يفتح `Lightbox` جديدًا (`src/components/Lightbox.tsx`) قابلاً لإعادة الاستخدام — سهمان + عدّاد + Escape/الأسهم + قفل تمرير الصفحة — بنمط Lightbox الموجود في `ProcedureDetail`.
+- **نشر:** `npx convex deploy` → `kindly-anaconda-422` (حقل اختياري — بدون حذف فروق).
+- **تحقق:** eslint 0 أخطاء، `tsc -b` و`vite build` ناجحان (entry ثابت 338KB).
+
 ---
 
 ## ٣. قرارات مهمة في هذا السيشن
@@ -225,4 +233,4 @@
 | النطاق | `alhasanalsaiem.com` |
 | الحزمة الأولى | 338KB (gzip: 105KB) — بعد إخراج framer-motion من entry |
 | ESLint | 0 أخطاء، 22 تحذيرًا حميدًا |
-| أحدث commit | `2a4b583` — feat: expressive procedure icons - semantic registry + custom anatomical SVGs |
+| أحدث commit | `5e6b943` — feat: patient review photos - thumbnails on homepage + lightbox, admin multi-upload with aspect hint |
