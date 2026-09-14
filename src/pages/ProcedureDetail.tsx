@@ -2,8 +2,8 @@ import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useParams, Link } from "react-router";
-import { motion } from "framer-motion";
-import { useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -14,6 +14,10 @@ import {
   Calendar,
   Layers,
   RefreshCcw,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ZoomIn,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
@@ -61,6 +65,34 @@ export default function ProcedureDetail() {
     ? (isRtl ? displayData.longDescriptionAr : displayData.longDescriptionEn)
     : "";
   const gallery = displayData?.gallery || [];
+
+  // ── Gallery lightbox state & navigation ──
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const goPrev = useCallback(() => {
+    setLightboxIndex((prev) => (prev === null || prev === 0 ? gallery.length - 1 : prev - 1));
+  }, [gallery.length]);
+
+  const goNext = useCallback(() => {
+    setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % gallery.length));
+  }, [gallery.length]);
+
+  // Keyboard navigation + body scroll lock while the lightbox is open
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxIndex(null);
+      else if (e.key === "ArrowLeft") goPrev();
+      else if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [lightboxIndex, goPrev, goNext]);
 
   // Dynamic SEO — must be called BEFORE any early returns (React Hook rules)
   useEffect(() => {
@@ -424,11 +456,20 @@ export default function ProcedureDetail() {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {gallery.map((url, i) => (
-                  <div key={i} className="glass-card rounded-2xl overflow-hidden">
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setLightboxIndex(i)}
+                    className="glass-card rounded-2xl overflow-hidden group relative cursor-zoom-in text-start"
+                    aria-label={isRtl ? `تكبير الصورة ${i + 1}` : `Enlarge image ${i + 1}`}
+                  >
                     <div className="aspect-square">
-                      <ResolvedImage storageId={url} alt={`${title} gallery ${i + 1}`} imgClassName="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                      <ResolvedImage storageId={url} alt={`${title} gallery ${i + 1}`} imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
-                  </div>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300 flex items-center justify-center">
+                      <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow" />
+                    </div>
+                  </button>
                 ))}
               </div>
             </motion.div>
@@ -531,6 +572,67 @@ export default function ProcedureDetail() {
           }),
         }}
       />
+    {/* Gallery Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && gallery[lightboxIndex] && (
+          <motion.div
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxIndex(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={isRtl ? "معرض الصور" : "Image gallery"}
+          >
+            {/* Close */}
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 end-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label={isRtl ? "إغلاق" : "Close"}
+            >
+              <X className="h-5 w-5" />
+            </button>
+            {/* Prev / Next */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); goPrev(); }}
+              className="absolute start-3 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+              aria-label={isRtl ? "السابق" : "Previous"}
+            >
+              <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); goNext(); }}
+              className="absolute end-3 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+              aria-label={isRtl ? "التالي" : "Next"}
+            >
+              <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
+            </button>
+            {/* Image */}
+            <div className="max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="relative w-full h-[70vh] sm:h-[80vh] flex items-center justify-center">
+                <ResolvedImage
+                  storageId={gallery[lightboxIndex]}
+                  key={lightboxIndex}
+                  alt={`${title} gallery ${lightboxIndex + 1}`}
+                  imgClassName="max-w-full max-h-full w-auto h-auto object-contain"
+                  fallbackClassName="w-full h-full"
+                  lazy={false}
+                />
+              </div>
+            </div>
+            {/* Counter */}
+            <div className="absolute bottom-4 inset-x-0 text-center text-sm text-white/80 z-10">
+              {isRtl
+                ? `الصورة ${lightboxIndex + 1} من ${gallery.length}`
+                : `${lightboxIndex + 1} / ${gallery.length}`}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
