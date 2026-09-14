@@ -210,6 +210,10 @@
 - **ملاحظة:** العنوان `addressLocality: Iraq` عام — نصّل مباشرة كلما زوّدتني بالعناوين الدقيقة أو أرقام الهاتف ليطرأ على schema.
 - `92856d1` — seo: geo-targeted Physician schema for all 6 practice locations.
 
+### ٢.٢٥ تحديث README
+- أُعيدت كتابة `README.md` كليًا ليعكس الحالة الفعلية: نظام الأيقونات الدلالي + Normalize Icons، الـ SEO الجغرافي (fill التلقائي)، معارض صور الشهادات مع Lightbox ومنتقي المكتبة، Physician schema لستّ عيادات، الصفحات/الموديولات الجديدة (ProceduresPage, ContactPage, migration, notifications, http)، أوامر npm مع `CONVEX_DEPLOYMENT` لمفاتيح النشر.
+- `5467873` — docs: refresh README to reflect current project state.
+
 ---
 
 ## ٣. قرارات مهمة في هذا السيشن
