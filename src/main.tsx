@@ -9,6 +9,8 @@ import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 
 // Lazy load route components for better code splitting
 const Landing = lazy(() => import("./pages/Landing.tsx"));
@@ -114,6 +116,30 @@ function RouteSyncer() {
 }
 
 
+/** Use the doctor's navbar photo (from site settings) as the browser tab icon. */
+function DynamicFavicon() {
+  const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
+  const resolved = useQuery(
+    api.media.resolveUrl,
+    doctorSettings?.navbarPhoto ? { ref: doctorSettings.navbarPhoto } : "skip"
+  );
+
+  useEffect(() => {
+    if (!resolved) return;
+    let link = document.querySelector(
+      'link[rel~="icon"]'
+    ) as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      document.head.appendChild(link);
+    }
+    link.rel = "icon";
+    link.href = resolved;
+  }, [resolved]);
+
+  return null;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
@@ -124,6 +150,7 @@ createRoot(document.getElementById("root")!).render(
         <I18nProvider>
           <BrowserRouter>
             <RouteSyncer />
+            <DynamicFavicon />
             <Suspense fallback={<RouteLoading />}>
               <Routes>
                 <Route path="/" element={<Landing />} />
