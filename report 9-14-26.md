@@ -67,7 +67,7 @@
 - الـ سايت ماب: `https://kindly-anaconda-422.convex.site/sitemap.xml` يشمل الرئيسية + /ar + /en + consultation + before-after + **كل الإجراءات** مع `canonicalBase: https://dr-alhasan.com`.
 - كل الصفحات العامة على `dralhasan-three.vercel.app` تعيد 200.
 - `migration:getMigrationStatus`: `newProceduresCount: 9`، `oldCombinedStillActive: false`، 3 سجلات قديمة غير فعالة مع `supersededBy`، إجراءان فرعيان نشطان.
-- eslint: 166 خطأ **سابقة** في مكونات Dashboard/Admin (متغيرات غير مستخدمة، `any`، refs أثناء render) — غير متعلقة بهذا السيشن ولم يضف الفريق أي خطأ جديد.
+- eslint: تم تصفير أخطاء الـ lint بالكامل — من **166 خطأ** إلى **0 أخطاء** (يبقى 14 تحذيرًا حميدًا من `react-refresh/only-export-components` في مكونات shadcn/ui و`main.tsx` وملف vly مولّد). السبب الجذري لأغلب الأخطاء: مكوّن `ResolvedImage` استخدم اسم `ref` المحجوز كـ prop (أخطاء `react-hooks/refs` كاذبة). يُراجع لاحقًا إن لزم.
 
 ---
 
@@ -84,7 +84,7 @@
 - [ ] إنشاء حساب الـ Admin **الثاني** من صفحة التسجيل (مسموح — أول حسابين مديرين).
 - [ ] التحقق من أن حسابًا **ثالثًا** يُرفض عند التسجيل.
 - [ ] (لاحقًا) ربط النطاق `dr-alhasan.com` في Vercel — حاليًا `000` (غير متاح).
-- [ ] (تقني) الدَين: 166 خطأ eslint سابقًا في `Dashboard`/`Admin` — يُراجع لاحقًا.
+- [x] (تقني) الدَين: أخطاء eslint السابقة مصفّرة إلى **0** (كانت 166) — تم في commit `df273ca`.
 - [ ] (تقني) `VLY_CONVEX_AUTH_ISSUER=https://freebuff.com` موجود فقط في `.env.local` المحلي (غير متتبع، dead) — تُنظّف عند الحاجة.
 
 ---
