@@ -196,6 +196,13 @@
 - **إصلاح تجميد الموقع عند فتح الصور:** كان `Lightbox` يُركَّب دائمًا و`useState(index)` يلتقط `null` عند أول تركيب، فكان قفل التمرير يعمل بينما الـ modal لا يظهر أبدًا. الحل: `key` بعدّاد يفتح — إعادة تركيب عند كل فتح لمزامنة الفهرس الداخلي.
   - `0c51288` — fix: freeze when opening testimonial photo lightbox.
 
+### ٢.٢٣ SEO موجه جغرافيًا لكل الإجراءات
+- **المطلوب:** تعبئة SEO Title/Description (AR + EN) لكل الإجراءات كلّما يراه مناسبًا، مع تسليط الضوء على مواقع العمل: سوريا (دمشق، اللاذقية، طرطوس)، دبي (الإمارات)، بيروت، العراق.
+- **المصدر:** `src/convex/procedureSeoDefaults.ts` — عبوءات عنوان ≤ ~63 حرفًا EN و≤ ~55 AR، ووصف ≤ ~160 حرفًا؛ النمط: المنفعة المحددة للإجراء + المدن (دمشق، اللاذقية، طرطوس، دبي، بيروت، العراق) + عبارة حجز الاستشارة.
+- **التنفيذ:** دالة migration `migrateProcedureSeo` (محمية بـ requireAdmin) — تملأ الحقول الأربعة لكل إجراء بطريقة idempotent وتحترم أي تعديل يدوي؛ وزر **"Fill SEO (AR/EN)"** في تبويب الإجراءات بلوحة التحكم.
+- **نشر:** `npx convex deploy` → `kindly-anaconda-422`. على الأدمن الضغط على الزر لتعبئة الحقول (حماية auth تمنع التشغيل عبر CLI).
+- `fc8e906` — feat: geo-targeted SEO titles/descriptions for all procedures.
+
 ---
 
 ## ٣. قرارات مهمة في هذا السيشن
@@ -237,4 +244,4 @@
 | النطاق | `alhasanalsaiem.com` |
 | الحزمة الأولى | 338KB (gzip: 105KB) — بعد إخراج framer-motion من entry |
 | ESLint | 0 أخطاء، 22 تحذيرًا حميدًا |
-| أحدث commit | `0c51288` — fix: freeze when opening testimonial photo lightbox |
+| أحدث commit | `fc8e906` — feat: geo-targeted SEO titles/descriptions for all procedures |
