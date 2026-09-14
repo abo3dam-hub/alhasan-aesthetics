@@ -3,6 +3,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
 import { I18nProvider } from "@/i18n";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
+import { FloatingSocial } from "@/components/FloatingSocial";
+import { AnimatePresence, motion } from "framer-motion";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
@@ -94,12 +96,14 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL || 'https:/
 
 function RouteSyncer() {
   const location = useLocation();
+  const pathname = location.pathname;
   useEffect(() => {
     window.parent.postMessage(
-      { type: "iframe-route-change", path: location.pathname },
+      { type: "iframe-route-change", path: pathname },
       "*",
     );
-  }, [location.pathname]);
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -113,6 +117,47 @@ function RouteSyncer() {
   }, []);
 
   return null;
+}
+
+/** Smooth opacity transition between routes. Keeps the current page mounted
+ *  while the next one fades in (and vice versa). */
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<Landing />} />
+          <Route path="/ar" element={<Landing />} />
+          <Route path="/en" element={<Landing />} />
+          <Route path="/procedures" element={<ProceduresPage />} />
+          <Route path="/procedure/:slug" element={<ProcedureDetail />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/before-after" element={<BeforeAfterPage />} />
+          <Route path="/consultation" element={<ConsultationPage />} />
+          <Route
+            path="/auth"
+            element={<AuthPage redirectAfterAuth="/dashboard" />}
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 
@@ -151,30 +196,9 @@ createRoot(document.getElementById("root")!).render(
           <BrowserRouter>
             <RouteSyncer />
             <DynamicFavicon />
+            <FloatingSocial />
             <Suspense fallback={<RouteLoading />}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/ar" element={<Landing />} />
-                <Route path="/en" element={<Landing />} />
-                <Route path="/procedures" element={<ProceduresPage />} />
-                <Route path="/procedure/:slug" element={<ProcedureDetail />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/before-after" element={<BeforeAfterPage />} />
-                <Route path="/consultation" element={<ConsultationPage />} />
-                <Route
-                  path="/auth"
-                  element={<AuthPage redirectAfterAuth="/dashboard" />}
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <RequireAuth>
-                      <Dashboard />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AnimatedRoutes />
             </Suspense>
           </BrowserRouter>
         </I18nProvider>

@@ -6,6 +6,7 @@ import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
 import doctorImg from "/assets/1.jpg";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { CountUp } from "@/components/CountUp";
 
 const statIconMap: Record<string, typeof Award> = {
   clock: Clock,
@@ -130,7 +131,9 @@ export default function About() {
                     {(() => { const I = statIconMap[primaryStat.icon || "award"] || Award; return <I className="h-5 w-5 text-primary" />; })()}
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-foreground leading-tight">{primaryStat.value}</p>
+                    <p className="text-xl font-bold text-foreground leading-tight">
+                      <CountUp value={primaryStat.value || ""} />
+                    </p>
                     <p className="text-[11px] text-muted-foreground">{isArabic ? primaryStat.labelAr : primaryStat.labelEn}</p>
                   </div>
                 </motion.div>
@@ -147,7 +150,9 @@ export default function About() {
                     {(() => { const I = statIconMap[secondaryStat.icon || "heart"] || Heart; return <I className="h-4 w-4 text-primary" />; })()}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground leading-tight">{secondaryStat.value}</p>
+                    <p className="text-sm font-bold text-foreground leading-tight">
+                      <CountUp value={secondaryStat.value || ""} duration={1200} />
+                    </p>
                     <p className="text-[10px] text-muted-foreground">{isArabic ? secondaryStat.labelAr : secondaryStat.labelEn}</p>
                   </div>
                 </motion.div>
@@ -187,7 +192,9 @@ export default function About() {
                       <div className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10 mb-3">
                         <StatIcon className="h-5 w-5 text-primary" />
                       </div>
-                      <p className="text-2xl sm:text-3xl font-bold text-foreground">{stat.value}</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-foreground">
+                        <CountUp value={stat.value || ""} />
+                      </p>
                       <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                         {isArabic ? stat.labelAr : stat.labelEn}
                       </p>

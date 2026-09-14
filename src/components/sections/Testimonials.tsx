@@ -2,9 +2,11 @@ import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Star, Quote } from "lucide-react";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { cn } from "@/lib/utils";
 
 const placeholderTestimonials = [
   { key: "t1", stars: 5 },
@@ -16,6 +18,14 @@ const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
+
+interface CarouselItem {
+  id: string;
+  rating: number;
+  text: string;
+  name: string;
+  avatar?: string;
+}
 
 export default function Testimonials() {
   const { t, dir, locale } = useI18n();
@@ -29,6 +39,51 @@ export default function Testimonials() {
     testimonials && testimonials.length > 0
       ? testimonials.slice(0, 6)
       : null;
+
+  const items: CarouselItem[] = displayTestimonials
+    ? displayTestimonials.map((item) => ({
+        id: item._id,
+        rating: Math.min(item.rating, 5),
+        text: isRtl ? item.textAr : item.textEn,
+        name: isRtl ? item.nameAr : item.nameEn,
+        avatar: item.avatar || undefined,
+      }))
+    : placeholderTestimonials.map((item) => ({
+        id: item.key,
+        rating: item.stars,
+        text: t.testimonials[item.key as keyof typeof t.testimonials],
+        name: t.testimonials[`${item.key}Name` as keyof typeof t.testimonials] as string,
+      }));
+
+  // ── Carousel state ──
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const [viewportW, setViewportW] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const visible = viewportW >= 1024 ? 3 : viewportW >= 640 ? 2 : 1;
+  const cardW = viewportW / visible;
+  const maxIndex = Math.max(0, items.length - visible);
+  const current = Math.min(index, maxIndex);
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const update = () => setViewportW(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Auto-play every 4.5s (paused on hover/focus)
+  useEffect(() => {
+    if (paused || items.length <= visible) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i >= maxIndex ? 0 : i + 1));
+    }, 4500);
+    return () => clearInterval(id);
+  }, [paused, items.length, visible, maxIndex]);
 
   return (
     <section id="testimonials" className="py-20 sm:py-28 lg:py-32 relative overflow-hidden">
@@ -55,80 +110,76 @@ export default function Testimonials() {
           </p>
         </motion.div>
 
-        {/* Testimonial Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" dir={dir}>
-          {displayTestimonials
-            ? displayTestimonials.map((item, i) => (
-                <motion.div
-                  key={item._id}
-                  initial="hidden"
-                  animate={inView ? "visible" : "hidden"}
-                  variants={{
-                    ...fadeInUp,
-                    visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.15 * i } },
-                  }}
-                >
+        {/* Carousel */}
+        <motion.div
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          variants={fadeInUp}
+        >
+          <div
+            ref={viewportRef}
+            dir={dir}
+            className="overflow-hidden"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onFocus={() => setPaused(true)}
+            onBlur={() => setPaused(false)}
+          >
+            <motion.div
+              className="flex"
+              animate={{ x: isRtl ? current * cardW : -current * cardW }}
+              transition={{ type: "spring", stiffness: 260, damping: 32 }}
+            >
+              {items.map((item) => (
+                <div key={item.id} className="shrink-0 px-2" style={{ width: `${100 / visible}%` }}>
                   <div className="glass-elevated rounded-3xl p-6 sm:p-8 h-full flex flex-col">
                     <Quote className="h-8 w-8 text-primary/30 mb-4 shrink-0" />
                     <div className="flex gap-1 mb-4">
-                      {Array.from({ length: Math.min(item.rating, 5) }).map((_, j) => (
+                      {Array.from({ length: item.rating }).map((_, j) => (
                         <Star key={j} className="h-4 w-4 fill-primary text-primary" />
                       ))}
                     </div>
                     <p className="text-sm sm:text-base text-foreground/80 leading-relaxed flex-1">
-                      {isRtl ? item.textAr : item.textEn}
+                      {item.text}
                     </p>
                     <div className="mt-6 pt-5 border-t border-border/30">
                       <div className="flex items-center gap-3">
                         {item.avatar ? (
-                          <ResolvedImage storageId={item.avatar} alt={isRtl ? item.nameAr : item.nameEn} imgClassName="h-10 w-10 rounded-full object-cover shrink-0" lazy={false} />
+                          <ResolvedImage storageId={item.avatar} alt={item.name} imgClassName="h-10 w-10 rounded-full object-cover shrink-0" lazy={false} />
                         ) : (
                           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
-                            {(isRtl ? item.nameAr : item.nameEn).charAt(0)}
+                            {item.name.charAt(0)}
                           </div>
                         )}
                         <p className="text-sm font-semibold text-foreground">
-                          {isRtl ? item.nameAr : item.nameEn}
+                          {item.name}
                         </p>
                       </div>
                     </div>
                   </div>
-                </motion.div>
-              ))
-            : placeholderTestimonials.map((item, i) => (
-                <motion.div
-                  key={item.key}
-                  initial="hidden"
-                  animate={inView ? "visible" : "hidden"}
-                  variants={{
-                    ...fadeInUp,
-                    visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.15 * i } },
-                  }}
-                >
-                  <div className="glass-elevated rounded-3xl p-6 sm:p-8 h-full flex flex-col">
-                    <Quote className="h-8 w-8 text-primary/30 mb-4 shrink-0" />
-                    <div className="flex gap-1 mb-4">
-                      {Array.from({ length: item.stars }).map((_, j) => (
-                        <Star key={j} className="h-4 w-4 fill-primary text-primary" />
-                      ))}
-                    </div>
-                    <p className="text-sm sm:text-base text-foreground/80 leading-relaxed flex-1">
-                      {t.testimonials[item.key as keyof typeof t.testimonials]}
-                    </p>
-                    <div className="mt-6 pt-5 border-t border-border/30">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
-                          {(t.testimonials[`${item.key}Name` as keyof typeof t.testimonials] as string).charAt(0)}
-                        </div>
-                        <p className="text-sm font-semibold text-foreground">
-                          {t.testimonials[`${item.key}Name` as keyof typeof t.testimonials]}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                </div>
               ))}
-        </div>
+            </motion.div>
+          </div>
+
+          {/* Dots */}
+          {items.length > visible && (
+            <div className="flex justify-center gap-2 mt-8" dir="ltr">
+              {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={cn(
+                    "h-2 rounded-full transition-all cursor-pointer",
+                    i === current ? "w-6 bg-primary" : "w-2 bg-primary/25 hover:bg-primary/50"
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
       </div>
     </section>
   );

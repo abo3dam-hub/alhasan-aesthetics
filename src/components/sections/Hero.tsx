@@ -1,10 +1,11 @@
 import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles, Star, Award } from "lucide-react";
 import { Link } from "react-router";
+import { useRef } from "react";
 
 const container = {
   hidden: { opacity: 0 },
@@ -66,19 +67,29 @@ export default function Hero() {
 
   const trustIconMap: Record<string, typeof Award> = { award: Award, star: Star, sparkles: Sparkles };
 
+  // Light parallax drift on the decorative elements as the user scrolls away
+  const heroRef = useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const orb1Y = useTransform(scrollYProgress, [0, 1], [0, 90]);
+  const orb2Y = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const orb3Y = useTransform(scrollYProgress, [0, 1], [0, 50]);
+  const glass1Y = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const glass2Y = useTransform(scrollYProgress, [0, 1], [0, 30]);
+
   return (
     <section
       id="home"
+      ref={heroRef}
       className="relative min-h-[500px] md:min-h-[75vh] lg:min-h-[80vh] flex items-center hero-gradient overflow-hidden"
     >
-      {/* Decorative orbs */}
-      <div className="absolute top-20 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(197, 168, 130, 0.15)" }} />
-      <div className="absolute bottom-20 left-10 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(212, 196, 173, 0.12)" }} />
-      <div className="absolute top-1/3 left-1/3 w-64 h-64 rounded-full blur-2xl pointer-events-none" style={{ background: "rgba(139, 115, 85, 0.05)" }} />
+      {/* Decorative orbs — subtle parallax */}
+      <motion.div style={{ y: orb1Y, background: "rgba(197, 168, 130, 0.15)" }} className="absolute top-20 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+      <motion.div style={{ y: orb2Y, background: "rgba(212, 196, 173, 0.12)" }} className="absolute bottom-20 left-10 w-96 h-96 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+      <motion.div style={{ y: orb3Y, background: "rgba(139, 115, 85, 0.05)" }} className="absolute top-1/3 left-1/3 w-64 h-64 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
 
-      {/* Glass decorative panel */}
-      <div className="absolute top-32 end-8 lg:end-20 w-48 h-48 glass-subtle rounded-3xl rotate-12 opacity-60 hidden md:block" />
-      <div className="absolute bottom-24 start-8 lg:start-16 w-32 h-32 glass-subtle rounded-2xl -rotate-6 opacity-40 hidden md:block" />
+      {/* Glass decorative panels */}
+      <motion.div style={{ y: glass1Y }} className="absolute top-32 end-8 lg:end-20 w-48 h-48 glass-subtle rounded-3xl rotate-12 opacity-60 hidden md:block" aria-hidden="true" />
+      <motion.div style={{ y: glass2Y }} className="absolute bottom-24 start-8 lg:start-16 w-32 h-32 glass-subtle rounded-2xl -rotate-6 opacity-40 hidden md:block" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-28 pb-12 sm:pt-32 sm:pb-20 lg:pt-32 lg:pb-28">
         <motion.div
