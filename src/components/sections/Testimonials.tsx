@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Star, Quote } from "lucide-react";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { Lightbox } from "@/components/Lightbox";
 import { cn } from "@/lib/utils";
 
 const placeholderTestimonials = [
@@ -25,6 +26,7 @@ interface CarouselItem {
   text: string;
   name: string;
   avatar?: string;
+  images?: string[];
 }
 
 export default function Testimonials() {
@@ -47,6 +49,7 @@ export default function Testimonials() {
         text: isRtl ? item.textAr : item.textEn,
         name: isRtl ? item.nameAr : item.nameEn,
         avatar: item.avatar || undefined,
+        images: item.images || undefined,
       }))
     : placeholderTestimonials.map((item) => ({
         id: item.key,
@@ -60,6 +63,7 @@ export default function Testimonials() {
   const [viewportW, setViewportW] = useState(0);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [lightboxTarget, setLightboxTarget] = useState<{ images: string[]; index: number; name: string } | null>(null);
 
   const visible = viewportW >= 1024 ? 3 : viewportW >= 640 ? 2 : 1;
   const cardW = viewportW / visible;
@@ -142,6 +146,28 @@ export default function Testimonials() {
                     <p className="text-sm sm:text-base text-foreground/80 leading-relaxed flex-1">
                       {item.text}
                     </p>
+                    {item.images && item.images.length > 0 && (
+                      <button
+                        type="button"
+                        className="mt-4 flex items-center gap-2 cursor-pointer"
+                        onClick={() => setLightboxTarget({ images: item.images as string[], index: 0, name: item.name })}
+                        aria-label={isArabic ? "عرض صور النتيجة" : "View result photos"}
+                      >
+                        {item.images.slice(0, 3).map((img, k) => (
+                          <span
+                            key={k}
+                            className="relative overflow-hidden rounded-lg border border-border/40 h-14 w-14 shrink-0"
+                          >
+                            <ResolvedImage storageId={img} alt={`${item.name} photo ${k + 1}`} imgClassName="w-full h-full object-cover" />
+                            {k === 2 && item.images!.length > 3 && (
+                              <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white bg-black/50">
+                                +{item.images!.length - 3}
+                              </span>
+                            )}
+                          </span>
+                        ))}
+                      </button>
+                    )}
                     <div className="mt-6 pt-5 border-t border-border/30">
                       <div className="flex items-center gap-3">
                         {item.avatar ? (
@@ -181,6 +207,13 @@ export default function Testimonials() {
           )}
         </motion.div>
       </div>
+
+      <Lightbox
+        images={lightboxTarget?.images ?? []}
+        index={lightboxTarget?.index ?? null}
+        onClose={() => setLightboxTarget(null)}
+        alt={lightboxTarget?.name ?? ""}
+      />
     </section>
   );
 }

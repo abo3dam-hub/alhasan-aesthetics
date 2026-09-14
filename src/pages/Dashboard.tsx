@@ -32,6 +32,7 @@ import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { getProcedureIcon, PROCEDURE_ICON_MAP, PROCEDURE_ICON_OPTIONS, PROCEDURE_ICON_LABELS, normalizeStoredIcon } from "@/lib/procedureIcons";
 import { MediaSelector } from "@/components/MediaSelector";
+import { ImageGalleryInput } from "@/components/ImageGalleryInput";
 import { useImageUpload } from "@/hooks/use-upload";
 import { useResolvedMedia } from "@/hooks/use-resolved-media";
 import { ResolvedImage } from "@/components/ResolvedImage";
@@ -498,7 +499,7 @@ function ProceduresTab() {
             <RefreshCw className={cn("h-4 w-4", normalizingIcons && "animate-spin")} />
             Normalize Icons
           </Button>
-          <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
+<Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
             <Plus className="h-4 w-4" /> Add Procedure
           </Button>
         </div>
@@ -996,12 +997,14 @@ function TestimonialsTab() {
   const [loading, setLoading] = useState(false);
   const existing = editingId ? testimonials?.find((t) => t._id === editingId) : null;
   const [testAvatar, setTestAvatar] = useState("");
+  const [testImages, setTestImages] = useState<string[]>([]);
 
   const handleOpenTestForm = (id: Id<"testimonials"> | null) => {
     setEditingId(id);
     setShowForm(true);
     const t = id ? testimonials?.find((t) => t._id === id) : null;
     setTestAvatar(t?.avatar || "");
+    setTestImages(t?.images || []);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -1015,6 +1018,7 @@ function TestimonialsTab() {
       textEn: fd.get("textEn") as string,
       rating: Number(fd.get("rating") as string) || 5,
       avatar: testAvatar || undefined,
+      images: testImages,
       procedureType: (fd.get("procedureType") as string) || undefined,
     };
     if (editingId) {
@@ -1033,7 +1037,7 @@ function TestimonialsTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Testimonials</h2>
-        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
+        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); setTestImages([]); setTestAvatar(""); }} className="gap-2 bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Testimonial
         </Button>
       </div>
@@ -1055,6 +1059,12 @@ function TestimonialsTab() {
               </div>
               <input type="hidden" name="avatar" value={testAvatar} />
               <MediaSelector value={testAvatar} onChange={setTestAvatar} label="Avatar Image (optional)" hint="يُزرع دائريًا صغيرًا — يُنصح 1:1 (مربّع) مع الوجه بالمنتصف" />
+              <ImageGalleryInput
+                value={testImages}
+                onChange={setTestImages}
+                label="Result Photos (optional)"
+                hint="تُعرض كمصغّرات في قسم تجارب المرضى ويمكن تصفّحها — يُنصح 4:3 (أفقي) أو 3:4 عمودي؛ تُقصّ تلقائيًا من المنتصف"
+              />
               <div className="flex gap-3">
                 <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
@@ -1085,6 +1095,12 @@ function TestimonialsTab() {
                 <button onClick={async () => { if (confirm("Delete this testimonial?")) { await removeTestimonial({ id: t._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
+                {t.images != null && t.images.length > 0 && (
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-medium shrink-0" title="Result photos">
+                    <ImageIcon className="h-3 w-3" />
+                    {t.images.length}
+                  </span>
+                )}
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
                   <button disabled={testimonials!.indexOf(t) === 0} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "up", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
                   <button disabled={testimonials!.indexOf(t) === testimonials!.length - 1} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "down", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>

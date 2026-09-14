@@ -90,6 +90,7 @@ const schema = defineSchema(
       rating: v.number(),
       procedureType: v.optional(v.string()),
       avatar: v.optional(v.string()),
+      images: v.optional(v.array(v.string())),
       isActive: v.boolean(),
       order: v.number(),
     }).index("by_order", ["order"]),
