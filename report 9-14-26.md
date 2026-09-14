@@ -203,6 +203,13 @@
 - **نشر:** `npx convex deploy` → `kindly-anaconda-422`. على الأدمن الضغط على الزر لتعبئة الحقول (حماية auth تمنع التشغيل عبر CLI).
 - `fc8e906` — feat: geo-targeted SEO titles/descriptions for all procedures.
 
+### ٢.٢٤ الـ Local Business Schema الجغرافي
+- **شرح:** JSON-LD من `schema.org` يجعل محركات البحث تقرأ الموقع كـ«كيان طبي محلي» له مواقع فعلية؛ يحدّد الظهور بالبحث المحلي للأسواق المستهدفة ويغذّي Google Business Profile ببيانات متسقة (الاسم/العنوان/الهاتف).
+- **التنفيذ:** تحديث schema في `index.html`: `@type: Physician` مع `location` لستّ عيادات (دمشق، اللاذقية، طرطوس، دبي، بيروت، العراق) وأكواد الدول SY/AE/LB/IQ، و`availableService` للإجراءات الستة عشر، وصورة مطلقة.
+- **إصلاح مهم:** إزالة `aggregateRating` (5.0/100) المختلق — مخالف لسياسة جوجل ويستوجب عقوبة؛ شُطب ومن ثَمّ جُدّد بدون تقييم. تحقق locale: JSON صالح (6 مواقع، 16 خدمات) والبناء سليم.
+- **ملاحظة:** العنوان `addressLocality: Iraq` عام — نصّل مباشرة كلما زوّدتني بالعناوين الدقيقة أو أرقام الهاتف ليطرأ على schema.
+- `92856d1` — seo: geo-targeted Physician schema for all 6 practice locations.
+
 ---
 
 ## ٣. قرارات مهمة في هذا السيشن
