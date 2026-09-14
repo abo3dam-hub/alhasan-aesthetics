@@ -193,6 +193,8 @@
 - **تحقق:** eslint 0 أخطاء، `tsc -b` و`vite build` ناجحان (entry ثابت 338KB).
 - **تحديث:** إمكانية **اختيار صور موجودة فعلاً في المكتبة** (Media Library) إضافة إلى رفع صور خاصة — استُخرج `MediaLibraryModal` كمكوّن مشترك (شبكة + بحث + رفع) وأُعيد استخدامه في `MediaSelector` و`ImageGalleryInput`؛ الأخير يضيف زرّ **"From Library"** باختيار متعدد (تبديل) والرفع يُلحق تلقائيًا بالاختيار.
   - `e9d5c9c` — feat: pick patient review photos from existing media library (multi-select) + keep upload option.
+- **إصلاح تجميد الموقع عند فتح الصور:** كان `Lightbox` يُركَّب دائمًا و`useState(index)` يلتقط `null` عند أول تركيب، فكان قفل التمرير يعمل بينما الـ modal لا يظهر أبدًا. الحل: `key` بعدّاد يفتح — إعادة تركيب عند كل فتح لمزامنة الفهرس الداخلي.
+  - `0c51288` — fix: freeze when opening testimonial photo lightbox.
 
 ---
 
@@ -235,4 +237,4 @@
 | النطاق | `alhasanalsaiem.com` |
 | الحزمة الأولى | 338KB (gzip: 105KB) — بعد إخراج framer-motion من entry |
 | ESLint | 0 أخطاء، 22 تحذيرًا حميدًا |
-| أحدث commit | `e9d5c9c` — feat: pick patient review photos from existing media library (multi-select) + keep upload option |
+| أحدث commit | `0c51288` — fix: freeze when opening testimonial photo lightbox |
