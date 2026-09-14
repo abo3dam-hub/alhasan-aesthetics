@@ -344,7 +344,7 @@ function AboutEditor() {
         {/* Doctor Image */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Doctor Profile Image</Label>
-          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select doctor image" />
+          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select doctor image" hint="يُزرع عموديًا 3:4 في قسم «عن الطبيب» بالصفحة الرئيسية — يُنصح صورة عمودية (بورتريه)" />
         </div>
 
         {/* Stats */}
@@ -477,7 +477,7 @@ function InformationCardEditor() {
 
         <div className="space-y-2">
           <Label className="text-sm font-medium">Image (optional)</Label>
-          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select card image" />
+          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select card image" hint="يُزرع أفقيًا يملأ نصف القسم في الرئيسية — يُنصح 4:3 (أفقي)" />
         </div>
 
         <div className="space-y-3">

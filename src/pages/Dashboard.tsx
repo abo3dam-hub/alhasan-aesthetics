@@ -770,21 +770,21 @@ function ProcedureForm({
             <Label className="text-base font-semibold">Images</Label>
             <div className="space-y-2">
               <Label>Main Image</Label>
-              <MediaSelector value={imageUrl} onChange={setImageUrl} label="Select procedure image" />
+              <MediaSelector value={imageUrl} onChange={setImageUrl} label="Select procedure image" hint="يُزرع 4:3 في الرئيسية و16:10 في صفحة الإجراءات — يُنصح بقصّها أفقية واضحة" />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Before Image</Label>
-                <MediaSelector value={beforeImageUrl} onChange={setBeforeImageUrl} label="Select before image" />
+                <MediaSelector value={beforeImageUrl} onChange={setBeforeImageUrl} label="Select before image" hint="يُزرع 1:1 في صفحة الإجراء و4:3 في صفحة قبل/بعد — ضَع الوجه/المنطقة بالمنتصف" />
               </div>
               <div className="space-y-2">
                 <Label>After Image</Label>
-                <MediaSelector value={afterImageUrl} onChange={setAfterImageUrl} label="Select after image" />
+                <MediaSelector value={afterImageUrl} onChange={setAfterImageUrl} label="Select after image" hint="يُزرع 1:1 في صفحة الإجراء و4:3 في صفحة قبل/بعد — ضَع الوجه/المنطقة بالمنتصف" />
               </div>
             </div>
             <div className="space-y-2">
               <Label>OG Image (for social sharing)</Label>
-              <MediaSelector value={ogImageUrl} onChange={setOgImageUrl} label="Select OG image" />
+              <MediaSelector value={ogImageUrl} onChange={setOgImageUrl} label="Select OG image" hint="صورة المشاركة على السوشيال — يُنصح 1200×630 (نسبة 1.91:1)" />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center justify-between">
@@ -800,7 +800,7 @@ function ProcedureForm({
                         const updated = [...galleryUrls];
                         updated[i] = newUrl;
                         setGalleryUrls(updated);
-                      }} label={`Gallery image ${i + 1}`} />
+                      }} label={`Gallery image ${i + 1}`} hint="يُزرع مربّعًا 1:1 في معرض صور صفحة الإجراء" />
                     </div>
                     <div className="flex flex-col gap-0.5 mt-7">
                       <button type="button" disabled={i === 0} onClick={() => { const updated = [...galleryUrls]; [updated[i-1], updated[i]] = [updated[i], updated[i-1]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
@@ -918,8 +918,8 @@ function BeforeAfterTab() {
               <input type="hidden" name="beforeImage" value={baBeforeImage} />
               <input type="hidden" name="afterImage" value={baAfterImage} />
               <div className="grid sm:grid-cols-2 gap-4">
-                <MediaSelector value={baBeforeImage} onChange={setBaBeforeImage} label="Before Image" />
-                <MediaSelector value={baAfterImage} onChange={setBaAfterImage} label="After Image" />
+                <MediaSelector value={baBeforeImage} onChange={setBaBeforeImage} label="Before Image" hint="يُزرع 4:3 في صفحة قبل/بعد و1:1 في قسم الرئيسية — ضَع الوجه/المنطقة بالمنتصف" />
+                <MediaSelector value={baAfterImage} onChange={setBaAfterImage} label="After Image" hint="يُزرع 4:3 في صفحة قبل/بعد و1:1 في قسم الرئيسية — ضَع الوجه/المنطقة بالمنتصف" />
               </div>
               <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
               <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
@@ -1036,7 +1036,7 @@ function TestimonialsTab() {
                 <div className="space-y-2"><Label>Procedure Type (optional)</Label><Input name="procedureType" defaultValue={existing?.procedureType} placeholder="e.g. rhinoplasty" /></div>
               </div>
               <input type="hidden" name="avatar" value={testAvatar} />
-              <MediaSelector value={testAvatar} onChange={setTestAvatar} label="Avatar Image (optional)" />
+              <MediaSelector value={testAvatar} onChange={setTestAvatar} label="Avatar Image (optional)" hint="يُزرع دائريًا صغيرًا — يُنصح 1:1 (مربّع) مع الوجه بالمنتصف" />
               <div className="flex gap-3">
                 <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
@@ -1323,7 +1323,7 @@ function SettingsTab() {
             <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} /></div>
           </div>
           <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} /></div>
-          <div className="space-y-2"><Label>Navbar Photo</Label><MediaSelector value={form.navbarPhoto} onChange={(val) => updateField("navbarPhoto", val)} label="Select navbar photo" /></div>
+          <div className="space-y-2"><Label>Navbar Photo</Label><MediaSelector value={form.navbarPhoto} onChange={(val) => updateField("navbarPhoto", val)} label="Select navbar photo" hint="يُزرع صغيرًا ودائريًا في الشريط العلوي — يُنصح 1:1 مع الوجه بالمنتصف" /></div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2"><Label>Address (EN)</Label><Textarea rows={2} value={form.addressEn} onChange={(e) => updateField("addressEn", e.target.value)} /></div>
             <div className="space-y-2"><Label>Address (AR)</Label><Textarea dir="rtl" rows={2} value={form.addressAr} onChange={(e) => updateField("addressAr", e.target.value)} /></div>

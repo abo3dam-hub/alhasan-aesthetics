@@ -2,7 +2,8 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ImageIcon, Search, X, Upload, Check } from "lucide-react";
+import { ImageIcon, Search, X, Upload, Check, Info } from "lucide-react";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useImageUpload } from "@/hooks/use-upload";
@@ -12,10 +13,11 @@ interface MediaSelectorProps {
   value: string;
   onChange: (storageIdOrUrl: string) => void;
   label?: string;
+  hint?: ReactNode;
   className?: string;
 }
 
-export function MediaSelector({ value, onChange, label, className }: MediaSelectorProps) {
+export function MediaSelector({ value, onChange, label, hint, className }: MediaSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -46,6 +48,13 @@ export function MediaSelector({ value, onChange, label, className }: MediaSelect
           </button>
         )}
       </div>
+
+      {hint && (
+        <p className="flex items-start gap-1.5 text-xs text-muted-foreground/80 leading-relaxed">
+          <Info className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary/60" />
+          <span>{hint}</span>
+        </p>
+      )}
 
       {isOpen && (
         <MediaLibraryModal
