@@ -1,7 +1,7 @@
 # تقرير وضع المشروع — 14-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `5e6b943` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `e9d5c9c` (شجرة نظيفة، مرفوع لـ GitHub)
 
 ---
 
@@ -9,7 +9,7 @@
 
 | الجهة | الحالة |
 |---|---|
-| GitHub `main` | `5e6b943` — متطابق مع فروع العمل، نظيف |
+| GitHub `main` | `e9d5c9c` — متطابق مع فروع العمل، نظيف |
 | Convex **Production** | `kindly-anaconda-422` — Auth مفعّل، البيانات مستعادة، الكود الحكومي حالي |
 | Convex **Dev** | `gregarious-perch-128` |
 | Vercel `dralhasan` | نشط — الاسم المستعار `https://dralhasan-three.vercel.app` يخدم آخر build |
@@ -191,6 +191,8 @@
 - **الواجهة:** `Testimonials.tsx` يعرض شريط مصغّرات (حتى 3 + "+N") داخل بطاقة التجربة، والنقر يفتح `Lightbox` جديدًا (`src/components/Lightbox.tsx`) قابلاً لإعادة الاستخدام — سهمان + عدّاد + Escape/الأسهم + قفل تمرير الصفحة — بنمط Lightbox الموجود في `ProcedureDetail`.
 - **نشر:** `npx convex deploy` → `kindly-anaconda-422` (حقل اختياري — بدون حذف فروق).
 - **تحقق:** eslint 0 أخطاء، `tsc -b` و`vite build` ناجحان (entry ثابت 338KB).
+- **تحديث:** إمكانية **اختيار صور موجودة فعلاً في المكتبة** (Media Library) إضافة إلى رفع صور خاصة — استُخرج `MediaLibraryModal` كمكوّن مشترك (شبكة + بحث + رفع) وأُعيد استخدامه في `MediaSelector` و`ImageGalleryInput`؛ الأخير يضيف زرّ **"From Library"** باختيار متعدد (تبديل) والرفع يُلحق تلقائيًا بالاختيار.
+  - `e9d5c9c` — feat: pick patient review photos from existing media library (multi-select) + keep upload option.
 
 ---
 
@@ -233,4 +235,4 @@
 | النطاق | `alhasanalsaiem.com` |
 | الحزمة الأولى | 338KB (gzip: 105KB) — بعد إخراج framer-motion من entry |
 | ESLint | 0 أخطاء، 22 تحذيرًا حميدًا |
-| أحدث commit | `5e6b943` — feat: patient review photos - thumbnails on homepage + lightbox, admin multi-upload with aspect hint |
+| أحدث commit | `e9d5c9c` — feat: pick patient review photos from existing media library (multi-select) + keep upload option |
