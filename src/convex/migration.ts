@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./admin";
 import { resolveIconKey } from "./procedureIconDefaults";
+import { getProcedureSeo } from "./procedureSeoDefaults";
 
 /**
  * ─── Procedure Structure Migration ─────────────────────────────────────────
@@ -387,5 +388,36 @@ export const migrateProcedureIcons = mutation({
       }
     }
     return { updated, total: procedures.length };
+  },
+});
+
+/**
+ * Fill the SEO title/description fields (AR + EN) of every procedure from the
+ * canonical geo-targeted defaults (see procedureSeoDefaults.ts). Idempotent:
+ * only patches when the stored value differs from the canonical one, so manual
+ * admin edits are respected unless re-run intentionally.
+ */
+export const migrateProcedureSeo = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const procedures = await ctx.db.query("procedures").collect();
+    let updated = 0;
+    const perSlug: { slug: string; fields: number }[] = [];
+    for (const proc of procedures) {
+      const seo = getProcedureSeo(proc.slug);
+      if (!seo) continue;
+      const patch: Partial<Record<keyof typeof seo, string>> = {} as never;
+      const fields = ["seoTitleEn", "seoDescriptionEn", "seoTitleAr", "seoDescriptionAr"] as const;
+      for (const field of fields) {
+        if (proc[field] !== seo[field]) patch[field] = seo[field];
+      }
+      if (Object.keys(patch).length > 0) {
+        await ctx.db.patch(proc._id, patch);
+        updated += 1;
+        perSlug.push({ slug: proc.slug, fields: Object.keys(patch).length });
+      }
+    }
+    return { updated, total: procedures.length, filled: perSlug };
   },
 });

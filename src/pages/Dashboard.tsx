@@ -451,6 +451,8 @@ function ProceduresTab() {
   const removeProcedure = useMutation(api.procedures.remove);
   const normalizeIcons = useMutation(api.migration.migrateProcedureIcons);
   const [normalizingIcons, setNormalizingIcons] = useState(false);
+  const fillSeo = useMutation(api.migration.migrateProcedureSeo);
+  const [fillingSeo, setFillingSeo] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<Id<"procedures"> | null>(null);
   const [search, setSearch] = useState("");
@@ -498,6 +500,26 @@ function ProceduresTab() {
           >
             <RefreshCw className={cn("h-4 w-4", normalizingIcons && "animate-spin")} />
             Normalize Icons
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={fillingSeo}
+            onClick={async () => {
+              setFillingSeo(true);
+              try {
+                const res = await fillSeo();
+                toast.success(`SEO filled for ${res.updated} procedures`);
+              } catch {
+                toast.error("Failed to fill SEO");
+              } finally {
+                setFillingSeo(false);
+              }
+            }}
+            className="gap-2"
+          >
+            <RefreshCw className={cn("h-4 w-4", fillingSeo && "animate-spin")} />
+            Fill SEO (AR/EN)
           </Button>
 <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
             <Plus className="h-4 w-4" /> Add Procedure
