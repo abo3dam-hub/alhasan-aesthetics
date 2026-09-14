@@ -64,6 +64,7 @@ export default function Testimonials() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [lightboxTarget, setLightboxTarget] = useState<{ images: string[]; index: number; name: string } | null>(null);
+  const [lightboxOpenKey, setLightboxOpenKey] = useState(0);
 
   const visible = viewportW >= 1024 ? 3 : viewportW >= 640 ? 2 : 1;
   const cardW = viewportW / visible;
@@ -150,7 +151,7 @@ export default function Testimonials() {
                       <button
                         type="button"
                         className="mt-4 flex items-center gap-2 cursor-pointer"
-                        onClick={() => setLightboxTarget({ images: item.images as string[], index: 0, name: item.name })}
+                        onClick={() => { setLightboxTarget({ images: item.images as string[], index: 0, name: item.name }); setLightboxOpenKey((k) => k + 1); }}
                         aria-label={isArabic ? "عرض صور النتيجة" : "View result photos"}
                       >
                         {item.images.slice(0, 3).map((img, k) => (
@@ -209,6 +210,7 @@ export default function Testimonials() {
       </div>
 
       <Lightbox
+        key={lightboxOpenKey}
         images={lightboxTarget?.images ?? []}
         index={lightboxTarget?.index ?? null}
         onClose={() => setLightboxTarget(null)}
