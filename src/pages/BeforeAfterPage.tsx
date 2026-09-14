@@ -36,8 +36,11 @@ export default function BeforeAfterPage() {
       ? cases
       : cases?.filter((c) => c.procedureType === activeFilter);
 
-  const handleSliderChange = (id: string, value: number) => {
-    setSliderValues((prev) => ({ ...prev, [id]: value }));
+  const updateSlider = (e: React.PointerEvent<HTMLDivElement>, id: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+    const next = (x / rect.width) * 100;
+    setSliderValues((prev) => ({ ...prev, [id]: next }));
   };
 
   return (
@@ -139,60 +142,69 @@ export default function BeforeAfterPage() {
                       className="glass-card rounded-2xl overflow-hidden"
                     >
                       {/* Before/After Slider */}
-                      <div className="relative aspect-[4/3] overflow-hidden">
-                        {/* After (background) */}
+                      <div
+                        className="relative aspect-[4/3] overflow-hidden select-none touch-none cursor-ew-resize"
+                        onPointerDown={(e) => {
+                          e.currentTarget.setPointerCapture(e.pointerId);
+                          updateSlider(e, caseItem._id);
+                        }}
+                        onPointerMove={(e) => {
+                          if (e.buttons === 1) updateSlider(e, caseItem._id);
+                        }}
+                        role="slider"
+                        aria-label={isRtl ? "مقارنة قبل وبعد" : "Before / After comparison"}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(sliderVal)}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                            e.preventDefault();
+                            const delta = e.key === "ArrowLeft" ? -5 : 5;
+                            setSliderValues((prev) => ({
+                              ...prev,
+                              [caseItem._id]: Math.min(100, Math.max(0, sliderVal + delta)),
+                            }));
+                          }
+                        }}
+                      >
+                        {/* After (full background) */}
                         <ResolvedImage
                           storageId={caseItem.afterImage}
                           alt="After"
                           imgClassName="absolute inset-0 w-full h-full object-cover"
                           fallbackClassName="absolute inset-0"
                         />
-                        {/* Before (clipped) */}
+                        {/* Before (clipped with clip-path — single crisp edge) */}
                         <div
-                          className="absolute inset-0 overflow-hidden"
-                          style={{ width: `${sliderVal}%` }}
+                          className="absolute inset-0 pointer-events-none"
+                          style={{ clipPath: `inset(0 ${100 - sliderVal}% 0 0)` }}
                         >
-                          <div style={{ width: `${10000 / Math.max(sliderVal, 1)}%`, maxWidth: "none" }}>
-                            <ResolvedImage
-                              storageId={caseItem.beforeImage}
-                              alt="Before"
-                              imgClassName="w-full h-full object-cover"
-                              fallbackClassName="w-full h-full"
-                              lazy={false}
-                            />
-                          </div>
+                          <ResolvedImage
+                            storageId={caseItem.beforeImage}
+                            alt="Before"
+                            imgClassName="w-full h-full object-cover"
+                            fallbackClassName="absolute inset-0 w-full h-full"
+                            lazy={false}
+                          />
                         </div>
                         {/* Slider Handle */}
                         <div
-                          className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
+                          className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10 pointer-events-none"
                           style={{ left: `${sliderVal}%` }}
                         >
-                          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-black/10">
+                          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-white shadow-lg flex items-center justify-center border border-black/10">
                             <ChevronLeft className="h-3 w-3 text-foreground" />
                             <ChevronRight className="h-3 w-3 text-foreground" />
                           </div>
                         </div>
                         {/* Labels */}
-                        <div className="absolute top-3 start-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
+                        <div className="absolute top-3 start-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 pointer-events-none">
                           {isRtl ? "قبل" : "Before"}
                         </div>
-                        <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
+                        <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 pointer-events-none">
                           {isRtl ? "بعد" : "After"}
                         </div>
-                        {/* Range Input */}
-                        <input
-                          type="range"
-                          min={0}
-                          max={100}
-                          value={sliderVal}
-                          onChange={(e) =>
-                            handleSliderChange(
-                              caseItem._id,
-                              Number(e.target.value)
-                            )
-                          }
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
-                        />
                       </div>
                       {/* Info */}
                       <div className="p-4">
