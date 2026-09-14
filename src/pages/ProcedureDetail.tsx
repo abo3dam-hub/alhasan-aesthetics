@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { getProcedureIcon } from "@/lib/procedureIcons";
 
 
 
@@ -65,6 +66,7 @@ export default function ProcedureDetail() {
     ? (isRtl ? displayData.longDescriptionAr : displayData.longDescriptionEn)
     : "";
   const gallery = displayData?.gallery || [];
+  const procIcon = { Icon: getProcedureIcon(displayData?.slug, displayData?.icon) };
 
   // ── Gallery lightbox state & navigation ──
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -276,9 +278,14 @@ export default function ProcedureDetail() {
               </Link>
             )}
 
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-sm font-medium text-primary mb-6">
-              <BadgeCheck className="h-4 w-4" />
-              {isRtl ? "إجراء طبي متخصص" : "Specialized Procedure"}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <procIcon.Icon className="h-6 w-6 text-primary" />
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-sm font-medium text-primary">
+                <BadgeCheck className="h-4 w-4" />
+                {isRtl ? "إجراء طبي متخصص" : "Specialized Procedure"}
+              </div>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif-luxury font-bold text-foreground mb-4">

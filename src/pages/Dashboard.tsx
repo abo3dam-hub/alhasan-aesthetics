@@ -20,28 +20,17 @@ import {
   EyeOff,
   Settings,
   ChevronDown,
+  RefreshCw,
+  ArrowUpDown,
   Image as ImageIcon,
   ArrowUp,
   ArrowDown,
   Star,
   X,
-  Sparkles,
-  UserRound,
-  SmilePlus,
-  Droplets,
-  Scissors,
-  Heart,
-  ArrowUpDown,
-  Stethoscope,
-  Ban,
-  Shield,
-  Zap,
-  Activity,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
+import { getProcedureIcon, PROCEDURE_ICON_MAP, PROCEDURE_ICON_OPTIONS, PROCEDURE_ICON_LABELS, normalizeStoredIcon } from "@/lib/procedureIcons";
 import { MediaSelector } from "@/components/MediaSelector";
 import { useImageUpload } from "@/hooks/use-upload";
 import { useResolvedMedia } from "@/hooks/use-resolved-media";
@@ -88,16 +77,7 @@ const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "media", label: "Media", icon: ImageIcon },
 ];
 
-const iconOptions = [
-  "Eye", "UserRound", "SmilePlus", "Droplets", "Scissors", "Sparkles",
-  "Heart", "ArrowUpDown", "Stethoscope", "Ban", "Star", "Shield",
-  "Zap", "Activity", "Sun", "Moon",
-];
-
-const iconMap: Record<string, typeof Sparkles> = {
-  Eye, UserRound, SmilePlus, Droplets, Scissors, Sparkles,
-  Heart, ArrowUpDown, Stethoscope, Ban, Star, Shield, Zap, Activity, Sun, Moon,
-};
+const iconOptions = [...PROCEDURE_ICON_OPTIONS];
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -468,6 +448,8 @@ function ProceduresTab() {
   const createProcedure = useMutation(api.procedures.create);
   const updateProcedure = useMutation(api.procedures.update);
   const removeProcedure = useMutation(api.procedures.remove);
+  const normalizeIcons = useMutation(api.migration.migrateProcedureIcons);
+  const [normalizingIcons, setNormalizingIcons] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<Id<"procedures"> | null>(null);
   const [search, setSearch] = useState("");
@@ -495,9 +477,31 @@ function ProceduresTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Procedures</h2>
-        <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
-          <Plus className="h-4 w-4" /> Add Procedure
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={normalizingIcons}
+            onClick={async () => {
+              setNormalizingIcons(true);
+              try {
+                await normalizeIcons();
+                toast.success("Procedure icons updated");
+              } catch {
+                toast.error("Failed to update icons");
+              } finally {
+                setNormalizingIcons(false);
+              }
+            }}
+            className="gap-2"
+          >
+            <RefreshCw className={cn("h-4 w-4", normalizingIcons && "animate-spin")} />
+            Normalize Icons
+          </Button>
+          <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
+            <Plus className="h-4 w-4" /> Add Procedure
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -532,12 +536,14 @@ function ProceduresTab() {
         {!procedures || procedures.length === 0 ? (
           <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No procedures yet.</CardContent></Card>
         ) : (
-          (filteredProcedures || []).map((proc, index) => (
+          (filteredProcedures || []).map((proc, index) => {
+            const IconComp = getProcedureIcon(proc.slug, proc.icon);
+            return (
             <Card key={proc._id} className="border-border/60">
               <CardContent className="p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-lg">
-                    {proc.icon}
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <IconComp className="h-5 w-5 text-primary" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium text-foreground truncate">{proc.titleEn}</p>
@@ -585,7 +591,8 @@ function ProceduresTab() {
                 </div>
               </CardContent>
             </Card>
-          ))
+            );
+          })
         )}
       </div>
     </div>
@@ -633,7 +640,7 @@ function ProcedureForm({
     [procedures]
   );
   const [loading, setLoading] = useState(false);
-  const [selectedIcon, setSelectedIcon] = useState(existing?.icon || "Sparkles");
+  const [selectedIcon, setSelectedIcon] = useState(() => normalizeStoredIcon(existing?.slug ?? "", existing?.icon ?? ""));
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [imageUrl, setImageUrl] = useState(existing?.image || "");
   const [beforeImageUrl, setBeforeImageUrl] = useState(existing?.beforeImage || "");
@@ -733,7 +740,16 @@ function ProcedureForm({
             <Label>Icon</Label>
             <div className="relative">
               <button type="button" onClick={() => setShowIconPicker(!showIconPicker)} className="w-full flex items-center justify-between px-3 py-2 border border-border/60 rounded-lg bg-white/40 text-sm">
-                <span>{selectedIcon}</span>
+                <span className="flex items-center gap-2">
+                  {(() => {
+                    const IconComp = PROCEDURE_ICON_MAP[selectedIcon as keyof typeof PROCEDURE_ICON_MAP];
+                    const label = PROCEDURE_ICON_LABELS[selectedIcon as keyof typeof PROCEDURE_ICON_LABELS];
+                    return (<>
+                      <IconComp className="h-4 w-4 text-primary" />
+                      {label ? label.en : selectedIcon}
+                    </>);
+                  })()}
+                </span>
                 <ChevronDown className="h-4 w-4" />
               </button>
               {showIconPicker && (
@@ -746,12 +762,14 @@ function ProcedureForm({
                     });
                   }} />
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
-                    {iconOptions.map((icon) => {
-                      const IconComp = iconMap[icon] || Sparkles;
+                    {iconOptions.map((key) => {
+                      const IconComp = PROCEDURE_ICON_MAP[key as keyof typeof PROCEDURE_ICON_MAP];
+                      const label = PROCEDURE_ICON_LABELS[key as keyof typeof PROCEDURE_ICON_LABELS];
+                      const selected = selectedIcon === key;
                       return (
-                        <button key={icon} type="button" data-icon-btn data-icon-name={icon} onClick={() => { setSelectedIcon(icon); setShowIconPicker(false); }} className={cn("p-2 rounded-lg flex flex-col items-center gap-1 hover:bg-primary/10 transition-colors", selectedIcon === icon && "bg-primary/10 ring-1 ring-primary")}>
+                        <button key={key} type="button" data-icon-btn data-icon-name={`${key} ${label.en} ${label.ar}`} onClick={() => { setSelectedIcon(key); setShowIconPicker(false); }} className={cn("p-2 rounded-lg flex flex-col items-center gap-1 hover:bg-primary/10 transition-colors", selected && "bg-primary/10 ring-1 ring-primary")}>
                           <IconComp className="h-5 w-5 text-primary" />
-                          <span className="text-[9px] text-muted-foreground leading-none truncate w-full text-center">{icon}</span>
+                          <span className="text-[9px] text-muted-foreground leading-none truncate w-full text-center">{label.en}</span>
                         </button>
                       );
                     })}

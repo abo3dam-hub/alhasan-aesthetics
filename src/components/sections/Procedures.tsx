@@ -6,31 +6,8 @@ import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "react-router";
-import {
-  Eye,
-  UserRound,
-  SmilePlus,
-  Droplets,
-  Scissors,
-  Sparkles,
-  Heart,
-  ArrowUpDown,
-  Stethoscope,
-  Ban,
-  Star,
-  Shield,
-  Zap,
-  Activity,
-  Sun,
-  Moon,
-} from "lucide-react";
 import { ResolvedImage } from "@/components/ResolvedImage";
-
-// Icon mapping from string name to component
-const iconMap: Record<string, typeof Eye> = {
-  Eye, UserRound, SmilePlus, Droplets, Scissors, Sparkles,
-  Heart, ArrowUpDown, Stethoscope, Ban, Star, Shield, Zap, Activity, Sun, Moon,
-};
+import { getProcedureIcon } from "@/lib/procedureIcons";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -52,7 +29,7 @@ export default function Procedures() {
         slug: p.slug,
         title: dir === "rtl" ? p.titleAr : p.titleEn,
         description: dir === "rtl" ? p.descriptionAr : p.descriptionEn,
-        icon: iconMap[p.icon] || Sparkles,
+        icon: getProcedureIcon(p.slug, p.icon),
         image: p.image,
         price: p.price,
       }))

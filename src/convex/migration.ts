@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./admin";
+import { resolveIconKey } from "./procedureIconDefaults";
 
 /**
  * ─── Procedure Structure Migration ─────────────────────────────────────────
@@ -363,5 +364,28 @@ export const getMigrationStatus = query({
       newProceduresCount: newOnes.length,
       oldCombinedStillActive: combined ? combined.isActive : false,
     };
+  },
+});
+
+/**
+ * Normalize the `icon` field of every procedure to its semantic key.
+ * Legacy names (e.g. "Eye", "Stethoscope", "SmilePlus") are replaced with the
+ * expressive canonical keys. If an admin has already picked a semantic key it
+ * is left untouched.
+ */
+export const migrateProcedureIcons = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const procedures = await ctx.db.query("procedures").collect();
+    let updated = 0;
+    for (const proc of procedures) {
+      const target = resolveIconKey(proc.slug, proc.icon);
+      if (target !== proc.icon) {
+        await ctx.db.patch(proc._id, { icon: target });
+        updated += 1;
+      }
+    }
+    return { updated, total: procedures.length };
   },
 });

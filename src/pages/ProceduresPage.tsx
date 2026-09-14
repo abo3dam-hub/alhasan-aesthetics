@@ -6,33 +6,13 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { getProcedureIcon } from "@/lib/procedureIcons";
 import {
   ArrowRight,
   ArrowLeft,
   Clock,
   HeartPulse,
-  Eye,
-  UserRound,
-  SmilePlus,
-  Droplets,
-  Scissors,
-  Sparkles,
-  Heart,
-  ArrowUpDown,
-  Stethoscope,
-  Ban,
-  Star,
-  Shield,
-  Zap,
-  Activity,
-  Sun,
-  Moon,
 } from "lucide-react";
-
-const iconMap: Record<string, typeof Eye> = {
-  Eye, UserRound, SmilePlus, Droplets, Scissors, Sparkles,
-  Heart, ArrowUpDown, Stethoscope, Ban, Star, Shield, Zap, Activity, Sun, Moon,
-};
 
 export default function ProceduresPage() {
   const { t, dir } = useI18n();
@@ -44,7 +24,7 @@ export default function ProceduresPage() {
     slug: p.slug,
     title: isRtl ? p.titleAr : p.titleEn,
     description: isRtl ? p.descriptionAr : p.descriptionEn,
-    icon: iconMap[p.icon] || Sparkles,
+    icon: getProcedureIcon(p.slug, p.icon),
     image: p.image,
     price: p.price,
     duration: p.duration,
