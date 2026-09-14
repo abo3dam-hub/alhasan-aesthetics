@@ -1,7 +1,7 @@
 # تقرير وضع المشروع — 14-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `cb8466d` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `2a4b583` (شجرة نظيفة، مرفوع لـ GitHub)
 
 ---
 
@@ -9,7 +9,7 @@
 
 | الجهة | الحالة |
 |---|---|
-| GitHub `main` | `cb8466d` — متطابق مع فروع العمل، نظيف |
+| GitHub `main` | `2a4b583` — متطابق مع فروع العمل، نظيف |
 | Convex **Production** | `kindly-anaconda-422` — Auth مفعّل، البيانات مستعادة، الكود الحكومي حالي |
 | Convex **Dev** | `gregarious-perch-128` |
 | Vercel `dralhasan` | نشط — الاسم المستعار `https://dralhasan-three.vercel.app` يخدم آخر build |
@@ -172,6 +172,18 @@
   - framer-motion يُحمّل كسول فقط حين يحتاجه أي صفحة.
 - `cb8466d` — perf: entry chunk -28%.
 
+### ٢.٢١ أيقونات إجرائية معبّرة (قائمة على نوع الإجراء)
+- **المشكلة:** الأيقونات السابقة (Lucide عامة مثل `Stethoscope`/`SmilePlus`) لم تكن مرتبطة بنوع العملية (طلب المستخدم: "أريد أيقونات معبّرة تمامًا").
+- **المنهج:** سجلّ دلالي مركزي بأسماء معنى + أيقونات SVG مخصصة للفجوات التشريحية (لا وجود لأيقونتي `Nose`/`Face` في lucide-react).
+  - `src/convex/procedureIconDefaults.ts` — مصدر حقيقة نقي (بيانات فقط): `PROCEDURE_ICON_KEYS`, `ICON_KEY_BY_SLUG`, `LEGACY_ICON_TO_KEY`, `resolveIconKey()`.
+  - `src/lib/procedureIcons.tsx` — `NoseIcon`, `FaceLiftIcon`, `EyelidLiftIcon`, `WaistIcon`, `BreastBase` + تعديلات `plus|minus|lift|liftPlus`، مع Lucide للبقية (`Syringe`=بوتوكس، `Droplet`=فيلر، `Droplets`=شفط دهون، `BicepsFlexed`=شدّ الذراع، `PersonStanding`=شدّ الفخذ، `Bandage`=تعديل الندوب، `Ear`=الأذن البارزة، `Sparkles`=عام).
+- **ترتيب الأولوية في العرض:** (1) القيمة المخزنة إن كانت مفتاحًا دلاليًا → (2) المفتاح الافتراضي حسب الـ slug → (3) الاسم القديم legacy → (4) عام. يعمل دون أي تعديل على قاعدة البيانات (حتى بدون زر التطبيع).
+- **16 مفتاحًا:** EyelidLift, FaceLift, Rhinoplasty, Liposuction, TummyTuck, Botox, Fillers, ArmLift, ThighLift, BreastAugmentation, BreastReduction, BreastLift, BreastLiftImplants, ScarCorrection, EarCorrection, General.
+- **الواجهة:** `Procedures.tsx` + `ProceduresPage.tsx` ترسم الأيقونة حسب `getProcedureIcon(slug, icon)`؛ `ProcedureDetail.tsx` يظهر شارة الأيقونة في الهيرو؛ `Dashboard.tsx`: قائمة الإجراءات تُظهر الأشكال، منتقي الأيقونات بالـ 16 مفتاحًا (شكل + تسمية EN) وقابل للبحث، مع زر **"Normalize Icons"** يستدعي `migrateProcedureIcons` (محمي بـ requireAdmin).
+- **نشر:** `npx convex deploy` → `kindly-anaconda-422`. زر التطبيع جاهز للاستخدام من لوحة التحكم (لا يستجيب لـ CLI identity؛ يحتاج جلسة متصفح موثّقة).
+- **تحقق:** eslint 0 أخطاء، `tsc -b` و`vite build` ناجحان؛ اختبار render لجميع الأيقونات الـ16 + دقة كل slug عبر `renderToStaticMarkup` (ALL OK).
+- `2a4b583` — feat: expressive procedure icons - semantic registry + custom anatomical SVGs.
+
 ---
 
 ## ٣. قرارات مهمة في هذا السيشن
@@ -212,5 +224,5 @@
 | اللون الرئيسي | `#8B7355` (warm bronze/taupe) |
 | النطاق | `alhasanalsaiem.com` |
 | الحزمة الأولى | 338KB (gzip: 105KB) — بعد إخراج framer-motion من entry |
-| ESLint | 0 أخطاء، 12 تحذيرًا حميدًا |
-| أحدث commit | `cb8466d` — perf: Arabic fonts, content-visibility, entry chunk -28%, 404 redesign |
+| ESLint | 0 أخطاء، 22 تحذيرًا حميدًا |
+| أحدث commit | `2a4b583` — feat: expressive procedure icons - semantic registry + custom anatomical SVGs |
