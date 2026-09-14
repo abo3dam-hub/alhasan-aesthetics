@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { useImageUpload } from "@/hooks/use-upload";
+import { MediaLibraryModal } from "@/components/MediaLibraryModal";
 import { Info } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -15,12 +16,15 @@ interface ImageGalleryInputProps {
 }
 
 /**
- * Multi-image upload input for the admin dashboard.
- * Each file uploads via Convex Storage and the resulting storageId is
- * appended to the array. Thumbnails can be removed individually.
+ * Multi-image input for the admin dashboard. Supports two add sources:
+ *   1. Upload new files → Convex Storage (thumbs appended).
+ *   2. Pick existing images from the media library (multi-select toggle).
+ * Thumbnails can be removed individually.
  */
 export function ImageGalleryInput({ value, onChange, label, hint, className }: ImageGalleryInputProps) {
   const [uploading, setUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const uploader = useImageUpload();
 
@@ -33,7 +37,11 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
       const result = await uploader.upload(file);
       if (result) ids.push(result.storageId);
     }
-    if (ids.length > 0) onChange([...value, ...ids]);
+    if (ids.length > 0) {
+      const merged = [...value];
+      for (const id of ids) if (!merged.includes(id)) merged.push(id);
+      onChange(merged);
+    }
     setUploading(false);
   };
 
@@ -41,7 +49,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
     <div className={cn("space-y-2", className)}>
       {label && <label className="text-sm font-medium text-foreground">{label}</label>}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {value.map((id) => (
           <div
             key={id}
@@ -69,6 +77,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
               ? "border-border/30 opacity-60 cursor-wait"
               : "border-border/40 cursor-pointer hover:border-primary/50 hover:bg-white/20"
           )}
+          title="Upload new images"
         >
           {uploading ? (
             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -76,10 +85,22 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
             <>
               <Plus className="h-5 w-5 text-muted-foreground" />
               <span className="text-[9px] text-muted-foreground leading-none px-1 text-center">
-                Add Images
+                Upload
               </span>
             </>
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setPickerSearch(""); setPickerOpen(true); }}
+          className="w-20 h-20 rounded-xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-1 transition-all shrink-0 cursor-pointer hover:border-primary/50 hover:bg-white/20"
+          title="Choose from library"
+        >
+          <Images className="h-5 w-5 text-muted-foreground" />
+          <span className="text-[9px] text-muted-foreground leading-none px-1 text-center">
+            From Library
+          </span>
         </button>
       </div>
 
@@ -88,7 +109,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
         multiple
-        onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+        onChange={(e) => { void handleFiles(e.target.files); e.target.value = ""; }}
         className="hidden"
       />
 
@@ -100,6 +121,23 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
       )}
 
       {uploader.error && <p className="text-xs text-red-500">{uploader.error}</p>}
+
+      {pickerOpen && (
+        <MediaLibraryModal
+          selectedUrls={value}
+          search={pickerSearch}
+          onSearch={setPickerSearch}
+          onPick={(id) => {
+            if (value.includes(id)) onChange(value.filter((v) => v !== id));
+            else onChange([...value, id]);
+          }}
+          onUploaded={(id) => {
+            if (!value.includes(id)) onChange([...value, id]);
+          }}
+          onClose={() => { setPickerOpen(false); setPickerSearch(""); }}
+          title="Choose Photos"
+        />
+      )}
     </div>
   );
 }
