@@ -137,7 +137,7 @@ export default function Testimonials() {
             >
               {items.map((item) => (
                 <div key={item.id} className="shrink-0 px-2" style={{ width: `${100 / visible}%` }}>
-                  <div className="glass-elevated rounded-3xl p-4 sm:p-8 h-full flex flex-col">
+                  <div className="glass-elevated card-glow rounded-3xl p-4 sm:p-8 h-full flex flex-col">
                     <Quote className="h-8 w-8 text-primary/30 mb-4 shrink-0" />
                     <div className="flex gap-1 mb-4">
                       {Array.from({ length: item.rating }).map((_, j) => (

@@ -77,7 +77,7 @@ export default function Procedures() {
                   }}
                 >
                   <Link to={`/procedure/${proc.slug}`} className="block h-full">
-                    <div className="glass-card rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
+                    <div className="glass-card card-glow rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.02]">
                       {proc.image ? (
                         <div className="relative aspect-[4/3] overflow-hidden">
                           <ResolvedImage storageId={proc.image} alt={proc.title} imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

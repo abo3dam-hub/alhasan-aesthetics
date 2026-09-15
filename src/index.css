@@ -237,6 +237,53 @@
   box-shadow: 0 0 40px rgba(197, 168, 130, 0.15);
 }
 
+/* ── Decorative card hover glow (visual only — no layout impact) ── */
+.card-glow {
+  position: relative;
+  transition-duration: 300ms;
+}
+.card-glow::after {
+  content: "";
+  position: absolute;
+  inset-inline: 14%;
+  top: 0;
+  height: 2px;
+  border-radius: 0 0 9999px 9999px;
+  background: linear-gradient(90deg, transparent, rgba(139, 115, 85, 0.55), transparent);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+.card-glow:hover {
+  box-shadow: 0 18px 44px rgba(139, 115, 85, 0.16),
+    0 6px 18px rgba(0, 0, 0, 0.05);
+}
+.card-glow:hover::after {
+  opacity: 1;
+}
+
+/* ── Selection + scrollbar in theme tones ── */
+::selection {
+  background: rgba(197, 168, 130, 0.35);
+  color: var(--foreground);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #F0E8DE;
+}
+::-webkit-scrollbar-thumb {
+  background: #C5A882;
+  border: 3px solid #F0E8DE;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8B7355;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

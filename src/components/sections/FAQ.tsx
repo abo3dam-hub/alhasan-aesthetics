@@ -71,7 +71,7 @@ export default function FAQ() {
                       <AccordionItem
                         key={faq._id}
                         value={faq._id}
-                        className="border-b border-border/30 last:border-b-0 px-4 sm:px-6"
+                        className="border-b border-border/30 last:border-b-0 px-4 sm:px-6 transition-colors duration-300 hover:bg-white/30 data-[state=open]:bg-white/30 rounded-xl"
                       >
                         <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:no-underline py-5 sm:py-6 text-start">
                           <span>{isRtl ? faq.questionAr : faq.questionEn}</span>
@@ -90,7 +90,7 @@ export default function FAQ() {
                       <AccordionItem
                         key={qKey}
                         value={qKey}
-                        className="border-b border-border/30 last:border-b-0 px-4 sm:px-6"
+                        className="border-b border-border/30 last:border-b-0 px-4 sm:px-6 transition-colors duration-300 hover:bg-white/30 data-[state=open]:bg-white/30 rounded-xl"
                       >
                         <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:no-underline py-5 sm:py-6 text-start">
                           {t.faq[qKey as keyof typeof t.faq]}

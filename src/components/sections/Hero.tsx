@@ -87,6 +87,18 @@ export default function Hero() {
       <motion.div style={{ y: orb2Y, background: "rgba(212, 196, 173, 0.12)" }} className="absolute bottom-20 left-10 w-96 h-96 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
       <motion.div style={{ y: orb3Y, background: "rgba(139, 115, 85, 0.05)" }} className="absolute top-1/3 left-1/3 w-64 h-64 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
 
+      {/* Champagne radial glows — extra depth (decorative only) */}
+      <motion.div
+        style={{ y: orb1Y, background: "radial-gradient(circle, rgba(197,168,130,0.30) 0%, rgba(197,168,130,0) 70%)" }}
+        className="absolute -top-24 -right-24 w-[34rem] h-[34rem] rounded-full pointer-events-none"
+        aria-hidden="true"
+      />
+      <motion.div
+        style={{ y: orb2Y, background: "radial-gradient(circle, rgba(212,196,173,0.28) 0%, rgba(212,196,173,0) 70%)" }}
+        className="absolute -bottom-32 -left-24 w-[30rem] h-[30rem] rounded-full pointer-events-none"
+        aria-hidden="true"
+      />
+
       {/* Glass decorative panels */}
       <motion.div style={{ y: glass1Y }} className="absolute top-32 end-8 lg:end-20 w-48 h-48 glass-subtle rounded-3xl rotate-12 opacity-60 hidden md:block" aria-hidden="true" />
       <motion.div style={{ y: glass2Y }} className="absolute bottom-24 start-8 lg:start-16 w-32 h-32 glass-subtle rounded-2xl -rotate-6 opacity-40 hidden md:block" aria-hidden="true" />
@@ -181,6 +193,16 @@ export default function Hero() {
           )}
         </motion.div>
 
+      </div>
+
+      {/* Scroll hint — mouse + bouncing dot (hidden on small screens) */}
+      <div
+        className="absolute bottom-5 left-1/2 hidden md:flex flex-col items-center text-primary/60 pointer-events-none"
+        aria-hidden="true"
+      >
+        <span className="h-9 w-5 rounded-full border border-primary/30 flex justify-center pt-1.5">
+          <span className="h-1.5 w-1 rounded-full bg-current animate-bounce" />
+        </span>
       </div>
     </section>
   );

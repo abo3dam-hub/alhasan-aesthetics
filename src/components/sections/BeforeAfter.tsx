@@ -70,7 +70,7 @@ export default function BeforeAfter() {
                     visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.1 * i } },
                   }}
                 >
-                  <div className="glass-card rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
+                  <div className="glass-card card-glow rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
                     <div className="relative aspect-square overflow-hidden">
                       <ResolvedImage
                         storageId={c.afterImage}
@@ -100,7 +100,7 @@ export default function BeforeAfter() {
                     visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.1 * i } },
                   }}
                 >
-                  <div className="glass-card rounded-3xl overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300">
+                  <div className="glass-card card-glow rounded-3xl overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300">
                     <div className="relative aspect-square bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center">
                       <div className="flex items-center gap-3">
                         <div className="h-16 w-16 rounded-2xl bg-white/40 flex items-center justify-center text-xs font-medium text-muted-foreground">

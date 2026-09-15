@@ -104,7 +104,7 @@ export default function ProceduresPage() {
                   transition={{ duration: 0.5, delay: 0.05 * i }}
                 >
                   <Link to={`/procedure/${proc.slug}`} className="block h-full group">
-                    <div className="glass-card rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer">
+                    <div className="glass-card card-glow rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer">
                       {/* Image or Icon */}
                       {proc.image ? (
                         <div className="relative aspect-[16/10] overflow-hidden">
