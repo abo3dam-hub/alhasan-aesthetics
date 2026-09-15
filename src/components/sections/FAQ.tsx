@@ -40,7 +40,7 @@ export default function FAQ() {
             variants={fadeInUp}
             className="lg:col-span-2"
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium tracking-[0.06em] text-muted-foreground mb-6">
               {isArabic ? (sectionCMS?.badgeAr || t.faq.badge) : (sectionCMS?.badgeEn || t.faq.badge)}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
@@ -49,7 +49,8 @@ export default function FAQ() {
                 {isArabic ? (sectionCMS?.titleHighlightAr || t.faq.titleHighlight) : (sectionCMS?.titleHighlightEn || t.faq.titleHighlight)}
               </span>
             </h2>
-            <p className="mt-4 sm:mt-6 text-base text-muted-foreground leading-relaxed">
+            <span className="title-line-start mt-5" aria-hidden="true" />
+            <p className="mt-4 sm:mt-5 text-base text-muted-foreground leading-relaxed text-pretty">
               {isArabic ? (sectionCMS?.subtitleAr || t.faq.subtitle) : (sectionCMS?.subtitleEn || t.faq.subtitle)}
             </p>
           </motion.div>

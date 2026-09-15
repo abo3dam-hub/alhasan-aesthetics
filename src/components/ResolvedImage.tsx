@@ -2,7 +2,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState } from "react";
-import { ImageIcon, Loader2 } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -63,8 +63,8 @@ export function ResolvedImage({
   // We must NOT treat this as "Image unavailable".
   if (resolved === undefined) {
     return (
-      <div className={cn("flex items-center justify-center bg-muted/20", fallbackClassName || className)}>
-        <Loader2 className="h-5 w-5 text-muted-foreground/40 animate-spin" />
+      <div className={cn("relative overflow-hidden bg-muted/20", fallbackClassName || className)}>
+        <div className="shimmer absolute inset-0" />
       </div>
     );
   }

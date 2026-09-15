@@ -48,14 +48,15 @@ export default function Procedures() {
           className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
           dir={dir}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium tracking-[0.06em] text-muted-foreground mb-6">
             {sectionCMS?.badgeAr && sectionCMS?.badgeEn ? (isArabic ? sectionCMS.badgeAr : sectionCMS.badgeEn) : t.procedures.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
             <span className="text-foreground">{sectionCMS?.titleAr && sectionCMS?.titleEn ? (isArabic ? sectionCMS.titleAr : sectionCMS.titleEn) : t.procedures.title}</span>{" "}
             <span className="font-serif-luxury text-primary">{sectionCMS?.titleHighlightAr && sectionCMS?.titleHighlightEn ? (isArabic ? sectionCMS.titleHighlightAr : sectionCMS.titleHighlightEn) : t.procedures.titleHighlight}</span>
           </h2>
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <span className="title-line mt-5" aria-hidden="true" />
+          <p className="mt-4 sm:mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed text-pretty">
             {sectionCMS?.subtitleAr && sectionCMS?.subtitleEn ? (isArabic ? sectionCMS.subtitleAr : sectionCMS.subtitleEn) : t.procedures.subtitle}
           </p>
         </motion.div>
@@ -128,7 +129,7 @@ export default function Procedures() {
             <Button
               variant="outline"
               size="lg"
-              className="rounded-full glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
+              className="rounded-full btn-sheen glass-card hover:bg-white/60 px-8 h-12 text-sm border-border/60"
             >
               {t.procedures.viewAll}
               <Arrow className="h-4 w-4" />

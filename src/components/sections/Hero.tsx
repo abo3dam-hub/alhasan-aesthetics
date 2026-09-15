@@ -148,7 +148,7 @@ export default function Hero() {
               <Link to="/consultation">
                 <Button
                   size="lg"
-                  className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
+                  className="rounded-full btn-sheen bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base"
                 >
                   {ctaText}
                   <Arrow className="h-4 w-4" />

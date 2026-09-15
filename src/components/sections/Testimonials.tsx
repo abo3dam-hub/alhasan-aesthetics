@@ -103,14 +103,15 @@ export default function Testimonials() {
           className="text-center max-w-2xl mx-auto mb-12 sm:mb-16"
           dir={dir}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium text-muted-foreground mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-medium tracking-[0.06em] text-muted-foreground mb-6">
             {isArabic ? (sectionCMS?.badgeAr || t.testimonials.badge) : (sectionCMS?.badgeEn || t.testimonials.badge)}
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
             <span className="text-foreground">{isArabic ? (sectionCMS?.titleAr || t.testimonials.title) : (sectionCMS?.titleEn || t.testimonials.title)}</span>{" "}
             <span className="font-serif-luxury text-primary">{isArabic ? (sectionCMS?.titleHighlightAr || t.testimonials.titleHighlight) : (sectionCMS?.titleHighlightEn || t.testimonials.titleHighlight)}</span>
           </h2>
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
+          <span className="title-line mt-5" aria-hidden="true" />
+          <p className="mt-4 sm:mt-5 text-base sm:text-lg text-muted-foreground leading-relaxed text-pretty">
             {isArabic ? (sectionCMS?.subtitleAr || t.testimonials.subtitle) : (sectionCMS?.subtitleEn || t.testimonials.subtitle)}
           </p>
         </motion.div>

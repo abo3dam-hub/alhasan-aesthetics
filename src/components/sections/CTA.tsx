@@ -70,7 +70,7 @@ export default function CTA() {
                   <Link to={ctaCMS?.buttonDestination || "/consultation"}>
                     <Button
                       size="lg"
-                      className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
+                      className="rounded-full btn-sheen bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"
                     >
                       {buttonText}
                       <Arrow className="h-5 w-5" />
