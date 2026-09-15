@@ -3,10 +3,13 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowLeftRight, Eye } from "lucide-react";
 import { Link } from "react-router";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { cn } from "@/lib/utils";
+import type { Doc } from "@/convex/_generated/dataModel";
 
 
 const placeholderCases = [
@@ -20,6 +23,65 @@ const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
+
+/** Homepage Before/After card — crossfades flip between the two frames:
+ *  hover flips on hover-capable devices, tap toggles on touch. Both images are
+ *  lazy-loaded so the extra frame costs nothing until it approaches the
+ *  viewport; the flip itself is a GPU-cheap opacity/transform transition. */
+function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
+  const [flipped, setFlipped] = useState(false);
+  const beforeLabel = isRtl ? "قبل" : "Before";
+  const afterLabel = isRtl ? "بعد" : "After";
+
+  return (
+    <div className="glass-card card-glow rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
+      <button
+        type="button"
+        onClick={() => setFlipped((f) => !f)}
+        onMouseEnter={() => setFlipped(true)}
+        onMouseLeave={() => setFlipped(false)}
+        aria-pressed={flipped}
+        aria-label={isRtl ? (flipped ? "عرض صورة بعد" : "عرض صورة قبل") : flipped ? "Show after photo" : "Show before photo"}
+        className="relative aspect-square overflow-hidden w-full block cursor-pointer text-start"
+      >
+        {/* After frame */}
+        <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-0 scale-[1.06]" : "opacity-100 scale-100")}>
+          <ResolvedImage
+            storageId={c.afterImage}
+            alt={afterLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
+            imgClassName="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Before frame (crossfades in) */}
+        <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-100 scale-100" : "opacity-0 scale-[1.06]")}>
+          <ResolvedImage
+            storageId={c.beforeImage}
+            alt={beforeLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
+            imgClassName="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Legacy gradient + label */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 transition-colors duration-500">
+          {flipped ? beforeLabel : afterLabel}
+        </div>
+
+        {/* Flip hint */}
+        <div className="absolute bottom-3 end-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/40 text-white/80 text-[11px] font-medium backdrop-blur-sm opacity-60 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <ArrowLeftRight className="h-3 w-3" />
+          {isRtl ? "قبل/بعد" : "Before/After"}
+        </div>
+      </button>
+      <div className="p-4 sm:p-5">
+        <p className="text-sm font-semibold text-foreground">
+          {isRtl ? c.titleAr : c.titleEn}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function BeforeAfter() {
   const { t, dir, locale } = useI18n();
@@ -71,24 +133,7 @@ export default function BeforeAfter() {
                     visible: { ...fadeInUp.visible, transition: { duration: 0.5, delay: 0.1 * i } },
                   }}
                 >
-                  <div className="glass-card card-glow rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
-                    <div className="relative aspect-square overflow-hidden">
-                      <ResolvedImage
-                        storageId={c.afterImage}
-                        alt={isRtl ? c.titleAr : c.titleEn}
-                        imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                      <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10">
-                        {isRtl ? "بعد" : "After"}
-                      </div>
-                    </div>
-                    <div className="p-4 sm:p-5">
-                      <p className="text-sm font-semibold text-foreground">
-                        {isRtl ? c.titleAr : c.titleEn}
-                      </p>
-                    </div>
-                  </div>
+                  <CaseCard c={c} isRtl={isRtl} />
                 </motion.div>
               ))
             : placeholderCases.map((c, i) => (
