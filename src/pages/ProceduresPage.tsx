@@ -95,7 +95,7 @@ export default function ProceduresPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" dir={dir}>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6" dir={dir}>
               {displayProcedures.map((proc, i) => (
                 <motion.div
                   key={proc.slug}
@@ -121,7 +121,7 @@ export default function ProceduresPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="p-6 sm:p-8">
+                        <div className="p-4 sm:p-6">
                           <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
                             <proc.icon className="h-7 w-7 text-primary" />
                           </div>
@@ -129,8 +129,8 @@ export default function ProceduresPage() {
                       )}
 
                       {/* Content */}
-                      <div className="p-5 sm:p-6">
-                        <h3 className="text-lg font-semibold text-foreground mb-2">
+                      <div className="p-4 sm:p-6">
+                        <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
                           {proc.title}
                         </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">

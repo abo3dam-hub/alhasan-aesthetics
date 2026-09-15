@@ -66,7 +66,7 @@ export default function Testimonials() {
   const [lightboxTarget, setLightboxTarget] = useState<{ images: string[]; index: number; name: string } | null>(null);
   const [lightboxOpenKey, setLightboxOpenKey] = useState(0);
 
-  const visible = viewportW >= 1024 ? 3 : viewportW >= 640 ? 2 : 1;
+  const visible = viewportW >= 1024 ? 3 : 2;
   const cardW = viewportW / visible;
   const maxIndex = Math.max(0, items.length - visible);
   const current = Math.min(index, maxIndex);
@@ -137,7 +137,7 @@ export default function Testimonials() {
             >
               {items.map((item) => (
                 <div key={item.id} className="shrink-0 px-2" style={{ width: `${100 / visible}%` }}>
-                  <div className="glass-elevated rounded-3xl p-6 sm:p-8 h-full flex flex-col">
+                  <div className="glass-elevated rounded-3xl p-4 sm:p-8 h-full flex flex-col">
                     <Quote className="h-8 w-8 text-primary/30 mb-4 shrink-0" />
                     <div className="flex gap-1 mb-4">
                       {Array.from({ length: item.rating }).map((_, j) => (

@@ -58,7 +58,7 @@ export default function BeforeAfter() {
         </motion.div>
 
         {/* Cases Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" dir={dir}>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6" dir={dir}>
           {displayCases
             ? displayCases.map((c, i) => (
                 <motion.div

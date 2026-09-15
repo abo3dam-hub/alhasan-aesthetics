@@ -61,7 +61,7 @@ export default function Procedures() {
         </motion.div>
 
         {/* Grid — CMS-driven when available */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5" dir={dir}>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-5" dir={dir}>
           {displayProcedures
             ? displayProcedures.map((proc, i) => (
                 <motion.div
@@ -84,13 +84,13 @@ export default function Procedures() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         </div>
                       ) : (
-                        <div className="p-5 sm:p-6">
+                        <div className="p-4 sm:p-6">
                           <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
                             <proc.icon className="h-6 w-6 text-primary" />
                           </div>
                         </div>
                       )}
-                      <div className="p-5 sm:p-6">
+                      <div className="p-4 sm:p-6">
                         {proc.image && (
                           <div className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10 mb-3">
                             <proc.icon className="h-4 w-4 text-primary" />
