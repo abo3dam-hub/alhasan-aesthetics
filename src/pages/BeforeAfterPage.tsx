@@ -239,13 +239,13 @@ export default function BeforeAfterPage() {
           >
             <h3 className="text-xl sm:text-2xl font-serif-luxury font-bold text-foreground mb-4">
               {isRtl
-                ? "تبي تشوف نتائج مشابهة لحالتك؟"
+                ? "تريد ان تشاهد نتائج مشابهة لحالتك؟"
                 : "Want to see results similar to your case?"}
             </h3>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
               {isRtl
-                ? "احجز استشارة مجانية ود. الحسن الصايم يوريك نتائج مشابهة."
-                : "Book a free consultation and Dr. Al Hasan Al Saiem will show you similar results."}
+                ? "احجز استشارتك و شاهد مزيد من الحالات المشابهة."
+                : "Book your consultation and see more similar cases."}
             </p>
             <Link to="/consultation">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-6 text-base">
