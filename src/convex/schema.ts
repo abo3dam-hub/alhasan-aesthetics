@@ -124,6 +124,21 @@ const schema = defineSchema(
       value: v.any(),
     }).index("by_key", ["key"]),
 
+    // ─── Analytics (page visits) ───
+    pageVisits: defineTable({
+      path: v.string(),
+      locale: v.optional(v.string()),
+      country: v.optional(v.string()),
+      sessionId: v.optional(v.string()),
+      ts: v.number(),
+    }).index("by_ts", ["ts"]),
+
+    ipCountryCache: defineTable({
+      ipHash: v.string(),
+      country: v.optional(v.string()),
+      expiresAt: v.number(),
+    }).index("by_ipHash", ["ipHash"]),
+
   },
   {
     schemaValidation: false,

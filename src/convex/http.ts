@@ -2,6 +2,7 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api } from "./_generated/api";
 import { auth } from "./auth";
+import { hashIp } from "./analytics";
 
 const http = httpRouter();
 
@@ -71,5 +72,122 @@ http.route({
     });
   }),
 });
+
+// ─── Analytics Tracker ───
+// Public, fire-and-forget endpoint that records a page visit. The visitor's
+// IP is geolocated server-side (IP is hashed for the cache then discarded —
+// no raw IP is ever persisted). Dashboard aggregates come from analytics.getStats.
+http.route({
+  path: "/trackVisit",
+  method: "OPTIONS",
+  handler: httpAction(async (_ctx, request) => {
+    return new Response(null, { status: 204, headers: corsHeaders(request) });
+  }),
+});
+
+http.route({
+  path: "/trackVisit",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const cors = corsHeaders(request);
+
+    let path = "/";
+    let locale: string | null = null;
+    let sessionId: string | null = null;
+    try {
+      const body = await request.json();
+      if (typeof body.path === "string" && body.path) path = body.path;
+      if (typeof body.locale === "string" && body.locale) locale = body.locale;
+      if (typeof body.sessionId === "string" && body.sessionId) sessionId = body.sessionId;
+    } catch {
+      // Malformed body — still record the visit with defaults.
+    }
+
+    const ip =
+      request.headers.get("true-client-ip") ||
+      request.headers.get("cf-connecting-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "";
+
+    let country: string | null = null;
+    if (ip) {
+      const ipHash = hashIp(ip);
+      const cached = await ctx
+        .runQuery(api.analytics.getIpCache, { ipHash })
+        .catch(() => null);
+      if (cached) {
+        country = cached;
+      } else {
+        country = await geocodeCountry(ip);
+        await ctx
+          .runMutation(api.analytics.saveIpCache, { ipHash, country: country ?? undefined })
+          .catch(() => {});
+      }
+    }
+
+    await ctx
+      .runMutation(api.analytics.insertVisit, {
+        path,
+        locale: locale ?? undefined,
+        country: country ?? undefined,
+        sessionId: sessionId ?? undefined,
+      })
+      .catch(() => {});
+
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }),
+});
+
+function corsHeaders(request: Request) {
+  return {
+    "Access-Control-Allow-Origin": request.headers.get("Origin") ?? "*",
+    "Vary": "Origin",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+}
+
+/** Best-effort IP → ISO 3166-1 alpha-2 country code via free geolocation
+ *  services. Returns null when unavailable. */
+async function geocodeCountry(ip: string): Promise<string | null> {
+  const endpoints = [
+    `https://ipwho.is/${ip}`,
+    `http://ip-api.com/json/${ip}?fields=status,countryCode`,
+  ];
+  for (const url of endpoints) {
+    try {
+      const res = await withTimeout(fetch(url), 3000);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const code: unknown =
+        data?.countryCode ?? data?.country_code ?? data?.country;
+      if (typeof code === "string" && code.length > 0) {
+        return code.slice(0, 2).toUpperCase();
+      }
+    } catch {
+      // Try the next endpoint.
+    }
+  }
+  return null;
+}
+
+function withTimeout(promise: Promise<Response>, ms: number): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then(
+      (res) => {
+        clearTimeout(timer);
+        resolve(res);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
 
 export default http;
