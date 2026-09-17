@@ -68,10 +68,23 @@ function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
           {flipped ? beforeLabel : afterLabel}
         </div>
 
-        {/* Flip hint */}
-        <div className="absolute bottom-3 end-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/40 text-white/80 text-[11px] font-medium backdrop-blur-sm opacity-60 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <ArrowLeftRight className="h-3 w-3" />
-          {isRtl ? "قبل/بعد" : "Before/After"}
+        {/* Flip affordance — animated center knob with pulse ring + caption */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10 pointer-events-none">
+          <span className={cn(
+            "relative flex items-center justify-center h-11 w-11 sm:h-12 sm:w-12 rounded-full shadow-lg border transition-colors duration-500",
+            flipped ? "bg-primary border-primary/50 text-white" : "bg-black/45 border-white/30 text-white group-hover:bg-primary/85"
+          )}>
+            {!flipped && (
+              <span className="absolute inset-0 rounded-full bg-white/30 animate-ping opacity-25" aria-hidden="true" />
+            )}
+            <ArrowLeftRight className="relative h-4 w-4 sm:h-5 sm:w-5" />
+          </span>
+          <span className={cn(
+            "whitespace-nowrap px-2.5 py-1 rounded-full bg-black/45 text-white text-[11px] font-medium backdrop-blur-sm transition-opacity duration-300",
+            "opacity-0 max-md:opacity-70 group-hover:opacity-100"
+          )}>
+            {isRtl ? "اضغط للقلب" : "Click to flip"}
+          </span>
         </div>
       </button>
       <div className="p-4 sm:p-5">
