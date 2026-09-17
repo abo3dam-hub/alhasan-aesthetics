@@ -44,17 +44,8 @@ function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
         aria-label={isRtl ? (flipped ? "عرض صورة بعد" : "عرض صورة قبل") : flipped ? "Show after photo" : "Show before photo"}
         className="relative aspect-square overflow-hidden w-full block cursor-pointer text-start"
       >
-        {/* After frame */}
+        {/* Before frame (default) */}
         <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-0 scale-[1.06]" : "opacity-100 scale-100")}>
-          <ResolvedImage
-            storageId={c.afterImage}
-            alt={afterLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
-            imgClassName="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Before frame (crossfades in) */}
-        <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-100 scale-100" : "opacity-0 scale-[1.06]")}>
           <ResolvedImage
             storageId={c.beforeImage}
             alt={beforeLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
@@ -62,24 +53,33 @@ function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
           />
         </div>
 
+        {/* After frame (revealed on click/tap) */}
+        <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-100 scale-100" : "opacity-0 scale-[1.06]")}>
+          <ResolvedImage
+            storageId={c.afterImage}
+            alt={afterLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
+            imgClassName="w-full h-full object-cover"
+          />
+        </div>
+
         {/* Legacy gradient + label */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 transition-colors duration-500">
-          {flipped ? beforeLabel : afterLabel}
+          {flipped ? afterLabel : beforeLabel}
         </div>
 
-        {/* Interactive flip affordance — pulsing click-hint at the bottom edge only */}
+        {/* Interactive flip affordance — transparent pulsing click-hint at the bottom corner */}
         <motion.div
-          className="absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-10"
+          className="absolute bottom-3 end-3 pointer-events-none z-10"
           initial={false}
           animate={{ y: [0, -4, 0] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         >
-          <div className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full bg-black/60 text-white text-[11px] font-medium backdrop-blur-md shadow-lg border border-white/20">
-            <span className="relative flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+          <div className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full bg-black/30 text-white/90 text-[11px] font-medium backdrop-blur-md shadow-md border border-white/10">
+            <span className="relative flex h-5 w-5 items-center justify-center rounded-full bg-primary/80">
               <motion.span
-                className="absolute inset-0 rounded-full bg-primary"
-                animate={{ scale: [1, 2], opacity: [0.55, 0] }}
+                className="absolute inset-0 rounded-full bg-primary/60"
+                animate={{ scale: [1, 2.2], opacity: [0.5, 0] }}
                 transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
                 aria-hidden="true"
               />
