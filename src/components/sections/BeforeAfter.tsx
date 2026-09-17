@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, ArrowLeftRight, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, MousePointerClick } from "lucide-react";
 import { Link } from "react-router";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { cn } from "@/lib/utils";
@@ -68,11 +68,28 @@ function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
           {flipped ? beforeLabel : afterLabel}
         </div>
 
-        {/* Flip affordance — small pill at the bottom edge, worded hint + clickable-feel icon */}
-        <div className="absolute bottom-3 end-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 text-white/90 text-[11px] font-medium backdrop-blur-sm shadow-md border border-white/15 transition-colors duration-300 group-hover:bg-primary/90 pointer-events-none">
-          <ArrowLeftRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
-          {isRtl ? "قبل وبعد" : "Before & After"}
-        </div>
+        {/* Interactive flip affordance — pulsing click-hint at the bottom edge only */}
+        <motion.div
+          className="absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-10"
+          initial={false}
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <div className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full bg-black/60 text-white text-[11px] font-medium backdrop-blur-md shadow-lg border border-white/20">
+            <span className="relative flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+              <motion.span
+                className="absolute inset-0 rounded-full bg-primary"
+                animate={{ scale: [1, 2], opacity: [0.55, 0] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
+                aria-hidden="true"
+              />
+              <MousePointerClick className="h-3 w-3 text-white" />
+            </span>
+            {flipped
+              ? (isRtl ? "اضغط لعرض قبل" : "Tap to see before")
+              : (isRtl ? "اضغط لعرض بعد" : "Tap to see after")}
+          </div>
+        </motion.div>
       </button>
       <div className="p-4 sm:p-5">
         <p className="text-sm font-semibold text-foreground">
