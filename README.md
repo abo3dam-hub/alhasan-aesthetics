@@ -1,6 +1,6 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-Premium bilingual (Arabic/English) aesthetic surgery website with structured Admin CMS, WhatsApp consultation flow, semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
+Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit analytics (page views + visitor countries), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
 
 Production Convex deployment: `kindly-anaconda-422` (hosted site: `dralhasan-three.vercel.app`).
 
@@ -8,12 +8,12 @@ Production Convex deployment: `kindly-anaconda-422` (hosted site: `dralhasan-thr
 
 - **Frontend:** Vite + React 19 + TypeScript
 - **Styling:** Tailwind CSS v4 + Glassmorphism theme
-- **Backend:** Convex (database, auth, storage)
-- **Auth:** @convex-dev/auth (Email OTP + Anonymous, with `becomeAdmin`)
+- **Backend:** Convex (database, auth, storage, HTTP actions)
+- **Auth:** @convex-dev/auth — **Password** provider (scrypt-hashed), max 2 admin accounts
 - **Routing:** React Router v7
 - **i18n:** Custom bilingual system (Arabic RTL primary / English LTR secondary)
 - **Icons:** Custom semantic procedure icon registry (hand-drawn SVGs + Lucide) in `src/lib/procedureIcons.tsx`
-- **UI:** shadcn/ui components + Lucide icons + Framer Motion
+- **UI:** shadcn/ui components + Lucide icons + Framer Motion (lazy-loaded, kept out of the entry chunk)
 
 ## Architecture
 
@@ -26,6 +26,8 @@ src/
 │   ├── ui/             # shadcn/ui components
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu + language toggle
+│   ├── AnalyticsTracker.tsx  # Fire-and-forget page-view tracker (no PII)
+│   ├── ScrollProgress.tsx    # Champagne scroll-progress bar (rAF, framer-free)
 │   ├── MediaSelector.tsx / MediaLibraryModal.tsx
 │   │                   # Media library picker used by every image field
 │   ├── ImageGalleryInput.tsx # Multi-image upload + library picker (testimonials)
@@ -46,24 +48,25 @@ src/
 │   ├── homepageSettings.ts   # Homepage CMS settings (hero, about, CTA, footer, sections)
 │   ├── siteSettings.ts       # Key/value settings store (doctor, SEO)
 │   ├── media.ts              # Media library (Convex storage upload, protected)
+│   ├── analytics.ts          # Visit analytics (record, geocode cache, aggregates)
 │   ├── users.ts              # User queries + becomeAdmin
 │   ├── notifications.ts      # Notifications (unread counts)
-│   ├── http.ts               # HTTP actions
+│   ├── http.ts               # HTTP actions: /sitemap.xml + /trackVisit
 │   ├── migration.ts          # Admin-only data migrations
 │   │                         #   (normalize icons, fill geo-targeted SEO)
 │   ├── procedureIconDefaults.ts  # Canonical icon key per procedure slug
 │   ├── procedureSeoDefaults.ts   # Canonical AR/EN SEO per procedure slug
 │   ├── seed.ts               # Initial data seeding
-│   └── auth/                 # Auth providers (Email OTP, Anonymous)
+│   └── auth/                 # Auth providers (Password)
 ├── pages/
 │   ├── Landing.tsx            # Homepage (all sections CMS-driven with toggle)
-│   ├── Dashboard.tsx          # Full Admin CMS dashboard (9 tabs)
+│   ├── Dashboard.tsx          # Full Admin CMS dashboard (10 tabs)
 │   ├── ProcedureDetail.tsx    # Individual procedure page (CMS-driven + SEO)
 │   ├── ProceduresPage.tsx     # All-procedures listing page
 │   ├── BeforeAfterPage.tsx    # Before & After gallery with interactive slider
 │   ├── ConsultationPage.tsx   # WhatsApp consultation form (2-step, no data stored)
 │   ├── ContactPage.tsx        # Static contact page
-│   ├── Auth.tsx               # Login/signup page (Email OTP)
+│   ├── Auth.tsx               # Admin sign in / sign up (email + password)
 │   └── NotFound.tsx           # 404 page
 ├── hooks/               # Custom hooks (auth, upload, mobile, media resolution)
 ├── i18n/                # Internationalization system
@@ -73,13 +76,14 @@ src/
 
 ## Admin CMS
 
-Access: Visit `/auth` → sign in → go to `/dashboard` → click **"Become Admin"** (first user only).
+Access: Visit `/auth` → sign in with email + password → go to `/dashboard`. The first two sign-ups become administrators; further sign-ups are rejected.
 
-### Dashboard Tabs
+### Dashboard Tabs (10)
 
 | Tab | CRUD | Edit | Reorder | Search | Image Upload | Toggle Active |
 |-----|------|------|---------|--------|--------------|---------------|
 | **Overview** | — | — | — | — | — | — |
+| **Analytics** | — | — | — | — | — | — |
 | **Homepage CMS** | — | ✅ | — | — | ✅ | ✅ Toggle |
 | **Procedures** | ✅ | ✅ | ✅ ↑↓ | ✅ | ✅ (picker + gallery) | ✅ |
 | **Before & After** | ✅ | ✅ | ✅ ↑↓ | — | ✅ (picker) | ✅ |
@@ -130,6 +134,23 @@ Every homepage section header and content is CMS-managed:
 
 All CMS mutations are protected server-side via `requireAdmin()`. Authorization is verified at the Convex function level — public users cannot modify any content, and admin-gated migrations can only be triggered from an authenticated admin browser (not via CLI).
 
+## Visit Analytics (Dashboard → Analytics)
+
+A self-contained analytics feature — no third-party script (no GA4/Vercel Analytics) and no personal data stored.
+
+- **Collection:** `AnalyticsTracker` calls `POST /trackVisit` on every route change (excluding `/dashboard` and `/auth`), sending only the path, locale, and a per-session `sessionId` stored in `sessionStorage`.
+- **Country resolution:** the visitor IP (from `true-client-ip` / `cf-connecting-ip` / `x-forwarded-for`) is geolocated server-side via `ipwho.is` (fallback `ip-api.com`). The IP is **hashed and immediately discarded** — only the country code is stored.
+- **Caching:** country lookups are cached per IP hash for 24h (`ipCountryCache`), keeping external calls minimal.
+- **Aggregates (`analytics.getStats`, 30-day window):** total visits, today, last 7 days, unique sessions, top pages, country breakdown, and a 14-day daily series.
+- **Dashboard widget:** four stat cards, a 14-day bar chart, a countries list (flags + bars), and a top-pages list.
+- **Maintenance:** `analytics.purgePath` (internal mutation) removes recorded visits for a given path (e.g. smoke-test data).
+
+| HTTP endpoint | Method | Purpose |
+|---------------|--------|---------|
+| `/trackVisit` | `POST` | Record a page visit (CORS-enabled, served on `*.convex.site`) |
+| `/trackVisit` | `OPTIONS` | CORS preflight |
+| `/sitemap.xml` | `GET` | Dynamic sitemap from live CMS data |
+
 ## Consultation Flow (WhatsApp — No Data Stored)
 
 1. Visitor selects procedures from CMS-driven list + "Other Procedure"
@@ -175,6 +196,8 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | `faq` | FAQ entries (CRUD) |
 | `media` | Media library records (storageId, url, name, type, size, alt) |
 | `siteSettings` | Key/value settings store (doctor, hero, about, CTA, footer, visibility, SEO, section headers) |
+| `pageVisits` | Analytics page views (path, locale, country, sessionId, ts) — no raw IP |
+| `ipCountryCache` | 24h IP-hash → country cache for analytics geolocation |
 
 ## Image Management
 
@@ -184,25 +207,25 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - Upload date tracking per image
 - Supported: JPEG, PNG, WebP, GIF (max 5MB)
 
-## Responsive Design
+## Responsive Design & UI Polish
 
-- Mobile-first with responsive breakpoints
-- Glassmorphism design system
-- RTL/LTR support
+- Mobile-first with responsive breakpoints; **two cards per row on all screen sizes** for procedures, before/after, and testimonials
+- Glassmorphism design system with RTL/LTR support
 - Mobile hamburger menu with slide-in animation
-- Interactive before/after slider on gallery page
+- Interactive before/after slider on the gallery page; **homepage before/after cards flip** (hover on desktop, tap on touch) with an animated center affordance
 - Testimonial photo thumbnails + full-screen lightbox
+- Champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, subtle film-grain overlay, and a centered animated scroll hint
+- Custom `::selection` and scrollbar theming; reduced-motion CSS support
 
 ## SEO & Structured Data
 
 - Global SEO (title, description, OG image) via admin
 - Per-procedure SEO fillable from Dashboard → **Fill SEO (AR/EN)**: canonical geo-targeted titles/descriptions (AR + EN) covering all practice locations — Syria (Damascus, Latakia, Tartus), Dubai (UAE), Beirut (Lebanon), and Iraq — via `procedureSeoDefaults.ts`
 - Dynamic meta tags per route; per-procedure title/description injected in `ProcedureDetail`
-- Physician JSON-LD structured data with `location` array for all six clinics and the 16 active procedures as `availableService`
+- Physician JSON-LD structured data with `location` array for all six clinics and the 16 active procedures as `availableService` (no fabricated aggregate rating)
 - FAQPage, Person/Physician, BreadcrumbList JSON-LD structured data
 - Twitter/X card meta tags
 - Skip navigation link for accessibility
-- Reduced motion CSS support
 - aria-labels on all interactive elements
 
 ## Routes
@@ -210,12 +233,14 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | Route | Page | Auth |
 |-------|------|------|
 | `/` | Landing (homepage) | Public |
+| `/ar` | Landing (Arabic) | Public |
+| `/en` | Landing (English) | Public |
 | `/procedures` | All procedures listing | Public |
 | `/procedure/:slug` | Procedure detail | Public |
 | `/before-after` | Before & After gallery | Public |
 | `/consultation` | WhatsApp consultation form | Public |
 | `/contact` | Contact page | Public |
-| `/auth` | Login / signup (Email OTP) | Public |
+| `/auth` | Admin sign in / sign up (email + password) | Public |
 | `/dashboard` | Admin CMS dashboard | Admin only |
 
 ## Development
@@ -243,6 +268,7 @@ CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable
 ## Environment Variables
 
 - `VITE_CONVEX_URL` — Convex deployment URL (managed at build/platform level)
+- `VITE_CONVEX_SITE_URL` — Convex HTTP-actions site URL (optional; derived from `VITE_CONVEX_URL` by swapping `.convex.cloud` → `.convex.site` when unset)
 - `CONVEX_DEPLOYMENT` — Deployment slug for CLI commands (e.g. `kindly-anaconda-422`)
 - `JWT_PRIVATE_KEY` / `JWKS` (auth) — server-side secrets, never committed
 
@@ -255,17 +281,19 @@ CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable
    - Build command: `npm run build`
    - Output directory: `dist`
    - Environment variable: `VITE_CONVEX_URL` (your Convex production URL)
-3. **Admin account:** Visit `/auth` → sign up → click "Become Admin" (first user only)
-4. **Seed data:** Go to Dashboard → Overview → click "Seed Data" (once)
+3. **Admin accounts:** Visit `/auth` → sign up (first two users become admins; further sign-ups rejected)
+4. **Seed data (fresh installs only):** Go to Dashboard → Overview → click "Seed Data" (once). **Do not seed an existing production database** — it overwrites content and does not restore real images; production data is already complete.
 5. **WhatsApp:** Configure real WhatsApp number in Dashboard → Settings
 6. **Content:** Upload doctor image, hero image, procedure images via Media Library; run **Normalize Icons** and **Fill SEO (AR/EN)** in the Procedures tab
-7. **Domain:** Connect custom domain + configure DNS + verify HTTPS (point canonical away from the placeholder `dr-alhasan.com`)
+7. **Analytics:** page views begin recording automatically — view them in Dashboard → Analytics
+8. **Domain:** Connect custom domain + configure DNS + verify HTTPS (point canonical away from the placeholder `dr-alhasan.com`)
 
 ### Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `VITE_CONVEX_URL` | Yes | Convex deployment URL (set in hosting platform) |
+| `VITE_CONVEX_SITE_URL` | No | Convex `.convex.site` URL for HTTP actions (auto-derived if omitted) |
 
 All secrets are managed through the hosting platform's environment variables UI.
 Never commit secrets to source code.

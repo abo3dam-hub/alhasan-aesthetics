@@ -10,6 +10,24 @@ Production URL: https://dralhasan-three.vercel.app/
 
 ---
 
+## ⚠️ CURRENT STATUS — refreshed 2026-09-17 (supersedes any conflicting detail below)
+
+> This document was generated on **2026-09-12**. Everything below is still largely accurate for structure, but the following facts have changed. Where the body conflicts with this block, **this block is authoritative**.
+
+- **Git HEAD:** `6666806` (`docs: document visit analytics feature in project report`), branch `main`, clean and pushed.
+- **Authentication:** migrated from Email-OTP/Anonymous to the Convex Auth **`Password`** provider (scrypt-hashed, email + password). Exactly **two admin accounts** are enforced atomically; the old Freebuff/OTP dependency is no longer in the active auth path. Any Email-OTP/Anonymous/Freebuff wording below is historical.
+- **Production Convex deployment:** `kindly-anaconda-422` (not `gregarious-perch-128`, which was a prior target/dev slug).
+- **Admin Dashboard:** now **10 tabs** — Overview, **Analytics**, Homepage, Procedures, Before & After, Testimonials, FAQ, SEO, Settings, Media.
+- **New feature — Visit Analytics:** in-DB page-view + visitor-country tracking. Tables `pageVisits` and `ipCountryCache`; module `src/convex/analytics.ts` (`insertVisit`, `saveIpCache`, `getIpCache`, `getStats`, `purgePath`); HTTP endpoints `/trackVisit` (POST + OPTIONS) and `/sitemap.xml`; client tracker `src/components/AnalyticsTracker.tsx`. No third-party analytics and no raw IP stored (hashed then discarded). See README → "Visit Analytics".
+- **Typography:** current fonts are **Cairo** (Arabic body) + **El Messiri** (Arabic headings) + Inter + Playfair Display — not Noto Kufi.
+- **UX polish added:** champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, film-grain overlay, animated hero scroll hint, two-cards-per-row grids at all breakpoints, and flip-style homepage before/after cards.
+- **Environment variables:** `VITE_CONVEX_URL` (required) and `VITE_CONVEX_SITE_URL` (optional; auto-derived from `.convex.cloud` → `.convex.site`). `JWT_PRIVATE_KEY` / `JWKS` remain server-side secrets.
+- **Build health:** `tsc` clean, ESLint **0 errors / 26 benign warnings**, `vite build` green; entry chunk ≈339.9 KB (gzip ≈105.5 KB).
+- **Domain:** canonical remains the placeholder `dr-alhasan.com`; the real domain `alhasanalsaiem.com` is added in project settings but not yet wired in Vercel.
+- **Canonical reference:** for the most current, self-contained overview read `README.md`; for the latest session log read `report 9-14-26.md`.
+
+---
+
 ## Table of Contents
 
 1. [Project Identity](#1-project-identity)

@@ -1,5 +1,8 @@
 # Convex Deploy Report — Password Auth (Attempt)
 
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17).
+> **Update 2026-09-17:** the deploy later succeeded; production runs on `kindly-anaconda-422`. The failed attempt here targeted the obsolete slug `gregarious-perch-128`.
+
 - **Date:** 2026-09-13
 - **Repository:** `abo3dam-hub/alhasan-aesthetics`
 - **HEAD before this operation:** `8e22070` (`docs: add pre-deploy audit for password auth`)

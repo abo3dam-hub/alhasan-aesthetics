@@ -1,7 +1,7 @@
-# تقرير وضع المشروع — 14-9-2026
+# تقرير وضع المشروع — محدّث 17-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `568a31c` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `6666806` (شجرة نظيفة، مرفوع لـ GitHub)
 
 ---
 
@@ -9,13 +9,15 @@
 
 | الجهة | الحالة |
 |---|---|
-| GitHub `main` | `e9d5c9c` — متطابق مع فروع العمل، نظيف |
+| GitHub `main` | `6666806` — متطابق مع فروع العمل، نظيف |
 | Convex **Production** | `kindly-anaconda-422` — Auth مفعّل، البيانات مستعادة، الكود الحكومي حالي |
 | Convex **Dev** | `gregarious-perch-128` |
 | Vercel `dralhasan` | نشط — الاسم المستعار `https://dralhasan-three.vercel.app` يخدم آخر build |
-| المصادقة | حساب Admin واحد `abo3dam@gmail.com` (سجّل الدخول بنجاح) |
+| المصادقة | Password (بريد + كلمة مرور) — حد أقصى حسابان إداريان؛ الأول `abo3dam@gmail.com` |
 | بيانات CMS | كاملة (جداول CMS + ملفات الـ Storage) |
+| التحليلات | مفعّلة — زيارات الصفحات وبلدان الزوار (تبويب Analytics في الداشبورد) |
 | النطاق | `alhasanalsaiem.com` مُضاف في إعدادات المشروع (ليس في Vercel بعد) |
+
 
 ---
 

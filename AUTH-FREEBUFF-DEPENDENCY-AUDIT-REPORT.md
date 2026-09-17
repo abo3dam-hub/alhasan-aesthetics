@@ -1,5 +1,8 @@
 # Auth & Freebuff Dependency Audit Report
 
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17).
+> **Update 2026-09-17:** the Freebuff/Email-OTP path described here is obsolete — authentication is now the Convex Auth **`Password`** provider (email + password, max two admins), deployed to production `kindly-anaconda-422`.
+
 - **Date:** 2026-09-13
 - **Scope:** Repository `abo3dam-hub/alhasan-aesthetics`
 - **Audited files (read-only):** `src/convex/auth.ts`, `src/convex/auth.config.ts`, `src/convex/auth/emailOtp.ts`, `src/convex/http.ts`, `src/pages/Auth.tsx`, `src/main.tsx`, `package.json`, `vite.config.ts`, `vly-toolbar-readonly.tsx`, `src/hooks/use-auth.ts`, `src/convex/users.ts`, `src/instrumentation.tsx`, `src/lib/vly-integrations.ts`, `.env.local`

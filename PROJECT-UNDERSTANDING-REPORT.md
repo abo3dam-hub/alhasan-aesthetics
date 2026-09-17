@@ -15,6 +15,21 @@
 
 ---
 
+## ⚠️ CURRENT STATUS — refreshed 2026-09-17 (supersedes any conflicting detail below)
+
+> Generated **2026-09-13**. The structural analysis below remains valid, but these facts have changed since. Where the body conflicts with this block, **this block is authoritative**.
+
+- **Git HEAD:** `6666806`, branch `main`, clean and pushed.
+- **Authentication:** now the Convex Auth **`Password`** provider (email + password, scrypt), max **two** admin accounts — the Email-OTP/Anonymous/Freebuff flow described below is historical.
+- **Production Convex deployment:** `kindly-anaconda-422`.
+- **Admin Dashboard:** **10 tabs** (Overview, **Analytics**, Homepage, Procedures, Before & After, Testimonials, FAQ, SEO, Settings, Media).
+- **New:** Visit Analytics (`pageVisits`, `ipCountryCache`, `src/convex/analytics.ts`, `/trackVisit` HTTP action, `AnalyticsTracker.tsx`).
+- **Fonts:** Cairo + El Messiri (Arabic), Inter + Playfair Display (Latin).
+- **Health:** `tsc` clean, ESLint 0 errors / 26 warnings, `vite build` green; entry ≈339.9 KB (gzip ≈105.5 KB).
+- **Newer references:** `README.md` (current overview) and `report 9-14-26.md` (latest session log).
+
+---
+
 ## Table of Contents
 
 1. [Project Summary](#1-project-summary)
