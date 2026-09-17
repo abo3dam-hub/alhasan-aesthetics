@@ -1,6 +1,6 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit analytics (page views + visitor countries), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
+Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, a sticky mobile conversion bar, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
 
 Production Convex deployment: `kindly-anaconda-422` (hosted site: `dralhasan-three.vercel.app`).
 
@@ -27,6 +27,7 @@ src/
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu + language toggle
 │   ├── AnalyticsTracker.tsx  # Fire-and-forget page-view tracker (no PII)
+│   ├── MobileCTABar.tsx      # Sticky mobile call + book-consultation bar
 │   ├── ScrollProgress.tsx    # Champagne scroll-progress bar (rAF, framer-free)
 │   ├── MediaSelector.tsx / MediaLibraryModal.tsx
 │   │                   # Media library picker used by every image field
@@ -37,6 +38,7 @@ src/
 │   └── RequireAuth.tsx # Auth guard
 ├── lib/
 │   ├── procedureIcons.tsx    # SVG + Lucide icon registry keyed by icon slug
+│   ├── track.ts              # Frontend analytics client (page views + events)
 │   └── utils.ts
 ├── convex/
 │   ├── schema.ts             # Database schema
@@ -134,20 +136,21 @@ Every homepage section header and content is CMS-managed:
 
 All CMS mutations are protected server-side via `requireAdmin()`. Authorization is verified at the Convex function level — public users cannot modify any content, and admin-gated migrations can only be triggered from an authenticated admin browser (not via CLI).
 
-## Visit Analytics (Dashboard → Analytics)
+## Visit & Conversion Analytics (Dashboard → Analytics)
 
 A self-contained analytics feature — no third-party script (no GA4/Vercel Analytics) and no personal data stored.
 
 - **Collection:** `AnalyticsTracker` calls `POST /trackVisit` on every route change (excluding `/dashboard` and `/auth`), sending only the path, locale, and a per-session `sessionId` stored in `sessionStorage`.
+- **Conversion events:** WhatsApp and CTA clicks are tracked through the same endpoint via `trackEvent(type, label)` (`src/lib/track.ts`) — wired to the hero CTA, CTA section, floating WhatsApp button, sticky mobile bar, consultation submit, and the contact forms.
 - **Country resolution:** the visitor IP (from `true-client-ip` / `cf-connecting-ip` / `x-forwarded-for`) is geolocated server-side via `ipwho.is` (fallback `ip-api.com`). The IP is **hashed and immediately discarded** — only the country code is stored.
 - **Caching:** country lookups are cached per IP hash for 24h (`ipCountryCache`), keeping external calls minimal.
-- **Aggregates (`analytics.getStats`, 30-day window):** total visits, today, last 7 days, unique sessions, top pages, country breakdown, and a 14-day daily series.
-- **Dashboard widget:** four stat cards, a 14-day bar chart, a countries list (flags + bars), and a top-pages list.
-- **Maintenance:** `analytics.purgePath` (internal mutation) removes recorded visits for a given path (e.g. smoke-test data).
+- **Aggregates (`analytics.getStats`, 30-day window):** total visits, today, last 7 days, unique sessions, top pages, country breakdown, a 14-day daily series, plus conversion totals (WhatsApp clicks, CTA clicks) and the top tracked actions.
+- **Dashboard widget:** four visit stat cards, conversion cards, a 14-day bar chart, countries list (flags + bars), top pages, and top actions.
+- **Maintenance:** `analytics.purgePath` (internal mutation) removes recorded visits and events for a given path (e.g. smoke-test data).
 
 | HTTP endpoint | Method | Purpose |
 |---------------|--------|---------|
-| `/trackVisit` | `POST` | Record a page visit (CORS-enabled, served on `*.convex.site`) |
+| `/trackVisit` | `POST` | Record a page visit **or** a conversion event (CORS-enabled, served on `*.convex.site`) |
 | `/trackVisit` | `OPTIONS` | CORS preflight |
 | `/sitemap.xml` | `GET` | Dynamic sitemap from live CMS data |
 
@@ -198,6 +201,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | `siteSettings` | Key/value settings store (doctor, hero, about, CTA, footer, visibility, SEO, section headers) |
 | `pageVisits` | Analytics page views (path, locale, country, sessionId, ts) — no raw IP |
 | `ipCountryCache` | 24h IP-hash → country cache for analytics geolocation |
+| `analyticsEvents` | Conversion events (type, label, path, locale, country, sessionId, ts) |
 
 ## Image Management
 
@@ -210,9 +214,10 @@ Every homepage section pulls data from Convex with translation fallbacks:
 ## Responsive Design & UI Polish
 
 - Mobile-first with responsive breakpoints; **two cards per row on all screen sizes** for procedures, before/after, and testimonials
+- **Sticky mobile conversion bar** (call + book consultation) on all public pages; the floating action stack sits above it
 - Glassmorphism design system with RTL/LTR support
 - Mobile hamburger menu with slide-in animation
-- Interactive before/after slider on the gallery page; **homepage before/after cards flip** (hover on desktop, tap on touch) with an animated center affordance
+- Interactive before/after slider on the gallery page; **homepage before/after cards are drag-to-compare sliders** (mouse + touch, keyboard accessible) with an animated center handle
 - Testimonial photo thumbnails + full-screen lightbox
 - Champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, subtle film-grain overlay, and a centered animated scroll hint
 - Custom `::selection` and scrollbar theming; reduced-motion CSS support

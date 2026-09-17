@@ -298,9 +298,9 @@
 | الخطوط | Cairo (Arabic body) + El Messiri (Arabic headings) + Inter (Latin body) + Playfair Display (Latin headings) |
 | اللون الرئيسي | `#8B7355` (warm bronze/taupe) |
 | النطاق | `alhasanalsaiem.com` |
-| الحزمة الأولى | 339.87KB (gzip: 105.50KB) |
+| الحزمة الأولى | 341.78KB (gzip: 106.09KB) |
 | ESLint | 0 أخطاء، 26 تحذيرًا حميدًا |
-| أحدث commit | `568a31c` — feat: dashboard analytics with page visits and visitor countries |
+| أحدث commit | `4e2f7b7` — feat: mobile CTA bar, WhatsApp/CTA conversion tracking, drag-compare homepage results |
 
 ---
 
@@ -332,3 +332,20 @@
 
 ### ملاحظة تشغيلية
 - يجب أن يستخدم المتتبّع رابط `VITE_CONVEX_SITE_URL` أو اشتقاقه باستبدال `.convex.cloud` بـ `.convex.site`. في حال عدم ضبط `VITE_CONVEX_SITE_URL` على Vercel، يُشتق تلقائيًا.
+
+---
+
+## ٧. جلسة 17-9-2026 (تكملة) — حزمة التحويل + تحسين قبل/بعد
+
+### أ) حزمة التحويل
+- **شريط CTA ثابت في الجوال** (`src/components/MobileCTABar.tsx`): زرّان (اتصل الآن + احجز استشارتك) على كل الصفحات العامة عدا `/dashboard` و`/auth`، مع احترام `safe-area` وإزاحة `padding-bottom` للجسم حتى لا يغطي المحتوى. نُقلت أيقونات `FloatingSocial` للأعلى على الجوال (`bottom-20`) للتفادي التداخل.
+- **تتبّع نقرات التحويل:** جدول `analyticsEvents` جديد + `insertEvent`، ومسار `/trackVisit` أصبح يستقبل إما زيارة صفحة أو حدثًا (`type` + `label`). أُنشئ `src/lib/track.ts` (`trackPageView` + `trackEvent`) وربط النقرات في: الهيرو، قسم CTA، زر واتساب العائم، الشريط الجوّال، نموذج الاستشارة، ونموذجا التواصل.
+- **اللوحة:** بطاقات تحويل (نقرات واتساب/CTA/الإجمالي) وقائمة **Top actions** ضمن تبويب Analytics.
+- **صيانة:** `purgePath` أصبح يحذف الزيارات والأحداث معًا لمسار معيّن.
+
+### ب) تحسين قبل/بعد في الرئيسية
+- استُبدل «القلب» في بطاقات الرئيسية بمكوّن **مقارنة بالسحب** (drag-to-compare): مقبض مركزي متحرك، `touch-action: pan-y` للسماح بالتمرير الرأسي، دعم لوحة المفاتيح (الأسهم)، واتجاه RTL/LTR صحيح (الجانب «قبل» يتبع اتجاه اللغة). الحدود مقيّدة 8–92% لإبقاء المقبض ظاهرًا.
+
+### التحقق
+- `/trackVisit` سجّل حدث `whatsapp` بنجاح عبر `curl`، وظهر في `analytics.getStats`، ثم حُذف الحدث التجريبي عبر `purgePath`.
+- `tsc` نظيف، ESLint 0 أخطاء/26 تحذيرًا، `vite build` أخضر (entry 341.78KB / gzip 106.09KB)، ونُشر Convex على `kindly-anaconda-422`.
