@@ -1,7 +1,7 @@
 # تقرير وضع المشروع — 14-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `e9d5c9c` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `568a31c` (شجرة نظيفة، مرفوع لـ GitHub)
 
 ---
 
@@ -296,6 +296,37 @@
 | الخطوط | Cairo (Arabic body) + El Messiri (Arabic headings) + Inter (Latin body) + Playfair Display (Latin headings) |
 | اللون الرئيسي | `#8B7355` (warm bronze/taupe) |
 | النطاق | `alhasanalsaiem.com` |
-| الحزمة الأولى | 338KB (gzip: 105KB) — بعد إخراج framer-motion من entry |
-| ESLint | 0 أخطاء، 22 تحذيرًا حميدًا |
-| أحدث commit | `fc8e906` — feat: geo-targeted SEO titles/descriptions for all procedures |
+| الحزمة الأولى | 339.87KB (gzip: 105.50KB) |
+| ESLint | 0 أخطاء، 26 تحذيرًا حميدًا |
+| أحدث commit | `568a31c` — feat: dashboard analytics with page visits and visitor countries |
+
+---
+
+## ٦. جلسة 17-9-2026 — تحليلات الزيارات (Visits & Countries)
+
+### الفكرة
+لوحة تحليلات مدمجة داخل Dashboard (تبويب **Analytics**) تُظهر عدد الزيارات والبلدان التي يأتي منها الزوار، دون أي أداة خارجية (GA4/Vercel Analytics) ودون تخزين أي بيانات شخصية.
+
+### البنية
+- **جدولان جديدان في `schema.ts`:**
+  - `pageVisits` = `{ path, locale?, country?, sessionId?, ts }` بفهرس `by_ts`.
+  - `ipCountryCache` = `{ ipHash, country?, expiresAt }` بفهرس `by_ipHash` (كاش 24 ساعة).
+- **`src/convex/analytics.ts`:**
+  - `insertVisit` (mutation عام) — يسجّل الزيارة.
+  - `saveIpCache` / `getIpCache` — كاش البلد لكل IP (الـ IP يُهشَّم ولا يُخزَّن خامًا أبدًا).
+  - `getStats` (query عام، بنفس نمط `getMigrationStatus`) — تجميع: الإجمالي/اليوم/٧أيام/٣٠يوم، الجلسات الفريدة، أعلى الصفحات، البلدان، وسلسلة يومية 14 يومًا.
+  - `purgePath` (internalMutation) — أداة صيانة لحذف زيارات مسار معيّن (مثل بيانات الاختبار).
+- **`src/convex/http.ts`:** مسار `POST /trackVisit` (يُخدَم على `*.convex.site` وليس `.cloud`) مع:
+  - استخراج الـ IP من `true-client-ip` / `cf-connecting-ip` / `x-forwarded-for`.
+  - تحويل الـ IP إلى رمز بلد ISO-2 عبر `ipwho.is` ثم `ip-api.com` احتياطيًا، مع مهلة 3 ثوانٍ.
+  - CORS (POST + OPTIONS) ومسار **OPTIONS** مستقل لاجتياز preflight.
+- **المتتبّع في الواجهة:** `src/components/AnalyticsTracker.tsx` — يرسل `fetch` (keepalive, `text/plain` لتجنّب preflight) عند تغيّر المسار، مع `sessionId` في `sessionStorage`، ويستثني `/dashboard` و`/auth`.
+- **اللوحة:** تبويب Analytics في `Dashboard.tsx` — 4 بطاقات (الإجمالي/اليوم/٧أيام/الجلسات الفريدة)، مخطط أعمدة لآخر 14 يومًا، قائمة البلدان مع الأعلام والبارات، وأعلى الصفحات.
+
+### التحقق
+- `analytics.getStats` أعاد `total` و`countries` صحيحين بعد اختبار `curl` (وُلّد بلد `US`).
+- تم حذف صفَّي الاختبار عبر `purgePath` ثم `total = 0`.
+- `tsc` نظيف، ESLint 0 أخطاء/26 تحذيرًا، `vite build` أخضر، ونُشر Convex على `kindly-anaconda-422`.
+
+### ملاحظة تشغيلية
+- يجب أن يستخدم المتتبّع رابط `VITE_CONVEX_SITE_URL` أو اشتقاقه باستبدال `.convex.cloud` بـ `.convex.site`. في حال عدم ضبط `VITE_CONVEX_SITE_URL` على Vercel، يُشتق تلقائيًا.
