@@ -70,20 +70,20 @@ function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
 
         {/* Interactive flip affordance — transparent pulsing click-hint at the bottom corner */}
         <motion.div
-          className="absolute bottom-3 end-3 pointer-events-none z-10"
+          className="absolute bottom-1 end-2 pointer-events-none z-10"
           initial={false}
-          animate={{ y: [0, -4, 0] }}
+          animate={{ y: [0, -3, 0] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         >
-          <div className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full bg-black/30 text-white/90 text-[11px] font-medium backdrop-blur-md shadow-md border border-white/10">
-            <span className="relative flex h-5 w-5 items-center justify-center rounded-full bg-primary/80">
+          <div className="flex items-center gap-1 pl-1 pr-2 py-0.5 rounded-full bg-black/30 text-white/90 text-[10px] font-medium backdrop-blur-md shadow-md border border-white/10">
+            <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-primary/80">
               <motion.span
                 className="absolute inset-0 rounded-full bg-primary/60"
                 animate={{ scale: [1, 2.2], opacity: [0.5, 0] }}
                 transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
                 aria-hidden="true"
               />
-              <MousePointerClick className="h-3 w-3 text-white" />
+              <MousePointerClick className="h-2.5 w-2.5 text-white" />
             </span>
             {flipped
               ? (isRtl ? "اضغط لعرض قبل" : "Tap to see before")
