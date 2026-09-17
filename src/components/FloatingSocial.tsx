@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ArrowUp, Facebook, Instagram } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { trackEvent } from "@/lib/track";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -40,7 +41,7 @@ export function FloatingSocial() {
 
   return (
     <div
-      className={cnPosition(isRtl) + " fixed bottom-4 sm:bottom-6 z-[70] flex flex-col items-end gap-3"}
+      className={cnPosition(isRtl) + " fixed bottom-20 sm:bottom-6 z-[70] flex flex-col items-end gap-3"}
     >
       <div className="flex flex-col items-center gap-2.5">
         {showTop && (
@@ -80,7 +81,7 @@ export function FloatingSocial() {
         )}
       </div>
 
-      <Link to="/consultation" aria-label={whatsappLabel} className="group flex items-center">
+      <Link to="/consultation" aria-label={whatsappLabel} onClick={() => trackEvent("whatsapp", "floating-button")} className="group flex items-center">
         {whatsappLabel && (
           <span className="hidden sm:block me-3 bg-foreground/90 text-background text-xs font-medium px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
             {whatsappLabel}

@@ -6,6 +6,7 @@ import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router";
+import { trackEvent } from "@/lib/track";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -67,7 +68,7 @@ export default function CTA() {
 
               {(ctaCMS?.buttonEnabled !== false) && (
                 <div className="mt-8 sm:mt-10">
-                  <Link to={ctaCMS?.buttonDestination || "/consultation"}>
+                  <Link to={ctaCMS?.buttonDestination || "/consultation"} onClick={() => trackEvent("cta", "cta-section")}>
                     <Button
                       size="lg"
                       className="rounded-full btn-sheen bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 px-8 sm:px-10 h-14 text-base"

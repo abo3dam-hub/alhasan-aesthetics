@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Eye, MousePointerClick } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowLeftRight, Eye } from "lucide-react";
 import { Link } from "react-router";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { cn } from "@/lib/utils";
@@ -24,77 +24,108 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
-/** Homepage Before/After card — crossfades flip between the two frames:
- *  hover flips on hover-capable devices, tap toggles on touch. Both images are
- *  lazy-loaded so the extra frame costs nothing until it approaches the
- *  viewport; the flip itself is a GPU-cheap opacity/transform transition. */
+/** Homepage Before/After card — a drag-to-compare slider. The visitor drags
+ *  (mouse or touch) the handle to reveal the before/after photos in place.
+ *  `touch-action: pan-y` lets vertical page scrolling through the card while
+ *  horizontal drags drive the comparison. Keyboard arrows also work. */
 function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
-  const [flipped, setFlipped] = useState(false);
+  const [pos, setPos] = useState(50);
+  const [dragging, setDragging] = useState(false);
+  const [touched, setTouched] = useState(false);
   const beforeLabel = isRtl ? "قبل" : "Before";
   const afterLabel = isRtl ? "بعد" : "After";
 
+  const updateFromPointer = (clientX: number, el: HTMLElement) => {
+    const rect = el.getBoundingClientRect();
+    const raw = isRtl ? rect.right - clientX : clientX - rect.left;
+    const pct = (Math.min(Math.max(raw, 0), rect.width) / rect.width) * 100;
+    setPos(Math.min(92, Math.max(8, pct)));
+  };
+
+  const beforeClip = isRtl
+    ? `inset(0 0 0 ${100 - pos}%)`
+    : `inset(0 ${100 - pos}% 0 0)`;
+
   return (
     <div className="glass-card card-glow rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300">
-      <button
-        type="button"
-        onClick={() => setFlipped((f) => !f)}
-        onMouseEnter={() => setFlipped(true)}
-        onMouseLeave={() => setFlipped(false)}
-        aria-pressed={flipped}
-        aria-label={isRtl ? (flipped ? "عرض صورة بعد" : "عرض صورة قبل") : flipped ? "Show after photo" : "Show before photo"}
-        className="relative aspect-square overflow-hidden w-full block cursor-pointer text-start"
+      <div
+        role="slider"
+        aria-label={isRtl ? "مقارنة قبل وبعد" : "Before / After comparison"}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(pos)}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            e.preventDefault();
+            const delta = e.key === "ArrowLeft" ? -5 : 5;
+            setPos((p) => Math.min(92, Math.max(8, p + (isRtl ? -delta : delta))));
+            setTouched(true);
+          }
+        }}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          setDragging(true);
+          setTouched(true);
+          updateFromPointer(e.clientX, e.currentTarget);
+        }}
+        onPointerMove={(e) => {
+          if (dragging) updateFromPointer(e.clientX, e.currentTarget);
+        }}
+        onPointerUp={() => setDragging(false)}
+        onPointerCancel={() => setDragging(false)}
+        style={{ touchAction: "pan-y" }}
+        className="relative aspect-square overflow-hidden select-none cursor-ew-resize"
       >
-        {/* Before frame (default) */}
-        <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-0 scale-[1.06]" : "opacity-100 scale-100")}>
-          <ResolvedImage
-            storageId={c.beforeImage}
-            alt={beforeLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
-            imgClassName="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* After frame (revealed on click/tap) */}
-        <div className={cn("absolute inset-0 transition-all duration-700 ease-in-out", flipped ? "opacity-100 scale-100" : "opacity-0 scale-[1.06]")}>
+        {/* After (base layer) */}
+        <div className="absolute inset-0">
           <ResolvedImage
             storageId={c.afterImage}
-            alt={afterLabel + " — " + (isRtl ? c.titleAr : c.titleEn)}
+            alt={`${afterLabel} — ${isRtl ? c.titleAr : c.titleEn}`}
             imgClassName="w-full h-full object-cover"
           />
         </div>
 
-        {/* Legacy gradient + label */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-        <div className="absolute top-3 end-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 transition-colors duration-500">
-          {flipped ? afterLabel : beforeLabel}
+        {/* Before (clipped to the before side) */}
+        <div className="absolute inset-0 pointer-events-none" style={{ clipPath: beforeClip }}>
+          <ResolvedImage
+            storageId={c.beforeImage}
+            alt={`${beforeLabel} — ${isRtl ? c.titleAr : c.titleEn}`}
+            imgClassName="w-full h-full object-cover"
+          />
         </div>
 
-        {/* Interactive flip affordance — transparent pulsing click-hint at the bottom corner */}
-        <motion.div
-          className="absolute bottom-1 end-2 pointer-events-none z-10"
-          initial={false}
-          animate={{ y: [0, -3, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        {/* Labels pinned to their real sides */}
+        <div className={cn("absolute top-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 pointer-events-none", isRtl ? "right-3" : "left-3")}>
+          {beforeLabel}
+        </div>
+        <div className={cn("absolute top-3 px-2 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm z-10 pointer-events-none", isRtl ? "left-3" : "right-3")}>
+          {afterLabel}
+        </div>
+
+        {/* Divider + drag handle */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-lg z-10 pointer-events-none"
+          style={isRtl ? { right: `${pos}%` } : { left: `${pos}%` }}
         >
-          <div className="flex items-center gap-1 pl-1 pr-2 py-0.5 rounded-full bg-black/30 text-white/90 text-[10px] font-medium backdrop-blur-md shadow-md border border-white/10">
-            <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-primary/80">
-              <motion.span
-                className="absolute inset-0 rounded-full bg-primary/60"
-                animate={{ scale: [1, 2.2], opacity: [0.5, 0] }}
-                transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
-                aria-hidden="true"
-              />
-              <MousePointerClick className="h-2.5 w-2.5 text-white" />
-            </span>
-            {flipped
-              ? (isRtl ? "اضغط لعرض قبل" : "Tap to see before")
-              : (isRtl ? "اضغط لعرض بعد" : "Tap to see after")}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-white shadow-lg border border-black/10 flex items-center justify-center">
+            {!touched && !dragging && (
+              <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" aria-hidden="true" />
+            )}
+            <ArrowLeftRight className="relative h-4 w-4 text-foreground" />
           </div>
-        </motion.div>
-      </button>
+        </div>
+      </div>
+
       <div className="p-4 sm:p-5">
         <p className="text-sm font-semibold text-foreground">
           {isRtl ? c.titleAr : c.titleEn}
         </p>
+        {!touched && (
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {isRtl ? "اسحب للمقارنة" : "Drag to compare"}
+          </p>
+        )}
       </div>
     </div>
   );

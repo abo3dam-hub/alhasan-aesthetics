@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { trackEvent } from "@/lib/track";
 import {
   Phone,
   Mail,
@@ -60,6 +61,7 @@ export default function Contact() {
 
     if (whatsappNumber) {
       window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
+      trackEvent("whatsapp", "contact-form");
       setSent(true);
     }
   };

@@ -139,6 +139,16 @@ const schema = defineSchema(
       expiresAt: v.number(),
     }).index("by_ipHash", ["ipHash"]),
 
+    analyticsEvents: defineTable({
+      type: v.string(),
+      label: v.string(),
+      path: v.optional(v.string()),
+      locale: v.optional(v.string()),
+      country: v.optional(v.string()),
+      sessionId: v.optional(v.string()),
+      ts: v.number(),
+    }).index("by_ts", ["ts"]),
+
   },
   {
     schemaValidation: false,

@@ -29,6 +29,28 @@ export const insertVisit = mutation({
   },
 });
 
+export const insertEvent = mutation({
+  args: {
+    type: v.string(),
+    label: v.string(),
+    path: v.optional(v.string()),
+    locale: v.optional(v.string()),
+    country: v.optional(v.string()),
+    sessionId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("analyticsEvents", {
+      type: args.type,
+      label: args.label,
+      path: args.path,
+      locale: args.locale,
+      country: args.country,
+      sessionId: args.sessionId,
+      ts: Date.now(),
+    });
+  },
+});
+
 export const saveIpCache = mutation({
   args: { ipHash: v.string(), country: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -61,17 +83,24 @@ export const getIpCache = query({
   },
 });
 
-/** Maintenance helper: remove recorded visits for a given path (e.g. test
- *  data). Internal only — cannot be called from the client. */
+/** Maintenance helper: remove recorded visits and events for a given path
+ *  (e.g. test data). Internal only — cannot be called from the client. */
 export const purgePath = internalMutation({
   args: { path: v.string() },
   handler: async (ctx, args) => {
-    const rows = await ctx.db
+    const visits = await ctx.db
       .query("pageVisits")
       .filter((q) => q.eq(q.field("path"), args.path))
       .collect();
-    for (const row of rows) await ctx.db.delete(row._id);
-    return { deleted: rows.length };
+    for (const row of visits) await ctx.db.delete(row._id);
+
+    const events = await ctx.db
+      .query("analyticsEvents")
+      .filter((q) => q.eq(q.field("path"), args.path))
+      .collect();
+    for (const row of events) await ctx.db.delete(row._id);
+
+    return { deletedVisits: visits.length, deletedEvents: events.length };
   },
 });
 
@@ -126,6 +155,27 @@ export const getStats = query({
       series.push({ day: new Date(start).toISOString().slice(0, 10), count });
     }
 
+    const events = await ctx.db
+      .query("analyticsEvents")
+      .filter((q) => q.gte(q.field("ts"), from))
+      .collect();
+
+    const eventTypeCounts = new Map<string, number>();
+    const eventActionCounts = new Map<string, { type: string; label: string; count: number }>();
+    for (const e of events) {
+      eventTypeCounts.set(e.type, (eventTypeCounts.get(e.type) ?? 0) + 1);
+      const key = `${e.type}::${e.label}`;
+      const existing = eventActionCounts.get(key);
+      if (existing) existing.count += 1;
+      else eventActionCounts.set(key, { type: e.type, label: e.label, count: 1 });
+    }
+    const eventsByType = [...eventTypeCounts.entries()]
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count);
+    const topActions = [...eventActionCounts.values()]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
     return {
       total,
       today,
@@ -134,6 +184,11 @@ export const getStats = query({
       topPages,
       countries,
       series,
+      events: {
+        total: events.length,
+        byType: eventsByType,
+        top: topActions,
+      },
     };
   },
 });

@@ -94,11 +94,15 @@ http.route({
     let path = "/";
     let locale: string | null = null;
     let sessionId: string | null = null;
+    let eventType: string | null = null;
+    let eventLabel: string | null = null;
     try {
       const body = await request.json();
       if (typeof body.path === "string" && body.path) path = body.path;
       if (typeof body.locale === "string" && body.locale) locale = body.locale;
       if (typeof body.sessionId === "string" && body.sessionId) sessionId = body.sessionId;
+      if (typeof body.type === "string" && body.type) eventType = body.type;
+      if (typeof body.label === "string" && body.label) eventLabel = body.label;
     } catch {
       // Malformed body — still record the visit with defaults.
     }
@@ -125,14 +129,27 @@ http.route({
       }
     }
 
-    await ctx
-      .runMutation(api.analytics.insertVisit, {
-        path,
-        locale: locale ?? undefined,
-        country: country ?? undefined,
-        sessionId: sessionId ?? undefined,
-      })
-      .catch(() => {});
+    if (eventType && eventLabel) {
+      await ctx
+        .runMutation(api.analytics.insertEvent, {
+          type: eventType,
+          label: eventLabel,
+          path,
+          locale: locale ?? undefined,
+          country: country ?? undefined,
+          sessionId: sessionId ?? undefined,
+        })
+        .catch(() => {});
+    } else {
+      await ctx
+        .runMutation(api.analytics.insertVisit, {
+          path,
+          locale: locale ?? undefined,
+          country: country ?? undefined,
+          sessionId: sessionId ?? undefined,
+        })
+        .catch(() => {});
+    }
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

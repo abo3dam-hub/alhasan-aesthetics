@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router";
+import { trackEvent } from "@/lib/track";
 import {
   ArrowRight,
   ArrowLeft,
@@ -239,6 +240,7 @@ export default function ConsultationPage() {
     const encodedMessage = encodeURIComponent(message);
     const url = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
     window.open(url, "_blank");
+    trackEvent("whatsapp", "consultation-submit");
   };
 
   const canProceedStep1 = () => {

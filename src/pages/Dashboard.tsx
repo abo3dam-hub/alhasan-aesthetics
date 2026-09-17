@@ -182,6 +182,14 @@ function AnalyticsTab() {
     { label: "Unique sessions (30d)", value: stats?.uniqueSessions ?? 0 },
   ];
 
+  const eventCount = (type: string) =>
+    stats?.events.byType.find((e) => e.type === type)?.count ?? 0;
+  const conversions = [
+    { label: "WhatsApp clicks (30d)", value: eventCount("whatsapp") },
+    { label: "CTA clicks (30d)", value: eventCount("cta") },
+    { label: "Tracked actions (30d)", value: stats?.events.total ?? 0 },
+  ];
+
   const series = stats?.series ?? [];
   const maxSeries = Math.max(1, ...series.map((d) => d.count));
   const maxCountry = Math.max(1, ...(stats?.countries ?? []).map((c) => c.count));
@@ -195,6 +203,19 @@ function AnalyticsTab() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((c) => (
+          <Card key={c.label} className="border-border/60">
+            <CardContent className="p-5">
+              <p className="text-xs text-muted-foreground">{c.label}</p>
+              <p className="mt-1 text-3xl font-bold text-foreground">
+                {stats === undefined ? "…" : num.format(c.value)}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {conversions.map((c) => (
           <Card key={c.label} className="border-border/60">
             <CardContent className="p-5">
               <p className="text-xs text-muted-foreground">{c.label}</p>
@@ -235,7 +256,7 @@ function AnalyticsTab() {
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-3 gap-6">
         <Card className="border-border/60">
           <CardHeader>
             <CardTitle className="text-base">Countries</CardTitle>
@@ -283,6 +304,29 @@ function AnalyticsTab() {
               ))
             ) : (
               <p className="text-sm text-muted-foreground">No visit data yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="text-base">Top actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {stats?.events.top.length ? (
+              stats.events.top.map((e) => (
+                <div key={`${e.type}-${e.label}`} className="flex items-center gap-2">
+                  <span className="text-xs font-mono bg-muted/60 rounded px-2 py-1 truncate flex-1">
+                    {e.label}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{e.type}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {num.format(e.count)}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No actions tracked yet.</p>
             )}
           </CardContent>
         </Card>

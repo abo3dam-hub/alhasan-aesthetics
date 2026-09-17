@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import GlassNavbar from "@/components/GlassNavbar";
+import { trackEvent } from "@/lib/track";
 import {
   ArrowRight,
   ArrowLeft,
@@ -63,6 +64,7 @@ export default function ContactPage() {
 
     if (whatsappNumber) {
       window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
+      trackEvent("whatsapp", "contact-page");
       setSent(true);
     }
   };
