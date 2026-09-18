@@ -316,7 +316,7 @@ CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable
 5. **WhatsApp:** Configure real WhatsApp number in Dashboard → Settings
 6. **Content:** Upload doctor image, hero image, procedure images via Media Library; run **Normalize Icons** and **Fill SEO (AR/EN)** in the Procedures tab
 7. **Analytics:** page views begin recording automatically — view them in Dashboard → Analytics
-8. **Domain:** Connect custom domain + configure DNS + verify HTTPS (point canonical away from the placeholder `dr-alhasan.com`)
+8. **Domain:** Production domain is **`dralhasanalsaiem.com`** (custom domain, connected in Vercel). All canonical/OG/JSON-LD/sitemap URLs use this domain — verified serving `/blog` and article URLs. Do **not** use the placeholder `dr-alhasan.com` (it is not registered in DNS).
 
 ### Environment Variables
 

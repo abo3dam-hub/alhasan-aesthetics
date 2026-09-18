@@ -99,7 +99,7 @@ export const seedHomepageSettings = mutation({
       doctorNameEn: "Dr. Al Hasan Al Saiem",
       whatsappNumber: "+966500000000",
       phone: "+966 XX XXX XXXX",
-      email: "info@dr-alhasan.com",
+      email: "info@dralhasanalsaiem.com",
       addressAr: "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي",
       addressEn: "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai",
       biographyAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة.",
@@ -256,7 +256,7 @@ export const seedHomepageSettings = mutation({
       siteTitleEn: "Dr. Al Hasan — Aesthetic & Plastic Surgery",
       metaDescriptionAr: "استشاري جراحة تجميلية بخبرة أكثر من ١٥ عاماً. نتائج طبيعية ومتقنة بأعلى معايير الجودة العالمية.",
       metaDescriptionEn: "Board-certified aesthetic surgeon with 15+ years of experience. Natural, refined results with the highest international quality standards.",
-      canonicalBase: "https://dr-alhasan.com",
+      canonicalBase: "https://dralhasanalsaiem.com",
     });
 
     return `Homepage CMS seed complete: ${created} settings created, ${updated} settings updated (filled empty fields), ${skipped} settings already complete (skipped).`;
@@ -276,7 +276,7 @@ export const seedAll = mutation({
       doctorNameEn: "Dr. Al Hasan Al Saiem",
       whatsappNumber: "+966500000000",
       phone: "+966 XX XXX XXXX",
-      email: "info@dr-alhasan.com",
+      email: "info@dralhasanalsaiem.com",
       addressAr: "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي",
       addressEn: "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai",
       biographyAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة.",

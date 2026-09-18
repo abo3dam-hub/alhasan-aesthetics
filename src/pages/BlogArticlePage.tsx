@@ -101,7 +101,7 @@ export default function BlogArticlePage() {
   const handleShare = async () => {
     const slug = display?.slug ?? "";
     trackEvent("share", `article/${slug}`);
-    const url = `https://dr-alhasan.com/blog/${slug}`;
+    const url = `https://dralhasanalsaiem.com/blog/${slug}`;
     const text = seoDesc || title || t.blogPage.title;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
@@ -144,7 +144,7 @@ export default function BlogArticlePage() {
     if (image) setOrCreateMeta("og:image", image);
     setOrCreateMeta("og:title", seoTitle, true);
     setOrCreateMeta("og:type", "article", true);
-    setOrCreateMeta("og:url", `https://dr-alhasan.com/blog/${display.slug}`, true);
+    setOrCreateMeta("og:url", `https://dralhasanalsaiem.com/blog/${display.slug}`, true);
     if (seoDesc) setOrCreateMeta("og:description", seoDesc, true);
     setOrCreateMeta("twitter:card", "summary_large_image");
     setOrCreateMeta("twitter:title", seoTitle);
@@ -172,7 +172,7 @@ export default function BlogArticlePage() {
       name: byName,
       logo: {
         "@type": "ImageObject",
-        url: "https://dr-alhasan.com/logo.png",
+        url: "https://dralhasanalsaiem.com/logo.png",
       },
     };
     return {
@@ -192,7 +192,7 @@ export default function BlogArticlePage() {
       dateModified: display.updatedDate
         ? new Date(display.updatedDate).toISOString()
         : undefined,
-      mainEntityOfPage: `https://dr-alhasan.com/blog/${display.slug}`,
+      mainEntityOfPage: `https://dralhasanalsaiem.com/blog/${display.slug}`,
       inLanguage: isAr ? "ar" : "en",
     };
   }, [display, title, seoDesc, isAr]);

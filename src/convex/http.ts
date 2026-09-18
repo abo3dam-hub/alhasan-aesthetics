@@ -16,7 +16,7 @@ auth.addHttpRoutes(http);
 //   https://<project>.convex.site/sitemap.xml
 // The frontend domain should proxy or redirect /sitemap.xml here,
 // or use the static fallback in public/sitemap.xml.
-const DOMAIN = "https://dr-alhasan.com";
+const DOMAIN = "https://dralhasanalsaiem.com";
 
 const staticPages = [
   { path: "/", changefreq: "weekly", priority: "1.0" },

@@ -28,7 +28,7 @@ export default function Contact() {
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
 
   const phone = doctorSettings?.phone || "+966 XX XXX XXXX";
-  const email = doctorSettings?.email || "info@dr-alhasan.com";
+  const email = doctorSettings?.email || "info@dralhasanalsaiem.com";
   const addressEn = doctorSettings?.addressEn || "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai";
   const addressAr = doctorSettings?.addressAr || "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي";
 

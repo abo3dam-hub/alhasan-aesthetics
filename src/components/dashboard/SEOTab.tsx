@@ -33,7 +33,7 @@ function GlobalSEOEditor() {
       metaDescriptionAr: seoCMS.metaDescriptionAr || "",
       metaDescriptionEn: seoCMS.metaDescriptionEn || "",
       ogImage: seoCMS.ogImage || "",
-      canonicalBase: seoCMS.canonicalBase || "https://dr-alhasan.com",
+      canonicalBase: seoCMS.canonicalBase || "https://dralhasanalsaiem.com",
     });
     setInitialized(true);
   }
@@ -70,7 +70,7 @@ function GlobalSEOEditor() {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2"><Label className="text-xs text-muted-foreground">OG Image</Label><MediaSelector value={form.ogImage || ""} onChange={(url) => update("ogImage", url)} label="Select OG image" hint="صورة المشاركة على السوشيال — يُنصح 1200×630 (نسبة 1.91:1)" /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Canonical Base URL</Label><Input value={form.canonicalBase || ""} onChange={(e) => update("canonicalBase", e.target.value)} placeholder="https://dr-alhasan.com" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Canonical Base URL</Label><Input value={form.canonicalBase || ""} onChange={(e) => update("canonicalBase", e.target.value)} placeholder="https://dralhasanalsaiem.com" /></div>
         </div>
         <div className="flex justify-end" role="status" aria-live="polite">
           <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save SEO"}</Button>

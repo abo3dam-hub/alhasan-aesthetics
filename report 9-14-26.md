@@ -379,3 +379,9 @@
 ### التحقق
 - `tsc -b` نظيف، ESLint 0 أخطاء، `vite build` أخضر (index 106.15 kB gzip).
 - نُشر Convex (`--typecheck enable`) وقاعدة البيانات حُدّثت، وتم seed مقالين، وفحص `listPublished`/`getBySlug`، وتأكيد تضمين الروابط في sitemap الحيّ.
+
+### د) إصلاح الدومين الفعلي
+- **الدومين الحقيقي للنشر هو `dralhasanalsaiem.com`** (مؤكّد من علياس Vercel) وليس `dr-alhasan.com` (دومين بلا سجل DNS عام).
+- استُبدلت كل إشارات `dr-alhasan.com` في الكود والملفات العامّة بـ `dralhasanalsaiem.com`:
+  `src/convex/http.ts` (DOMAIN الـ sitemap)، `src/pages/BlogArticlePage.tsx` (رابط المشاركة/OG/JSON-LD)، `index.html` (canonical + OG + Physician schema + البريد)، `public/sitemap.xml`، `public/robots.txt`، افتراضيات `seed.ts` (canonicalBase + البريد)، `SEOTab.tsx`، واردة البريد الاحتياطي في `Footer.tsx`/`Contact.tsx`/`ContactPage.tsx`.
+- تحقّق مباشر: `https://dralhasanalsaiem.com/blog` يعيد 200.
