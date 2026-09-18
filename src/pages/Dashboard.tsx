@@ -28,6 +28,7 @@ import {
   Star,
   X,
   BarChart3,
+  Newspaper,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
@@ -64,8 +65,9 @@ async function swapOrder<TId>(
 
 import HomepageCMSTab from "@/components/dashboard/HomepageCMSTab";
 import SEOTab from "@/components/dashboard/SEOTab";
+import ArticlesTab from "@/components/dashboard/ArticlesTab";
 
-type Tab = "overview" | "analytics" | "homepage" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "seo" | "settings" | "media";
+type Tab = "overview" | "analytics" | "homepage" | "procedures" | "beforeAfter" | "testimonials" | "faq" | "blog" | "seo" | "settings" | "media";
 
 const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
@@ -75,6 +77,7 @@ const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { key: "beforeAfter", label: "Before & After", icon: ImageIcon },
   { key: "testimonials", label: "Testimonials", icon: Star },
   { key: "faq", label: "FAQ", icon: HelpCircle },
+  { key: "blog", label: "Articles", icon: Newspaper },
   { key: "seo", label: "SEO", icon: Settings },
   { key: "settings", label: "Settings", icon: Settings },
   { key: "media", label: "Media", icon: ImageIcon },
@@ -144,6 +147,7 @@ export default function Dashboard() {
             {activeTab === "beforeAfter" && <BeforeAfterTab />}
             {activeTab === "testimonials" && <TestimonialsTab />}
             {activeTab === "faq" && <FaqTab />}
+            {activeTab === "blog" && <ArticlesTab />}
             {activeTab === "seo" && <SEOTab />}
             {activeTab === "settings" && <SettingsTab />}
             {activeTab === "media" && <MediaTab />}

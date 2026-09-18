@@ -6,6 +6,7 @@
     "beforeAfter": "Before & After",
     "testimonials": "Testimonials",
     "faq": "FAQ",
+    "blog": "Blog",
     "contact": "Contact",
     "bookConsultation": "Book Consultation",
     "logo": "Dr. Al Hasan Al Saiem"
@@ -175,6 +176,24 @@
     "genderError": "Gender is required",
     "nationalityError": "Nationality is required",
     "residenceError": "Current residence is required"
+  },
+  "blogPage": {
+    "badge": "Health & Beauty Blog",
+    "title": "Understand Your Procedures",
+    "subtitle": "Trusted articles from Dr. Al Hasan Al Saiem's team to help you make an informed, safe decision.",
+    "noArticles": "No articles published yet.",
+    "loading": "Loading...",
+    "backToBlog": "All articles",
+    "backHome": "Back to home",
+    "publishedOn": "Published on",
+    "minutes": "min read",
+    "featured": "Featured",
+    "relatedTopic": "Related reading",
+    "bookTitle": "Still have questions?",
+    "bookSubtitle": "Book a private consultation with Dr. Al Hasan Al Saiem for a clear, personalised plan.",
+    "bookCta": "Book your consultation",
+    "notFound": "Sorry, we could not find this article.",
+    "share": "Share article"
   },
   "proceduresPage": {
     "title": "Our Procedures",

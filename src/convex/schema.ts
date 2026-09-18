@@ -65,6 +65,34 @@ const schema = defineSchema(
       .index("by_order", ["order"])
       .index("by_parentSlug", ["parentSlug"]),
 
+    // ─── Blog Articles (patient education / long-term SEO) ───
+    articles: defineTable({
+      slug: v.string(),
+      titleAr: v.string(),
+      titleEn: v.string(),
+      excerptAr: v.string(),
+      excerptEn: v.string(),
+      bodyAr: v.string(),
+      bodyEn: v.string(),
+      coverImage: v.optional(v.string()),
+      categoryAr: v.optional(v.string()),
+      categoryEn: v.optional(v.string()),
+      relatedProcedureSlug: v.optional(v.string()),
+      seoTitleAr: v.optional(v.string()),
+      seoTitleEn: v.optional(v.string()),
+      seoDescriptionAr: v.optional(v.string()),
+      seoDescriptionEn: v.optional(v.string()),
+      ogImage: v.optional(v.string()),
+      publishDate: v.optional(v.number()),
+      updatedDate: v.optional(v.number()),
+      readingMinutes: v.optional(v.number()),
+      isPublished: v.boolean(),
+      isFeatured: v.optional(v.boolean()),
+      order: v.number(),
+    })
+      .index("by_slug", ["slug"])
+      .index("by_order", ["order"]),
+
     // ─── Before & After Cases ───
     beforeAfter: defineTable({
       titleAr: v.string(),

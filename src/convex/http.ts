@@ -24,6 +24,7 @@ const staticPages = [
   { path: "/en", changefreq: "weekly", priority: "1.0" },
   { path: "/consultation", changefreq: "monthly", priority: "0.9" },
   { path: "/before-after", changefreq: "weekly", priority: "0.8" },
+  { path: "/blog", changefreq: "weekly", priority: "0.6" },
 ];
 
 http.route({
@@ -36,6 +37,14 @@ http.route({
       activeProcedures = await ctx.runQuery(api.procedures.listActive);
     } catch {
       // If query fails, serve static-only sitemap
+    }
+
+    // Fetch published blog articles
+    let publishedArticles: { slug: string }[] = [];
+    try {
+      publishedArticles = await ctx.runQuery(api.articles.listPublished);
+    } catch {
+      // If query fails, serve the sitemap without article URLs
     }
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
@@ -58,6 +67,17 @@ http.route({
         xml += `    <loc>${DOMAIN}/procedure/${proc.slug}</loc>\n`;
         xml += `    <changefreq>monthly</changefreq>\n`;
         xml += `    <priority>0.7</priority>\n`;
+        xml += `  </url>\n`;
+      }
+    }
+
+    // Dynamic blog article pages from CMS
+    for (const article of publishedArticles) {
+      if (article.slug) {
+        xml += `  <url>\n`;
+        xml += `    <loc>${DOMAIN}/blog/${article.slug}</loc>\n`;
+        xml += `    <changefreq>monthly</changefreq>\n`;
+        xml += `    <priority>0.6</priority>\n`;
         xml += `  </url>\n`;
       }
     }

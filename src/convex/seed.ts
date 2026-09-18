@@ -480,3 +480,87 @@ export const polishEnglishCopy = mutation({
     return `Polish complete. Updated: ${changed.join(", ") || "none"}.`;
   },
 });
+
+/**
+ * Starter articles for the patient-education blog. Idempotent — only creates
+ * articles whose slug does not exist yet, so clinic edits are never overwritten.
+ */
+export const seedArticles = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const starterArticles = [
+      {
+        slug: "how-long-does-a-facelift-last",
+        titleAr: "كم تدوم عملية شد الوجه؟ النتائج والعوامل المؤثرة",
+        titleEn: "How Long Does a Facelift Last? Results and Key Factors",
+        excerptAr:
+          "شد الوجه يمنح نتائج تدوم عادة بين 7 و12 عاماً. نستعرض هنا العوامل التي تحدد مدة بقاء النتيجة ومتى قد تحتاج لعملية تجميلية أخرى.",
+        excerptEn:
+          "A facelift typically delivers results lasting 7–12 years. Here we explain what determines how long the outcome lasts and when a repeat procedure may be needed.",
+        bodyAr:
+          "## كم تدوم نتيجة عملية شد الوجه؟\n\nشد الوجه (Rhytidectomy) يشدّ الأنسجة العميقة ويعيد تموضع الجلد. عند معظم المرضى تدوم النتيجة ما بين ٧ و١٢ عاماً، وقد تطول أكثر مع نمط حياة صحي وعناية جيدة بالبشرة.\n\n## ما العوامل التي تحدد مدة النتيجة؟\n\nعدة عوامل تؤثر في ثبات النتيجة:\n\n- **العمر عند إجراء العملية.** المرضى في الأربعينات والخمسينات يستفيدون عادة من نتيجة أطول من أولئك الذين يُجرون العملية في سن أكبر.\n- **نوعية الجلد والعوامل الوراثية.** تلعب جودة البشرة ومرونتها والميل الوراثي تجاه علامات التقدم بالسن دوراً مهماً.\n- **نمط الحياة.** التعرض للشمس والتدخين وتغير الوزن الكبير قد تسرّع الشيخوخة الطبيعية للوجه.\n\n## متى قد تحتاج لعملية شد ثانية؟\n\nشد الوجه ليس حاجزاً أمام التقدم بالسن، بل يعيد عقارب الساعة إلى الوراء. بحسب طريقة تقدم الوجه بالسن، قد يُنظر أحياناً إلى لمسة تجميلية أو شد ثانٍ بعد ١٠–١٥ عاماً من العملية الأولى.\n\n## ما النتائج الواقعية المتوقعة؟\n\nيجب أن تتوقع مظهراً أكثر نضارة وراحة — وليس شكلاً مختلفاً تماماً. أفضل النتائج هي تلك الطبيعية التي تحترم توازن الملامح.\n\nالمعلومات الواردة أعلاه تثقيفية ولا تغني عن استشارة طبية. كل حالة مختلفة، والرأي النهائي يحدده د. الحسن الصايم خلال استشارة خاصة.",
+        bodyEn:
+          "## How long does the result last?\n\nA facelift (rhytidectomy) tightens the deeper facial tissues and repositions the skin. For most patients the results last between 7 and 12 years — and often longer when combined with a healthy lifestyle and good skin care.\n\n## What determines how long a facelift lasts?\n\nSeveral factors influence the durability of your result:\n\n- **Age at surgery.** Patients in their 40s and 50s generally enjoy a longer-lasting result than those operated on at an older age.\n- **Skin quality and genetics.** The quality and elasticity of your skin, together with your genetic tendency to age, play a major role.\n- **Lifestyle.** Sun exposure, smoking and significant weight changes can speed up the natural ageing of the face.\n\n## When might you need a second facelift?\n\nA facelift is not a barrier to ageing — it resets the clock. Depending on how your face ages, a touch-up or a second lift is sometimes considered 10–15 years after the first surgery.\n\n## What results can you realistically expect?\n\nYou should expect a fresher, more rested appearance — not a completely different look. The best results are natural-looking and respect the balance of your features.\n\nThe information above is educational and does not replace a medical consultation. Every case is different, and the final opinion is given by Dr. Al Hasan Al Saiem during a private consultation.",
+        categoryAr: "الوجه",
+        categoryEn: "Face",
+        relatedProcedureSlug: "face-neck-lift",
+        seoTitleAr: "كم تدوم عملية شد الوجه؟ | د. الحسن الصايم",
+        seoDescriptionAr:
+          "يراوح عمر نتيجة شد الوجه بين 7 و12 عاماً عادةً. تعرف على العوامل المؤثرة في مدة النتيجة ومتى قد تحتاج لعملية تجميلية ثانية.",
+        seoTitleEn: "How Long Does a Facelift Last? | Dr. Al Hasan Al Saiem",
+        seoDescriptionEn:
+          "A facelift usually lasts 7–12 years. Learn the factors that affect how long results last and when a second facelift might be needed.",
+        readingMinutes: 4,
+        publishDate: now - 2 * 86_400_000,
+        isPublished: true,
+        isFeatured: true,
+        order: 1,
+      },
+      {
+        slug: "when-does-rhinoplasty-final-result-show",
+        titleAr: "متى يظهر الشكل النهائي لتجميل الأنف؟",
+        titleEn: "When Will the Final Result of Rhinoplasty Show?",
+        excerptAr:
+          "يستغرق الشكل النهائي لتجميل الأنف من 6 إلى 12 شهراً ليظهر بشكل كامل. إليك مراحل التعافي بالتفصيل ومتى يمكنك تقييم النتيجة.",
+        excerptEn:
+          "The final shape of a rhinoplasty takes 6–12 months to fully appear. Here is the recovery timeline and when you can truly judge your result.",
+        bodyAr:
+          "## الإجابة المختصرة\n\nيظهر الشكل النهائي لتجميل الأنف بشكل كامل بعد ٦ إلى ١٢ شهراً من العملية. لكن معظم التفاصيل التي ستلاحظها في المرآة تظهر غالباً بعد ثلاثة إلى ستة أشهر.\n\n## أسبوعاً بأسبوع بعد العملية\n\nيسير التعافي بعد تجميل الأنف وفق مسار متوقع إلى حد كبير:\n\n- **الأسبوعان الأولان.** يُثبَّت الأنف بجبيرة وقد يكون هناك حشو داخلي مؤقت؛ تزول معظم الكدمات والتورمات. يعود معظم المرضى إلى عملهم الخفيف خلال أسبوع أو أسبوعين.\n- **من الأسبوع الثاني وحتى السادس.** يستمر الأنف بالاستقرار. قد يستمر تورم طرف الأنف فترة أطول ويبدو الطرف مرتفعاً قليلاً في البداية.\n- **الشهر الثالث إلى السادس.** يظهر قرابة ثلثي النتيجة النهائية. تحدد سماكة الجلد وحجم التعديلات مقدار ما تبقى من التورم.\n- **الشهر السادس إلى الثاني عشر.** يزول التورم الدقيق المتبقي — خاصة في الطرف — وتظهر الملامح النهائية.\n\n## لماذا يستغرق طرف الأنف وقتاً أطول؟\n\nجلد طرف الأنف أسمك وغضروفه أليّن، لذا فهو آخر منطقة تتنقّى. الصبر جزء من نجاح عملية تجميل الأنف.\n\n## نصائح لحماية نتيجتك\n\n- أبقِ رأسك مرتفعاً خلال الليالي الأولى.\n- تجنّب وضع النظارات على جسر الأنف لمدة أربعة أسابيع على الأقل.\n- تجنّب الرياضات التي قد تصدم الأنف لمدة ستة إلى ثمانية أسابيع.\n\nالمعلومات الواردة أعلاه تثقيفية ولا تغني عن استشارة طبية. كل حالة مختلفة، والرأي النهائي يحدده د. الحسن الصايم خلال استشارة خاصة.",
+        bodyEn:
+          "## The short answer\n\nThe final result of rhinoplasty becomes fully visible 6 to 12 months after surgery. However, most of the definition you will see in the mirror is already noticeable after three to six months.\n\n## Week by week after surgery\n\nRecovery following rhinoplasty follows a fairly predictable timeline:\n\n- **First 1–2 weeks.** A splint (and at times nasal packing) supports the nose; most bruising and swelling subside. Most patients return to light work within a week or two.\n- **Weeks 2–6.** The nose continues to settle. Swelling from the tip can persist longer and may make the tip appear slightly upturned at first.\n- **Months 3–6.** Around two-thirds of the final result is visible. Skin thickness and the amount of work done determine how much remains.\n- **Months 6–12.** The remaining fine swelling — especially at the tip — resolves, revealing the final shape.\n\n## Why the tip takes longest\n\nThe nasal tip has thicker skin and softer cartilage, so it is normally the last area to refine. Patience is part of a successful rhinoplasty.\n\n## Tips for protecting your result\n\n- Keep your head elevated for the first nights.\n- Avoid wearing glasses resting on the bridge for at least four weeks.\n- Avoid any contact sport or pressure on the nose for six to eight weeks.\n\nThe information above is educational and does not replace a medical consultation. Every case is different, and the final opinion is given by Dr. Al Hasan Al Saiem during a private consultation.",
+        categoryAr: "الأنف",
+        categoryEn: "Nose",
+        relatedProcedureSlug: "rhinoplasty",
+        seoTitleAr: "متى يظهر الشكل النهائي لتجميل الأنف؟ | د. الحسن الصايم",
+        seoDescriptionAr:
+          "يوضح المقال مراحل التعافي بعد تجميل الأنف ومتى تختفي التورمات ويظهر الشكل النهائي خلال 6–12 شهراً، مع نصائح للعناية.",
+        seoTitleEn: "When Does the Final Rhinoplasty Result Show? | Dr. Al Hasan Al Saiem",
+        seoDescriptionEn:
+          "A rhinoplasty final result takes 6–12 months. This guide breaks down the recovery timeline and when to judge your new nose shape.",
+        readingMinutes: 3,
+        publishDate: now - 86_400_000,
+        isPublished: true,
+        isFeatured: false,
+        order: 2,
+      },
+    ];
+
+    let created = 0;
+    let skipped = 0;
+    for (const article of starterArticles) {
+      const existing = await ctx.db
+        .query("articles")
+        .withIndex("by_slug", (q) => q.eq("slug", article.slug))
+        .first();
+      if (existing) {
+        skipped++;
+        continue;
+      }
+      await ctx.db.insert("articles", { ...article, updatedDate: undefined });
+      created++;
+    }
+
+    return `Articles seed complete: ${created} created, ${skipped} already existed (skipped).`;
+  },
+});

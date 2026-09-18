@@ -22,7 +22,7 @@ src/
 ├── components/
 │   ├── sections/       # Homepage sections (Hero, About, Procedures, BeforeAfter,
 │   │                   #   Testimonials, FAQ, CTA, Contact, InformationCard)
-│   ├── dashboard/      # Admin CMS tab components (HomepageCMSTab, SEOTab)
+│   ├── dashboard/      # Admin CMS tab components (HomepageCMSTab, SEOTab, ArticlesTab)
 │   ├── ui/             # shadcn/ui components
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu + language toggle
@@ -43,6 +43,7 @@ src/
 │   ├── schema.ts             # Database schema
 │   ├── admin.ts              # Server-side admin authorization (requireAdmin)
 │   ├── procedures.ts         # Procedures CRUD (protected)
+│   ├── articles.ts           # Blog article CRUD + published queries (protected writes)
 │   ├── beforeAfter.ts        # Before & After CRUD (protected)
 │   ├── testimonials.ts       # Testimonials CRUD (protected, with photos)
 │   ├── faq.ts                # FAQ CRUD (protected)
@@ -61,9 +62,11 @@ src/
 │   └── auth/                 # Auth providers (Password)
 ├── pages/
 │   ├── Landing.tsx            # Homepage (all sections CMS-driven with toggle)
-│   ├── Dashboard.tsx          # Full Admin CMS dashboard (10 tabs)
+│   ├── Dashboard.tsx          # Full Admin CMS dashboard (11 tabs)
 │   ├── ProcedureDetail.tsx    # Individual procedure page (CMS-driven + SEO)
 │   ├── ProceduresPage.tsx     # All-procedures listing page
+│   ├── BlogListPage.tsx       # Blog listing (/blog) — featured + grid of articles
+│   ├── BlogArticlePage.tsx    # Single article (/blog/:slug) with SEO + JSON-LD
 │   ├── BeforeAfterPage.tsx    # Before & After gallery with interactive slider
 │   ├── ConsultationPage.tsx   # WhatsApp consultation form (2-step, no data stored)
 │   ├── ContactPage.tsx        # Static contact page
@@ -79,7 +82,7 @@ src/
 
 Access: Visit `/auth` → sign in with email + password → go to `/dashboard`. The first two sign-ups become administrators; further sign-ups are rejected.
 
-### Dashboard Tabs (10)
+### Dashboard Tabs (11)
 
 | Tab | CRUD | Edit | Reorder | Search | Image Upload | Toggle Active |
 |-----|------|------|---------|--------|--------------|---------------|
@@ -90,6 +93,7 @@ Access: Visit `/auth` → sign in with email + password → go to `/dashboard`. 
 | **Before & After** | ✅ | ✅ | ✅ ↑↓ | — | ✅ (picker) | ✅ |
 | **Testimonials** | ✅ | ✅ | ✅ ↑↓ | — | ✅ (avatar + multi-photos) | ✅ |
 | **FAQ** | ✅ | ✅ | ✅ ↑↓ | ✅ | — | ✅ |
+| **Articles** | ✅ | ✅ | ✅ ↑↓ | ✅ | ✅ (cover + OG image) | ✅ Published |
 | **SEO** | — | ✅ | — | — | — | — |
 | **Settings** | — | ✅ | — | — | ✅ (navbar photo) | — |
 | **Media** | — | — | — | — | ✅ Upload (multi, drag & drop) | — |
@@ -117,6 +121,28 @@ Every homepage section header and content is CMS-managed:
 | **CTA** | Badge, title, description, button text, destination, enable/disable |
 | **Footer** | Description (AR/EN) |
 | **Visibility** | Show/hide each homepage section |
+
+### Blog (Articles)
+
+The bilingual patient-education blog lives at `/blog` (listing) and `/blog/:slug`
+(article). All content is CMS-driven from Dashboard → **Articles**:
+
+- Full CRUD with AR/EN titles, excerpts, bodies, categories, SEO titles +
+  descriptions, cover + Open Graph images, reading minutes, featured flag, and a
+  related-procedure dropdown.
+- **Body formatting conventions:** separate paragraphs with a blank line; start a
+  line with `## ` for a section heading; prefix `- ` for bullet lists; wrap
+  emphasized words in `**bold**`.
+- **Published** toggle controls visibility; unpublished articles are `noindex`
+  and excluded from the sitemap.
+- **Public SEO:** dynamic `<title>`/meta description/OG/Twitter tags plus
+  `<script type="application/ld+json">` Article schema (author Dr. Al Hasan Al
+  Saiem, dates, in-language).
+- **Sitemap:** published articles are emitted in `/sitemap.xml` (priority 0.6).
+- **SEO defaults:** each article carries its own AR/EN SEO title + description;
+  matching procedures can be cross-linked via *Related procedure*.
+- **Starter content:** `seed.seedArticles` (idempotent) creates 2 sample bilingual
+  articles — facelift longevity and rhinoplasty recovery.
 
 ### Settings CMS Fields
 

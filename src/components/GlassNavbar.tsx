@@ -22,6 +22,7 @@ const hashLinks = [
 const routeLinks = [
   { key: "procedures" as const, href: "/procedures" },
   { key: "beforeAfter" as const, href: "/before-after" },
+  { key: "blog" as const, href: "/blog" },
   { key: "contact" as const, href: "/contact" },
 ];
 

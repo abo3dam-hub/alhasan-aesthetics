@@ -357,3 +357,25 @@
 ### التحقق
 - `/trackVisit` سجّل حدث `whatsapp` بنجاح عبر `curl`، وظهر في `analytics.getStats`، ثم حُذف الحدث التجريبي عبر `purgePath`.
 - `tsc` نظيف، ESLint 0 أخطاء/26 تحذيرًا، `vite build` أخضر، ونُشر Convex على `kindly-anaconda-422`.
+
+---
+
+## ٣. المقالات / المدونة (Blog Articles) — سيشن 2026-09-18
+
+### ما تم بناؤه
+- **الجدول** `articles` في `schema.ts`: `slug` فريد، عناوين/مقتطفات/أجسام ثنائية اللغة (AR/EN)، `coverImage` و`ogImage` (من مكتبة الوسائط)، `categoryAr/categoryEn`، `relatedProcedureSlug` (ربط إجراء ذي صلة)، حقول SEO AR/EN، `publishDate/updatedDate/readingMinutes`، أعلام `isPublished/isFeatured` و`order`، مع فهرس `by_slug` و`by_order`.
+- **`src/convex/articles.ts`**: `list` و`listPublished` (المنشورات فقط، الأحدث أولًا) و`getBySlug` و`getById` و`create/update/remove` — جميع الكتابات محمية بـ `requireAdmin()`.
+- **Seed إداري منشور:** `seed.seedArticles` أنشأ مقالين ثنائيي اللغة («كم تدوم عملية شد الوجه؟» و«متى يظهر الشكل النهائي لتجميل الأنف؟») في قاعدة الإنتاج؛ idempotent ولا يعيد كتابة تعديلات العيادة.
+
+### الواجهة العامة
+- **`/blog` (BlogListPage.tsx):** بطاقة مميزة + شبكة بطاقات (صورة الغلاف عبر `ResolvedImage`، التصنيف، العنوان، المقتطف، التاريخ + دقائق القراءة)، بدون كسور الحزم (lazy-loaded).
+- **`/blog/:slug` (BlogArticlePage.tsx):** SEO ديناميكي (title/description/OG/Twitter)، وسوم `noindex` للمسودات، مخطط **Article JSON-LD** (المؤلف د. الحسن الصايم، التواريخ، اللغة)، عارض جسم يدعم العناوين (`## `), القوائم (`- `) والخط العريض (`**...**`), صلة بمقال ذي صلة، وخانة CTA للاتصال/الحجز إجمالاً من `siteSettings`.
+- **sitemap.xml:** يضمّ الآن `/blog` (0.6) وجميع المقالات المنشورة (0.6) — تحقّق مباشر على `kindly-anaconda-422.convex.site/sitemap.xml`.
+
+### لوحة التحكم
+- تبويب **Articles** الحادي عشر في Dashboard (`src/components/dashboard/ArticlesTab.tsx`): بحث وتصفية (الكل/المنشورة/مسودات), محرر ثنائي اللغة كامل (عنوان، مدخل، جسم، تصنيف، دقائق القراءة، إجراء ذي صلة، غلاف عبر `MediaSelector`, SEO AR/EN), تبديل نشر/مميز, ترتيب ↑↓, وحذف.
+- أضيف رابط «المقالات» (nav.blog) في القائمة العلوية والجوال والـ Footer.
+
+### التحقق
+- `tsc -b` نظيف، ESLint 0 أخطاء، `vite build` أخضر (index 106.15 kB gzip).
+- نُشر Convex (`--typecheck enable`) وقاعدة البيانات حُدّثت، وتم seed مقالين، وفحص `listPublished`/`getBySlug`، وتأكيد تضمين الروابط في sitemap الحيّ.
