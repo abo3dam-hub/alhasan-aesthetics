@@ -15,7 +15,7 @@ export default function Footer() {
   const procedures = useQuery(api.procedures.listActive);
 
   const phone = doctorSettings?.phone || "+966 XX XXX XXXX";
-  const email = doctorSettings?.email || "info@dr-alhasan.com";
+  const email = doctorSettings?.email || "info@dralhasanalsaiem.com";
   const addressEn = doctorSettings?.addressEn || "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai";
   const addressAr = doctorSettings?.addressAr || "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي";
   const address = isRtl ? addressAr : addressEn;
@@ -40,9 +40,9 @@ export default function Footer() {
       <div className="absolute inset-0 luxury-gradient pointer-events-none opacity-50" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-4">
               {doctorSettings?.navbarPhoto ? (
                 <ResolvedImage storageId={doctorSettings.navbarPhoto} alt="Dr. Al Hasan Al Saiem" className="h-12 w-12 rounded-xl object-cover border border-border/40" imgClassName="w-full h-full rounded-xl object-cover" lazy={false} />
@@ -123,7 +123,7 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="lg:col-start-4">
             <h3 className="font-semibold text-foreground mb-4 text-sm">{t.nav.contact}</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">
@@ -143,13 +143,16 @@ export default function Footer() {
                 </span>
               </li>
             </ul>
+          </div>
 
-            <div className="mt-4 pt-4 border-t border-border/30">
-              <p className="text-xs font-medium text-foreground mb-2">{t.footer.workingHours}</p>
-              <p className="text-xs text-muted-foreground">{t.footer.weekdays}: {doctorSettings?.workingHoursWeekdays || "9 AM - 6 PM"}</p>
-              <p className="text-xs text-muted-foreground">{t.footer.friday}: {doctorSettings?.workingHoursFriday || (isRtl ? "مغلق" : "Closed")}</p>
-              <p className="text-xs text-muted-foreground">{t.footer.saturday}: {doctorSettings?.workingHoursSaturday || (isRtl ? "مغلق" : "Closed")}</p>
-            </div>
+          {/* Working Hours */}
+          <div className="lg:col-start-4 lg:row-start-2">
+            <h3 className="font-semibold text-foreground mb-4 text-sm">{t.footer.workingHours}</h3>
+            <ul className="space-y-2.5">
+              <li className="text-sm text-muted-foreground">{t.footer.weekdays}: {doctorSettings?.workingHoursWeekdays || "9 AM - 6 PM"}</li>
+              <li className="text-sm text-muted-foreground">{t.footer.friday}: {doctorSettings?.workingHoursFriday || (isRtl ? "مغلق" : "Closed")}</li>
+              <li className="text-sm text-muted-foreground">{t.footer.saturday}: {doctorSettings?.workingHoursSaturday || (isRtl ? "مغلق" : "Closed")}</li>
+            </ul>
           </div>
         </div>
 
