@@ -1,6 +1,6 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { auth } from "./auth";
 import { hashIp } from "./analytics";
 
@@ -17,6 +17,11 @@ auth.addHttpRoutes(http);
 // The frontend domain should proxy or redirect /sitemap.xml here,
 // or use the static fallback in public/sitemap.xml.
 const DOMAIN = "https://dralhasanalsaiem.com";
+
+// Origin of this Convex deployment. Facebook/WhatsApp/LinkedIn etc. resolve
+// og:image directly against this public site URL.
+const SITE_ORIGIN =
+  process.env.CONVEX_SITE_URL ?? "https://kindly-anaconda-422.convex.site";
 
 const staticPages = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
@@ -129,28 +134,7 @@ http.route({
           description = wantsArabic
             ? article.seoDescriptionAr || article.excerptAr || description
             : article.seoDescriptionEn || article.excerptEn || description;
-          let imageRef = article.ogImage || article.coverImage;
-          if (!imageRef && article.relatedProcedureSlug) {
-            try {
-              const proc = await ctx.runQuery(api.procedures.getBySlug, {
-                slug: article.relatedProcedureSlug,
-              });
-              imageRef = proc?.ogImage || proc?.image;
-            } catch {
-              // No procedure image — fall through to the site default.
-            }
-          }
-          if (imageRef) {
-            try {
-              const resolved = await ctx.runQuery(api.media.resolveUrl, {
-                ref: imageRef,
-              });
-              if (resolved) image = resolved;
-              else if (imageRef.startsWith("http")) image = imageRef;
-            } catch {
-              if (imageRef.startsWith("http")) image = imageRef;
-            }
-          }
+          image = `${SITE_ORIGIN}/og-image?slug=${encodeURIComponent(slug)}`;
           type = "article";
         }
       } catch {
@@ -171,6 +155,8 @@ http.route({
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:image" content="${esc(image)}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta property="og:url" content="${esc(link)}" />
 <meta property="og:site_name" content="Dr. Al Hasan Al Saiem" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -188,6 +174,81 @@ http.route({
         "Cache-Control": "public, max-age=300, s-maxage=600, stale-while-revalidate=3600",
       },
     });
+  }),
+});
+
+// ─── Branded OG card (PNG) ───
+// Generates the 1200x630 share preview the crawlers request. Rendered on
+// demand in a Node action (satori → @resvg/resvg-wasm). If the article has a
+// cover image it is embedded into the card; cache headers keep repeat hits cheap.
+http.route({
+  path: "/og-image",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const slug = (url.searchParams.get("slug") || "").trim().toLowerCase();
+    if (!slug) {
+      return new Response("missing slug", { status: 400 });
+    }
+    try {
+      const article = await ctx.runQuery(api.articles.getBySlug, { slug });
+      if (!article || !article.isPublished) {
+        return new Response("not found", { status: 404 });
+      }
+      const wantsArabic = (request.headers.get("accept-language") || "")
+        .toLowerCase()
+        .startsWith("ar");
+      const title = (wantsArabic ? article.titleAr : article.titleEn) || "";
+      if (!title) {
+        return new Response("no title", { status: 404 });
+      }
+
+      let imageDataUri: string | undefined;
+      const imageRef = article.ogImage || article.coverImage;
+      if (imageRef) {
+        try {
+          let abs: string | null = null;
+          if (imageRef.startsWith("http")) {
+            abs = imageRef;
+          } else {
+            const resolved = await ctx.runQuery(api.media.resolveUrl, {
+              ref: imageRef,
+            });
+            if (resolved) abs = resolved;
+          }
+          if (abs) {
+            const res = await withTimeout(fetch(abs), 8000);
+            if (res.ok) {
+              const contentType = res.headers.get("content-type") || "image/jpeg";
+              if (contentType.startsWith("image/")) {
+                const bytes = await res.arrayBuffer();
+                if (bytes.byteLength <= 1.5 * 1024 * 1024) {
+                  imageDataUri = `data:${contentType};base64,${toBase64(bytes)}`;
+                }
+              }
+            }
+          }
+        } catch {
+          // Embedding failed — fall back to a branded-only card.
+        }
+      }
+
+      const png = (await ctx.runAction(internal.og_image.generateArticleOg, {
+        title,
+        dir: wantsArabic ? "rtl" : "ltr",
+        imageDataUri,
+      })) as ArrayBuffer;
+
+      return new Response(png, {
+        status: 200,
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=86400, stale-while-revalidate=43200",
+        },
+      });
+    } catch {
+      return new Response("error generating image", { status: 500 });
+    }
   }),
 });
 
@@ -323,6 +384,10 @@ function withTimeout(promise: Promise<Response>, ms: number): Promise<Response> 
       },
     );
   });
+}
+
+function toBase64(buffer: ArrayBuffer): string {
+  return Buffer.from(buffer).toString("base64");
 }
 
 export default http;

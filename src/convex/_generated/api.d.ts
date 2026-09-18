@@ -18,6 +18,7 @@ import type * as homepageSettings from "../homepageSettings.js";
 import type * as http from "../http.js";
 import type * as media from "../media.js";
 import type * as migration from "../migration.js";
+import type * as og_image from "../og_image.js";
 import type * as procedureIconDefaults from "../procedureIconDefaults.js";
 import type * as procedureSeoDefaults from "../procedureSeoDefaults.js";
 import type * as procedures from "../procedures.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   media: typeof media;
   migration: typeof migration;
+  og_image: typeof og_image;
   procedureIconDefaults: typeof procedureIconDefaults;
   procedureSeoDefaults: typeof procedureSeoDefaults;
   procedures: typeof procedures;

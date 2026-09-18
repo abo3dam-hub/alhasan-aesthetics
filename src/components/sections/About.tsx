@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
 import doctorImg from "/assets/1.jpg";
+import doctorImgWebp from "/assets/1.webp";
+import doctorImgSmall from "/assets/1.small.webp";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { CountUp } from "@/components/CountUp";
 
@@ -97,12 +99,20 @@ export default function About() {
                       imgClassName="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
                     />
                   ) : (
-                    <img
-                      src={doctorImg}
-                      alt={isArabic ? doctorNameAr : doctorName}
-                      className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
-                      loading="lazy"
-                    />
+                    <picture>
+                      <source
+                        type="image/webp"
+                        srcSet={`${doctorImgSmall} 480w, ${doctorImgWebp} 768w`}
+                        sizes="(min-width: 1024px) 560px, 100vw"
+                      />
+                      <img
+                        src={doctorImg}
+                        alt={isArabic ? doctorNameAr : doctorName}
+                        className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </picture>
                   )}
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />

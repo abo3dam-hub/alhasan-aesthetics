@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { Link } from "react-router";
 import { Globe, Phone, Mail, MapPin } from "lucide-react";
 import { ResolvedImage } from "@/components/ResolvedImage";
-import doctorLogo from "/assets/3.jpg";
+import { BrandMark } from "@/components/BrandMark";
 
 export default function Footer() {
   const { t, dir, toggleLocale } = useI18n();
@@ -47,8 +47,7 @@ export default function Footer() {
               {doctorSettings?.navbarPhoto ? (
                 <ResolvedImage storageId={doctorSettings.navbarPhoto} alt="Dr. Al Hasan Al Saiem" className="h-12 w-12 rounded-xl object-cover border border-border/40" imgClassName="w-full h-full rounded-xl object-cover" lazy={false} />
               ) : (
-                <img
-                  src={doctorLogo}
+                <BrandMark
                   alt="Dr. Al Hasan Al Saiem"
                   className="h-12 w-12 rounded-xl object-cover border border-border/40"
                 />

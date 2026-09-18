@@ -176,7 +176,7 @@ export default function BlogArticlePage() {
       name: byName,
       logo: {
         "@type": "ImageObject",
-        url: "https://dralhasanalsaiem.com/logo.png",
+        url: "https://dralhasanalsaiem.com/assets/3.jpg",
       },
     };
     return {

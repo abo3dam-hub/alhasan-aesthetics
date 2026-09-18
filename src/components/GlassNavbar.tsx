@@ -8,7 +8,7 @@ import { Link } from "react-router";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ResolvedImage } from "@/components/ResolvedImage";
-import doctorAvatar from "/assets/3.jpg";
+import { BrandMark } from "@/components/BrandMark";
 
 // Hash-scroll links use native <a> so the browser handles smooth scrolling.
 // Route links use React Router <Link>.
@@ -51,9 +51,9 @@ export default function GlassNavbar() {
                 {doctorSettings?.navbarPhoto ? (
                   <ResolvedImage storageId={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
                 ) : (
-                  <img
-                    src={doctorAvatar}
+                  <BrandMark
                     alt="Dr. AlHasan"
+                    eager
                     className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
                   />
                 )}
@@ -167,8 +167,7 @@ export default function GlassNavbar() {
                   {doctorSettings?.navbarPhoto ? (
                     <ResolvedImage storageId={doctorSettings.navbarPhoto} alt="Dr. AlHasan" className="h-9 w-9 rounded-full object-cover border-2 border-primary/30" imgClassName="w-full h-full rounded-full object-cover" lazy={false} />
                   ) : (
-                    <img
-                      src={doctorAvatar}
+                    <BrandMark
                       alt="Dr. AlHasan"
                       className="h-9 w-9 rounded-full object-cover border-2 border-primary/30"
                     />

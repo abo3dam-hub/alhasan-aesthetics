@@ -5,7 +5,62 @@ import { motion } from "framer-motion";
 import { Link } from "react-router";
 import GlassNavbar from "@/components/GlassNavbar";
 import { ResolvedImage } from "@/components/ResolvedImage";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { trackEvent } from "@/lib/track";
+
+function CardShareButton({
+  slug,
+  titleAr,
+  titleEn,
+  excerptAr,
+  excerptEn,
+}: {
+  slug: string;
+  titleAr?: string | null;
+  titleEn?: string | null;
+  excerptAr?: string | null;
+  excerptEn?: string | null;
+}) {
+  const { t, dir } = useI18n();
+  const isRtl = dir === "rtl";
+  const title = isRtl ? titleAr || "" : titleEn || "";
+  const excerpt = isRtl ? excerptAr || "" : excerptEn || "";
+
+  const handleShare = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    trackEvent("share", `card/${slug}`);
+    const url = `https://dralhasanalsaiem.com/blog/${slug}`;
+    const text = excerpt || title || t.blogPage.title;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch {
+        // User closed the native share sheet — no-op.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t.blogPage.shareCopied);
+    } catch {
+      toast.error(t.blogPage.shareFailed);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleShare}
+      aria-label={t.blogPage.share}
+      title={t.blogPage.share}
+      className="absolute top-3 end-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/85 backdrop-blur text-primary shadow-md hover:bg-white hover:scale-105 transition-all cursor-pointer"
+    >
+      <Share2 className="h-4 w-4" />
+    </button>
+  );
+}
 
 function formatDate(ts: number, locale: string): string {
   try {
@@ -78,6 +133,13 @@ export default function BlogListPage() {
                           imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                        <CardShareButton
+                          slug={featured.slug}
+                          titleAr={featured.titleAr}
+                          titleEn={featured.titleEn}
+                          excerptAr={featured.excerptAr}
+                          excerptEn={featured.excerptEn}
+                        />
                       </div>
                       <div className="p-6 sm:p-8 flex flex-col justify-center">
                         <div className="flex items-center gap-2 mb-3">
@@ -141,6 +203,13 @@ export default function BlogListPage() {
                             imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                          <CardShareButton
+                            slug={article.slug}
+                            titleAr={article.titleAr}
+                            titleEn={article.titleEn}
+                            excerptAr={article.excerptAr}
+                            excerptEn={article.excerptEn}
+                          />
                         </div>
                         <div className="p-5">
                           {(article.categoryAr || article.categoryEn) && (

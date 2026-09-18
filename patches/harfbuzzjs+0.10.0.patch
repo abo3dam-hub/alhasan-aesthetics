@@ -1,0 +1,37 @@
+diff --git a/node_modules/harfbuzzjs/index.js b/node_modules/harfbuzzjs/index.js
+index 5a1a2ab..0961fb6 100644
+--- a/node_modules/harfbuzzjs/index.js
++++ b/node_modules/harfbuzzjs/index.js
+@@ -1,8 +1,26 @@
+ var hbjs = require('./hbjs.js');
+ var hb = require('./hb.js');
+ 
+-module.exports = new Promise(function (resolve, reject) {
+-  hb().then((instance) => {
+-    resolve(hbjs(instance));
+-  }, reject);
+-});
++// Patch (patch-package): harfbuzzjs ships its wasm as a separate file
++// (hb.wasm). The Convex node sandbox bundles node_modules into /var/task
++// WITHOUT the ancillary .wasm binary, so the default Emscripten bootstrap
++// fails with `ENOENT: no such file or directory, open '/var/task/hb.wasm'`.
++// Fetch the matching wasm distribution at runtime and hand the bytes to the
++// Emscripten module via moduleArg.wasmBinary, which skips the
++// fs.readFileSync path in `getWasmBinary`/`getBinarySync`.
++var wasmUrl = 'https://cdn.jsdelivr.net/npm/harfbuzzjs@0.10.0/hb.wasm';
++
++module.exports = Promise.resolve()
++  .then(function () {
++    return fetch(wasmUrl);
++  })
++  .then(function (res) {
++    if (!res.ok) throw new Error('harfbuzz wasm fetch failed: ' + res.status);
++    return res.arrayBuffer();
++  })
++  .then(function (bytes) {
++    var wasmBinary = new Uint8Array(bytes);
++    return hb({ wasmBinary: wasmBinary }).then(function (instance) {
++      return hbjs(instance);
++    });
++  });
+\ No newline at end of file

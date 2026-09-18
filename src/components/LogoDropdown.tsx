@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import doctorLogo from "/assets/3.jpg";
+import doctorLogoWebp from "/assets/3.small.webp";
 import { useAuth } from "@/hooks/use-auth";
 import { Home, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
@@ -34,13 +34,17 @@ export function LogoDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-10 w-10">
-          <img
-            src={doctorLogo}
-            alt="Dr. Al Hasan Al Saiem"
-            width={32}
-            height={32}
-            className="rounded-full object-cover border border-primary/30"
-          />
+          <picture>
+            <source type="image/webp" srcSet={doctorLogoWebp} />
+            <img
+              src="/assets/3.jpg"
+              alt="Dr. Al Hasan Al Saiem"
+              width={32}
+              height={32}
+              className="rounded-full object-cover border border-primary/30"
+              decoding="async"
+            />
+          </picture>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">
