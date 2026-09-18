@@ -1,6 +1,6 @@
 # Password Authentication Implementation Report
 
-> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17).
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (latest refresh 2026-09-18).
 > **Update 2026-09-17:** this password authentication is now **deployed to production** on `kindly-anaconda-422` (the "not deployed" status below is outdated).
 
 - **Date:** 2026-09-13

@@ -1,8 +1,8 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
+Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, a media library, and a branded on-demand Open Graph share-image generator for the blog.
 
-Production Convex deployment: `kindly-anaconda-422` (hosted site: `dralhasan-three.vercel.app`).
+Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-anaconda-422.convex.site`). Web: **`https://www.dralhasanalsaiem.com`** (custom domain wired to Vercel; auto-deployed from the `main` branch).
 
 ## Stack
 
@@ -14,6 +14,8 @@ Production Convex deployment: `kindly-anaconda-422` (hosted site: `dralhasan-thr
 - **i18n:** Custom bilingual system (Arabic RTL primary / English LTR secondary)
 - **Icons:** Custom semantic procedure icon registry (hand-drawn SVGs + Lucide) in `src/lib/procedureIcons.tsx`
 - **UI:** shadcn/ui components + Lucide icons + Framer Motion (lazy-loaded, kept out of the entry chunk)
+- **Blog social-preview images:** satori + `@resvg/resvg-wasm` rendered on-demand inside a Convex node action (`src/convex/og_image.tsx`) → 1200×630 branded PNG; `harfbuzzjs` (Arabic text shaping) patched via **patch-package** to load its wasm from jsDelivr
+- **Image optimization:** static WebP variants generated with `sharp` + a `<picture>` component (`BrandMark`) with JPG/PNG fallbacks
 
 ## Architecture
 
@@ -34,6 +36,7 @@ src/
 │   ├── Lightbox.tsx    # Shared photo lightbox (testimonial galleries)
 │   ├── ResolvedImage.tsx / MediaDiagnostics.tsx
 │   ├── ImageUpload.tsx # Convex storage upload component
+│   ├── BrandMark.tsx   # <picture> WebP logo/avatar with JPG/PNG fallback
 │   └── RequireAuth.tsx # Auth guard
 ├── lib/
 │   ├── procedureIcons.tsx    # SVG + Lucide icon registry keyed by icon slug
@@ -44,6 +47,7 @@ src/
 │   ├── admin.ts              # Server-side admin authorization (requireAdmin)
 │   ├── procedures.ts         # Procedures CRUD (protected)
 │   ├── articles.ts           # Blog article CRUD + published queries (protected writes)
+│   ├── og_image.tsx          # OG share-card renderer (node action: satori → resvg PNG)
 │   ├── beforeAfter.ts        # Before & After CRUD (protected)
 │   ├── testimonials.ts       # Testimonials CRUD (protected, with photos)
 │   ├── faq.ts                # FAQ CRUD (protected)
@@ -53,7 +57,7 @@ src/
 │   ├── analytics.ts          # Visit analytics (record, geocode cache, aggregates)
 │   ├── users.ts              # User queries + becomeAdmin
 │   ├── notifications.ts      # Notifications (unread counts)
-│   ├── http.ts               # HTTP actions: /sitemap.xml + /trackVisit
+│   ├── http.ts               # HTTP actions: /sitemap.xml, /og-meta, /og-image, /trackVisit
 │   ├── migration.ts          # Admin-only data migrations
 │   │                         #   (normalize icons, fill geo-targeted SEO)
 │   ├── procedureIconDefaults.ts  # Canonical icon key per procedure slug
@@ -144,6 +148,33 @@ The bilingual patient-education blog lives at `/blog` (listing) and `/blog/:slug
 - **Starter content:** `seed.seedArticles` (idempotent) creates 2 sample bilingual
   articles — facelift longevity and rhinoplasty recovery.
 
+#### Social share previews (branded OG cards)
+
+Sharing an article on WhatsApp/Twitter/Facebook/LinkedIn shows a **branded
+1200×630 preview card** generated on-demand:
+
+- **`/og-image?slug=…`** (`GET`) — renders the card server-side
+  (`src/convex/og_image.tsx`, a Convex `"use node"` action): Satori lays out the
+  Arabic/English title + excerpt over the article's cover image (with a
+  branded dark-glass overlay), then `@resvg/resvg-wasm` rasterizes the SVG to a
+  PNG. No client-side canvas or HTML → zero layout shift, works for any crawler.
+  Results are cached server-side by slug+lang for a day
+  (`Cache-Control: public, max-age=86400, stale-while-revalidate=43200`).
+- **`/og-meta`** (`GET`, served by `middleware.ts` on Vercel edge to crawler UAs)
+  — returns an HTML shell whose `meta[property=og:image]` points at
+  `/og-image?slug=<article>&lang=<…>` with the right `og:image:width/height`,
+  so scrapers like Twitterbot/WhatsApp fetch the PNG directly.
+- **Fallbacks:** if an article has no cover image a branded graphic-only
+  fallback is rendered; if rendering still fails the route falls back to a
+  static OG-ready asset.
+
+#### Share buttons
+
+Articles and blog-list cards include a **share button** (`CardShareButton` /
+article share): uses the native Web Share API on mobile, clipboard copy of the
+public article URL as fallback, and fires a `share` analytics event through the
+same `/trackVisit` endpoint.
+
 ### Settings CMS Fields
 
 - Doctor name (AR/EN)
@@ -178,6 +209,8 @@ A self-contained analytics feature — no third-party script (no GA4/Vercel Anal
 | `/trackVisit` | `POST` | Record a page visit **or** a conversion event (CORS-enabled, served on `*.convex.site`) |
 | `/trackVisit` | `OPTIONS` | CORS preflight |
 | `/sitemap.xml` | `GET` | Dynamic sitemap from live CMS data |
+| `/og-meta` | `GET` | HTML shell for crawlers with `og:image` set to the branded card (served by Vercel edge middleware to bot user agents) |
+| `/og-image?slug=…&lang=…` | `GET` | Renders the branded 1200×630 PNG share card for an article (crawlers + public) |
 
 ## Consultation Flow (WhatsApp — No Data Stored)
 
@@ -235,6 +268,9 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - Images are persisted to Convex storage with a library record; safe deletion checks all CMS references before allowing delete
 - Upload date tracking per image
 - Supported: JPEG, PNG, WebP, GIF (max 5MB)
+- **Static brand assets are shipped as optimized WebP** (`assets/*.webp`, generated with `sharp`)
+  rendered through `BrandMark` (`<picture>` with JPG/PNG fallbacks) in the navbar, footer,
+  timeline logo, and About; the about image uses `srcSet`/`sizes` for art direction
 
 ## Responsive Design & UI Polish
 
@@ -254,6 +290,12 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - Dynamic meta tags per route; per-procedure title/description injected in `ProcedureDetail`
 - Physician JSON-LD structured data with `location` array for all six clinics and the 16 active procedures as `availableService` (no fabricated aggregate rating)
 - FAQPage, Person/Physician, BreadcrumbList JSON-LD structured data
+- Blog articles emit `Article` JSON-LD and can additionally emit `NewsArticle`
+  schema; the organization logo URL is fixed to the production domain
+  (`/assets/3.jpg`) so rich results pass Google's logo requirements
+- **Branded OG share cards** — every public article advertises a 1200×630
+  `og:image` PNG (see *Social share previews* above) generated on `/og-image`
+  at request time
 - Twitter/X card meta tags
 - Skip navigation link for accessibility
 - aria-labels on all interactive elements
@@ -267,6 +309,8 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | `/en` | Landing (English) | Public |
 | `/procedures` | All procedures listing | Public |
 | `/procedure/:slug` | Procedure detail | Public |
+| `/blog` | Blog listing (featured + grid) | Public |
+| `/blog/:slug` | Blog article with SEO + JSON-LD + share | Public |
 | `/before-after` | Before & After gallery | Public |
 | `/consultation` | WhatsApp consultation form | Public |
 | `/contact` | Contact page | Public |
@@ -278,6 +322,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 ```bash
 # Install dependencies
 npm install
+# NOTE: postinstall runs `patch-package` to apply patches/harfbuzzjs+0.10.0.patch
 
 # Run dev server
 npm run dev
@@ -306,17 +351,19 @@ CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable
 
 ### Production Setup
 
-1. **Convex production:** `CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable`
+1. **Convex production:** `CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable` (this also registers the `/og-image` HTTP action — do this **before** pushing frontend changes so `/og-meta` never advertises a 404 image)
 2. **Hosting:** Deploy to Vercel with:
    - Build command: `npm run build`
    - Output directory: `dist`
    - Environment variable: `VITE_CONVEX_URL` (your Convex production URL)
+   - Connected to the `main` branch → **auto-deploys** on every `git push`; the `middleware.ts` edge route serves `/og-meta` to crawler user agents
 3. **Admin accounts:** Visit `/auth` → sign up (first two users become admins; further sign-ups rejected)
 4. **Seed data (fresh installs only):** Go to Dashboard → Overview → click "Seed Data" (once). **Do not seed an existing production database** — it overwrites content and does not restore real images; production data is already complete.
 5. **WhatsApp:** Configure real WhatsApp number in Dashboard → Settings
 6. **Content:** Upload doctor image, hero image, procedure images via Media Library; run **Normalize Icons** and **Fill SEO (AR/EN)** in the Procedures tab
 7. **Analytics:** page views begin recording automatically — view them in Dashboard → Analytics
 8. **Domain:** Production domain is **`dralhasanalsaiem.com`** (custom domain, connected in Vercel). All canonical/OG/JSON-LD/sitemap URLs use this domain — verified serving `/blog` and article URLs. Do **not** use the placeholder `dr-alhasan.com` (it is not registered in DNS).
+9. **Verify share previews:** `curl -A "Twitterbot" https://dralhasanalsaiem.com/blog/<slug>` should show `og:image` = the `/og-image?…` URL; that URL must return a 1200×630 PNG.
 
 ### Environment Variables
 

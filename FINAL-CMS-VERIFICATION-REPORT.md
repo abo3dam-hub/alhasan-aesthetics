@@ -1,6 +1,6 @@
 # FINAL CMS VERIFICATION REPORT
 
-> **🗄️ HISTORICAL SNAPSHOT — archived.** Written September 3, 2026; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17).
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written September 3, 2026; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (latest refresh 2026-09-18).
 
 ## Image System — Final Root Cause & Verification
 

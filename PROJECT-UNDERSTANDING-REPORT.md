@@ -6,8 +6,8 @@
 
 - Generated: September 13, 2026
 - Repository: https://github.com/abo3dam-hub/alhasan-aesthetics
-- Production URL: https://dralhasan-three.vercel.app/
-- Canonical/SEO Domain: https://dr-alhasan.com
+- Production URL: https://www.dralhasanalsaiem.com/
+- Canonical/SEO Domain: https://dralhasanalsaiem.com (production; not `dr-alhasan.com`)
 - Branch: `main`
 - Project path: `/teamspace/studios/this_studio/projects/alhasan-aesthetics`
 
@@ -15,17 +15,22 @@
 
 ---
 
-## ⚠️ CURRENT STATUS — refreshed 2026-09-17 (supersedes any conflicting detail below)
+## ⚠️ CURRENT STATUS — refreshed 2026-09-18 (supersedes any conflicting detail below)
 
 > Generated **2026-09-13**. The structural analysis below remains valid, but these facts have changed since. Where the body conflicts with this block, **this block is authoritative**.
 
-- **Git HEAD:** `6666806`, branch `main`, clean and pushed.
+- **Git HEAD:** `0be1cb1`, branch `main`, clean and pushed.
 - **Authentication:** now the Convex Auth **`Password`** provider (email + password, scrypt), max **two** admin accounts — the Email-OTP/Anonymous/Freebuff flow described below is historical.
 - **Production Convex deployment:** `kindly-anaconda-422`.
-- **Admin Dashboard:** **10 tabs** (Overview, **Analytics**, Homepage, Procedures, Before & After, Testimonials, FAQ, SEO, Settings, Media).
-- **New:** Visit Analytics (`pageVisits`, `ipCountryCache`, `src/convex/analytics.ts`, `/trackVisit` HTTP action, `AnalyticsTracker.tsx`).
+- **Admin Dashboard:** **11 tabs** (Overview, Analytics, Homepage CMS, Procedures, Before & After, Testimonials, FAQ, **Articles**, SEO, Settings, Media).
+- **New — Blog:** bilingual articles at `/blog` + `/blog/:slug` (table `articles`, `src/convex/articles.ts`, Dashboard tab **Articles**, Article/NewsArticle JSON-LD, sitemap 0.6).
+- **New — Branded OG cards:** `/og-image?slug=…` renders 1200×630 PNG via `src/convex/og_image.tsx` (satori + @resvg/resvg-wasm, `"use node"` action, server-cached); `/og-meta` served to crawlers by `middleware.ts`. `harfbuzzjs` wasm is patched via `patch-package` (`patches/harfbuzzjs+0.10.0.patch`) because the Convex sandbox has no filesystem.
+- **New — Share buttons:** blog cards + article pages (Web Share API / clipboard + `share` analytics event).
+- **New — Visit Analytics:** `pageVisits`, `ipCountryCache`, `src/convex/analytics.ts`, `/trackVisit` HTTP action, `AnalyticsTracker.tsx`.
+- **Images:** static brand assets now ship as WebP via `BrandMark.tsx` (`<picture>`), generated with `sharp`; JSON-LD logo fixed to `https://dralhasanalsaiem.com/assets/3.jpg`.
+- **Domain:** canonical domain is now **`dralhasanalsaiem.com`, live in production** (wired in Vercel). All the `dr-alhasan.com` references below are stale/historical.
 - **Fonts:** Cairo + El Messiri (Arabic), Inter + Playfair Display (Latin).
-- **Health:** `tsc` clean, ESLint 0 errors / 26 warnings, `vite build` green; entry ≈339.9 KB (gzip ≈105.5 KB).
+- **Health:** `tsc` clean, ESLint 0 errors / 26 warnings, `vite build` green; entry ≈342 KB (gzip ≈104 KB).
 - **Newer references:** `README.md` (current overview) and `report 9-14-26.md` (latest session log).
 
 ---
@@ -75,11 +80,13 @@ Bilingual (Arabic-primary RTL / English-secondary) marketing website + admin CMS
 
 ### Backend
 - Convex (convex ^1.30.0)
-- `@convex-dev/auth` — passwordless Email OTP via Freebuff
+- `@convex-dev/auth` — **Password** provider (email + password, scrypt); Email-OTP/Freebuff wording below is historical
 - Convex storage for all images
+- **OG share cards:** `satori` + `@resvg/resvg-wasm` run inside `src/convex/og_image.tsx` (`"use node"` action); `harfbuzzjs` patched via `patch-package` (`patches/harfbuzzjs+0.10.0.patch`, re-applied by `postinstall`) to load its wasm from jsDelivr
 
 ### Tooling
-- `bun` — package manager (bun.lock)
+- `bun` — package manager (bun.lock) (`package.json` also declares the `postinstall: patch-package` script, so adapters/pnpm/npm work too)
+- `sharp` (dev) — generates the static WebP variants in `public/assets/*.webp`
 - Scripts: `dev`, `build`, `lint` (eslint), `format` (prettier), `preview`
 - **No test script; no test files exist** (confirmed by grep)
 
@@ -223,7 +230,7 @@ Overview/stats + CMS health check + Become Admin · Homepage CMS (`HomepageCMSTa
 
 - **Homepage CMS:** `HomepageCMSTab` edits per-section JSON stored in `siteSettings`; `homepageSettings.set` upserts via `v.any()`.
 - **Header content** for procedures/testimonials/FAQ/beforeAfter sections handled via `getSectionContent(key)`.
-- **Global SEO** (`SEOTab`): `siteTitleAr/En`, `metaDescriptionAr/En`, `ogImage`, `canonicalBase` (default `https://dr-alhasan.com`).
+- **Global SEO** (`SEOTab`): `siteTitleAr/En`, `metaDescriptionAr/En`, `ogImage`, `canonicalBase` (default `https://www.dralhasanalsaiem.com`).
 - **Per-procedure SEO** (title/description/OG) + `gallery` + `beforeImage`/`afterImage` fully implemented.
 - **Doctor settings** via `getDoctorSettings` (phone, email, addresses AR/EN, WhatsApp, social links) — used across Contact/Footer/Navbar.
 - **Hero/CTA image fields are intentionally unused** (text/design only) — do not add image pickers there (CRITICAL invariant).
@@ -242,11 +249,13 @@ Overview/stats + CMS health check + Become Admin · Homepage CMS (`HomepageCMSTa
 
 ## 11. SEO & Structured Data
 
-- **Static base (`index.html`):** Physician JSON-LD (aggregateRating 5 / reviewCount 100, procedure list, Damascus + Dubai addresses), OG/Twitter tags (image `/assets/1.jpg`), canonical `https://dr-alhasan.com/`.
+- **Static base (`index.html`):** Physician JSON-LD (aggregateRating 5 / reviewCount 100, procedure list, Damascus + Dubai addresses), OG/Twitter tags (image `/assets/1.jpg`), canonical `https://www.dralhasanalsaiem.com/`.
 - **Runtime CMS SEO** overrides title / meta description / og:image on Landing and ProcedureDetail.
+- **Blog articles** emit Article/NewsArticle JSON-LD with the organization logo fixed to `https://dralhasanalsaiem.com/assets/3.jpg`, and advertise a branded 1200×630 `og:image` rendered by `/og-image` (see README → "Social share previews").
 - **ProcedureDetail** emits Person/Physician + BreadcrumbList JSON-LD from CMS data (verified at `ProcedureDetail.tsx:338-360`).
 - **FAQ / MedicalOrganization JSON-LD** rendered via `dangerouslySetInnerHTML` from CMS data — **no sanitization** (security note).
-- **Sitemap:** dynamic `/sitemap.xml` in `src/convex/http.ts` (`DOMAIN = https://dr-alhasan.com`, `Cache-Control: public, max-age=3600, s-maxage=3600`); static fallback `public/sitemap.xml` + `robots.txt`.
+- **Sitemap:** dynamic `/sitemap.xml` in `src/convex/http.ts` (`DOMAIN = https://www.dralhasanalsaiem.com`, `Cache-Control: public, max-age=3600, s-maxage=3600`); includes `/blog` + all published articles (0.6); static fallback `public/sitemap.xml` + `robots.txt`.
+- **Crawler share previews:** Vercel `middleware.ts` serves `/og-meta` (HTML shell with `og:image` → `/og-image?slug=…`) to bot user agents.
 
 ---
 

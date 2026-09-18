@@ -1,7 +1,7 @@
-# تقرير وضع المشروع — محدّث 17-9-2026
+# تقرير وضع المشروع — محدّث 18-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `6666806` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `0be1cb1` (شجرة نظيفة، مرفوع لـ GitHub)
 
 ---
 
@@ -9,14 +9,15 @@
 
 | الجهة | الحالة |
 |---|---|
-| GitHub `main` | `6666806` — متطابق مع فروع العمل، نظيف |
-| Convex **Production** | `kindly-anaconda-422` — Auth مفعّل، البيانات مستعادة، الكود الحكومي حالي |
+| GitHub `main` | `0be1cb1` — متطابق مع فروع العمل، نظيف |
+| Convex **Production** | `kindly-anaconda-422` — Auth مفعل، البيانات مستعادة، الكود حالي (بما فيه `/og-image`) |
 | Convex **Dev** | `gregarious-perch-128` |
-| Vercel `dralhasan` | نشط — الاسم المستعار `https://dralhasan-three.vercel.app` يخدم آخر build |
+| Vercel `dralhasan` | نشط — **نشر تلقائي** من `main`؛ الاسم المستعار `https://dralhasan-three.vercel.app` والنطاق الحقيقي `dralhasanalsaiem.com` يخدمان نفس build |
 | المصادقة | Password (بريد + كلمة مرور) — حد أقصى حسابان إداريان؛ الأول `abo3dam@gmail.com` |
 | بيانات CMS | كاملة (جداول CMS + ملفات الـ Storage) |
-| التحليلات | مفعّلة — زيارات الصفحات وبلدان الزوار (تبويب Analytics في الداشبورد) |
-| النطاق | `alhasanalsaiem.com` مُضاف في إعدادات المشروع (ليس في Vercel بعد) |
+| التحليلات | مفعلة — زيارات الصفحات وبلدان الزوار (تبويب Analytics في الداشبورد) |
+| المدونة | مفعلة — `/blog` و`/blog/:slug` بالعربية والإنجليزية + صورة OG مخصصة عند المشاركة |
+| النطاق | **`dralhasanalsaiem.com` متصل فعليًا بـ Vercel ويعمل في الإنتاج** (كل canonical/OG/JSON-LD/sitemap تشير إليه) |
 
 
 ---
@@ -385,3 +386,37 @@
 - استُبدلت كل إشارات `dr-alhasan.com` في الكود والملفات العامّة بـ `dralhasanalsaiem.com`:
   `src/convex/http.ts` (DOMAIN الـ sitemap)، `src/pages/BlogArticlePage.tsx` (رابط المشاركة/OG/JSON-LD)، `index.html` (canonical + OG + Physician schema + البريد)، `public/sitemap.xml`، `public/robots.txt`، افتراضيات `seed.ts` (canonicalBase + البريد)، `SEOTab.tsx`، واردة البريد الاحتياطي في `Footer.tsx`/`Contact.tsx`/`ContactPage.tsx`.
 - تحقّق مباشر: `https://dralhasanalsaiem.com/blog` يعيد 200.
+
+---
+
+## ٤. جلسة 2026-09-18 (تكملة) — بطاقات OG + أزرار المشاركة + WebP + إصلاح JSON-LD
+
+### ٤.١ مولد بطاقة المشاركة (Branded OG Share Card Generator)
+- **الهدف:** عند مشاركة رابط مقال على WhatsApp/Twitter/Facebook/LinkedIn تظهر صورة بطاقة 1200×630 تحمل العلامة (عنوان المقال + المقتطف فوق صورة الغلاف + هوية الموقع)، بدل الصورة الافتراضية.
+- **البنية الجديدة:**
+  - `src/convex/og_image.tsx` — إجراء Convex من نوع `"use node"` (ليس query): يبنـي SVG عبر **satori** ثم يحوّله إلى PNG عبر **@resvg/resvg-wasm**، ويُضيف صورة الغلاف مع تراكب زجاجي داكن. لا canvas ولا HTML على العميل → صفر layout shift.
+  - نقطة HTTP **`/og-image?slug=…&lang=…`** في `src/convex/http.ts` — تُعيد PNG حقيقيًا (200، `image/png`) مع ذاكرة تخزين مؤقت: `Cache-Control: public, max-age=86400, stale-while-revalidate=43200`. عند غياب الغلاف تُستخدم بطاقة بديلة ذات علامة، وعند فشل كل شيء يعود الكود لصورة OG ثابتة.
+  - **الخطوط:** تُجلب وقت التشغيل من Google Fonts عبر css2 مع UA من نوع curl (El Messiri 600 + Playfair Display 700) — تعريب عربي سليم في البطاقة.
+- **العقدة الحرجة التي عطّلت الشغل — حُلت:** `satori@0.33.4` يتطلب `harfbuzzjs@0.10.0` للـ shaping العربي، وكان محمّل Emscripten فيه يستدعي `fs.readFileSync("/var/task/hb.wasm")` → ENOENT داخل بيئة Convex (لا نظام ملفات).
+  - الحل: **patch-package** — `patches/harfbuzzjs+0.10.0.patch` يعدّل المحمل ليجلب `hb.wasm` من `https://cdn.jsdelivr.net/npm/harfbuzzjs@0.10.0/hb.wasm` وقت التشغيل ويمرّره عبر `wasmBinary`. أُضيف `postinstall: patch-package` في `package.json` (لا تحذفه — مهم عند أي `npm install` لاحق).
+- **خلل Convex ثانٍ — حُل:** الإجراءات لا تقبل إرجاع `Uint8Array` (رسالة "not a supported Convex type")؛ صارت الدالة تعيد/تخزّن **`ArrayBuffer`** (`rendered.buffer.slice(...)`).
+
+### ٤.٢ غلاف بحث البوتات `/og-meta` (استضافة Vercel edge)
+- `middleware.ts` في جذر المشروع: عندما يطلب **بوت** (Twitterbot/WhatsApp/SlackBot/...) صفحة مقال، تُستبدل الاستجابة بـ HTML خفيف فيه `meta[property=og:image]` = `/og-image?slug=…` مع `og:image:width/height` الصحيحتين؛ والمستخدم البشري يستقبل الـ SPA كالمعتاد.
+- بهذا تلتقط روابط المقالات صور البطاقة المخصصة عند المشاركة (تحقّق فعلي مباشر على الإنتاج بـ UA `Twitterbot` و`WhatsApp`).
+
+### ٤.٣ أزرار مشاركة
+- **بطاقات القائمة (`/blog`):** زر مشاركة `CardShareButton` يوزّع عبر Web Share API على الجوال مع نسخ رابط المقال إلى الحافظة كاحتياط.
+- **صفحة المقال:** زر مشاركة العلني مطابق + حدث تحليلات `share` يُرسل عبر نفس `/trackVisit`.
+
+### ٤.٤ أداء الصور — WebP + `<picture>`
+- مولّدنا صيغ WebP مضغوطة من الصور الثابتة عبر `sharp` (المولدة إلى `public/assets/*.webp`) مع `BrandMark.tsx` (مكوّن `<picture>` بسقوط JPG/PNG) في: الناف بار، الفوتر، الشعار في المخطط الزمني، وقسم About (مع `srcSet`/`sizes`).
+
+### ٤.٥ إصلاح JSON-LD للشعار
+- شعار Organization في توصيف المقالات أصبح يشير إلى `https://dralhasanalsaiem.com/assets/3.jpg` — لتمرير متطلبات Google للشعار في النتائج الغنية.
+
+### التحقق + النشر
+- محليًا (بعد إبعاد `hb.wasm`): satori → SVG (34,267 حرفًا، تعريب سليم) → resvg → PNG بصيغة magick سليمة.
+- نُشر Convex على `kindly-anaconda-422` (`--typecheck enable`)، وتحقّق بنقطتين: `/og-image` يرجع 1200×630 PNG (AR ≈168 KB، EN ≈179 KB)؛ `/og-meta` معروض لبوتات على النطاق الحقيقي و`og:image` فيه يحمل PNG فعليًا.
+- `npx convex typecheck` و`npm run build` وESLint كلها نظيفة. الالتزام والدفع: **`0be1cb1`** (`feat: branded OG card generator, blog card share buttons, WebP assets, JSON-LD logo fix` — 19 ملفًا) → Vercel نشر تلقائيًا، والتحقق من الإنتاج نجح.
+- ملاحظة: `CONVEX_SITE_URL` غير مضبوط كمتغير؛ `http.ts` يعتمد على `https://kindly-anaconda-422.convex.site` المضمّن (يعمل وينفع للعناكب).

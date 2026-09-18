@@ -1,7 +1,8 @@
 # Convex Deploy Report — Password Auth (Attempt)
 
-> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17).
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (latest refresh 2026-09-18).
 > **Update 2026-09-17:** the deploy later succeeded; production runs on `kindly-anaconda-422`. The failed attempt here targeted the obsolete slug `gregarious-perch-128`.
+> **Update 2026-09-18:** re-deployed successfully to `kindly-anaconda-422` (`CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable`). Adds the `og_image` node action + the `/og-image` binary HTTP route (branded 1200×630 share PNGs) and the `/og-meta` crawler shell helper; `harfbuzzjs` wasm loading is patched via patch-package. Verified live: `/og-image?slug=…` returns a valid PNG. See `report 9-14-26.md` §4.
 
 - **Date:** 2026-09-13
 - **Repository:** `abo3dam-hub/alhasan-aesthetics`

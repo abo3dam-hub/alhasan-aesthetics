@@ -6,24 +6,30 @@
 
 Generated: September 12, 2026
 Repository: https://github.com/abo3dam-hub/alhasan-aesthetics
-Production URL: https://dralhasan-three.vercel.app/
+Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel; auto-deployed from `main`)
 
 ---
 
-## ⚠️ CURRENT STATUS — refreshed 2026-09-17 (supersedes any conflicting detail below)
+## ⚠️ CURRENT STATUS — refreshed 2026-09-18 (supersedes any conflicting detail below)
 
 > This document was generated on **2026-09-12**. Everything below is still largely accurate for structure, but the following facts have changed. Where the body conflicts with this block, **this block is authoritative**.
 
-- **Git HEAD:** `6666806` (`docs: document visit analytics feature in project report`), branch `main`, clean and pushed.
+- **Git HEAD:** `0be1cb1` (`feat: branded OG card generator, blog card share buttons, WebP assets, JSON-LD logo fix`), branch `main`, clean and pushed.
 - **Authentication:** migrated from Email-OTP/Anonymous to the Convex Auth **`Password`** provider (scrypt-hashed, email + password). Exactly **two admin accounts** are enforced atomically; the old Freebuff/OTP dependency is no longer in the active auth path. Any Email-OTP/Anonymous/Freebuff wording below is historical.
-- **Production Convex deployment:** `kindly-anaconda-422` (not `gregarious-perch-128`, which was a prior target/dev slug).
-- **Admin Dashboard:** now **10 tabs** — Overview, **Analytics**, Homepage, Procedures, Before & After, Testimonials, FAQ, SEO, Settings, Media.
+- **Production Convex deployment:** `kindly-anaconda-422` (not `gregarious-perch-128`, which was a prior target/dev slug). HTTP-effecting actions are served on `https://kindly-anaconda-422.convex.site`.
+- **Admin Dashboard:** now **11 tabs** — Overview, Analytics, Homepage CMS, Procedures, Before & After, Testimonials, FAQ, Articles, SEO, Settings, Media.
+- **New feature — Blog:** bilingual (AR/EN) patient-education articles at `/blog` and `/blog/:slug`. CMS-driven (Dashboard → **Articles**), with cover + OG images, SEO fields, `Article`/`NewsArticle` JSON-LD, sitemap inclusion, and `seed.seedArticles`. See README → "Blog (Articles)".
+- **New feature — Branded OG share-card generator:** `src/convex/og_image.tsx` (a Convex `"use node"` **action**, not a query) renders 1200×630 PNG share cards with Satori + `@resvg/resvg-wasm` at **request time**; `/og-image?slug=…` serves them with a 1-day cache. Because Convex sandboxes block the filesystem, `harfbuzzjs` (Arabic shaping, pinned by satori) is **patched via patch-package** to load its wasm from jsDelivr — the patch lives at `patches/harfbuzzjs+0.10.0.patch` and is re-applied by `postinstall`. Convex actions return the PNG as an `ArrayBuffer` (not `Uint8Array`, which Convex rejects).
+- **New feature — crawler meta shell (`/og-meta`):** `middleware.ts` on the Vercel edge serves an HTML shell with `og:image` = `/og-image?slug=…` to bot user agents (Twitterbot, WhatsApp, etc.); human UAs receive the SPA. This is what makes article links unfurl as branded previews.
+- **New feature — Share buttons:** blog-list cards + article pages include a share button (`CardShareButton` / article share): native Web Share API → clipboard copy fallback; tracked as a `share` analytics event.
 - **New feature — Visit Analytics:** in-DB page-view + visitor-country tracking. Tables `pageVisits` and `ipCountryCache`; module `src/convex/analytics.ts` (`insertVisit`, `saveIpCache`, `getIpCache`, `getStats`, `purgePath`); HTTP endpoints `/trackVisit` (POST + OPTIONS) and `/sitemap.xml`; client tracker `src/components/AnalyticsTracker.tsx`. No third-party analytics and no raw IP stored (hashed then discarded). See README → "Visit Analytics".
+- **Image performance:** static brand assets now ship as optimized **WebP** (`assets/*.webp`, generated with `sharp`) via `<picture>` in `BrandMark.tsx` (navbar, footer, timeline logo, About); the About image uses `srcSet`/`sizes`. JSON-LD organization logo URL fixed to `https://dralhasanalsaiem.com/assets/3.jpg`.
 - **Typography:** current fonts are **Cairo** (Arabic body) + **El Messiri** (Arabic headings) + Inter + Playfair Display — not Noto Kufi.
-- **UX polish added:** champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, film-grain overlay, animated hero scroll hint, two-cards-per-row grids at all breakpoints, and flip-style homepage before/after cards.
-- **Environment variables:** `VITE_CONVEX_URL` (required) and `VITE_CONVEX_SITE_URL` (optional; auto-derived from `.convex.cloud` → `.convex.site`). `JWT_PRIVATE_KEY` / `JWKS` remain server-side secrets.
-- **Build health:** `tsc` clean, ESLint **0 errors / 26 benign warnings**, `vite build` green; entry chunk ≈339.9 KB (gzip ≈105.5 KB).
-- **Domain:** canonical remains the placeholder `dr-alhasan.com`; the real domain `alhasanalsaiem.com` is added in project settings but not yet wired in Vercel.
+- **UX polish added:** champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, film-grain overlay, animated hero scroll hint, two-cards-per-row grids at all breakpoints, flip-style homepage before/after cards, and a responsive 2×2 footer layout on mobile.
+- **Environment variables:** `VITE_CONVEX_URL` (required) and `VITE_CONVEX_SITE_URL` (optional; auto-derived from `.convex.cloud` → `.convex.site`). `JWT_PRIVATE_KEY` / `JWKS` remain server-side secrets. Note: `CONVEX_SITE_URL` is not yet set on the deployment — `http.ts` falls back to the hardcoded `https://kindly-anaconda-422.convex.site`, which works.
+- **Build health:** `tsc` clean, ESLint **0 errors / 26 benign warnings**, `vite build` green; entry chunk ≈342 KB (gzip ≈104 KB).
+- **Domain:** the real domain **`dralhasanalsaiem.com`** is now fully wired in Vercel and is **live in production** — all canonical/OG/JSON-LD/sitemap/robots references point at it (superseding the placeholder `dr-alhasan.com`, which is not registered in DNS). Verified: `curl -A "Twitterbot" https://dralhasanalsaiem.com/blog/<slug>` returns the `/og-meta` shell whose `og:image` resolves to a valid 1200×630 PNG.
+- **Infra notes:** `package.json` has a `postinstall: patch-package` script (do not remove). `src/convex/_generated` is gitignored (only `api.d.ts` is tracked) — regenerate with `npx convex dev --once` / deploy.
 - **Canonical reference:** for the most current, self-contained overview read `README.md`; for the latest session log read `report 9-14-26.md`.
 
 ---
@@ -69,7 +75,7 @@ Production URL: https://dralhasan-three.vercel.app/
 **Purpose:** Bilingual (Arabic/English) marketing website + admin CMS for a plastic surgery practice
 **Languages:** Arabic (RTL, primary), English (LTR, secondary)
 **Design Theme:** Light Glassmorphism — translucent panels, blur, warm ivory/charcoal/champagne palette
-**Primary Domain:** https://dr-alhasan.com (configured in SEO sitemap)
+**Primary Domain:** https://www.dralhasanalsaiem.com (configured in SEO sitemap, canonical/OG/JSON-LD)
 
 ---
 

@@ -1,6 +1,6 @@
 # Procedures Restructure + Homepage Information Card — Implementation Report
 
-> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17).
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written 2026-09-13; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (latest refresh 2026-09-18).
 
 Date: 2026-09-13
 Commit: `feat: restructure procedures and add homepage information card`

@@ -1,6 +1,6 @@
 # Dr.AlHasan — Phase 2 Implementation Verification Audit
 
-> **🗄️ HISTORICAL SNAPSHOT — archived.** Written September 1, 2026; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (refreshed 2026-09-17). Details such as auth method, deployment status, and active features may be outdated.
+> **🗄️ HISTORICAL SNAPSHOT — archived.** Written September 1, 2026; reflects the project **as of that date**, not now. For the current state see `README.md`, `PROJECT-MASTER-HANDOVER.md`, and `report 9-14-26.md` (latest refresh 2026-09-18). Details such as auth method, deployment status, and active features may be outdated.
 
 **Date:** September 1, 2026
 **Auditor:** Buffy (Codebuff AI)
