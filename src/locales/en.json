@@ -193,7 +193,9 @@
     "bookSubtitle": "Book a private consultation with Dr. Al Hasan Al Saiem for a clear, personalised plan.",
     "bookCta": "Book your consultation",
     "notFound": "Sorry, we could not find this article.",
-    "share": "Share article"
+    "share": "Share article",
+    "shareCopied": "Article link copied to clipboard",
+    "shareFailed": "Could not copy the link"
   },
   "proceduresPage": {
     "title": "Our Procedures",

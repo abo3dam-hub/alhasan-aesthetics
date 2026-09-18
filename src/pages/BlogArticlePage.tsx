@@ -4,10 +4,12 @@ import { useQuery } from "convex/react";
 import { useParams, Link } from "react-router";
 import { useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
-import { ArrowRight, ArrowLeft, Calendar, Clock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import GlassNavbar from "@/components/GlassNavbar";
 import { ResolvedImage } from "@/components/ResolvedImage";
+import { trackEvent } from "@/lib/track";
 
 function formatDate(ts: number, locale: string): string {
   try {
@@ -95,6 +97,27 @@ export default function BlogArticlePage() {
     const raw = doctorSettings?.phone || "";
     return raw.replace(/[^0-9+]/g, "");
   }, [doctorSettings]);
+
+  const handleShare = async () => {
+    const slug = display?.slug ?? "";
+    trackEvent("share", `article/${slug}`);
+    const url = `https://dr-alhasan.com/blog/${slug}`;
+    const text = seoDesc || title || t.blogPage.title;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch {
+        // User cancelled the native share sheet — no-op.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t.blogPage.shareCopied);
+    } catch {
+      toast.error(t.blogPage.shareFailed);
+    }
+  };
 
   useEffect(() => {
     if (!display) return;
@@ -244,6 +267,14 @@ export default function BlogArticlePage() {
                   {display.readingMinutes} {t.blogPage.minutes}
                 </span>
               )}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="ms-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-card text-sm font-medium text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+              >
+                <Share2 className="h-4 w-4" />
+                {t.blogPage.share}
+              </button>
             </div>
           </div>
 
