@@ -17,8 +17,8 @@
     "subtitle": "We bring your vision to life with the latest surgical techniques and world-class standards. Your trust and beauty are our absolute priority.",
     "cta": "Book Your Consultation & Get Pricing",
     "ctaSecondary": "Explore Procedures",
-    "trust1": "+15 Years Experience",
-    "trust2": "+5000 Successful Surgeries",
+    "trust1": "15+ Years of Experience",
+    "trust2": "5,000+ Successful Surgeries",
     "trust3": "100% Natural Results"
   },
   "about": {
@@ -26,10 +26,10 @@
     "title": "Expertise That Merges",
     "titleHighlight": "Science & Beauty",
     "description": "Dr. Al Hasan Al Saiem is a board-certified aesthetic and plastic surgeon with over 15 years of experience transforming the lives of thousands of patients through natural, refined results. Specialized in face & neck lift, rhinoplasty, liposuction & fat injection, and all advanced aesthetic procedures.",
-    "experience": "Years Experience",
+    "experience": "Years of Experience",
     "procedures": "Successful Procedures",
     "satisfaction": "Satisfaction Rate",
-    "certification": "International Certification"
+    "certification": "International Certifications"
   },
   "procedures": {
     "badge": "Our Procedures",
@@ -61,7 +61,7 @@
   },
   "informationCard": {
     "badge": "Patient Guide",
-    "title": "Information Every Woman Considering Cosmetic Surgery Should Know",
+    "title": "What Every Woman Considering Cosmetic Surgery Should Know",
     "content": "Before considering any cosmetic surgery, it is important that you are fully informed about the stages of the procedure, the recovery period, and realistic expectations. Our team accompanies you step by step and explains every detail with honesty and full transparency.",
     "ctaText": "Book Your Free Consultation"
   },

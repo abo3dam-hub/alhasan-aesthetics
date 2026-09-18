@@ -41,7 +41,7 @@ export function FloatingSocial() {
 
   return (
     <div
-      className={cnPosition(isRtl) + " fixed bottom-20 sm:bottom-6 z-[70] flex flex-col items-end gap-3"}
+      className={cnPosition(isRtl) + " fixed bottom-6 z-[70] flex flex-col items-end gap-3"}
     >
       <div className="flex flex-col items-center gap-2.5">
         {showTop && (

@@ -346,6 +346,14 @@
 ### ب) تحسين قبل/بعد في الرئيسية
 - استُبدل «القلب» في بطاقات الرئيسية بمكوّن **مقارنة بالسحب** (drag-to-compare): مقبض مركزي متحرك، `touch-action: pan-y` للسماح بالتمرير الرأسي، دعم لوحة المفاتيح (الأسهم)، واتجاه RTL/LTR صحيح (الجانب «قبل» يتبع اتجاه اللغة). الحدود مقيّدة 8–92% لإبقاء المقبض ظاهرًا.
 
+### ج) إزالة الشريط السفلي العائم + تدقيق الترجمة الإنكليزية
+- **أُزيل `MobileCTABar.tsx`** (شريط «اتصل الآن / احجز استشارتك» السفلي في الجوال) نهائيًا: حُذف المكوّن وتركيبه في `main.tsx`، وأُزيلت إزاحة `padding-bottom` للجسم في `index.css`، وأعيد زر واتساب العائم إلى موضعه السفلي (`bottom-6`).
+- **تدقيق الترجمة الإنكليزية** وتصحيح النسخ الحيّ في قاعدة البيانات عبر `seed:polishEnglishCopy` (لا يمس أي نصوص عربية):
+  - Hero: زر CTA «Book Your Consultation & Get Pricing»، وشارات الثقة «10+ Years of Experience» و«5,000+ Successful Surgeries» و«Natural, discreet results tailored to each case» و«Honest, realistic expectations from the start».
+  - About: تصحيح اسم الطبيب إلى «Dr. Al Hasan Al Saiem» ونقطة إغلاق، و«Years of Experience».
+  - Information Card: إصلاح جملة مكسورة كانت تعلّق «…informed.is complete.» وإصلاح خطأ «Alsaiemem»، والعنوان «What Every Woman Considering Cosmetic Surgery Should Know».
+- حُدِّثت الافتراضات في `seed.ts` و`en.json` و`migration.ts` لتطابق النسخة المصقولة عند أي seed مستقبلي.
+
 ### التحقق
 - `/trackVisit` سجّل حدث `whatsapp` بنجاح عبر `curl`، وظهر في `analytics.getStats`، ثم حُذف الحدث التجريبي عبر `purgePath`.
-- `tsc` نظيف، ESLint 0 أخطاء/26 تحذيرًا، `vite build` أخضر (entry 341.78KB / gzip 106.09KB)، ونُشر Convex على `kindly-anaconda-422`.
+- `tsc` نظيف، ESLint 0 أخطاء/26 تحذيرًا، `vite build` أخضر، ونُشر Convex على `kindly-anaconda-422`.

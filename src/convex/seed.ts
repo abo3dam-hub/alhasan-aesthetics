@@ -135,15 +135,15 @@ export const seedHomepageSettings = mutation({
       descriptionAr: "نحول رؤيتك إلى واقع بأحدث التقنيات الجراحية وبمعايير عالمية. ثقتك وجمالك هما أولويتنا المطلقة.",
       descriptionEn: "We bring your vision to life with the latest surgical techniques and world-class standards. Your trust and beauty are our absolute priority.",
       ctaTextAr: "احجز استشارتك ومعرفة الأسعار",
-      ctaTextEn: "Book Your Consultation",
+      ctaTextEn: "Book Your Consultation & Get Pricing",
       ctaSecondaryTextAr: "استكشف الإجراءات",
       ctaSecondaryTextEn: "Explore Procedures",
       badgeEnabled: true,
       ctaEnabled: true,
       ctaSecondaryEnabled: true,
       trustBadges: [
-        { labelAr: "+١٥ سنة خبرة", labelEn: "+15 Years Experience", icon: "award", enabled: true },
-        { labelAr: "+٥٠٠٠ عملية ناجحة", labelEn: "+5000 Successful Surgeries", icon: "star", enabled: true },
+        { labelAr: "+١٥ سنة خبرة", labelEn: "15+ Years of Experience", icon: "award", enabled: true },
+        { labelAr: "+٥٠٠٠ عملية ناجحة", labelEn: "5,000+ Successful Surgeries", icon: "star", enabled: true },
         { labelAr: "نتائج طبيعية ١٠٠٪", labelEn: "100% Natural Results", icon: "sparkles", enabled: true },
       ],
     });
@@ -159,7 +159,7 @@ export const seedHomepageSettings = mutation({
       descriptionAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة. متخصص في شد الوجه والرقبة، تجميل الأنف، شفط وحقن الشحم، وجميع إجراءات التجميل المتقدمة.",
       descriptionEn: "Dr. Al Hasan Al Saiem is a board-certified aesthetic and plastic surgeon with over 15 years of experience. Specializing in Face & Neck Lift, Rhinoplasty, Liposuction & Fat Transfer, and all advanced aesthetic procedures.",
       stats: [
-        { icon: "clock", value: "15+", labelAr: "سنوات خبرة", labelEn: "Years Experience", enabled: true },
+        { icon: "clock", value: "15+", labelAr: "سنوات خبرة", labelEn: "Years of Experience", enabled: true },
         { icon: "heart", value: "5000+", labelAr: "إجراء ناجح", labelEn: "Successful Procedures", enabled: true },
         { icon: "users", value: "99%", labelAr: "نسبة الرضا", labelEn: "Patient Satisfaction", enabled: true },
         { icon: "award", value: "10+", labelAr: "شهادة دولية", labelEn: "Certifications", enabled: true },
@@ -411,5 +411,72 @@ export const seedAll = mutation({
     } // end if (!existingFaq)
 
     return `Seed complete: procedures ${existingProcedures ? "already exist" : "created"}, testimonials ${existingTestimonials ? "already exist" : "created"}, FAQ ${existingFaq ? "already exist" : "created"}`;
+  },
+});
+
+/**
+ * Polishes the live English copy of home-page CMS settings (hero badges/CTA,
+ * about description & stats, information card) that was seeded before the
+ * professional English pass. Only rewrites the exact fields listed below and
+ * leaves every other field — including all Arabic text — untouched.
+ */
+export const polishEnglishCopy = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const changed: string[] = [];
+
+    async function patchSetting(
+      key: string,
+      apply: (value: Record<string, unknown>) => void,
+    ) {
+      const doc = await ctx.db
+        .query("siteSettings")
+        .withIndex("by_key", (q) => q.eq("key", key))
+        .first();
+      if (!doc) return;
+      const value = { ...(doc.value as Record<string, unknown>) };
+      apply(value);
+      await ctx.db.patch(doc._id, { value });
+      changed.push(key);
+    }
+
+    // ─── Hero ───
+    await patchSetting("hero", (v) => {
+      if (v.ctaTextEn === "Book Your Consultation") {
+        v.ctaTextEn = "Book Your Consultation & Get Pricing";
+      }
+      const badges = (v.trustBadges as Array<Record<string, unknown>> | undefined) ?? [];
+      const badge = (old: string) => badges.find((b) => b.labelEn === old);
+      const b1 = badge("+10 Years Experience ");
+      if (b1) b1.labelEn = "10+ Years of Experience";
+      const b2 = badge("+5000 Successful Surgeries");
+      if (b2) b2.labelEn = "5,000+ Successful Surgeries";
+      const b3 = badge("Natural results that respect the specific nature of the case.");
+      if (b3) b3.labelEn = "Natural, discreet results tailored to each case";
+      const b4 = badge(" We are not overstating expectations.");
+      if (b4) b4.labelEn = "Honest, realistic expectations from the start";
+    });
+
+    // ─── About ───
+    await patchSetting("about", (v) => {
+      if (typeof v.descriptionEn === "string") {
+        v.descriptionEn = v.descriptionEn
+          .replace("Dr. Alhasan Alsaiem", "Dr. Al Hasan Al Saiem")
+          .trimEnd()
+          .concat(".");
+      }
+      const stats = (v.stats as Array<Record<string, unknown>> | undefined) ?? [];
+      const years = stats.find((s) => s.labelEn === "Years Experience");
+      if (years) years.labelEn = "Years of Experience";
+    });
+
+    // ─── Information Card ───
+    await patchSetting("informationCard", (v) => {
+      v.titleEn = "What Every Woman Considering Cosmetic Surgery Should Know";
+      v.contentEn =
+        "At Dr. Al Hasan Al Saiem's practice, we believe that a proper understanding of your aesthetic needs is the foundation of confidence and safety. We provide you with the essential information you need before making any decision about a cosmetic procedure.\n\nWe begin with a comprehensive assessment of your health, medical history and expectations. We then explain the procedure with clarity and full transparency — its nature, duration, recovery stages and realistic expected outcomes — without exaggerated promises. The decision is always yours, made once you are fully informed.";
+    });
+
+    return `Polish complete. Updated: ${changed.join(", ") || "none"}.`;
   },
 });

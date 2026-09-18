@@ -238,7 +238,7 @@ export const DEFAULT_INFORMATION_CARD = {
   badgeAr: "معلومات مهمة",
   badgeEn: "Patient Guide",
   titleAr: "معلومات على كل سيدة تنوي إجراء جراحة تجميلية معرفتها",
-  titleEn: "Information Every Woman Considering Cosmetic Surgery Should Know",
+  titleEn: "What Every Woman Considering Cosmetic Surgery Should Know",
   contentAr:
     "في د. الحسن الصايم، نؤمن بأن المعرفة الصحيحة هي أساس الثقة والسلامة. نضع بين يديكِ المعلومات الأساسية التي تحتاجين معرفتها قبل اتخاذ أي قرار يتعلق بإجراء تجميلي.\n\nنبدأ بتقييم شامل لصحتك وتاريخك الطبي وتوقعاتك، ثم نشرح لكِ الإجراء بوضوح وشفافية: طبيعته، ومدته، ومراحل التعافي، والنتائج الواقعية المتوقعة، دون أي وعود مبالغ فيها. قرارك أولاً وبعد اكتمال معرفتك.",
   contentEn:

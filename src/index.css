@@ -361,10 +361,3 @@
     scroll-behavior: auto !important;
   }
 }
-
-/* Keep page content clear of the sticky mobile conversion bar */
-@media (max-width: 639px) {
-  body {
-    padding-bottom: 4.5rem;
-  }
-}

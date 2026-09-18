@@ -5,7 +5,6 @@ import { I18nProvider } from "@/i18n";
 import { FloatingSocial } from "@/components/FloatingSocial";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
-import { MobileCTABar } from "@/components/MobileCTABar";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
@@ -196,7 +195,6 @@ createRoot(document.getElementById("root")!).render(
             <ScrollProgress />
             <div className="grain-overlay" aria-hidden="true" />
             <FloatingSocial />
-            <MobileCTABar />
             <Suspense fallback={<RouteLoading />}>
               <AnimatedRoutes />
             </Suspense>

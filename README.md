@@ -1,6 +1,6 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, a sticky mobile conversion bar, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
+Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, and a media library.
 
 Production Convex deployment: `kindly-anaconda-422` (hosted site: `dralhasan-three.vercel.app`).
 
@@ -27,7 +27,6 @@ src/
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu + language toggle
 │   ├── AnalyticsTracker.tsx  # Fire-and-forget page-view tracker (no PII)
-│   ├── MobileCTABar.tsx      # Sticky mobile call + book-consultation bar
 │   ├── ScrollProgress.tsx    # Champagne scroll-progress bar (rAF, framer-free)
 │   ├── MediaSelector.tsx / MediaLibraryModal.tsx
 │   │                   # Media library picker used by every image field
@@ -141,7 +140,7 @@ All CMS mutations are protected server-side via `requireAdmin()`. Authorization 
 A self-contained analytics feature — no third-party script (no GA4/Vercel Analytics) and no personal data stored.
 
 - **Collection:** `AnalyticsTracker` calls `POST /trackVisit` on every route change (excluding `/dashboard` and `/auth`), sending only the path, locale, and a per-session `sessionId` stored in `sessionStorage`.
-- **Conversion events:** WhatsApp and CTA clicks are tracked through the same endpoint via `trackEvent(type, label)` (`src/lib/track.ts`) — wired to the hero CTA, CTA section, floating WhatsApp button, sticky mobile bar, consultation submit, and the contact forms.
+- **Conversion events:** WhatsApp and CTA clicks are tracked through the same endpoint via `trackEvent(type, label)` (`src/lib/track.ts`) — wired to the hero CTA, CTA section, floating WhatsApp button, consultation submit, and the contact forms.
 - **Country resolution:** the visitor IP (from `true-client-ip` / `cf-connecting-ip` / `x-forwarded-for`) is geolocated server-side via `ipwho.is` (fallback `ip-api.com`). The IP is **hashed and immediately discarded** — only the country code is stored.
 - **Caching:** country lookups are cached per IP hash for 24h (`ipCountryCache`), keeping external calls minimal.
 - **Aggregates (`analytics.getStats`, 30-day window):** total visits, today, last 7 days, unique sessions, top pages, country breakdown, a 14-day daily series, plus conversion totals (WhatsApp clicks, CTA clicks) and the top tracked actions.
@@ -214,8 +213,8 @@ Every homepage section pulls data from Convex with translation fallbacks:
 ## Responsive Design & UI Polish
 
 - Mobile-first with responsive breakpoints; **two cards per row on all screen sizes** for procedures, before/after, and testimonials
-- **Sticky mobile conversion bar** (call + book consultation) on all public pages; the floating action stack sits above it
 - Glassmorphism design system with RTL/LTR support
+- Floating action stack (WhatsApp, socials, back-to-top) on public pages
 - Mobile hamburger menu with slide-in animation
 - Interactive before/after slider on the gallery page; **homepage before/after cards are drag-to-compare sliders** (mouse + touch, keyboard accessible) with an animated center handle
 - Testimonial photo thumbnails + full-screen lightbox
