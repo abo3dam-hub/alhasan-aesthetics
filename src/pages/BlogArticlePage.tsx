@@ -84,6 +84,10 @@ export default function BlogArticlePage() {
   const title = display ? (isRtl ? display.titleAr : display.titleEn) : "";
   const body = display ? (isRtl ? display.bodyAr : display.bodyEn) : "";
   const image = display?.ogImage || display?.coverImage;
+  const resolvedImage = useQuery(api.media.resolveUrl, image ? { ref: image } : "skip");
+  const absoluteImage =
+    (resolvedImage && resolvedImage !== "" ? resolvedImage : null) ||
+    (image && image.startsWith("http") ? image : null);
 
   const seoTitle = isRtl
     ? (display?.seoTitleAr || title)
@@ -141,7 +145,7 @@ export default function BlogArticlePage() {
     };
 
     if (seoDesc) setOrCreateMeta("description", seoDesc);
-    if (image) setOrCreateMeta("og:image", image);
+    if (absoluteImage) setOrCreateMeta("og:image", absoluteImage);
     setOrCreateMeta("og:title", seoTitle, true);
     setOrCreateMeta("og:type", "article", true);
     setOrCreateMeta("og:url", `https://dralhasanalsaiem.com/blog/${display.slug}`, true);
@@ -149,7 +153,7 @@ export default function BlogArticlePage() {
     setOrCreateMeta("twitter:card", "summary_large_image");
     setOrCreateMeta("twitter:title", seoTitle);
     if (seoDesc) setOrCreateMeta("twitter:description", seoDesc);
-    if (image) setOrCreateMeta("twitter:image", image);
+    if (absoluteImage) setOrCreateMeta("twitter:image", absoluteImage);
 
     let robots = document.querySelector('meta[name="robots"]');
     if (!display.isPublished) {
@@ -162,7 +166,7 @@ export default function BlogArticlePage() {
     } else if (robots) {
       robots.remove();
     }
-  }, [display, seoTitle, seoDesc, image]);
+  }, [display, seoTitle, seoDesc, image, absoluteImage]);
 
   const jsonLd = useMemo(() => {
     if (!display) return null;
@@ -180,10 +184,7 @@ export default function BlogArticlePage() {
       "@type": "Article",
       headline: title,
       description: seoDesc || undefined,
-      image:
-        display.coverImage && display.coverImage.startsWith("http")
-          ? display.coverImage
-          : undefined,
+      image: absoluteImage ?? undefined,
       author: { "@type": "Person", name: byName },
       publisher,
       datePublished: display.publishDate
@@ -195,7 +196,7 @@ export default function BlogArticlePage() {
       mainEntityOfPage: `https://dralhasanalsaiem.com/blog/${display.slug}`,
       inLanguage: isAr ? "ar" : "en",
     };
-  }, [display, title, seoDesc, isAr]);
+  }, [display, title, seoDesc, isAr, absoluteImage]);
 
   if (article === undefined) {
     return (

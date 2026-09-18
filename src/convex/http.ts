@@ -93,6 +93,104 @@ http.route({
   }),
 });
 
+// ─── Article OG Meta (social share previews) ───
+// Serves a tiny, crawler-friendly HTML document with dynamic Open Graph /
+// Twitter tags for a blog article. Social platforms (WhatsApp, Facebook,
+// Telegram, X, LinkedIn…) fetch the raw HTML of a shared URL and do NOT run
+// JavaScript, so a client-side SPA can never populate these tags for them.
+// The Vercel Edge middleware (middleware.ts) intercepts crawler requests to
+// /blog/:slug and returns the response of this endpoint instead of the SPA.
+http.route({
+  path: "/og-meta",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const slug = (url.searchParams.get("slug") || "").trim().toLowerCase();
+
+    let title = "Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery";
+    let description =
+      "Board-certified aesthetic surgeon with 15+ years experience. " +
+      "Rhinoplasty, facelift, Botox, fillers and all aesthetic procedures. Free consultation.";
+    let image = `${DOMAIN}/assets/1.jpg`;
+    let type = "website";
+    let link = `${DOMAIN}/`;
+
+    if (slug) {
+      link = `${DOMAIN}/blog/${encodeURIComponent(slug)}`;
+      try {
+        const article = await ctx.runQuery(api.articles.getBySlug, { slug });
+        if (article && article.isPublished) {
+          const wantsArabic = (request.headers.get("accept-language") || "")
+            .toLowerCase()
+            .startsWith("ar");
+          title = wantsArabic
+            ? article.seoTitleAr || article.titleAr || title
+            : article.seoTitleEn || article.titleEn || title;
+          description = wantsArabic
+            ? article.seoDescriptionAr || article.excerptAr || description
+            : article.seoDescriptionEn || article.excerptEn || description;
+          let imageRef = article.ogImage || article.coverImage;
+          if (!imageRef && article.relatedProcedureSlug) {
+            try {
+              const proc = await ctx.runQuery(api.procedures.getBySlug, {
+                slug: article.relatedProcedureSlug,
+              });
+              imageRef = proc?.ogImage || proc?.image;
+            } catch {
+              // No procedure image — fall through to the site default.
+            }
+          }
+          if (imageRef) {
+            try {
+              const resolved = await ctx.runQuery(api.media.resolveUrl, {
+                ref: imageRef,
+              });
+              if (resolved) image = resolved;
+              else if (imageRef.startsWith("http")) image = imageRef;
+            } catch {
+              if (imageRef.startsWith("http")) image = imageRef;
+            }
+          }
+          type = "article";
+        }
+      } catch {
+        // Fall through to site defaults — a valid preview is better than none.
+      }
+    }
+
+    const esc = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>${esc(title)}</title>
+<link rel="canonical" href="${esc(link)}" />
+<meta property="og:type" content="${type}" />
+<meta property="og:title" content="${esc(title)}" />
+<meta property="og:description" content="${esc(description)}" />
+<meta property="og:image" content="${esc(image)}" />
+<meta property="og:url" content="${esc(link)}" />
+<meta property="og:site_name" content="Dr. Al Hasan Al Saiem" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${esc(title)}" />
+<meta name="twitter:description" content="${esc(description)}" />
+<meta name="twitter:image" content="${esc(image)}" />
+</head>
+<body></body>
+</html>`;
+
+    return new Response(html, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=300, s-maxage=600, stale-while-revalidate=3600",
+      },
+    });
+  }),
+});
+
 // ─── Analytics Tracker ───
 // Public, fire-and-forget endpoint that records a page visit. The visitor's
 // IP is geolocated server-side (IP is hashed for the cache then discarded —
