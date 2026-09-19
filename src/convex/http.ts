@@ -114,6 +114,7 @@ http.route({
     let image = `${DOMAIN}/assets/1.jpg`;
     let type = "website";
     let link = `${DOMAIN}/`;
+    let publishedIso = "";
 
     if (slug) {
       link = `${DOMAIN}/blog/${encodeURIComponent(slug)}`;
@@ -131,6 +132,9 @@ http.route({
             : article.seoDescriptionEn || article.excerptEn || description;
           image = `${DOMAIN}/og-image?slug=${encodeURIComponent(slug)}`;
           type = "article";
+          publishedIso = article.publishDate
+            ? new Date(article.publishDate).toISOString()
+            : "";
         }
       } catch {
         // Fall through to site defaults — a valid preview is better than none.
@@ -152,12 +156,15 @@ http.route({
 <meta property="og:image" content="${esc(image)}" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="${esc(title)}" />
+${publishedIso ? `\n<meta property="article:published_time" content="${publishedIso}" />` : ""}
 <meta property="og:url" content="${esc(link)}" />
 <meta property="og:site_name" content="Dr. Al Hasan Al Saiem" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${esc(title)}" />
 <meta name="twitter:description" content="${esc(description)}" />
 <meta name="twitter:image" content="${esc(image)}" />
+<meta name="twitter:image:alt" content="${esc(title)}" />
 </head>
 <body></body>
 </html>`;

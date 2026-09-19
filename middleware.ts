@@ -16,7 +16,7 @@
  */
 
 const BOT_REGEX =
-  /facebookexternalhit|facebot|twitterbot|slackbot|discordbot|discord|telegrambot|whatsapp|viber|skypeuri|snapchat|pinterest|linkedinbot|linkedin|bingbot|googlebot|yandex|baiduspider|duckduckbot|ia_archiver|embedly|outbrain|quora|redditbot|sogou|bitlybot|curl|wget|postman/i;
+  /facebookexternalhit|facebookcatalog|facebot|metaexternalagent|twitterbot|slackbot|discordbot|discord|telegrambot|whatsapp|viber|skypeuri|snapchat|pinterest|linkedinbot|linkedin|bingbot|googlebot|yandex|baiduspider|duckduckbot|ia_archiver|embedly|outbrain|quora|redditbot|sogou|bitlybot|line|micromessenger|vkshare|vkShare|curl|wget|postman|node-fetch/i;
 
 const CONVEX_SITE_URL = (
   process.env.VITE_CONVEX_SITE_URL || "https://kindly-anaconda-422.convex.site"
