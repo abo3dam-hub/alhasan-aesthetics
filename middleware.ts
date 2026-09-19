@@ -23,8 +23,25 @@ const CONVEX_SITE_URL = (
 ).replace(/\/$/, "");
 
 export const config = {
-  matcher: ["/blog/:path*"],
+  matcher: ["/blog/:path*", "/og-image"],
 };
+
+async function fetchWithTimeout(
+  url: string,
+  headers: HeadersInit | undefined,
+  ms: number,
+): Promise<Response | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: controller.signal, cache: "no-store", headers });
+    return res;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // The SPA document never changes per request, so cache it per origin with a
 // short TTL to avoid a same-origin fetch on every article visit.
@@ -63,6 +80,39 @@ async function serveSpa(origin: string): Promise<Response> {
 }
 
 export default async function middleware(request: Request) {
+  const url = new URL(request.url);
+
+  // Branded OG share card (PNG): proxy /og-image to the Convex HTTP action for
+  // ANY fetcher (crawlers resolve og:image against the page origin, which is
+  // this Vercel domain). Without this route the SPA's index.html would be
+  // served as the "image", and social platforms would drop the preview.
+  if (url.pathname === "/og-image" && request.method === "GET") {
+    const header = new Headers();
+    const acceptLanguage = request.headers.get("accept-language");
+    if (acceptLanguage) header.set("accept-language", acceptLanguage);
+    const res = await fetchWithTimeout(
+      `${CONVEX_SITE_URL}/og-image${url.search}`,
+      header,
+      8000,
+    );
+    if (res && res.ok) {
+      const body = await res.arrayBuffer();
+      return new Response(body, {
+        headers: {
+          "content-type": res.headers.get("content-type") ?? "image/png",
+          "cache-control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200",
+          "access-control-allow-origin": "*",
+        },
+      });
+    }
+    // Never serve HTML in place of the image — let the crawler drop the image
+    // (text-only card) rather than cache an "invalid image".
+    return new Response("not found", {
+      status: 404,
+      headers: { "cache-control": "no-store" },
+    });
+  }
+
   if (request.method !== "GET") return serveSpa(new URL(request.url).origin);
 
   const userAgent = request.headers.get("user-agent") || "";
@@ -70,32 +120,27 @@ export default async function middleware(request: Request) {
     return serveSpa(new URL(request.url).origin);
   }
 
-  const url = new URL(request.url);
   const match = url.pathname.match(/^\/blog\/([^/]+)\/?$/);
   if (!match) return serveSpa(url.origin);
   const slug = decodeURIComponent(match[1]);
 
+  // Forward the crawler's Accept-Language so Arabic previews keep Arabic
+  // titles/images (Convex decides the language from this header).
+  const header = new Headers();
+  const acceptLanguage = request.headers.get("accept-language");
+  if (acceptLanguage) header.set("accept-language", acceptLanguage);
+
   const endpoint = `${CONVEX_SITE_URL}/og-meta?slug=${encodeURIComponent(slug)}`;
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(endpoint, {
-      signal: controller.signal,
-      cache: "no-store",
+  const res = await fetchWithTimeout(endpoint, header, 5000);
+  if (res && res.ok) {
+    const html = await res.text();
+    return new Response(html, {
+      status: 200,
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=300, s-maxage=300",
+      },
     });
-    clearTimeout(timeout);
-    if (res.ok) {
-      const html = await res.text();
-      return new Response(html, {
-        status: 200,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "public, max-age=300, s-maxage=300",
-        },
-      });
-    }
-  } catch {
-    // Network failure — serve the SPA so the default preview appears.
   }
 
   return serveSpa(url.origin);

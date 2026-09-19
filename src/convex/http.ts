@@ -18,11 +18,6 @@ auth.addHttpRoutes(http);
 // or use the static fallback in public/sitemap.xml.
 const DOMAIN = "https://dralhasanalsaiem.com";
 
-// Origin of this Convex deployment. Facebook/WhatsApp/LinkedIn etc. resolve
-// og:image directly against this public site URL.
-const SITE_ORIGIN =
-  process.env.CONVEX_SITE_URL ?? "https://kindly-anaconda-422.convex.site";
-
 const staticPages = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/ar", changefreq: "weekly", priority: "1.0" },
@@ -134,7 +129,7 @@ http.route({
           description = wantsArabic
             ? article.seoDescriptionAr || article.excerptAr || description
             : article.seoDescriptionEn || article.excerptEn || description;
-          image = `${SITE_ORIGIN}/og-image?slug=${encodeURIComponent(slug)}`;
+          image = `${DOMAIN}/og-image?slug=${encodeURIComponent(slug)}`;
           type = "article";
         }
       } catch {
