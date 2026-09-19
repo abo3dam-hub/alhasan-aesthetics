@@ -420,3 +420,24 @@
 - نُشر Convex على `kindly-anaconda-422` (`--typecheck enable`)، وتحقّق بنقطتين: `/og-image` يرجع 1200×630 PNG (AR ≈168 KB، EN ≈179 KB)؛ `/og-meta` معروض لبوتات على النطاق الحقيقي و`og:image` فيه يحمل PNG فعليًا.
 - `npx convex typecheck` و`npm run build` وESLint كلها نظيفة. الالتزام والدفع: **`0be1cb1`** (`feat: branded OG card generator, blog card share buttons, WebP assets, JSON-LD logo fix` — 19 ملفًا) → Vercel نشر تلقائيًا، والتحقق من الإنتاج نجح.
 - ملاحظة: `CONVEX_SITE_URL` غير مضبوط كمتغير؛ `http.ts` يعتمد على `https://kindly-anaconda-422.convex.site` المضمّن (يعمل وينفع للعناكب).
+
+---
+
+## ٥. جلسة 2026-09-18 (الإصلاح) — صورة المشاركة على WhatsApp
+
+### الشكوى
+عند مشاركة رابط مقال الأنف، ظهر **كرت نصّي** بلا صورة (عنوان المقال + اسم الدكتور + عنوان الموقع) — لا غلاف ولا بطاقة ذات العلامة.
+
+### الأسباب الجذرية (اكتُشفت بالقياس البرمجي، لا بالعين)
+1. **صورة الغلاف لم تكن مدمجة أصلًا:** `toBase64` في `/og-image` كان يستخدم `Buffer.from(...)` الذي **غير معرّف داخل بيئة HTTP action في Convex** → خطأ `ReferenceError: Buffer is not defined` يُبلع بصمت في الـ catch → تُرسم البطاقة بدون الصورة (أُثبت بمقارنة إنتروبيا بالبكسل: منطقة الصورة في البطاقة stdev≈40 مثل الخلفية المسطحة، بينما الصورة الحقيقية ≈77).
+   - **الحل:** مُشفّر Base64 محمول (يدوي، بدون Buffer).
+2. **satori كان يرفض البطاقة التي تحوي `<img>`:** `display: flex` غائب عن حاوية الصورة → خطأ `Expected <div> to have explicit "display: flex" ...` → `500 error generating image`.
+   - **الحل:** إضافة `display: flex` لحاوية الصورة في `src/convex/og_image.tsx` (أُثبت محليًا عبر إعادة إنتاج بـ satori+resvg ثم بالفحص على الإنتاج).
+3. **`og:image` كان على `convex.site` والمسار على نطاق الإنتاج معطّل:** كان `https://dralhasanalsaiem.com/og-image` يُعيد **index.html** (SPA) بدل PNG.
+   - **الحل:** `middleware.ts` أصبح يطابق `/og-image` وبروكسي للـ Convex على **نفس أصل الصفحة** (Vercel edge)، مع توجيه `Accept-Language` من الزاحف حتى يعرض العنوان العربي للأجهزة العربية.
+
+### التحقق النهائي (على الإنتاج)
+- `curl -A WhatsApp … -H "Accept-Language: ar" /blog/when-does-rhinoplasty-final-result-show` → `og:image = https://dralhasanalsaiem.com/og-image?slug=…` + عنوان عربي.
+- نفس رابط الصورة → **HTTP 200, image/png, 1200×630، 477KB**، والغلاف مضمّن فعليًا (stdev المنطقة 69، ألوان 8549 بكسل مميّز — سابقًا ~40/~1270).
+- مؤشر K: الالتزام `d49b0c9` (وسط) + الالتزام الحالي لإصلاح Buffer/satori. مصفوفة Convex: `kindly-anaconda-422` محدّثة.
+- **ملاحظة تخزين:** WhatsApp يخزّن المعاينة حسب الرابط ولا يعيد جلبها فورًا. لمشاهدة المعاينة الجديدة فورًا: شارك الرابط مع إضافة معامل، مثل `https://dralhasanalsaiem.com/blog/when-does-rhinoplasty-final-result-show?v=2` (أو رابط مختصر جديد) — زر التجربة الرسمي يعيد جلب OG.

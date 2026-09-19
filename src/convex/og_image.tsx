@@ -269,6 +269,7 @@ async function renderCard(
                 border: "1px solid rgba(201,169,107,0.55)",
                 overflow: "hidden",
                 flexShrink: 0,
+                display: "flex",
               }}
             >
               <img

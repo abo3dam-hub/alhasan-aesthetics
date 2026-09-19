@@ -155,15 +155,19 @@ Sharing an article on WhatsApp/Twitter/Facebook/LinkedIn shows a **branded
 
 - **`/og-image?slug=…`** (`GET`) — renders the card server-side
   (`src/convex/og_image.tsx`, a Convex `"use node"` action): Satori lays out the
-  Arabic/English title + excerpt over the article's cover image (with a
-  branded dark-glass overlay), then `@resvg/resvg-wasm` rasterizes the SVG to a
-  PNG. No client-side canvas or HTML → zero layout shift, works for any crawler.
-  Results are cached server-side by slug+lang for a day
+  Arabic/English title beside a rounded framed panel carrying the article's
+  cover image, over the branded gold-on-dark glass background, then
+  `@resvg/resvg-wasm` rasterizes the SVG to a PNG. No client-side canvas or
+  HTML → zero layout shift, works for any crawler. Results are cached
+  server-side by slug+lang for a day
   (`Cache-Control: public, max-age=86400, stale-while-revalidate=43200`).
 - **`/og-meta`** (`GET`, served by `middleware.ts` on Vercel edge to crawler UAs)
   — returns an HTML shell whose `meta[property=og:image]` points at
-  `/og-image?slug=<article>&lang=<…>` with the right `og:image:width/height`,
-  so scrapers like Twitterbot/WhatsApp fetch the PNG directly.
+  `/og-image?slug=<article>&lang=<…>` **on the same production origin**, with the
+  right `og:image`/`og:image:width`/`og:image:height`, so scrapers like
+  Twitterbot/WhatsApp fetch the PNG directly. The Vercel edge also proxies
+  `/og-image` itself (it is not a Vercel route) and forwards the crawler's
+  `Accept-Language`, so Arabic devices get Arabic previews.
 - **Fallbacks:** if an article has no cover image a branded graphic-only
   fallback is rendered; if rendering still fails the route falls back to a
   static OG-ready asset.
