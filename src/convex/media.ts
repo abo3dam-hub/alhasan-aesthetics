@@ -169,7 +169,9 @@ export const resolveUrls = query({
           const resolved = await ctx.storage.getUrl(ref as Id<"_storage">);
           if (resolved) { results[ref] = resolved; continue; }
         } catch { /* fall through */ }
-        results[ref] = ref;
+        // Unresolvable storageId — return empty (matches resolveUrl) so the
+        // "No image" fallback renders instead of a broken storageId as src.
+        results[ref] = "";
         continue;
       }
 

@@ -1,4 +1,3 @@
-import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
 import { I18nProvider } from "@/i18n";
