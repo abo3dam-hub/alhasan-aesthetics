@@ -1,7 +1,7 @@
-# تقرير وضع المشروع — محدّث 18-9-2026
+# تقرير وضع المشروع — محدّث 19-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
-**الفرع:** `main` — HEAD: `0be1cb1` (شجرة نظيفة، مرفوع لـ GitHub)
+**الفرع:** `main` — HEAD: `0be1cb1` (نهاية جلسة 18-9) → **`dc29c4e`** (جلسة 19-9، راجع §6)
 
 ---
 
@@ -441,3 +441,25 @@
 - نفس رابط الصورة → **HTTP 200, image/png, 1200×630، 477KB**، والغلاف مضمّن فعليًا (stdev المنطقة 69، ألوان 8549 بكسل مميّز — سابقًا ~40/~1270).
 - مؤشر K: الالتزام `d49b0c9` (وسط) + الالتزام الحالي لإصلاح Buffer/satori. مصفوفة Convex: `kindly-anaconda-422` محدّثة.
 - **ملاحظة تخزين:** WhatsApp يخزّن المعاينة حسب الرابط ولا يعيد جلبها فورًا. لمشاهدة المعاينة الجديدة فورًا: شارك الرابط مع إضافة معامل، مثل `https://dralhasanalsaiem.com/blog/when-does-rhinoplasty-final-result-show?v=2` (أو رابط مختصر جديد) — زر التجربة الرسمي يعيد جلب OG.
+
+---
+
+## ٦. جلسة 2026-09-19 — تسليم Codespaces + إغلاق بند الأدمن + مراجعة التقارير + Refactor الداشبورد
+
+### ٦.١ إعداد Codespaces وحالة التحقق
+- إعداد كامل (npm / patch-package / env / فحص قراءة-only للتقارير) موثّق في `CODESPACES-SETUP-REPORT.md`؛ فحص الحالة: `tsc` نظيف، ESLint 0 أخطاء (~30 تحذيرًا سابقًا)، build أخضر، الالتزام `f7c85de`.
+- جولة تدقيق شاملة (قراءة-only) → `PROJECT-HANDOVER-AUDIT.md` (الالتزام `e2a575b`).
+
+### ٦.٢ إغلاق بند الأدمن نهائيًا
+- أنشأ المالك حسابَي admin على Production `kindly-anaconda-422` بنجاح، وعند محاولة إنشاء ثالث ظهرت رسالة الرفض «Registration is closed…» → **حدّان-admin يعمل ذريًا** كما في `src/convex/auth.ts`؛ بذلك أُغلق آخر بند مفتوح من قائمة الجلسات السابقة.
+
+### ٦.٣ مراجعة جميع التقارير
+- مراجعة 26 ملف تقرير في المستودع ومطابقتها بالكود الحالي → `REPORTS-AUDIT.md` (الالتزام `df79c19`). الحاصلة: 5 مصادر حقيقة حاليّة، 4 تقارير مرفقة بـ banner تصحيحي، والباقي أرشيف تاريخي.
+
+### ٦.٤ Refactor الداشبورد (إغلاق TD-1)
+- `src/pages/Dashboard.tsx` (Monolith ~2050 سطرًا) → shell (~48 سطرًا) يدير auth/active tab/sign-out/layout فقط.
+- كل تبويب مكوّن مستقل في `src/components/dashboard/`: `DashboardOverviewTab`، `DashboardAnalyticsTab`، `DashboardProceduresTab` (مع `ProcedureForm`)، `DashboardBeforeAfterTab`، `DashboardTestimonialsTab`، `DashboardFaqTab`، `DashboardSettingsTab`، `DashboardMediaTab` (مع أداة الرفع وكل سلوك storageId/references)؛ إضافة إلى `HomepageCMSTab`/`ArticlesTab`/`SEOTab` السابقين، و`DashboardLayout` + `DashboardNav` + `dashboard-utils.ts` (مشترك `swapOrder`/`OrderableItem`).
+- تحقق: `npx tsc -b` نظيف، ESLint 0 أخطاء، build أخضر بنفس حجم الـ entry (342.22KB/gzip 106.24KB). الالتزام الوحيد: **`dc29c4e`** (`refactor: split monolithic dashboard into modular tabs`).
+
+### ٦.٥ تحديث الوثائق المرتبطة
+- حدّثت `PROJECT-MASTER-HANDOVER.md` (كتلة CURRENT STATUS + شجرة الملفات + قسم Dashboard + TD-1 + Fragile Areas + Recommended First Investigation)، `PROJECT-HANDOVER-AUDIT.md` (§1.5 + جدول TD)، `REPORTS-AUDIT.md` (تحديثات + §5)، و`README.md` (الشجرة) بما يطابق البنية الجديدة. بند **TD-1** صار **محلولًا**.

@@ -37,7 +37,10 @@ src/
 │   ├── ResolvedImage.tsx / MediaDiagnostics.tsx
 │   ├── ImageUpload.tsx # Convex storage upload component
 │   ├── BrandMark.tsx   # <picture> WebP logo/avatar with JPG/PNG fallback
-│   └── RequireAuth.tsx # Auth guard
+│   ├── RequireAuth.tsx # Auth guard
+│   └── dashboard/      # Admin CMS tabs: Dashboard*,Tab.tsx (Overview, Analytics, Procedures,
+│                       #   Before & After, Testimonials, FAQ, Settings, Media) + HomepageCMSTab,
+│                       #   ArticlesTab, SEOTab, DashboardLayout, DashboardNav, dashboard-utils.ts
 ├── lib/
 │   ├── procedureIcons.tsx    # SVG + Lucide icon registry keyed by icon slug
 │   ├── track.ts              # Frontend analytics client (page views + events)
@@ -66,7 +69,7 @@ src/
 │   └── auth/                 # Auth providers (Password)
 ├── pages/
 │   ├── Landing.tsx            # Homepage (all sections CMS-driven with toggle)
-│   ├── Dashboard.tsx          # Full Admin CMS dashboard (11 tabs)
+│   ├── Dashboard.tsx          # Admin CMS shell (tabs live in components/dashboard/)
 │   ├── ProcedureDetail.tsx    # Individual procedure page (CMS-driven + SEO)
 │   ├── ProceduresPage.tsx     # All-procedures listing page
 │   ├── BlogListPage.tsx       # Blog listing (/blog) — featured + grid of articles

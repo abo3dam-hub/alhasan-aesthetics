@@ -6,6 +6,10 @@
 > **تحديث 2026-09-19 (تحقق حي على Production):** تم إنشاء حسابَي admin بنجاح، وعند محاولة
 > إنشاء حساب ثالث ظهرت رسالة الرفض («Registration is closed…») — **حدّان-admin يعمل كما هو
 > موثق في `src/convex/auth.ts`**. بذلك أُغلق آخر بند مفتوح في قائمة `report 9-14-26.md` §4.
+>
+> **تحديث 2026-09-19 (Refactor):** `src/pages/Dashboard.tsx` قُسِّم من Monolith (~2050 سطراً) إلى
+> shell (~48 سطراً) + مكونات تبويبات مستقلة في `src/components/dashboard/` (commit `dc29c4e`).
+> **بند TD-1 حُلّ** — انظر §5 أدناه.
 **المنهجية:** مراجعة كل ملف تقرير في المستودع (26 ملفاً) ومطابقته مع **الكود الفعلي الحالي** (auth، schema، http، main.tsx، middleware، vercel.json، env) ومع كتلة **"CURRENT STATUS — refreshed 2026-09-18"** في `PROJECT-MASTER-HANDOVER.md`.
 
 ---
@@ -98,7 +102,9 @@
 
 - `resolveUrls` (مجمّع الروابط) في `src/convex/media.ts:172` يعيد **raw storageId** عند الفشل، بينما
   `resolveUrl` الفردي يعيد `""` — فرق سلوكي محتمل (لم يُعنَّن كـbug في أي تقرير؛ ملاحظة من المراجعة نفسها).
-- `Dashboard.tsx` أكبر قليلاً من الرقم المذكور بالوثائق (~2050 مقابل 1600 سطراً) — بقايا monolith.
+- ~~`Dashboard.tsx` monolith (~2050 سطراً)~~ → **حُلّ (2026-09-19، `dc29c4e`):** الملف صار shellاً
+  (~48 سطراً) وكل تبويب مكوّن مستقل في `src/components/dashboard/` (`Dashboard*Tab.tsx` +
+  `DashboardLayout`/`DashboardNav`/`dashboard-utils.ts`)؛ الملاحظة القديمة أعلاه صارت تاريخية.
 - صفحة `/auth` إنجليزية دائماً (بند TD-10 قائم، تحقّقنا: لا i18n في `Auth.tsx`).
 
 ---

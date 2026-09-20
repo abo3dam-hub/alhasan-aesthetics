@@ -18,6 +18,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 - **Authentication:** migrated from Email-OTP/Anonymous to the Convex Auth **`Password`** provider (scrypt-hashed, email + password). Exactly **two admin accounts** are enforced atomically; the old Freebuff/OTP dependency is no longer in the active auth path. Any Email-OTP/Anonymous/Freebuff wording below is historical.
 - **Production Convex deployment:** `kindly-anaconda-422` (not `gregarious-perch-128`, which was a prior target/dev slug). HTTP-effecting actions are served on `https://kindly-anaconda-422.convex.site`.
 - **Admin Dashboard:** now **11 tabs** — Overview, Analytics, Homepage CMS, Procedures, Before & After, Testimonials, FAQ, Articles, SEO, Settings, Media.
+- **Admin Dashboard structure (refactored 2026-09-19, `dc29c4e`):** `src/pages/Dashboard.tsx` is now a thin shell (~48 lines) — auth/session, active-tab state, sign-out, layout, tab mounting. Each tab is its own component in `src/components/dashboard/`: `DashboardOverviewTab`, `DashboardAnalyticsTab`, `DashboardProceduresTab` (incl. `ProcedureForm`), `DashboardBeforeAfterTab`, `DashboardTestimonialsTab`, `DashboardFaqTab`, `DashboardSettingsTab`, `DashboardMediaTab` (incl. upload widget); `HomepageCMSTab`, `ArticlesTab`, `SEOTab` were already separate. The shell/nav live in `DashboardLayout` + `DashboardNav`; shared helpers in `dashboard-utils.ts` (`swapOrder` / `OrderableItem`). **TD-1 resolved.**
 - **New feature — Blog:** bilingual (AR/EN) patient-education articles at `/blog` and `/blog/:slug`. CMS-driven (Dashboard → **Articles**), with cover + OG images, SEO fields, `Article`/`NewsArticle` JSON-LD, sitemap inclusion, and `seed.seedArticles`. See README → "Blog (Articles)".
 - **New feature — Branded OG share-card generator:** `src/convex/og_image.tsx` (a Convex `"use node"` **action**, not a query) renders 1200×630 PNG share cards with Satori + `@resvg/resvg-wasm` at **request time**; `/og-image?slug=…` serves them with a 1-day cache. Because Convex sandboxes block the filesystem, `harfbuzzjs` (Arabic shaping, pinned by satori) is **patched via patch-package** to load its wasm from jsDelivr — the patch lives at `patches/harfbuzzjs+0.10.0.patch` and is re-applied by `postinstall`. Convex actions return the PNG as an `ArrayBuffer` (not `Uint8Array`, which Convex rejects).
 - **New feature — crawler meta shell (`/og-meta`):** `middleware.ts` on the Vercel edge serves an HTML shell with `og:image` = `/og-image?slug=…` to bot user agents (Twitterbot, WhatsApp, etc.); human UAs receive the SPA. The edge also **proxies `/og-image` itself on the production domain** (same origin as the shared URL) and forwards the crawler's `Accept-Language`, so previews are served from `dralhasanalsaiem.com` and Arabic devices get Arabic cards. This is what makes article links unfurl as branded previews.
@@ -153,7 +154,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 │   ├── pages/
 │   │   ├── Landing.tsx                # Homepage (all sections with visibility toggle)
 │   │   ├── Auth.tsx                   # Email OTP login/signup
-│   │   ├── Dashboard.tsx              # Full Admin CMS (9 tabs, ~1600 lines)
+│   │   ├── Dashboard.tsx              # Admin CMS shell (~50 lines; tabs live in components/dashboard/)
 │   │   ├── ProceduresPage.tsx         # Public procedures listing page
 │   │   ├── ProcedureDetail.tsx        # Individual procedure detail page
 │   │   ├── ContactPage.tsx            # Public contact page
@@ -733,21 +734,23 @@ Two JWT providers:
 - **Error handling:** Displays inline error messages
 - **Note:** Auth page UI is English-only (not translated)
 
-#### Dashboard (`src/pages/Dashboard.tsx`)
+#### Dashboard (`src/pages/Dashboard.tsx` + `src/components/dashboard/`)
 - **Route:** `/dashboard` (protected)
-- **Purpose:** Full admin CMS dashboard
-- **~1600 lines** — contains all tab components inline
-- **9 tabs:** Overview, Homepage, Procedures, Before & After, Testimonials, FAQ, SEO, Settings, Media
+- **Purpose:** Full admin CMS dashboard — thin shell component that owns auth/session, the active tab, sign-out, the layout (`DashboardLayout`) and the nav (`DashboardNav`)
+- **~48 lines** in `Dashboard.tsx`; every tab is a standalone component under `src/components/dashboard/`
+- **11 tabs:** Overview, Analytics, Homepage (CMS), Procedures, Before & After, Testimonials, FAQ, Articles (blog), SEO, Settings, Media
 - **Features per tab:**
-  - **Overview:** Stats, CMS health check, seed buttons, become admin button
-  - **Homepage:** CMS editors for Hero, About, CTA, Footer, section headers, visibility toggles
-  - **Procedures:** Full CRUD, search, filter, reorder, icon picker, image management, SEO fields
-  - **Before & After:** CRUD, reorder, MediaSelector for images
-  - **Testimonials:** CRUD, reorder, avatar upload
-  - **FAQ:** CRUD, reorder
-  - **SEO:** Global SEO settings editor
-  - **Settings:** Doctor/clinic information form + navbar photo
-  - **Media:** Image upload, gallery view, diagnostics, URL repair, delete with reference checking
+  - **Overview** (`DashboardOverviewTab.tsx`): Stats, CMS health check, seed buttons, migration status/actions
+  - **Analytics** (`DashboardAnalyticsTab.tsx`): visit counts, 14-day chart, countries, top pages/actions
+  - **Homepage** (`HomepageCMSTab.tsx`): CMS editors for Hero, About, CTA, Footer, section headers, visibility toggles
+  - **Procedures** (`DashboardProceduresTab.tsx`): Full CRUD, search, filter, reorder, icon picker, image management, SEO fields
+  - **Before & After** (`DashboardBeforeAfterTab.tsx`): CRUD, reorder, MediaSelector for images
+  - **Testimonials** (`DashboardTestimonialsTab.tsx`): CRUD, reorder, avatar + result photos
+  - **FAQ** (`DashboardFaqTab.tsx`): CRUD, reorder
+  - **Articles** (`ArticlesTab.tsx`): blog article CRUD (see "New feature — Blog")
+  - **SEO** (`SEOTab.tsx`): Global SEO settings editor
+  - **Settings** (`DashboardSettingsTab.tsx`): Doctor/clinic information form + navbar photo
+  - **Media** (`DashboardMediaTab.tsx`): Image upload, gallery, diagnostics, URL repair, delete with reference checking
 
 #### ProceduresPage (`src/pages/ProceduresPage.tsx`)
 - **Route:** `/procedures`
@@ -1510,11 +1513,9 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 
 ## 22. Technical Debt
 
-### TD-1: Dashboard.tsx is a monolith
-- **Location:** `src/pages/Dashboard.tsx` (~1600 lines)
-- **Description:** Contains 9 tab components all in one file
-- **Impact:** Hard to navigate, maintain, and understand
-- **Suggestion:** Extract each tab into its own component file
+### TD-1: Dashboard.tsx monolith — **RESOLVED** (2026-09-19, commit `dc29c4e`)
+- **Location (before):** `src/pages/Dashboard.tsx` (~1600–2050 lines, all tab components inline)
+- **Resolution:** `Dashboard.tsx` is now a ~48-line shell; every tab moved to `src/components/dashboard/` (`DashboardOverviewTab`, `DashboardAnalyticsTab`, `DashboardProceduresTab` incl. `ProcedureForm`, `DashboardBeforeAfterTab`, `DashboardTestimonialsTab`, `DashboardFaqTab`, `DashboardSettingsTab`, `DashboardMediaTab` incl. its upload widget), with `DashboardLayout`, `DashboardNav`, and shared `dashboard-utils.ts`. Existing `HomepageCMSTab`, `ArticlesTab`, `SEOTab` untouched. Behavior preserved — `tsc`/lint/build green.
 
 ### TD-2: Duplicate seed data
 - **Location:** `src/convex/seed.ts` — `seedAll` and `seedProcedures`
@@ -1822,7 +1823,7 @@ These must NOT be broken:
 ### Fragile Areas
 
 1. **Image system** — Storage resolution, loading states, and URL generation have had multiple rounds of fixes. Test thoroughly.
-2. **Dashboard.tsx** — 1600-line monolith with 9 inline tab components
+2. **Dashboard.tsx** — resolved 2026-09-19: split into modular components under `src/components/dashboard/` (was a 1600–2050-line monolith)
 3. **Auth config** — JWT provider configuration must match exactly
 4. **Seed data** — `seedAll` and `seedProcedures` have different procedure slugs
 
@@ -1851,7 +1852,7 @@ These must NOT be broken:
 1. `src/convex/schema.ts` — Data structures
 2. `src/main.tsx` — App entry and routing
 3. `src/components/sections/` — Homepage components
-4. `src/pages/Dashboard.tsx` — Admin CMS
+4. `src/pages/Dashboard.tsx` (+ `src/components/dashboard/`) — Admin CMS
 5. `src/convex/media.ts` — Image system backend
 6. `src/components/ResolvedImage.tsx` — Image system frontend
 7. `src/hooks/` — Custom hooks

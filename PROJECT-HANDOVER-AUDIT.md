@@ -89,8 +89,11 @@
 
 - **11 تبويب** في `/dashboard`: Overview، Analytics، Homepage CMS، Procedures، Before & After،
   Testimonials، FAQ، Articles، SEO، Settings، Media.
-- **التقسيم:** 3 تبويبات مجزأة في `src/components/dashboard/` (ArticlesTab,
-  HomepageCMSTab, SEOTab)؛ والبقية داخل `Dashboard.tsx` (~2050 سطراً — أكبر من الـ1600 الموثقة).
+- **التقسيم (Refactored 2026-09-19، commit `dc29c4e`):** كل تبويب مكوّن مستقل في
+  `src/components/dashboard/` — `Dashboard*Tab.tsx` ×8 (Overview, Analytics, Procedures،
+  Before & After, Testimonials, FAQ, Settings, Media) إضافة إلى `HomepageCMSTab`/`ArticlesTab`/`SEOTab`
+  السابقين، مع `DashboardLayout` + `DashboardNav` + helpers مشتركة (`dashboard-utils.ts`).
+  `Dashboard.tsx` أصبح shellاً (~48 سطراً) يدير auth/tab state/sign-out فقط.
 - **نظام إعدادات عامة:** key/value في جدول `siteSettings`.
 - **قواعد العمل الأساسية:** `storageId` هو المرجع القانوني للصور؛ الاستشارات لا تخزّن أي بيانات؛
   كل حقول المحتوى ثنائية AR/EN؛ أقسام الرئيسية قابلة للإظهار/الإخفاء كاملة.
@@ -162,7 +165,7 @@
 
 | # | البند | الدليل / الموقع | الحالة |
 |---|---|---|---|
-| TD-1 | **Dashboard.tsx monolith** | `src/pages/Dashboard.tsx` (~2050 سطراً) | قائم (أعلى من الموثق 1600) |
+| TD-1 | Dashboard.tsx monolith | `src/pages/Dashboard.tsx` + `src/components/dashboard/` | **حُلّ** (2026-09-19، `dc29c4e`): صار shellاً ~48 سطراً وكل تبويب مكوّن مستقل؛ السلوك محفوظ (tsc/lint/build خضراء) |
 | TD-2 | **بيانات seed مكررة/متباينة** | `src/convex/seed.ts` (`seedAll` vs `seedProcedures` بسلغات مختلفة) | قائم |
 | TD-3 | **fallback URL لـConvex مضمّن** | `src/main.tsx:96`, `src/lib/track.ts:11` | جُزئياً حُلّ: أصبح يشير لـ**production** (ليس dev القديم) |
 | TD-4 | مفتاح Email-OTP مضمّن | `src/convex/auth/emailOtp.ts` | **حُلّ** — Auth نُقل إلى Password؛ estimator لم يعد موجوداً |
