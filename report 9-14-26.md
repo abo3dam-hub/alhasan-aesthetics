@@ -463,3 +463,14 @@
 
 ### ٦.٥ تحديث الوثائق المرتبطة
 - حدّثت `PROJECT-MASTER-HANDOVER.md` (كتلة CURRENT STATUS + شجرة الملفات + قسم Dashboard + TD-1 + Fragile Areas + Recommended First Investigation)، `PROJECT-HANDOVER-AUDIT.md` (§1.5 + جدول TD)، `REPORTS-AUDIT.md` (تحديثات + §5)، و`README.md` (الشجرة) بما يطابق البنية الجديدة. بند **TD-1** صار **محلولًا**.
+
+### ٦.٦ رفع blockers بيئة العمل (من المالك)
+- سجّل المالك الدخول من Codespaces عبر `npx convex login`، وتأكّد في Vercel أن `VITE_CONVEX_URL` = `https://kindly-anaconda-422.convex.cloud`.
+- بذلك انتهى آخر بلوكين موثقين (Convex غير معلّق + Vercel env غير قابلة للفحص) — البيئة جاهزة لأي `codegen`/`deploy`/عمل Convex قادم.
+
+### ٦.٧ إصلاحات البند «الصغيرة» + تحديث الوثائق + دفعة k = 21
+- **4.1 صورة الطبيب:** مؤكَّد مكتمل أصلًا — `About.tsx:95` يقرأ `aboutCMS.image` عبر `ResolvedImage`، وحقل "Doctor Profile Image" موجود في HomepageCMSTab، والبيانات في Production مضبوطة (`about.image = kg281f7...` — تحقق قراءة-only عبر `npx convex run homepageSettings:getAboutSettings` على `kindly-anaconda-422`). الاستيراد الثابت `/assets/1.jpg` مجرد fallback.
+- **4.2 توحيد `resolveUrls`:** في `src/convex/media.ts` يعيد `""` عند فشل الـ storageId (نفس `resolveUrl`) بدل raw storageId كمصدر صورة مكسور. **يحتاج `convex deploy` ليسري على Production.**
+- **4.3 تنظيف VLY:** حذف `src/instrumentation.tsx` و`src/lib/vly-integrations.ts`، فك ربط `@vly-ai/integrations` (استيراد `main.tsx` + `vlyPlugin()` في `vite.config.ts` + من `package.json`/`package-lock.json`). بقي `VlyToolbar` كأداة preview. لا بقايا VLY/Freebuff في `src/` سوى إشارة الـtoolbar.
+- **4.4 `.env.local` (آخر القائمة):** غير موجود في workspace هذا (مهمَل في `.gitignore`) — لا شيء يُحذف؛ بقي `VLY_CONVEX_AUTH_ISSUER` القديم خارج المستودع بلا أي reference.
+- تحقق: `npx tsc -b` نظيف، ESLint 0 أخطاء (30 تحذيرًا كلها سابقة)، build أخضر (الـentry 340.19KB/gzip 105.54KB — أصغر من 342.22 بعد إزالة استيراد VLY). الالتزام: **`502fb6e`** — رُفعت التحديثات ووثّقت في `REPORTS-AUDIT.md` (بعنوان «نفذ البند 4»), `PROJECT-MASTER-HANDOVER.md`, `CODESPACES-SETUP-REPORT.md`.

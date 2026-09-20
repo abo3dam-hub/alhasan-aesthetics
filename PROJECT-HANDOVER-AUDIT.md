@@ -194,7 +194,7 @@
    - إضافة **tests** (لا توجد حالياً) و **CI/CD** (لا GitHub Actions).
    - **promoteUser** mutation لإدارة حساب أدمن إضافي (بديل becomeAdmin الملغى).
    - تفعيل `schemaValidation` بعد استقرار الـschema والتحقق من تطابق البيانات.
-3. **خطوة مالك فقط:** `npx convex login` قبل أي عمل Convex قادم (codegen/deploy).
+3. ~~**خطوة مالك فقط:** `npx convex login`~~ → ✅ **منفَّذة (2026-09-19)** — المالك سجّل الدخول من Codespaces وأكّد env على Vercel (`VITE_CONVEX_URL` = `kindly-anaconda-422`). لا بلوك على أي عمل Convex قادم.
 
 ---
 
@@ -209,8 +209,8 @@
 3. **`schemaValidation: false`** قد يسمح بانحراف بيانات بين dev/prod.
 4. **الوصول الافتراضي للإنتاج:** أي تشغيل محلي بلا `VITE_CONVEX_URL` يتصل بـ**production**
    (fallback مضمّن) — يجب الحذر في أي عمل مستقبلي لا يراد له لمس بيانات حقيقية.
-5. **Convex غير معلّق في Codespaces** → أي codegen/deploy قادم متوقف على تسجيل دخول المالك.
-6. **إعدادات Vercel/env غير قابلة للفحص من Codespaces** (لا CLI ولا link — موثق Unverified).
+5. ~~**Convex غير معلّق في Codespaces**~~ → ✅ **حُلّ (2026-09-19):** سجّل المالك الدخول — لا عائق على codegen/deploy.
+6. ~~**إعدادات Vercel/env غير قابلة للفحص من Codespaces**~~ → ✅ **حُلّ (2026-09-19):** أكّد المالك من Vercel أن `VITE_CONVEX_URL` = `https://kindly-anaconda-422.convex.cloud`.
 7. **npm audit: 12 vulnerabilities** (4 moderate / 6 high / 2 critical) في التبعيات — سابقة ولم تُعالج.
 8. **تخزين WhatsApp للمعاينة حسب الرابط** — أي معاينة جديدة تتطلب كسر الكاش (`?v=2`) —
    قيد تشغيلي موثق في `report 9-14-26.md` §5.
@@ -226,7 +226,7 @@
 1. تسجيل حساب **admin الثاني** عبر `/auth` (سلوك حدّان-admin).
 2. **التحقق من رفض تسجيل حساب ثالث** (تأكيد قيد `MAX_ADMIN_ACCOUNTS = 2` في الإنتاج).
 
-أما أي عمل Convex مستقبلي فيبدأ بتسجيل دخول المالك: `npx convex login`.
+بند «تسجيل الدخول Convex + تأكيد Vercel env» الذي كان يبدأ به أي عمل قادم — ✅ **مُنفَّذ من المالك (2026-09-19)**، فإنّ البيئة جاهزة لأي codegen/deploy/عمل Convex مستقبلي.
 
 ---
 

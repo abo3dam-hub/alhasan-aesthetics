@@ -103,10 +103,8 @@ npm install
 | `VITE_CONVEX_URL` | `src/main.tsx:96` ، `src/lib/track.ts:11` | نعم (client) | fallback = `https://kindly-anaconda-422.convex.cloud` (نفس قيمة production) |
 | `VITE_CONVEX_SITE_URL` | `src/lib/track.ts:13-17` ، `middleware.ts:21-23` | اختياري | fallback = `https://kindly-anaconda-422.convex.site` أو اشتقاق تلقائي |
 | `CONVEX_SITE_URL` | `src/convex/auth.config.ts:13` | server-side | يُحقن تلقائياً من Convex runtime |
-| `VITE_VLY_APP_ID` | `src/instrumentation.tsx:72,165` | لا | الملف **غير مستورد** في أي مكان |
-| `VITE_VLY_MONITORING_URL` | `src/instrumentation.tsx:73` | لا | الملف غير مستورد |
-| `VLY_INTEGRATION_KEY` | `src/lib/vly-integrations.ts:7` | لا | الملف غير مستورد |
-| `VLY_CONVEX_AUTH_ISSUER` | — | لا | **أُزيل من الكود** (Password Auth migration)؛ لا يوجد أي reference |
+| ~~`VITE_VLY_APP_ID` / `VITE_VLY_MONITORING_URL` / `VLY_INTEGRATION_KEY`~~ | — | لا | **حُذفت ملفاتها (2026-09-19):** `src/instrumentation.tsx` و`src/lib/vly-integrations.ts` أُزيلا، و`@vly-ai/integrations` فُكّ ربطه من الكود والتبعيات |
+| ~~`VLY_CONVEX_AUTH_ISSUER`~~ | — | لا | **أُزيل من الكود** (Password Auth migration + تنظيف VLY 19-9)؛ لا يوجد أي reference |
 | `VERCEL_OIDC_TOKEN` | — | لا | **لا يوجد أي reference في الـrepo** (تحقنها Vercel عند الحاجة) |
 
 ### المتغيرات المطلوبة (BLOCKER محتمل)
@@ -115,8 +113,8 @@ npm install
   - `VITE_CONVEX_URL`(= قيمتها الفعلية المنتجة معروفة في الكود/repo: `https://kindly-anaconda-422.convex.cloud`) — القيمة ليست سرّية.
   - اختيارياً `VITE_CONVEX_SITE_URL`.
 - المتغيرات السرية `JWT_PRIVATE_KEY` و `JWKS` (+ `SITE_URL`) **مضبوطة على الـdeployment نفسه** في Convex Cloud ولا حاجة لنسخة محلية.
-- `VLY_CONVEX_AUTH_ISSUER` و `VERCEL_OIDC_TOKEN`: **لا يحتاجها الكود إطلاقاً** — يمكن تجاهلها.
-- `VITE_VLY_APP_ID` / `VITE_VLY_MONITORING_URL` / `VLY_INTEGRATION_KEY`: **لا يحتاجها الكود الفعلي** (ملفاتها غير مستوردة).
+- `VERCEL_OIDC_TOKEN`: **لا يحتاجه الكود إطلاقاً** — يمكن تجاهله.
+- `VITE_VLY_APP_ID` / `VITE_VLY_MONITORING_URL` / `VLY_INTEGRATION_KEY`: ~~لا يحتاجها الكود~~ → **حُذفت ملفاتها (2026-09-19)** — لا توجد أي references.
 
 ---
 
@@ -140,7 +138,7 @@ npm install
 - ❌ لم أغيّر schema أو env أو data
 - ✅ فحص READ-ONLY فقط (دخول عبر HTTP عام + تحقق من الإعدادات المحلية)
 
-**مطلوب من المالك (خطوة بشرية تفاعلية):** `npx convex login` عندما نريد لاحقاً أي `codegen`/`deploy`. لا يمكن إكمالها من بيئة غير تفاعلية، ولن أنفّذها بنفسي.
+~~**مطلوب من المالك (خطوة بشرية تفاعلية):** `npx convex login`~~ → ✅ **منفَّذ (2026-09-19):** المالك سجّل الدخول من Codespaces، وتأكّد في Vercel أن `VITE_CONVEX_URL` = `https://kindly-anaconda-422.convex.cloud`. أي عمل Convex/Vercel قادم لم يعد محجوباً.
 
 ---
 
@@ -201,7 +199,7 @@ $ git status -sb
 
 ### BLOCKERS
 
-1. **Convex auth:** غير مسجّل الدخول في Codespaces — أي عمل قادم (codegen/deploy) يتطلب `npx convex login` منك (خطوة تفاعلية لا يمكن التنفيذ منها هنا).
+1. ~~**Convex auth:** غير مسجّل الدخول~~ → ✅ **منفَّذ (2026-09-19):** سجّل المالك الدخول من Codespaces (`npx convex login`) — لا حظر على codegen/deploy بعد الآن.
 2. **`.env.local`:** غائب. للعمل الفعلي عبر dev-server إما نعتمد على الـfallbacks (التي تشير إلى production) أو تعطيني القيم. المتغير الوحيد الذي يحتاجه الكود فعلياً هو `VITE_CONVEX_URL` وقيمته العامة معلومة.
 3. **`package-lock.json`:** معدَّل من الـPrebuild (سطر `hasInstallScript`)، متفق عليه أن يبقى.
 

@@ -84,15 +84,12 @@
 
 من «بقايا» التقارير (لا من التخمين) — بلا تنفيذ حتى الآن:
 
-1. **من `CONVEX-DEPLOY-REPORT`:** المالك يجب أن ينفّذ `npx convex login` قبل أي عمل Convex قادم.
-2. **من `VERCEL-DEPLOYMENT-REPORT`:** `VITE_CONVEX_URL` في Vercel يجب أن تبقى على `kindly-anaconda-422`
-   (غير قابل للتحقق محلياً من Codespaces — بند Unverified موثق).
+1. ~~**من `CONVEX-DEPLOY-REPORT`:** المالك يجب أن ينفّذ `npx convex login`~~ → ✅ **منفَّذ (2026-09-19):** المالك سجّل الدخول من Codespaces — أي `codegen`/`deploy` قادم غير محجوب.
+2. ~~**من `VERCEL-DEPLOYMENT-REPORT`:** `VITE_CONVEX_URL`~~ → ✅ **مؤكَّد (2026-09-19):** المالك تحقّق في Vercel أن `VITE_CONVEX_URL` = `https://kindly-anaconda-422.convex.cloud` (ارتفع بند Unverified).
 3. **من `CMS-DATA-MAPPING-AUDIT`:** زر **Seed** على Production لم يُنفَّذ عمداً (لا تلمس data حقيقية)؛
    أزرار "Seed Settings"/"Full" للعمليات الجديدة فقط بالوثائق.
-4. **من `AUTH-FREEBUFF-AUDIT`:** التنظيف الاختياري المتبقي (حذف `instrumentation.tsx` و`vly-integrations.ts`
-   وملفات/تبعيات VLY غير المستوردة، وفك ربط `@vly-ai/integrations` + `vlyPlugin()`) — لا يمسّ الوظيفة الحالية.
-5. **من `CMS-DATA-MAPPING` / `DATA-SYNC`:** حقل `about.doctorImage` ما يزال يستورد `/assets/1.jpg` بشكل ثابت
-   (`About.tsx`) — بند P1 قديم ما يزال قائماً حسب الكود.
+4. ~~**من `AUTH-FREEBUFF-AUDIT`:** التنظيف الاختياري المتبقي~~ → ✅ **نُفِّذ (2026-09-19):** حُذف `src/instrumentation.tsx` و`src/lib/vly-integrations.ts`، وفُكّ ربط `@vly-ai/integrations` (استيراد `main.tsx` + `vlyPlugin()` في `vite.config.ts` + التبعية من `package.json`/`package-lock.json`). بقي `VlyToolbar` (`vly-toolbar-readonly.tsx`) كأداة preview فقط. الصفر VLY/Freebuff في `src/` غير إشارة الـtoolbar.
+5. ~~**من `CMS-DATA-MAPPING` / `DATA-SYNC`:** حقل `about.doctorImage`~~ → ✅ **مؤكَّد مكتمل (2026-09-19):** `About.tsx:95` يعرض `aboutCMS.image` عبر `ResolvedImage`، وواجهة HomepageCMSTab فيها حقل "Doctor Profile Image"، و**البيانات في Production مضبوطة** (`about.image = kg281f7...` — تحقق قراءة-only عبر `npx convex run`). الاستيراد الثابت `/assets/1.jpg` هو fallback عند غياب الصورة فقط.
 6. **من `VERCEL`:** قائمة المسارات في `vercel.json` لم تعد تحوي `/procedures`, `/contact`, `/blog/:slug`
    في جداول الوثيقة فقط (الملف الفعلي سليم — SPA rewrite عام).
 
@@ -100,8 +97,9 @@
 
 ## 5) ملاحظات دقيقة رصدتها المراجعة (فروق بين الوثائق والكود)
 
-- `resolveUrls` (مجمّع الروابط) في `src/convex/media.ts:172` يعيد **raw storageId** عند الفشل، بينما
-  `resolveUrl` الفردي يعيد `""` — فرق سلوكي محتمل (لم يُعنَّن كـbug في أي تقرير؛ ملاحظة من المراجعة نفسها).
+- `resolveUrls` (مجمّع الروابط) في `src/convex/media.ts` كان يعيد **raw storageId** عند الفشل بينما
+  `resolveUrl` الفردي يعيد `""` — ~~فرق سلوكي محتمل~~ → ✅ **حُلّ (2026-09-19):** وحّدنا السلوك، `resolveUrls`
+  يعيد الآن `""` لنفس مسار فشل الـ storageId (يُعرض fallback «بدون صورة» بدل src مكسور). — يحتاج **deploy** لليسري على Production.
 - ~~`Dashboard.tsx` monolith (~2050 سطراً)~~ → **حُلّ (2026-09-19، `dc29c4e`):** الملف صار shellاً
   (~48 سطراً) وكل تبويب مكوّن مستقل في `src/components/dashboard/` (`Dashboard*Tab.tsx` +
   `DashboardLayout`/`DashboardNav`/`dashboard-utils.ts`)؛ الملاحظة القديمة أعلاه صارت تاريخية.
@@ -115,6 +113,7 @@
   (كتلة التحديث 18-9 هي الأعلى سلطة)، `CODESPACES-SETUP-REPORT.md`، `PROJECT-HANDOVER-AUDIT.md`،
   و`report 9-14-26.md` لسجل الجلسات.
 - **التقارير التاريخية (17+ ملفاً):** يُنصح بمعاملتها كأرشيف فقط؛ لا تُبنى عليها قرارات تخص الحالة الحالية.
-- **لا يوجد تناقض حالي يمنع التطوير**؛ أكثر الـblockers المؤكدة أمور مالك فقط (`convex login`، فحص Vercel env).
+- **لا يوجد تناقض حالي يمنع التطوير**؛ الـblockers السابقة (أمور مالك فقط: `convex login`، فحص Vercel env)
+  ~~أُغلقت~~ → ✅ **مؤكَّدة من المالك (2026-09-19):** تم تسجيل الدخول من Codespaces + تأكيد `VITE_CONVEX_URL` على Vercel.
 - **لا يوجد عمل «مفقود»**: التفاصيل التي بدت ناقصة في التقارير القديمة حُلّت في جلسات لاحقة موثقة
   بتقارير أحدث أو بالكود نفسه (مطابق للتأكيد الأصلي عن Recovery Audit).

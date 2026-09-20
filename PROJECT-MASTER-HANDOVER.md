@@ -104,8 +104,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 │   ├── types/global.d.ts               # Window.navigateToAuth type declaration
 │   ├── assets/logo.svg                 # Logo asset
 │   ├── lib/
-│   │   ├── utils.ts                    # cn() helper (clsx + tailwind-merge)
-│   │   └── vly-integrations.ts         # Freebuff integrations config
+│   │   └── utils.ts                    # cn() helper (clsx + tailwind-merge)
 │   ├── i18n/
 │   │   ├── index.tsx                   # I18nProvider, useI18n hook, locale state (localStorage)
 │   │   └── types.ts                    # Translations type from ar.json
@@ -279,7 +278,6 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 | `react-day-picker` | 9.13.0 | Calendar component |
 | `@zumer/snapdom` | ^2.0.1 | DOM snapshot (for screenshot features) |
 | `@jridgewell/trace-mapping` | ^0.3.31 | Source map tracing |
-| `@vly-ai/integrations` | ^0.6.13 | Freebuff platform integrations |
 
 ### Dev Dependencies
 | Dependency | Purpose |
@@ -1282,11 +1280,8 @@ All CMS content has `*Ar` and `*En` fields. Components check `isArabic = dir ===
 
 ### Freebuff Platform
 
-- **Purpose:** Hosting, development environment, error monitoring
-- **Integration:** `@vly-ai/integrations` package, `VlyToolbar` component
-- **Error reporting:** `src/instrumentation.tsx` sends errors to `VITE_VLY_MONITORING_URL`
-- **Federated auth:** Freebuff JWTs accepted as valid authentication via `auth.config.ts`
-- **Email OTP:** Sent via `https://auth.freebuff.app/send_otp` with API key `fb_email_2crN1hqIArZP2bEfvjp5Qik4`
+- **Purpose:** Hosting / preview environment (`.vly.sh`); VlyToolbar dev toolbar remains in `vly-toolbar-readonly.tsx`
+- **Removed (cleanup 2026-09-19):** `@vly-ai/integrations` import + `vlyPlugin()`, `src/instrumentation.tsx`, `src/lib/vly-integrations.ts` — auth is fully self-hosted (Password via `@convex-dev/auth`), no federated/Freebuff/JWT auth, no Freebuff email OTP.
 
 ### WhatsApp
 
@@ -1295,13 +1290,9 @@ All CMS content has `*Ar` and `*En` fields. Components check `isArabic = dir ===
 - **No API integration** — just URL-based deep link
 - **Phone number:** Stored in CMS `doctor.whatsappNumber`
 
-### Email (OTP only)
+### Email
 
-- **Purpose:** Authentication only
-- **Provider:** Freebuff email service
-- **Endpoint:** `https://auth.freebuff.app/send_otp`
-- **Method:** POST with `x-api-key` header
-- **Not used for:** Marketing, notifications, or any other email
+- **Not used:** Authentication is self-hosted Password via `@convex-dev/auth` — no external email/OTP service (the old Freebuff `send_otp` flow was removed).
 
 ---
 
@@ -1310,15 +1301,10 @@ All CMS content has `*Ar` and `*En` fields. Components check `isArabic = dir ===
 | Variable | Required | Used In | Purpose |
 |---|---|---|---|
 | `VITE_CONVEX_URL` | Yes | `src/main.tsx` | Convex deployment URL (frontend connection) |
-| `VITE_VLY_APP_ID` | No | `src/instrumentation.tsx` | Freebuff app identifier |
-| `VITE_VLY_MONITORING_URL` | No | `src/instrumentation.tsx` | Freebuff error monitoring endpoint |
-| `VLY_INTEGRATION_KEY` | No | `src/lib/vly-integrations.ts` | Freebuff integrations token |
-| `VLY_APP_NAME` | No | `src/convex/auth/emailOtp.ts` | App name for OTP email |
-| `VLY_CONVEX_AUTH_ISSUER` | No | `src/convex/auth.config.ts` | Freebuff auth issuer URL |
 
-**Default fallback:** If `VITE_CONVEX_URL` is not set, falls back to `https://impartial-ladybug-881.convex.cloud` (hardcoded in `src/main.tsx`).
+**Default fallback:** If `VITE_CONVEX_URL` is not set, falls back to `https://kindly-anaconda-422.convex.cloud` (hardcoded in `src/main.tsx`).
 
-**IMPORTANT:** Never expose secrets in source code. The email OTP API key is hardcoded in `src/convex/auth/emailOtp.ts` — this is intentional as it's a server-side Convex function (not exposed to the browser).
+**IMPORTANT:** Never expose secrets in source code.
 
 ---
 
@@ -1890,7 +1876,7 @@ All 132+ source files in the project were examined during this audit, including:
 - Both locale files (`ar.json`, `en.json`)
 - `package.json`, `components.json`, `index.html`
 - `src/main.tsx`, `src/index.css`
-- `src/lib/utils.ts`, `src/lib/vly-integrations.ts`
+- `src/lib/utils.ts`
 - `README.md`
 - `src/components/ui/index.ts`
 
