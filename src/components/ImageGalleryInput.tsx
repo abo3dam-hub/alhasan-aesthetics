@@ -61,7 +61,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
             <button
               type="button"
               onClick={() => onChange(value.filter((v) => v !== id))}
-              className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+              className="absolute top-1.5 end-1.5 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity hover:bg-red-500"
               aria-label={admin.media.removeImage}
             >
               <X className="h-3 w-3" />

@@ -150,20 +150,20 @@ export function MediaLibraryModal({
                       "relative aspect-square rounded-xl overflow-hidden border-2 transition-all hover:shadow-md group",
                       isSelected ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-border/60"
                     )}
-                    aria-label={`Select ${item.name}`}
+                    aria-label={`${admin.media.selectImage} — ${item.name}`}
                     aria-pressed={isSelected}
                   >
                     <ResolvedImage
                       storageId={item.storageId}
                       alt={item.name}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity" />
                     {isSelected && (
                       <div className="absolute top-2 end-2 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
                         <Check className="h-3.5 w-3.5 text-primary-foreground" />
                       </div>
                     )}
-                    <p className="absolute bottom-0 inset-x-0 p-1.5 text-[10px] text-white font-medium truncate opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="absolute bottom-0 inset-x-0 p-1.5 text-[10px] text-white font-medium truncate opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 transition-opacity">
                       {item.name}
                     </p>
                   </button>

@@ -22,6 +22,7 @@ import {
 import { MediaSelector } from "@/components/MediaSelector";
 import { ImageGalleryInput } from "@/components/ImageGalleryInput";
 import { swapOrder } from "./dashboard-utils";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function DashboardTestimonialsTab() {
@@ -36,6 +37,8 @@ export default function DashboardTestimonialsTab() {
   const existing = editingId ? testimonials?.find((t) => t._id === editingId) : null;
   const [testAvatar, setTestAvatar] = useState("");
   const [testImages, setTestImages] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<Id<"testimonials"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleOpenTestForm = (id: Id<"testimonials"> | null) => {
     setEditingId(id);
@@ -104,7 +107,7 @@ export default function DashboardTestimonialsTab() {
                 hint="تُعرض كمصغّرات في قسم تجارب المرضى ويمكن تصفّحها — يُنصح 4:3 (أفقي) أو 3:4 عمودي؛ تُقصّ تلقائيًا من المنتصف"
               />
               <div className="flex gap-3">
-                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : (editingId ? admin.testimonials.edit : admin.common.save)}</Button>
+                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : admin.common.save}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{admin.common.cancel}</Button>
               </div>
             </form>
@@ -128,11 +131,11 @@ export default function DashboardTestimonialsTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{t.textEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => handleOpenTestForm(t._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit}><FileText className="h-4 w-4" /></button>
-                <button onClick={async () => { await updateTestimonial({ id: t._id, isActive: !t.isActive }); toast.success(admin.toast.saved); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
+                <button onClick={() => handleOpenTestForm(t._id)} className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit} aria-label={admin.common.edit}><FileText className="h-4 w-4" /></button>
+                <button onClick={async () => { await updateTestimonial({ id: t._id, isActive: !t.isActive }); toast.success(admin.toast.saved); }} className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={t.isActive ? admin.common.inactive : admin.common.active} aria-label={t.isActive ? admin.common.inactive : admin.common.active}>
                   {t.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
-                <button onClick={async () => { if (confirm(admin.confirm.deleteTestimonial)) { await removeTestimonial({ id: t._id }); toast.success(admin.toast.deleted); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                <button onClick={() => setDeleteTarget(t._id)} className="p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors" title={admin.common.delete} aria-label={admin.common.delete}>
                   <Trash2 className="h-4 w-4" />
                 </button>
                 {t.images != null && t.images.length > 0 && (
@@ -142,14 +145,35 @@ export default function DashboardTestimonialsTab() {
                   </span>
                 )}
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                  <button disabled={testimonials!.indexOf(t) === 0} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "up", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                  <button disabled={testimonials!.indexOf(t) === testimonials!.length - 1} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "down", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                  <button disabled={testimonials!.indexOf(t) === 0} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "up", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveUp}><ArrowUp className="h-3 w-3" /></button>
+                  <button disabled={testimonials!.indexOf(t) === testimonials!.length - 1} onClick={() => swapOrder(testimonials!, testimonials!.indexOf(t), "down", updateTestimonial)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveDown}><ArrowDown className="h-3 w-3" /></button>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={admin.confirm.title}
+        message={admin.confirm.deleteTestimonial}
+        isLoading={deleting}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setDeleting(true);
+          try {
+            await removeTestimonial({ id: deleteTarget });
+            toast.success(admin.toast.deleted);
+            setDeleteTarget(null);
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }

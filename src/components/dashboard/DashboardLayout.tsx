@@ -29,7 +29,7 @@ export default function DashboardLayout({
             <span className="text-sm text-muted-foreground hidden sm:inline">
               {userName}
             </span>
-            <Button variant="outline" size="sm" onClick={onSignOut} className="gap-2">
+            <Button variant="outline" size="sm" onClick={onSignOut} className="gap-2" aria-label={admin.signOut}>
               <LogOut className="h-4 w-4 rtl:rotate-180" />
               <span className="hidden sm:inline">{admin.signOut}</span>
             </Button>

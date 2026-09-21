@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAdminText } from "@/hooks/use-admin-text";
 import { ArrowDown, ArrowUp, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react";
 import { swapOrder } from "./dashboard-utils";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function DashboardFaqTab() {
@@ -22,6 +23,8 @@ export default function DashboardFaqTab() {
   const [editingId, setEditingId] = useState<Id<"faq"> | null>(null);
   const [search, setSearch] = useState("");
   const existing = editingId ? faqs?.find((f) => f._id === editingId) : null;
+  const [deleteTarget, setDeleteTarget] = useState<Id<"faq"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filteredFaqs = faqs?.filter((f) => {
     return !search || f.questionEn.toLowerCase().includes(search.toLowerCase()) || f.questionAr.includes(search) || f.answerEn.toLowerCase().includes(search.toLowerCase());
@@ -75,7 +78,7 @@ export default function DashboardFaqTab() {
               <div className="space-y-2"><Label>{admin.faq.answerAr}</Label><Textarea name="answerAr" dir="rtl" rows={3} required defaultValue={existing?.answerAr} /></div>
               <div className="space-y-2"><Label>{admin.faq.category}</Label><Input name="category" defaultValue={existing?.category} placeholder={admin.faq.categoryHint} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? admin.faq.edit : admin.common.save}</Button>
+                <Button type="submit" className="bg-primary text-primary-foreground">{admin.common.save}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{admin.common.cancel}</Button>
               </div>
             </form>
@@ -99,16 +102,16 @@ export default function DashboardFaqTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{f.answerEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => { setEditingId(f._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit}><FileText className="h-4 w-4" /></button>
-                <button onClick={async () => { await updateFaq({ id: f._id, isActive: !f.isActive }); toast.success(admin.toast.saved); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
+                <button onClick={() => { setEditingId(f._id); setShowForm(true); }} className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit} aria-label={admin.common.edit}><FileText className="h-4 w-4" /></button>
+                <button onClick={async () => { await updateFaq({ id: f._id, isActive: !f.isActive }); toast.success(admin.toast.saved); }} className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={f.isActive ? admin.common.inactive : admin.common.active} aria-label={f.isActive ? admin.common.inactive : admin.common.active}>
                   {f.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
-                <button onClick={async () => { if (confirm(admin.confirm.deleteFaq)) { await removeFaq({ id: f._id }); toast.success(admin.toast.deleted); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                <button onClick={() => setDeleteTarget(f._id)} className="p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors" title={admin.common.delete} aria-label={admin.common.delete}>
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                  <button disabled={faqs!.indexOf(f) === 0} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "up", updateFaq)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                  <button disabled={faqs!.indexOf(f) === faqs!.length - 1} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "down", updateFaq)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                  <button disabled={faqs!.indexOf(f) === 0} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "up", updateFaq)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveUp}><ArrowUp className="h-3 w-3" /></button>
+                  <button disabled={faqs!.indexOf(f) === faqs!.length - 1} onClick={() => swapOrder(faqs!, faqs!.indexOf(f), "down", updateFaq)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveDown}><ArrowDown className="h-3 w-3" /></button>
                 </div>
               </div>
             </CardContent>
@@ -116,6 +119,27 @@ export default function DashboardFaqTab() {
         ))
       )}
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={admin.confirm.title}
+        message={admin.confirm.deleteFaq}
+        isLoading={deleting}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setDeleting(true);
+          try {
+            await removeFaq({ id: deleteTarget });
+            toast.success(admin.toast.deleted);
+            setDeleteTarget(null);
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }

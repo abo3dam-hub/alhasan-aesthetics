@@ -249,7 +249,7 @@ function HeroEditor() {
         <div className="space-y-3">
           <Label className="text-sm font-medium">شارات الثقة</Label>
           {(form.trustBadges || []).map((badge, i) => (
-            <div key={i} className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-end">
+            <div key={i} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto_auto] gap-2 items-end">
               <div className="space-y-1"><Label className="text-xs">EN</Label><Input value={badge.labelEn} onChange={(e) => {
                 const badges = [...form.trustBadges]; badges[i] = { ...badges[i], labelEn: e.target.value }; update("trustBadges", badges);
               }} /></div>

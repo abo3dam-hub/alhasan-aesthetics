@@ -45,6 +45,13 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && !tabFromHash(hash)) {
+      window.history.replaceState(null, "", "#/overview");
+    }
+  }, []);
+
+  useEffect(() => {
     const handler = () => {
       const tab = tabFromHash(window.location.hash);
       if (tab) setActiveTab(tab);

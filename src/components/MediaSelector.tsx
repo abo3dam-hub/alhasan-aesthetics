@@ -26,7 +26,7 @@ export function MediaSelector({ value, onChange, label, hint, className }: Media
         {value ? (
           <div className="relative group w-24 h-24 rounded-xl overflow-hidden border border-border/60">
             <ResolvedImage storageId={value} alt="" />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100">
               <button type="button" onClick={() => setIsOpen(true)} className="p-1.5 rounded-full bg-white/90 hover:bg-white text-foreground shadow-sm" aria-label={admin.media.replaceImage}>
                 <Upload className="h-3.5 w-3.5" />
               </button>

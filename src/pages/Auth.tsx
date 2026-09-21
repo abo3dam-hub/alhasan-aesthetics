@@ -33,8 +33,6 @@ function resolveRedirectAfterAuth(
   return fallback;
 }
 
-const FALLBACK_SIGNIN_ERROR = "Sign-in failed. Please try again.";
-
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
@@ -96,7 +94,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
           ? err.message
           : typeof err === "string" && err
             ? err
-            : FALLBACK_SIGNIN_ERROR;
+            : admin.auth.signInFailed;
       setError(message);
       if (mode === "signIn") {
         void recordFailedAttempt({ email });

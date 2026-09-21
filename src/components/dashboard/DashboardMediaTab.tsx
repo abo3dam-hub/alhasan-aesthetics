@@ -231,7 +231,14 @@ export default function DashboardMediaTab() {
       )}
 
       {/* Gallery Grid */}
-      {showEmptyState ? (
+      {!mediaItems ? (
+        <Card className="border-border/60">
+          <CardContent className="p-8 text-center text-muted-foreground">
+            <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            {admin.common.loading}
+          </CardContent>
+        </Card>
+      ) : showEmptyState ? (
         <Card className="border-border/60">
           <CardContent className="p-12 text-center">
             <ImageIcon className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
@@ -277,11 +284,12 @@ export default function DashboardMediaTab() {
                 </div>
               </div>
               {/* Hover actions */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 pointer-coarse:bg-black/30 transition-colors duration-200 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100">
                 <button
                   onClick={(e) => { e.stopPropagation(); handleCopyUrl(item.resolvedUrl || item.url); }}
                   className="p-2 rounded-full bg-white/90 hover:bg-white text-foreground shadow-md transition-colors"
                   title={admin.media.copyUrl}
+                  aria-label={admin.media.copyUrl}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 </button>
@@ -289,6 +297,7 @@ export default function DashboardMediaTab() {
                   onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
                   className="p-2 rounded-full bg-white/90 hover:bg-red-50 text-red-500 shadow-md transition-colors"
                   title={admin.media.delete}
+                  aria-label={admin.media.delete}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -312,6 +321,7 @@ export default function DashboardMediaTab() {
             <button
               onClick={() => setPreviewItem(null)}
               className="absolute top-3 end-3 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+              aria-label={admin.common.close}
             >
               <X className="h-4 w-4" />
             </button>
@@ -334,7 +344,7 @@ export default function DashboardMediaTab() {
                     {previewItem.name}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {previewItem.type} • {formatSize(previewItem.size)}
+                    {formatSize(previewItem.size)}
                   </p>
                 </div>
               </div>

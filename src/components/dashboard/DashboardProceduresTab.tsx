@@ -31,6 +31,7 @@ import {
 } from "@/lib/procedureIcons";
 import { MediaSelector } from "@/components/MediaSelector";
 import { swapOrder } from "./dashboard-utils";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 const iconOptions = [...PROCEDURE_ICON_OPTIONS];
@@ -49,6 +50,8 @@ export default function DashboardProceduresTab() {
   const [editingId, setEditingId] = useState<Id<"procedures"> | null>(null);
   const [search, setSearch] = useState("");
   const [filterActive, setFilterActive] = useState<"all" | "active" | "inactive">("all");
+  const [deleteTarget, setDeleteTarget] = useState<Id<"procedures"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filteredProcedures = procedures?.filter((p) => {
     const matchesSearch = !search || p.titleEn.toLowerCase().includes(search.toLowerCase()) || p.titleAr.includes(search) || p.slug.includes(search.toLowerCase());
@@ -61,11 +64,8 @@ export default function DashboardProceduresTab() {
     toast.success(admin.toast.saved);
   };
 
-  const handleDelete = async (id: Id<"procedures">) => {
-    if (confirm(admin.confirm.deleteProcedure)) {
-      await removeProcedure({ id });
-      toast.success(admin.toast.deleted);
-    }
+  const handleDelete = (id: Id<"procedures">) => {
+    setDeleteTarget(id);
   };
 
   return (
@@ -188,7 +188,7 @@ export default function DashboardProceduresTab() {
                       setEditingId(proc._id);
                       setShowForm(true);
                     }}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
+                    className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
                     title={admin.common.edit} aria-label={admin.common.edit}
                   >
                     <FileText className="h-4 w-4" />
@@ -196,29 +196,31 @@ export default function DashboardProceduresTab() {
                   <button
                     onClick={() => handleToggleActive(proc._id, proc.isActive)}
                     className={cn(
-                      "p-2 rounded-lg transition-colors",
+                      "p-2.5 rounded-lg transition-colors",
                       proc.isActive ? "text-green-600 hover:bg-green-50" : "text-muted-foreground hover:bg-muted"
                     )}
                     title={proc.isActive ? admin.common.inactive : admin.common.active}
+                    aria-label={proc.isActive ? admin.common.inactive : admin.common.active}
                   >
                     {proc.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <button
                     onClick={async () => { await updateProcedure({ id: proc._id, isFeatured: !proc.isFeatured }); toast.success(admin.toast.saved); }}
                     className={cn(
-                      "p-2 rounded-lg transition-colors",
+                      "p-2.5 rounded-lg transition-colors",
                       proc.isFeatured ? "text-amber-500 hover:bg-amber-50" : "text-muted-foreground hover:bg-muted"
                     )}
                     title={admin.common.featured}
+                    aria-label={admin.common.featured}
                   >
                     <Star className={cn("h-4 w-4", proc.isFeatured && "fill-amber-400")} />
                   </button>
-                  <button onClick={() => handleDelete(proc._id)} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                  <button onClick={() => handleDelete(proc._id)} className="p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors" title={admin.common.delete} aria-label={admin.common.delete}>
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", updateProcedure)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move up"><ArrowUp className="h-3 w-3" /></button>
-                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", updateProcedure)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label="Move down"><ArrowDown className="h-3 w-3" /></button>
+                    <button disabled={index === 0} onClick={() => swapOrder(procedures!, index, "up", updateProcedure)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveUp}><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={index === procedures!.length - 1} onClick={() => swapOrder(procedures!, index, "down", updateProcedure)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveDown}><ArrowDown className="h-3 w-3" /></button>
                   </div>
                 </div>
               </CardContent>
@@ -227,6 +229,27 @@ export default function DashboardProceduresTab() {
           })
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={admin.confirm.title}
+        message={admin.confirm.deleteProcedure}
+        isLoading={deleting}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setDeleting(true);
+          try {
+            await removeProcedure({ id: deleteTarget });
+            toast.success(admin.toast.deleted);
+            setDeleteTarget(null);
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -341,7 +364,7 @@ function ProcedureForm({
             </div>
             <div className="space-y-2">
               <Label>{admin.procedures.category}</Label>
-              <Input name="category" defaultValue={existing?.category} placeholder="face" />
+              <Input name="category" defaultValue={existing?.category} placeholder="الوجه" />
             </div>
             <div className="space-y-2">
               <Label>{admin.procedures.price}</Label>
@@ -359,7 +382,7 @@ function ProcedureForm({
                 <option value="">{admin.procedures.parentNone}</option>
                 {parentOptions.map((p) => (
                   <option key={p._id} value={p.slug}>
-                    {p.titleEn} ({p.slug})
+                    {p.titleAr || p.titleEn}
                   </option>
                 ))}
               </select>
@@ -380,7 +403,7 @@ function ProcedureForm({
                     const label = PROCEDURE_ICON_LABELS[selectedIcon as keyof typeof PROCEDURE_ICON_LABELS];
                     return (<>
                       <IconComp className="h-4 w-4 text-primary" />
-                      {label ? label.en : selectedIcon}
+                      {label ? label.ar : selectedIcon}
                     </>);
                   })()}
                 </span>
@@ -403,7 +426,7 @@ function ProcedureForm({
                       return (
                         <button key={key} type="button" data-icon-btn data-icon-name={`${key} ${label.en} ${label.ar}`} onClick={() => { setSelectedIcon(key); setShowIconPicker(false); }} className={cn("p-2 rounded-lg flex flex-col items-center gap-1 hover:bg-primary/10 transition-colors", selected && "bg-primary/10 ring-1 ring-primary")}>
                           <IconComp className="h-5 w-5 text-primary" />
-                          <span className="text-[9px] text-muted-foreground leading-none truncate w-full text-center">{label.en}</span>
+                          <span className="text-[9px] text-muted-foreground leading-none truncate w-full text-center">{label.ar}</span>
                         </button>
                       );
                     })}
@@ -455,8 +478,8 @@ function ProcedureForm({
                       }} label={`${admin.procedures.gallery} ${i + 1}`} hint="يُزرع مربّعًا 1:1 في معرض صور صفحة الإجراء" />
                     </div>
                     <div className="flex flex-col gap-0.5 mt-7">
-                      <button type="button" disabled={i === 0} onClick={() => { const updated = [...galleryUrls]; [updated[i-1], updated[i]] = [updated[i], updated[i-1]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
-                      <button type="button" disabled={i === galleryUrls.length - 1} onClick={() => { const updated = [...galleryUrls]; [updated[i], updated[i+1]] = [updated[i+1], updated[i]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
+                      <button type="button" disabled={i === 0} onClick={() => { const updated = [...galleryUrls]; [updated[i-1], updated[i]] = [updated[i], updated[i-1]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30" aria-label={admin.common.moveUp}><ArrowUp className="h-3 w-3" /></button>
+                      <button type="button" disabled={i === galleryUrls.length - 1} onClick={() => { const updated = [...galleryUrls]; [updated[i], updated[i+1]] = [updated[i+1], updated[i]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30" aria-label={admin.common.moveDown}><ArrowDown className="h-3 w-3" /></button>
                       <button type="button" className="p-1 text-red-500 hover:bg-red-50 rounded" onClick={() => removeGalleryImage(i)}>
                         <Trash2 className="h-3 w-3" />
                       </button>

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useAdminText } from "@/hooks/use-admin-text";
+import { useI18n } from "@/i18n";
 
 function countryFlag(code: string): string {
   if (!/^[A-Z]{2}$/.test(code)) return "🌍";
@@ -10,19 +11,26 @@ function countryFlag(code: string): string {
   );
 }
 
-function countryName(code: string): string {
-  if (!/^[A-Z]{2}$/.test(code)) return code;
-  try {
-    return new Intl.DisplayNames(["en"], { type: "region" }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
-
 export default function DashboardAnalyticsTab() {
   const admin = useAdminText();
+  const { locale } = useI18n();
   const stats = useQuery(api.analytics.getStats, { days: 30 });
-  const num = new Intl.NumberFormat();
+  const num = new Intl.NumberFormat(locale);
+  const regionFmt = new Intl.DisplayNames([locale], { type: "region" });
+
+  const countryName = (code: string) => {
+    if (!/^[A-Z]{2}$/.test(code)) return code;
+    try {
+      return regionFmt.of(code) ?? code;
+    } catch {
+      return code;
+    }
+  };
+
+  const dayLabel = (day: string) => {
+    const d = new Date(`${day}T12:00:00`);
+    return d.toLocaleDateString(locale, { day: "2-digit", month: "2-digit" });
+  };
 
   const actionLabel = (type: string) => {
     if (type === "whatsapp") return admin.analytics.actionWhatsapp;
@@ -63,7 +71,11 @@ export default function DashboardAnalyticsTab() {
             <CardContent className="p-5">
               <p className="text-xs text-muted-foreground">{c.label}</p>
               <p className="mt-1 text-3xl font-bold text-foreground">
-                {stats === undefined ? "…" : num.format(c.value)}
+                {stats === undefined ? (
+                  <span className="inline-block h-8 w-16 rounded-md bg-muted/40 animate-pulse align-middle" />
+                ) : (
+                  num.format(c.value)
+                )}
               </p>
             </CardContent>
           </Card>
@@ -76,7 +88,11 @@ export default function DashboardAnalyticsTab() {
             <CardContent className="p-5">
               <p className="text-xs text-muted-foreground">{c.label}</p>
               <p className="mt-1 text-3xl font-bold text-foreground">
-                {stats === undefined ? "…" : num.format(c.value)}
+                {stats === undefined ? (
+                  <span className="inline-block h-8 w-16 rounded-md bg-muted/40 animate-pulse align-middle" />
+                ) : (
+                  num.format(c.value)
+                )}
               </p>
             </CardContent>
           </Card>
@@ -98,10 +114,10 @@ export default function DashboardAnalyticsTab() {
                   <div
                     className="w-full rounded-t-md bg-primary/70"
                     style={{ height: `${Math.max(4, (d.count / maxSeries) * 96)}px` }}
-                    title={`${d.day}: ${d.count}`}
+                    title={`${dayLabel(d.day)}: ${num.format(d.count)}`}
                   />
                   <span className="text-[9px] text-muted-foreground whitespace-nowrap">
-                    {d.day.slice(5)}
+                    {dayLabel(d.day)}
                   </span>
                 </div>
               ))}
@@ -148,18 +164,23 @@ export default function DashboardAnalyticsTab() {
           </CardHeader>
           <CardContent className="space-y-2">
             {stats?.topPages?.length ? (
-              stats.topPages.map((p) => (
-                <div key={p.path} className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-mono bg-muted/60 rounded px-2 py-1 truncate">
-                    {p.path}
-                  </span>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {num.format(p.count)}
-                  </span>
-                </div>
-              ))
+              <>
+                {stats.topPages.map((p) => (
+                  <div key={p.path} className="flex items-center justify-between gap-3">
+                    <span className="text-xs bg-muted/60 rounded px-2 py-1 truncate">
+                      {p.path}
+                    </span>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {num.format(p.count)}
+                    </span>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground/70 pt-1">
+                  {admin.analytics.topPagesHint}
+                </p>
+              </>
             ) : (
-              <p className="text-sm text-muted-foreground">No visit data yet.</p>
+              <p className="text-sm text-muted-foreground">{admin.analytics.noData}</p>
             )}
           </CardContent>
         </Card>

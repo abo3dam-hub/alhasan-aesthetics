@@ -11,6 +11,7 @@ import { useAdminText } from "@/hooks/use-admin-text";
 import { ArrowDown, ArrowUp, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react";
 import { MediaSelector } from "@/components/MediaSelector";
 import { swapOrder } from "./dashboard-utils";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function DashboardBeforeAfterTab() {
@@ -26,6 +27,8 @@ export default function DashboardBeforeAfterTab() {
   const existing = editingId ? cases?.find((c) => c._id === editingId) : null;
   const [baBeforeImage, setBaBeforeImage] = useState("");
   const [baAfterImage, setBaAfterImage] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Id<"beforeAfter"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleOpenBAForm = (id: Id<"beforeAfter"> | null) => {
     setEditingId(id);
@@ -96,7 +99,7 @@ export default function DashboardBeforeAfterTab() {
               <div className="space-y-2"><Label>{admin.content.descAr}</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
               <div className="space-y-2"><Label>{admin.beforeAfter.patientAge}</Label><Input name="patientAge" type="number" min={1} max={120} defaultValue={existing?.patientAge ?? ""} placeholder="مثال: 35" /></div>
               <div className="flex gap-3">
-                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : (editingId ? admin.beforeAfter.edit : admin.common.save)}</Button>
+                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : admin.common.save}</Button>
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{admin.common.cancel}</Button>
               </div>
             </form>
@@ -115,19 +118,23 @@ export default function DashboardBeforeAfterTab() {
               <CardContent className="p-4 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-medium text-foreground truncate">{c.titleEn}</p>
-                  <p className="text-sm text-muted-foreground">{c.procedureType}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {procedures?.find((p) => p.slug === c.procedureType)?.titleAr ||
+                      procedures?.find((p) => p.slug === c.procedureType)?.titleEn ||
+                      c.procedureType}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleOpenBAForm(c._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit}><FileText className="h-4 w-4" /></button>
-                  <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success(admin.toast.saved); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
+                  <button onClick={() => handleOpenBAForm(c._id)} className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit} aria-label={admin.common.edit}><FileText className="h-4 w-4" /></button>
+                  <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success(admin.toast.saved); }} className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={c.isActive ? admin.common.inactive : admin.common.active} aria-label={c.isActive ? admin.common.inactive : admin.common.active}>
                     {c.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
-                  <button onClick={async () => { if (confirm(admin.confirm.deleteCase)) { await removeCase({ id: c._id }); toast.success(admin.toast.deleted); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                  <button onClick={() => setDeleteTarget(c._id)} className="p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors" title={admin.common.delete} aria-label={admin.common.delete}>
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">
-                    <button disabled={cases!.indexOf(c) === 0} onClick={() => swapOrder(cases!, cases!.indexOf(c), "up", updateCase)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowUp className="h-3 w-3" /></button>
-                    <button disabled={cases!.indexOf(c) === cases!.length - 1} onClick={() => swapOrder(cases!, cases!.indexOf(c), "down", updateCase)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"><ArrowDown className="h-3 w-3" /></button>
+                    <button disabled={cases!.indexOf(c) === 0} onClick={() => swapOrder(cases!, cases!.indexOf(c), "up", updateCase)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveUp}><ArrowUp className="h-3 w-3" /></button>
+                    <button disabled={cases!.indexOf(c) === cases!.length - 1} onClick={() => swapOrder(cases!, cases!.indexOf(c), "down", updateCase)} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors" aria-label={admin.common.moveDown}><ArrowDown className="h-3 w-3" /></button>
                   </div>
                 </div>
               </CardContent>
@@ -135,6 +142,27 @@ export default function DashboardBeforeAfterTab() {
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={admin.confirm.title}
+        message={admin.confirm.deleteCase}
+        isLoading={deleting}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setDeleting(true);
+          try {
+            await removeCase({ id: deleteTarget });
+            toast.success(admin.toast.deleted);
+            setDeleteTarget(null);
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }

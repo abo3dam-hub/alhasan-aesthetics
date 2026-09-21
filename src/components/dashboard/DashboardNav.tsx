@@ -78,6 +78,7 @@ export default function DashboardNav({
       <button
         key={item.key}
         onClick={() => onTabChange(item.key)}
+        aria-current={activeTab === item.key ? "page" : undefined}
         className={cn(
           "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
           activeTab === item.key

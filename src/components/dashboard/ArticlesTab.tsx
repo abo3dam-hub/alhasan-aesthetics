@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MediaSelector } from "@/components/MediaSelector";
 import { useAdminText } from "@/hooks/use-admin-text";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function ArticlesTab() {
@@ -36,6 +37,8 @@ export default function ArticlesTab() {
   const [filterPublished, setFilterPublished] = useState<
     "all" | "published" | "draft"
   >("all");
+  const [deleteTarget, setDeleteTarget] = useState<Id<"articles"> | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = articles?.filter((a) => {
     const matchesSearch =
@@ -57,11 +60,8 @@ export default function ArticlesTab() {
     toast.success(isPublished ? admin.toast.movedToDrafts : admin.toast.published);
   };
 
-  const handleDelete = async (id: Id<"articles">) => {
-    if (confirm(admin.confirm.deleteArticle)) {
-      await removeArticle({ id });
-      toast.success(admin.toast.deleted);
-    }
+  const handleDelete = (id: Id<"articles">) => {
+    setDeleteTarget(id);
   };
 
   const swapOrder = async (index: number, direction: "up" | "down") => {
@@ -180,7 +180,7 @@ export default function ArticlesTab() {
                       {article.titleEn}
                     </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {article.titleAr} · {article.slug}
+                      {article.titleAr}
                     </p>
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export default function ArticlesTab() {
                       setEditingId(article._id);
                       setShowForm(true);
                     }}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
+                    className="p-2.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
                     title={admin.common.edit}
                     aria-label={admin.common.edit}
                   >
@@ -201,13 +201,20 @@ export default function ArticlesTab() {
                       handleTogglePublished(article._id, article.isPublished)
                     }
                     className={cn(
-                      "p-2 rounded-lg transition-colors",
+                      "p-2.5 rounded-lg transition-colors",
                       article.isPublished
                         ? "text-green-600 hover:bg-green-50"
                         : "text-muted-foreground hover:bg-muted",
                     )}
                     title={
-                      article.isPublished ? "Unpublish" : admin.common.published
+                      article.isPublished
+                        ? admin.articles.unpublish
+                        : admin.common.published
+                    }
+                    aria-label={
+                      article.isPublished
+                        ? admin.articles.unpublish
+                        : admin.common.published
                     }
                   >
                     {article.isPublished ? (
@@ -229,12 +236,13 @@ export default function ArticlesTab() {
                       );
                     }}
                     className={cn(
-                      "p-2 rounded-lg transition-colors",
+                      "p-2.5 rounded-lg transition-colors",
                       article.isFeatured
                         ? "text-amber-500 hover:bg-amber-50"
                         : "text-muted-foreground hover:bg-muted",
                     )}
                     title={admin.common.featured}
+                    aria-label={admin.common.featured}
                   >
                     <Star
                       className={cn("h-4 w-4", article.isFeatured && "fill-amber-400")}
@@ -242,7 +250,9 @@ export default function ArticlesTab() {
                   </button>
                   <button
                     onClick={() => handleDelete(article._id)}
-                    className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                    className="p-2.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                    title={admin.common.delete}
+                    aria-label={admin.common.delete}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -251,7 +261,7 @@ export default function ArticlesTab() {
                       disabled={index === 0}
                       onClick={() => swapOrder(index, "up")}
                       className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"
-                      aria-label="Move up"
+                      aria-label={admin.common.moveUp}
                     >
                       <ArrowUp className="h-3 w-3" />
                     </button>
@@ -259,7 +269,7 @@ export default function ArticlesTab() {
                       disabled={index === articles.length - 1}
                       onClick={() => swapOrder(index, "down")}
                       className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"
-                      aria-label="Move down"
+                      aria-label={admin.common.moveDown}
                     >
                       <ArrowDown className="h-3 w-3" />
                     </button>
@@ -270,6 +280,27 @@ export default function ArticlesTab() {
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={admin.confirm.title}
+        message={admin.confirm.deleteArticle}
+        isLoading={deleting}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setDeleting(true);
+          try {
+            await removeArticle({ id: deleteTarget });
+            toast.success(admin.toast.deleted);
+            setDeleteTarget(null);
+          } finally {
+            setDeleting(false);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -278,7 +309,7 @@ interface ArticleFormProps {
   onSubmit: (data: ArticleFormData) => Promise<void>;
   onCancel: () => void;
   editingId: Id<"articles"> | null;
-  procedures: { _id: Id<"procedures">; slug: string; titleEn: string }[];
+  procedures: { _id: Id<"procedures">; slug: string; titleEn: string; titleAr: string }[];
   nextOrder: number;
 }
 
@@ -367,7 +398,7 @@ function ArticleForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Title (English)</Label>
+              <Label>{admin.content.titleEn}</Label>
               <Input
                 name="titleEn"
                 required
@@ -376,7 +407,7 @@ function ArticleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label>Title (Arabic)</Label>
+              <Label>{admin.content.titleAr}</Label>
               <Input
                 name="titleAr"
                 dir="rtl"
@@ -402,7 +433,7 @@ function ArticleForm({
               <Input
                 name="categoryEn"
                 defaultValue={existing?.categoryEn}
-                placeholder="Face"
+                placeholder="الوجه"
               />
             </div>
             <div className="space-y-2">
@@ -436,7 +467,7 @@ function ArticleForm({
                 <option value="">{admin.articles.relatedNone}</option>
                 {procedures.map((p) => (
                   <option key={p._id} value={p.slug}>
-                    {p.titleEn} ({p.slug})
+                    {p.titleAr || p.titleEn}
                   </option>
                 ))}
               </select>
@@ -451,7 +482,7 @@ function ArticleForm({
                 required
                 rows={3}
                 defaultValue={existing?.excerptEn}
-                placeholder="Short summary shown on the blog listing."
+                placeholder="ملخص قصير يظهر في قائمة المدونة."
               />
             </div>
             <div className="space-y-2">
@@ -497,7 +528,7 @@ function ArticleForm({
                 value={coverUrl}
                 onChange={setCoverUrl}
                 label={admin.articles.coverImage}
-                hint="Select a library image or paste a URL — the article header and listing card will use it."
+                hint="اختر صورة من المكتبة أو الصق رابطًا — ستُستخدم في رأس المقال وبطاقة القائمة."
               />
             </div>
             <div className="space-y-2">
@@ -505,7 +536,7 @@ function ArticleForm({
                 value={ogImageUrl}
                 onChange={setOgImageUrl}
                 label={admin.articles.ogImage}
-                hint="Used when the article is shared on WhatsApp / social media. Falls back to the cover image."
+                hint="تُستخدم عند مشاركة المقال على واتساب / وسائل التواصل — تعود للصورة الرئيسية إن لم تُحدّد."
               />
             </div>
           </div>
@@ -513,7 +544,7 @@ function ArticleForm({
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{admin.articles.seoTitleEn}</Label>
-              <Input name="seoTitleEn" defaultValue={existing?.seoTitleEn} placeholder="How Long Does a Facelift Last? | Dr. Al Hasan Al Saiem" />
+              <Input name="seoTitleEn" defaultValue={existing?.seoTitleEn} placeholder="عنوان SEO يظهر في نتائج البحث" />
             </div>
             <div className="space-y-2">
               <Label>{admin.articles.seoTitleAr}</Label>
@@ -528,7 +559,7 @@ function ArticleForm({
                 name="seoDescriptionEn"
                 rows={2}
                 defaultValue={existing?.seoDescriptionEn}
-                placeholder="Meta description for search engines."
+                placeholder="الوصف الظاهر في نتائج البحث."
               />
             </div>
             <div className="space-y-2">
@@ -551,7 +582,7 @@ function ArticleForm({
                 defaultChecked={existing?.isPublished ?? true}
                 className="h-4 w-4 rounded border-border text-primary"
               />
-              {admin.articles.published} (visible on the public blog)
+              {admin.articles.published} ({admin.articles.publishedHint})
             </label>
             <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
               <input
@@ -566,7 +597,7 @@ function ArticleForm({
 
           <div className="flex items-center gap-3 pt-2">
             <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">
-              {editingId ? admin.common.save : admin.articles.add}
+              {loading ? admin.common.saving : admin.common.save}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               {admin.common.cancel}

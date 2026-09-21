@@ -183,15 +183,15 @@ export default function DashboardSettingsTab() {
         <CardHeader><CardTitle className="text-lg">{admin.settings.doctorProfile}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>{admin.settings.biographyEn}</Label><Textarea rows={3} value={form.biographyEn} onChange={(e) => updateField("biographyEn", e.target.value)} placeholder="Doctor biography in English..." /></div>
+            <div className="space-y-2"><Label>{admin.settings.biographyEn}</Label><Textarea rows={3} value={form.biographyEn} onChange={(e) => updateField("biographyEn", e.target.value)} placeholder="نبذة تعريفيّة باللغة الإنجليزية..." /></div>
             <div className="space-y-2"><Label>{admin.settings.biographyAr}</Label><Textarea dir="rtl" rows={3} value={form.biographyAr} onChange={(e) => updateField("biographyAr", e.target.value)} placeholder="السيرة الذاتية بالعربية..." /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>{admin.settings.specializationsEn}</Label><Input value={form.specializationsEn} onChange={(e) => updateField("specializationsEn", e.target.value)} placeholder="e.g. Rhinoplasty, Facelift, Botox" /></div>
+            <div className="space-y-2"><Label>{admin.settings.specializationsEn}</Label><Input value={form.specializationsEn} onChange={(e) => updateField("specializationsEn", e.target.value)} placeholder="مثلاً: تجميل الأنف، شد الوجه، البوتوكس" /></div>
             <div className="space-y-2"><Label>{admin.settings.specializationsAr}</Label><Input dir="rtl" value={form.specializationsAr} onChange={(e) => updateField("specializationsAr", e.target.value)} placeholder="مثلاً تجميل الأنف، شد الوجه، البوتوكس" /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>{admin.settings.educationEn}</Label><Input value={form.educationEn} onChange={(e) => updateField("educationEn", e.target.value)} placeholder="e.g. MD, Board Certified in Plastic Surgery" /></div>
+            <div className="space-y-2"><Label>{admin.settings.educationEn}</Label><Input value={form.educationEn} onChange={(e) => updateField("educationEn", e.target.value)} placeholder="مثلاً: دكتوراه في الطب، شهادة البورد" /></div>
             <div className="space-y-2"><Label>{admin.settings.educationAr}</Label><Input dir="rtl" value={form.educationAr} onChange={(e) => updateField("educationAr", e.target.value)} placeholder="مثلاً دكتوراه في الطب، شهادة البورد" /></div>
           </div>
         </CardContent>
@@ -208,11 +208,11 @@ export default function DashboardSettingsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>{admin.settings.heroTitleEn}</Label><Input value={form.heroTitleEn} onChange={(e) => updateField("heroTitleEn", e.target.value)} placeholder="Your Beauty Deserves" /></div>
+            <div className="space-y-2"><Label>{admin.settings.heroTitleEn}</Label><Input value={form.heroTitleEn} onChange={(e) => updateField("heroTitleEn", e.target.value)} placeholder="مثال: جمالك يستحق" /></div>
             <div className="space-y-2"><Label>{admin.settings.heroTitleAr}</Label><Input dir="rtl" value={form.heroTitleAr} onChange={(e) => updateField("heroTitleAr", e.target.value)} placeholder="جمالك يستحق" /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>{admin.settings.heroHighlightEn}</Label><Input value={form.heroSubtitleEn} onChange={(e) => updateField("heroSubtitleEn", e.target.value)} placeholder="The Finest Care" /></div>
+            <div className="space-y-2"><Label>{admin.settings.heroHighlightEn}</Label><Input value={form.heroSubtitleEn} onChange={(e) => updateField("heroSubtitleEn", e.target.value)} placeholder="مثال: أرقى العناية" /></div>
             <div className="space-y-2"><Label>{admin.settings.heroHighlightAr}</Label><Input dir="rtl" value={form.heroSubtitleAr} onChange={(e) => updateField("heroSubtitleAr", e.target.value)} placeholder="أرقى العناية" /></div>
           </div>
         </CardContent>
@@ -224,8 +224,8 @@ export default function DashboardSettingsTab() {
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="space-y-2"><Label>{admin.settings.sunThu}</Label><Input value={form.workingHoursWeekdays} onChange={(e) => updateField("workingHoursWeekdays", e.target.value)} placeholder="9 AM - 6 PM" /></div>
-            <div className="space-y-2"><Label>{admin.settings.friday}</Label><Input value={form.workingHoursFriday} onChange={(e) => updateField("workingHoursFriday", e.target.value)} placeholder="Closed" /></div>
-            <div className="space-y-2"><Label>{admin.settings.saturday}</Label><Input value={form.workingHoursSaturday} onChange={(e) => updateField("workingHoursSaturday", e.target.value)} placeholder="Closed" /></div>
+            <div className="space-y-2"><Label>{admin.settings.friday}</Label><Input value={form.workingHoursFriday} onChange={(e) => updateField("workingHoursFriday", e.target.value)} placeholder="مغلق" /></div>
+            <div className="space-y-2"><Label>{admin.settings.saturday}</Label><Input value={form.workingHoursSaturday} onChange={(e) => updateField("workingHoursSaturday", e.target.value)} placeholder="مغلق" /></div>
           </div>
         </CardContent>
       </Card>
@@ -235,15 +235,15 @@ export default function DashboardSettingsTab() {
         <CardHeader><CardTitle className="text-lg">{admin.settings.socialMedia}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Instagram URL</Label><Input value={form.instagram} onChange={(e) => updateField("instagram", e.target.value)} placeholder="https://instagram.com/..." /></div>
-            <div className="space-y-2"><Label>Facebook URL</Label><Input value={form.facebook} onChange={(e) => updateField("facebook", e.target.value)} placeholder="https://facebook.com/..." /></div>
+            <div className="space-y-2"><Label>{admin.settings.socialInstagram}</Label><Input value={form.instagram} onChange={(e) => updateField("instagram", e.target.value)} placeholder="https://instagram.com/..." /></div>
+            <div className="space-y-2"><Label>{admin.settings.socialFacebook}</Label><Input value={form.facebook} onChange={(e) => updateField("facebook", e.target.value)} placeholder="https://facebook.com/..." /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Twitter / X URL</Label><Input value={form.twitter} onChange={(e) => updateField("twitter", e.target.value)} placeholder="https://twitter.com/..." /></div>
-            <div className="space-y-2"><Label>Snapchat URL</Label><Input value={form.snapchat} onChange={(e) => updateField("snapchat", e.target.value)} placeholder="https://snapchat.com/..." /></div>
+            <div className="space-y-2"><Label>{admin.settings.socialTwitter}</Label><Input value={form.twitter} onChange={(e) => updateField("twitter", e.target.value)} placeholder="https://twitter.com/..." /></div>
+            <div className="space-y-2"><Label>{admin.settings.socialSnapchat}</Label><Input value={form.snapchat} onChange={(e) => updateField("snapchat", e.target.value)} placeholder="https://snapchat.com/..." /></div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>TikTok URL</Label><Input value={form.tiktok} onChange={(e) => updateField("tiktok", e.target.value)} placeholder="https://tiktok.com/@..." /></div>
+            <div className="space-y-2"><Label>{admin.settings.socialTiktok}</Label><Input value={form.tiktok} onChange={(e) => updateField("tiktok", e.target.value)} placeholder="https://tiktok.com/@..." /></div>
           </div>
         </CardContent>
       </Card>
@@ -309,7 +309,7 @@ export default function DashboardSettingsTab() {
                           {user.name || user.email?.slice(0, 1).toUpperCase() || "?"}
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{user.name || "Unknown"}</p>
+                          <p className="text-sm font-medium">{user.name || admin.settings.unknownUser}</p>
                           <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
                       </div>
