@@ -1369,7 +1369,7 @@ Output: `dist/` directory
 - `<title>` with doctor name + specialties
 - `<meta name="description">` with keywords
 - `<meta name="keywords">` with relevant terms
-- `<link rel="canonical">` to `https://dr-alhasan.com/`
+- `<link rel="canonical">` to `https://dralhasanalsaiem.com/`
 - Open Graph tags (type, title, description, image, url, site_name, locale)
 - Twitter Card tags (summary_large_image)
 - Physician JSON-LD structured data

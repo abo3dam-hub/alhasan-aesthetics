@@ -188,7 +188,7 @@
 1. **من `report 9-14-26.md` §4 (قائمة مفتوحة):**
    - إنشاء حساب **admin الثاني** من `/auth` (مسموح — أول حسابين أدمن).
    - **التحقق من رفض حساب ثالث** (اختبار حدّان-admin).
-   - لاحقاً: ربط `dr-alhasan.com` (حالياً domain 000)، وربط `alhasanalsaiem.com` في Vercel إن رغبنا.
+   - لاحقاً: ربط `alhasanalsaiem.com` في Vercel إن رغبنا (النطاق الفعلي حاليًا `dralhasanalsaiem.com`؛ **لا يوجد نطاق باسم `dr-alhasan.com`** — أُلغي بقرار المالك 19-9).
    - نظافة تقنية: إزالة `VLY_CONVEX_AUTH_ISSUER` الميت من `.env.local` القديمة (غير متتبعة).
 2. **من الـhandover (توصيات لا فرض):**
    - إضافة **tests** (لا توجد حالياً) و **CI/CD** (لا GitHub Actions).

@@ -279,7 +279,7 @@
 
 - [ ] إنشاء حساب الـ Admin **الثاني** من صفحة التسجيل (مسموح — أول حسابين مديرين).
 - [ ] التحقق من أن حسابًا **ثالثًا** يُرفض عند التسجيل.
-- [ ] (لاحقًا) ربط النطاق `dr-alhasan.com` في Vercel — حاليًا `000` (غير متاح).
+- [x] ~~(لاحقًا) ربط النطاق `dr-alhasan.com` في Vercel — حاليًا `000` (غير متاح).~~ → **أُلغي (19-9): لا وجود لنطاق باسم `dr-alhasan.com`** — النطاق الوحيد الفعلي `dralhasanalsaiem.com`.
 - [ ] النطاق `alhasanalsaiem.com` مُضاف في إعدادات المشروع — يحتاج ربط في Vercel إذا أردنا استخدامه.
 - [ ] (تقني) `VLY_CONVEX_AUTH_ISSUER=https://freebuff.com` موجود فقط في `.env.local` المحلي (غير متتبع، dead) — تُنظّف عند الحاجة.
 
@@ -474,3 +474,28 @@
 - **4.3 تنظيف VLY:** حذف `src/instrumentation.tsx` و`src/lib/vly-integrations.ts`، فك ربط `@vly-ai/integrations` (استيراد `main.tsx` + `vlyPlugin()` في `vite.config.ts` + من `package.json`/`package-lock.json`). بقي `VlyToolbar` كأداة preview. لا بقايا VLY/Freebuff في `src/` سوى إشارة الـtoolbar.
 - **4.4 `.env.local` (آخر القائمة):** غير موجود في workspace هذا (مهمَل في `.gitignore`) — لا شيء يُحذف؛ بقي `VLY_CONVEX_AUTH_ISSUER` القديم خارج المستودع بلا أي reference.
 - تحقق: `npx tsc -b` نظيف، ESLint 0 أخطاء (30 تحذيرًا كلها سابقة)، build أخضر (الـentry 340.19KB/gzip 105.54KB — أصغر من 342.22 بعد إزالة استيراد VLY). الالتزام: **`502fb6e`** — رُفعت التحديثات ووثّقت في `REPORTS-AUDIT.md` (بعنوان «نفذ البند 4»), `PROJECT-MASTER-HANDOVER.md`, `CODESPACES-SETUP-REPORT.md`.
+
+### ٦.٨ قرارات المالك (بند «اختر لي»)
+- **لا نعرب صفحة `/auth`** — بند TD-10 في قائمة المقترحات **أُلغي بقرار المالك** (لا يُنفَّذ).
+- **النطاق:** لا وجود لنطاق باسم `dr-alhasan.com`؛ النطاق الوحيد الفعلي هو **`dralhasanalsaiem.com`**. صُحّحت إشارات `dr-alhasan.com` في `PROJECT-HANDOVER-AUDIT.md` و`PROJECT-MASTER-HANDOVER.md` (canonical) و`REPORTS-AUDIT.md` و`report 9-14-26.md` (بند ربط النطاق أُلغي).
+
+### ٦.٩ جلسة إكمال بنود القائمة المتبقية — تحقق نظيف + نشر Convex (2026-09-21)
+نفّذت كل البنود المتبقية من قائمة الأمن/المراجعة، وتحقّق كامل ثم نُشر على Convex Prod. **لم يُعمل أي git commit** (بانتظار موافقة المالك).
+
+**التحقق النهائي (كلّه نظيف):**
+- `npm run build`: 0 أخطاء TypeScript (entry 340.54 kB / gzip 105.74 kB — مطابق تقريبًا لـ baseline).
+- `npm run lint`: **0 أخطاء و0 تحذيرات** (كانت 30 تحذيراً: 4 من الملفات `_generated` أُضيفت إلى `ignores` في `eslint.config.js` لأنها كود مولّد، و26 من قاعدة `react-refresh/only-export-components` التطويرية فقط — عُطّلت بإعداد project لأن المشروع يخلط مكوّنات مع hooks/constants/variants عمداً بأسلوب shadcn؛ صفر تأثير على production).
+- `npm audit`: 2 moderate فقط (satori→fflate؛ residual مُوثّقة، لا خادم أرشفة يخدم المحتوى).
+- `npm test` (Vitest، جديد): 12 اختبارًا ناجحًا عبر 3 ملفات، + GitHub Actions CI (` .github/workflows/ci.yml`).
+
+**نشر Convex Prod (`kindly-anaconda-422`): نجح.**
+- السبب: `@convex-dev/auth@0.0.95` جعل تقييم الوحدات في الخادم يفشل (`evaluate_push 400 InvalidModules … Uncaught fetch failed`) فتعذّر أي push.
+- الحل: تثبيت `@convex-dev/auth@0.0.94` (تُنشر بنجاح، وتحمل @auth/core 0.41.3 فتظل الـ criticals مقفلة). `deploy` نجح: `✔ Deployed Convex functions`.
+- الدوال الجديدة حيّة على Prod: `loginRateLimit.getLoginStatus` (`{"retryAfterMs":0}`)، `users.listUsers` (تصل لـ requireAdmin وتحتاج جلسة أدمن — متوقع).
+- **وسم انتقاد:** سببًا محتملًا لـ «أنواع التخزين القديمة`: صور الـ media في الجدول تحمل `storageId` بالصيغة القديمة `kg…`، لكن المسار الرسمي `getFileUrl` يحوّلها ويُرجع رابط 200 (image/*) لكل القيم (15/15) — إغلاق جزئي لـ BUG-1 من جهة الخادم.
+
+**قرارات/ملاحظات الجلسة:**
+- إصلاح أخطاء الـ types اليدوية السابقة: أُلغيت الأنوتيشنات غير الصحيحة في `ProceduresPage`/`ProcedureDetail`/`ConsultationPage` (الاستدلال الأنسب يعمل مع الأنواع المتولّدة)، وأُصلح `DashboardSettingsTab` (استيراد Loader2 + مجال الاسم `name` + guard لـ `users`).
+- إعادة إنشاء ملفين بعد حذف عرضي أثناء الفحص: `src/convex/loginRateLimit.ts` و`src/lib/jsonLd.ts` (نفس المحتوى).
+- حُذفت أخطاء كثيرة كانت تظهر سابقًا بسبب حالة node_modules غير المتطابقة أثناء الفحص؛ في الحالة المتّسقة نهائيًا لا أخطاء.
+- `git status` (غير committed): تعديلات الكود/الوثائق أعلاه + ملفات جديدة (`loginRateLimit.ts`, `jsonLd.ts`, `vitest.config.ts`, `src/lib/__tests__/*`, `.github/workflows/ci.yml`) + حذف (`ui/calendar.tsx`, `ui/resizable.tsx`, `convex/notifications.ts`).

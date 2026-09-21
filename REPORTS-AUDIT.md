@@ -57,7 +57,7 @@
 1. **المصادقة:** «Email-OTP + Anonymous + Freebuff federated + `becomeAdmin`»
    → الحقيقي الآن: **Password provider فقط، حدّان-admin ذريان** (`src/convex/auth.ts`)،
    `customJwt` و`VLY_CONVEX_AUTH_ISSUER` أُزيلا نهائياً.
-2. **نطاقات/Deployments:** `dr-alhasan.com`، `impartial-ladybug-881`، `gregarious-perch-128`
+2. **نطاقات/Deployments:** `dr-alhasan.com` (**لا وجود لنطاق بهذا الاسم** — ذُكر كوهمي)، `impartial-ladybug-881`، `gregarious-perch-128`
    → الحقيقي: **`dralhasanalsaiem.com`** وحيداً، و**`kindly-anaconda-422`** هو production.
 3. **التوابـل:** «7 جداول» → الحالي **12** (أُضيفت articles, pageVisits, ipCountryCache, analyticsEvents).
 4. **الـbuild:** أرقام `bun` القديمة و«Index 461.71 kB» → الحالي npm، entry **≈342.22 kB (gzip 106.24 kB)**.
@@ -92,6 +92,15 @@
 5. ~~**من `CMS-DATA-MAPPING` / `DATA-SYNC`:** حقل `about.doctorImage`~~ → ✅ **مؤكَّد مكتمل (2026-09-19):** `About.tsx:95` يعرض `aboutCMS.image` عبر `ResolvedImage`، وواجهة HomepageCMSTab فيها حقل "Doctor Profile Image"، و**البيانات في Production مضبوطة** (`about.image = kg281f7...` — تحقق قراءة-only عبر `npx convex run`). الاستيراد الثابت `/assets/1.jpg` هو fallback عند غياب الصورة فقط.
 6. **من `VERCEL`:** قائمة المسارات في `vercel.json` لم تعد تحوي `/procedures`, `/contact`, `/blog/:slug`
    في جداول الوثيقة فقط (الملف الفعلي سليم — SPA rewrite عام).
+7. **النشر على Convex Production** → ✅ **منفَّذ (2026-09-21):** `deploy` نجح على
+   `kindly-anaconda-422` (كل دوال الأمن/الـ loginRateLimit/listUsers/promoteUser + schema الجديد حيّة).
+   - **قيد الإصدار:** `@convex-dev/auth` مُثبَّت **عند `0.0.94` تحديداً** — الإصدار `0.0.95` يجعل تقييم
+     الوحدات على الخادم يفشل (`evaluate_push 400 InvalidModules … Uncaught fetch failed`) فتُرفض كل عمليات push؛
+     لا ترفع الإصدار قبل التجربة على نسخة قابلة للنشر.
+   - **Residual معتمَد:** `npm audit` عند **2 moderate** (satori→fflate؛ لا مسار وصول للمحتوى المُرفع) —
+     الـ criticals في @auth/core أُغلقت (المُثبَّت 0.41.3).
+8. **اختبارات + CI** → ✅ **مضاف (2026-09-21):** `npm test` (Vitest، 12 اختباراً/3 ملفات) +
+   `.github/workflows/ci.yml` (typecheck/lint/test/build على push وPR).
 
 ---
 
@@ -99,7 +108,7 @@
 
 - `resolveUrls` (مجمّع الروابط) في `src/convex/media.ts` كان يعيد **raw storageId** عند الفشل بينما
   `resolveUrl` الفردي يعيد `""` — ~~فرق سلوكي محتمل~~ → ✅ **حُلّ (2026-09-19):** وحّدنا السلوك، `resolveUrls`
-  يعيد الآن `""` لنفس مسار فشل الـ storageId (يُعرض fallback «بدون صورة» بدل src مكسور). — يحتاج **deploy** لليسري على Production.
+  يعيد الآن `""` لنفس مسار فشل الـ storageId (يُعرض fallback «بدون صورة» بدل src مكسور). → ✅ **نُشر (2026-09-21)** على Production، ويُضاف إليه أن جميع الروابط المخزنة (الصيغة القديمة `kg…`) تحلّ بنجاح عبر المسار الرسمي (200 image/*، 15/15).
 - ~~`Dashboard.tsx` monolith (~2050 سطراً)~~ → **حُلّ (2026-09-19، `dc29c4e`):** الملف صار shellاً
   (~48 سطراً) وكل تبويب مكوّن مستقل في `src/components/dashboard/` (`Dashboard*Tab.tsx` +
   `DashboardLayout`/`DashboardNav`/`dashboard-utils.ts`)؛ الملاحظة القديمة أعلاه صارت تاريخية.
