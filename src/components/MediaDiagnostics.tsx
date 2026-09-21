@@ -2,6 +2,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { Database, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 /**
@@ -10,6 +11,7 @@ import { Database, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
  * For debugging only — not shown to regular users.
  */
 export function MediaDiagnostics() {
+  const admin = useAdminText();
   const diagnostic = useQuery(api.media.diagnostic);
 
   if (!diagnostic) {
@@ -18,7 +20,7 @@ export function MediaDiagnostics() {
         <CardContent className="p-5">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Database className="h-4 w-4 animate-pulse" />
-            <span className="text-sm">Loading diagnostics...</span>
+            <span className="text-sm">{admin.media.diagnosticsLoading}</span>
           </div>
         </CardContent>
       </Card>
@@ -35,20 +37,20 @@ export function MediaDiagnostics() {
       <CardContent className="p-5 space-y-4">
         <h3 className="font-medium text-foreground flex items-center gap-2">
           <Database className="h-4 w-4" />
-          Media Diagnostics
+          {admin.media.diagnosticsTitle}
         </h3>
 
         {/* Summary */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatBox label="Total Records" value={totalRecords} />
-          <StatBox label="Storage OK" value={resolved.length} color="text-green-600 bg-green-50" />
-          <StatBox label="Storage Missing" value={failed.length} color="text-red-600 bg-red-50" />
-          <StatBox label="URL Empty" value={emptyUrl.length} color="text-amber-600 bg-amber-50" />
+          <StatBox label={admin.media.diagnosticsTotal} value={totalRecords} />
+          <StatBox label={admin.media.diagnosticsOk} value={resolved.length} color="text-green-600 bg-green-50" />
+          <StatBox label={admin.media.diagnosticsMissing} value={failed.length} color="text-red-600 bg-red-50" />
+          <StatBox label={admin.media.diagnosticsEmptyUrl} value={emptyUrl.length} color="text-amber-600 bg-amber-50" />
         </div>
 
         {/* Detailed Records */}
         {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No media records found.</p>
+          <p className="text-sm text-muted-foreground">{admin.media.noImagesTitle}</p>
         ) : (
           <div className="space-y-2">
             {items.map((item) => (

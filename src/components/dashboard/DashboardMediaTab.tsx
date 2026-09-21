@@ -5,9 +5,10 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-import { Settings, Image as ImageIcon, Trash2, X } from "lucide-react";
+import { Settings, Image as ImageIcon, SearchCheck, Trash2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useImageUpload } from "@/hooks/use-upload";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { useResolvedMedia } from "@/hooks/use-resolved-media";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { MediaDiagnostics } from "@/components/MediaDiagnostics";
@@ -15,6 +16,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 
 function ImageUploadUploadWidget() {
   const { upload, uploading, error } = useImageUpload();
+  const admin = useAdminText();
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -46,16 +48,16 @@ function ImageUploadUploadWidget() {
       {uploading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          Uploading...
+          {admin.media.uploading}
         </div>
       ) : (
         <>
           <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
           <p className="text-sm font-medium text-muted-foreground">
-            Click or drag to upload
+            {admin.media.uploadHelp}
           </p>
           <p className="text-[11px] text-muted-foreground/60 mt-1">
-            JPEG, PNG, WebP, GIF • Max 5MB
+            {admin.media.uploadFormats}
           </p>
         </>
       )}
@@ -82,9 +84,11 @@ export default function DashboardMediaTab() {
   const mediaItems = useQuery(api.media.list);
   const removeMedia = useMutation(api.media.remove);
   const repairUrls = useMutation(api.media.repairUrls);
+  const admin = useAdminText();
   const [search, setSearch] = useState("");
   const [repairing, setRepairing] = useState(false);
   const [repairResult, setRepairResult] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [previewItem, setPreviewItem] = useState<
     { url: string; resolvedUrl?: string; name: string; type: string; size: number; storageId: string; _id: string } | null
   >(null);
@@ -106,7 +110,7 @@ export default function DashboardMediaTab() {
 
   const handleCopyUrl = (url: string) => {
     navigator.clipboard.writeText(url);
-    toast.success("URL copied to clipboard!");
+    toast.success(admin.toast.urlCopied);
   };
 
   const handleDelete = async (item: { _id: string; storageId: string; url: string; name: string }) => {
@@ -117,20 +121,23 @@ export default function DashboardMediaTab() {
     if (!deleteTarget) return;
     try {
       await removeMedia({ id: deleteTarget._id as Id<"media"> });
-      toast.success("Image deleted");
+      toast.success(admin.toast.imageDeleted);
       if (previewItem?._id === deleteTarget._id) setPreviewItem(null);
       setDeleteTarget(null);
     } catch {
-      toast.error("Failed to delete image");
+      toast.error(admin.toast.imageDeleteError);
     }
   };
 
+  const showEmptyState = !!mediaItems && mediaItems.length === 0;
+  const showNoResults = !!mediaItems && mediaItems.length > 0 && (filteredMedia?.length ?? 0) === 0;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-foreground">Media Library</h2>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h2 className="text-2xl font-bold text-foreground">{admin.media.title}</h2>
         <span className="text-sm text-muted-foreground">
-          {mediaItems?.length ?? 0} images
+          {admin.media.imagesCount.replace("{count}", String(mediaItems?.length ?? 0))}
         </span>
       </div>
 
@@ -141,53 +148,81 @@ export default function DashboardMediaTab() {
         </CardContent>
       </Card>
 
-      {/* Repair Media URLs */}
+      {/* Repair + Diagnostics → advanced */}
       <Card className="border-border/60">
         <CardContent className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-xl bg-amber-50 flex items-center justify-center">
-                <Settings className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Repair Media URLs</p>
-                <p className="text-sm text-muted-foreground">Fix media records with broken/empty URLs (idempotent)</p>
-              </div>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="space-y-1">
+              <h3 className="font-medium text-foreground">{admin.advancedTitle}</h3>
+              <p className="text-sm text-muted-foreground">{admin.media.repairHint}</p>
             </div>
             <Button
               size="sm"
-              variant="outline"
-              disabled={repairing}
-              onClick={async () => {
-                setRepairing(true);
-                setRepairResult(null);
-                try {
-                  const result = await repairUrls();
-                  setRepairResult(result || "Done");
-                  toast.success(result || "Media URLs repaired!");
-                } catch {
-                  toast.error("Failed to repair media URLs.");
-                }
-                setRepairing(false);
-              }}
+              variant="ghost"
+              onClick={() => setShowAdvanced((s) => !s)}
+              className="gap-2"
             >
-              {repairing ? "Repairing..." : "Repair Media URLs"}
+              {showAdvanced ? admin.lessDetails : admin.moreDetails}
+              {showAdvanced ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </Button>
           </div>
-          {repairResult && (
-            <p className="mt-3 text-sm text-muted-foreground">{repairResult}</p>
+
+          {showAdvanced && (
+            <div className="mt-5 space-y-4">
+              {/* Repair Media URLs */}
+              <Card className="border-border/60">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <div className="h-11 w-11 rounded-xl bg-amber-50 flex items-center justify-center">
+                        <Settings className="h-5 w-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{admin.media.repairTitle}</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={repairing}
+                      onClick={async () => {
+                        setRepairing(true);
+                        setRepairResult(null);
+                        try {
+                          const result = await repairUrls();
+                          setRepairResult(result || admin.toast.mediaRepaired);
+                          toast.success(result || admin.toast.mediaRepaired);
+                        } catch {
+                          toast.error(admin.toast.mediaRepairError);
+                        }
+                        setRepairing(false);
+                      }}
+                    >
+                      {repairing ? admin.media.repairing : admin.media.repair}
+                    </Button>
+                  </div>
+                  {repairResult && (
+                    <p className="mt-3 text-sm text-muted-foreground">{repairResult}</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Diagnostics */}
+              <MediaDiagnostics />
+            </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Diagnostics */}
-      <MediaDiagnostics />
 
       {/* Search */}
       {mediaItems && mediaItems.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3">
           <Input
-            placeholder="Search images..."
+            placeholder={admin.media.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="sm:max-w-xs"
@@ -196,14 +231,19 @@ export default function DashboardMediaTab() {
       )}
 
       {/* Gallery Grid */}
-      {!mediaItems || mediaItems.length === 0 ? (
+      {showEmptyState ? (
         <Card className="border-border/60">
           <CardContent className="p-12 text-center">
             <ImageIcon className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-            <p className="text-muted-foreground text-lg font-medium">No images yet</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Upload your first image above to get started.
-            </p>
+            <p className="text-muted-foreground text-lg font-medium">{admin.media.noImagesTitle}</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">{admin.media.noImagesDesc}</p>
+          </CardContent>
+        </Card>
+      ) : showNoResults ? (
+        <Card className="border-border/60">
+          <CardContent className="p-10 text-center">
+            <SearchCheck className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">{admin.media.noSearchResults}</p>
           </CardContent>
         </Card>
       ) : (
@@ -241,14 +281,14 @@ export default function DashboardMediaTab() {
                 <button
                   onClick={(e) => { e.stopPropagation(); handleCopyUrl(item.resolvedUrl || item.url); }}
                   className="p-2 rounded-full bg-white/90 hover:bg-white text-foreground shadow-md transition-colors"
-                  title="Copy URL"
+                  title={admin.media.copyUrl}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
                   className="p-2 rounded-full bg-white/90 hover:bg-red-50 text-red-500 shadow-md transition-colors"
-                  title="Delete"
+                  title={admin.media.delete}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -271,7 +311,7 @@ export default function DashboardMediaTab() {
             {/* Close button */}
             <button
               onClick={() => setPreviewItem(null)}
-              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+              className="absolute top-3 end-3 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -312,21 +352,21 @@ export default function DashboardMediaTab() {
                   className="shrink-0 gap-1"
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  Copy
+                  {admin.common.copy}
                 </Button>
               </div>
 
-              <div className="flex gap-2 pt-1">
+              <div className="flex gap-2 pt-1 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     navigator.clipboard.writeText(previewItem.resolvedUrl || previewItem.url);
-                    toast.success("URL copied! Paste it in any image field.");
+                    toast.success(admin.toast.urlCopied);
                   }}
                   className="gap-1"
                 >
-                  Use in Procedure
+                  {admin.media.useInContent}
                 </Button>
                 <Button
                   variant="outline"
@@ -339,7 +379,7 @@ export default function DashboardMediaTab() {
                   }}
                   className="gap-1"
                 >
-                  Download
+                  {admin.media.download}
                 </Button>
                 <Button
                   variant="outline"
@@ -348,7 +388,7 @@ export default function DashboardMediaTab() {
                   className="gap-1 text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  Delete
+                  {admin.media.delete}
                 </Button>
               </div>
             </div>
@@ -369,40 +409,37 @@ export default function DashboardMediaTab() {
                 <Trash2 className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Delete Image</h3>
+                <h3 className="font-semibold text-foreground">{admin.media.delete}</h3>
                 <p className="text-sm text-muted-foreground truncate">{deleteTarget.name}</p>
               </div>
             </div>
 
             {deleteRefs && deleteRefs.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-sm text-amber-600 font-medium">This image is referenced by:</p>
-                <ul className="space-y-1">
-                  {deleteRefs.map((ref: string) => (
-                    <li key={ref} className="text-sm text-muted-foreground flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />
-                      {ref}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-muted-foreground mt-2">Deleting this will break those references.</p>
+                <p className="text-sm font-medium text-amber-600">
+                  {admin.confirm.imageReferencedBy}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {admin.confirm.imageReferenceWarning.replace("{count}", String(deleteRefs.length))}
+                </p>
               </div>
             ) : deleteRefs !== undefined ? (
-              <p className="text-sm text-muted-foreground">This image is not referenced by any content.</p>
+              <p className="text-sm text-muted-foreground">{admin.confirm.imageNotReferenced}</p>
             ) : (
-              <p className="text-sm text-muted-foreground">Checking references...</p>
+              <p className="text-sm text-muted-foreground">{admin.confirm.checkingReferences}</p>
             )}
 
             <div className="flex gap-3 justify-end pt-2">
-              <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+              <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
+                {admin.common.cancel}
+              </Button>
               <Button
                 size="sm"
-                variant={deleteRefs && deleteRefs.length > 0 ? "destructive" : "destructive"}
+                variant="destructive"
                 disabled={deleteRefs === undefined}
                 onClick={confirmDelete}
-                className={deleteRefs && deleteRefs.length > 0 ? "" : "bg-red-600 text-white hover:bg-red-700"}
               >
-                {deleteRefs && deleteRefs.length > 0 ? "Delete Anyway" : "Delete"}
+                {deleteRefs && deleteRefs.length > 0 ? admin.confirm.deleteAnyway : admin.common.delete}
               </Button>
             </div>
           </div>

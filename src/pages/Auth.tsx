@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useAuth } from "@/hooks/use-auth";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import doctorLogo from "/assets/3.jpg";
-import { ArrowRight, Loader2, Lock, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, Lock, Mail } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -32,11 +33,7 @@ function resolveRedirectAfterAuth(
   return fallback;
 }
 
-function errorMessage(err: unknown): string {
-  if (err instanceof Error && err.message) return err.message;
-  if (typeof err === "string" && err) return err;
-  return "Sign-in failed. Please try again.";
-}
+const FALLBACK_SIGNIN_ERROR = "Sign-in failed. Please try again.";
 
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
@@ -46,6 +43,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     searchParams.get("returnTo"),
     redirectAfterAuth,
   );
+  const admin = useAdminText();
   const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,8 +72,11 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       if (mode === "signIn" && loginStatus?.blocked) {
         setError(
           loginStatus.retryAfterMs
-            ? `Too many failed attempts. Try again in ${Math.ceil(loginStatus.retryAfterMs / 60000)} minute(s).`
-            : "Too many failed attempts. Please try again later.",
+            ? admin.auth.retryAfter.replace(
+                "{seconds}",
+                String(Math.max(1, Math.ceil(loginStatus.retryAfterMs / 1000))),
+              )
+            : admin.auth.tooManyAttempts,
         );
         return;
       }
@@ -90,7 +91,12 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       navigate(redirect);
     } catch (err) {
       console.error("Sign-in error:", err);
-      const message = errorMessage(err);
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : typeof err === "string" && err
+            ? err
+            : FALLBACK_SIGNIN_ERROR;
       setError(message);
       if (mode === "signIn") {
         void recordFailedAttempt({ email });
@@ -123,26 +129,24 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               />
             </div>
             <CardTitle className="text-xl">
-              {mode === "signIn" ? "Admin Sign In" : "Create Admin Account"}
+              {mode === "signIn" ? admin.auth.signInTitle : admin.auth.signUpTitle}
             </CardTitle>
             <CardDescription>
-              {mode === "signIn"
-                ? "Enter your email and password to access the dashboard."
-                : "Register an administrator account. Registration closes after two admin accounts exist."}
+              {mode === "signIn" ? admin.auth.signInDesc : admin.auth.signUpDesc}
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{admin.auth.email}</Label>
                 <div className="relative flex items-center">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="name@example.com"
-                    className="pl-9"
+                    placeholder={admin.auth.emailPlaceholder}
+                    className="ps-9"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
@@ -152,15 +156,15 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{admin.auth.password}</Label>
                 <div className="relative flex items-center">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="At least 8 characters"
-                    className="pl-9"
+                    placeholder={admin.auth.passwordPlaceholder}
+                    className="ps-9"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
@@ -182,13 +186,13 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {mode === "signIn" ? "Signing in..." : "Creating..."}
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                    {mode === "signIn" ? admin.auth.signingIn : admin.auth.creating}
                   </>
                 ) : (
                   <>
-                    {mode === "signIn" ? "Sign in" : "Create account"}
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {mode === "signIn" ? admin.auth.signIn : admin.auth.createAccount}
+                    <ArrowLeft className="rtl:rotate-180 ms-2 h-4 w-4" />
                   </>
                 )}
               </Button>
@@ -202,14 +206,12 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 disabled={isLoading}
                 className="w-full"
               >
-                {mode === "signIn"
-                  ? "Don't have an account? Create one"
-                  : "Have an account? Sign in"}
+                {mode === "signIn" ? admin.auth.switchToSignUp : admin.auth.switchToSignIn}
               </Button>
             </CardFooter>
           </form>
           <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted border-t rounded-b-lg">
-            Admin portal access
+            {admin.auth.portalAccess}
           </div>
         </Card>
         </div>

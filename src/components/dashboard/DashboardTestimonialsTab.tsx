@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAdminText } from "@/hooks/use-admin-text";
 import {
   ArrowDown,
   ArrowUp,
@@ -24,6 +25,7 @@ import { swapOrder } from "./dashboard-utils";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function DashboardTestimonialsTab() {
+  const admin = useAdminText();
   const testimonials = useQuery(api.testimonials.list);
   const createTestimonial = useMutation(api.testimonials.create);
   const updateTestimonial = useMutation(api.testimonials.update);
@@ -59,10 +61,10 @@ export default function DashboardTestimonialsTab() {
     };
     if (editingId) {
       await updateTestimonial({ id: editingId, ...data });
-      toast.success("Testimonial updated");
+      toast.success(admin.toast.saved);
     } else {
       await createTestimonial({ ...data, isActive: true, order: testimonials?.length ?? 0 });
-      toast.success("Testimonial added");
+      toast.success(admin.toast.saved);
     }
     setShowForm(false);
     setEditingId(null);
@@ -72,38 +74,38 @@ export default function DashboardTestimonialsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Testimonials</h2>
+        <h2 className="text-2xl font-bold text-foreground">{admin.testimonials.title}</h2>
         <Button onClick={() => { setShowForm(!showForm); setEditingId(null); setTestImages([]); setTestAvatar(""); }} className="gap-2 bg-primary text-primary-foreground">
-          <Plus className="h-4 w-4" /> Add Testimonial
+          <Plus className="h-4 w-4" /> {admin.testimonials.add}
         </Button>
       </div>
 
       {showForm && (
         <Card className="border-border/60">
-          <CardHeader><CardTitle className="text-lg">{editingId ? "Edit Testimonial" : "Add Testimonial"}</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{editingId ? admin.testimonials.edit : admin.testimonials.addTitle}</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Name (EN)</Label><Input name="nameEn" required defaultValue={existing?.nameEn} /></div>
-                <div className="space-y-2"><Label>Name (AR)</Label><Input name="nameAr" dir="rtl" required defaultValue={existing?.nameAr} /></div>
+                <div className="space-y-2"><Label>{admin.content.nameEn}</Label><Input name="nameEn" required defaultValue={existing?.nameEn} /></div>
+                <div className="space-y-2"><Label>{admin.content.nameAr}</Label><Input name="nameAr" dir="rtl" required defaultValue={existing?.nameAr} /></div>
               </div>
-              <div className="space-y-2"><Label>Text (EN)</Label><Textarea name="textEn" rows={3} required defaultValue={existing?.textEn} /></div>
-              <div className="space-y-2"><Label>Text (AR)</Label><Textarea name="textAr" dir="rtl" rows={3} required defaultValue={existing?.textAr} /></div>
+              <div className="space-y-2"><Label>{admin.content.textEn}</Label><Textarea name="textEn" rows={3} required defaultValue={existing?.textEn} /></div>
+              <div className="space-y-2"><Label>{admin.content.textAr}</Label><Textarea name="textAr" dir="rtl" rows={3} required defaultValue={existing?.textAr} /></div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Rating (1-5)</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
-                <div className="space-y-2"><Label>Procedure Type (optional)</Label><Input name="procedureType" defaultValue={existing?.procedureType} placeholder="e.g. rhinoplasty" /></div>
+                <div className="space-y-2"><Label>{admin.testimonials.rating}</Label><Input name="rating" type="number" min={1} max={5} defaultValue={existing?.rating ?? 5} /></div>
+                <div className="space-y-2"><Label>{admin.testimonials.procedureType}</Label><Input name="procedureType" defaultValue={existing?.procedureType} placeholder={admin.testimonials.procedureTypePlaceholder} /></div>
               </div>
               <input type="hidden" name="avatar" value={testAvatar} />
-              <MediaSelector value={testAvatar} onChange={setTestAvatar} label="Avatar Image (optional)" hint="يُزرع دائريًا صغيرًا — يُنصح 1:1 (مربّع) مع الوجه بالمنتصف" />
+              <MediaSelector value={testAvatar} onChange={setTestAvatar} label={admin.testimonials.avatar} hint="يُزرع دائريًا صغيرًا — يُنصح 1:1 (مربّع) مع الوجه بالمنتصف" />
               <ImageGalleryInput
                 value={testImages}
                 onChange={setTestImages}
-                label="Result Photos (optional)"
+                label={admin.testimonials.resultPhotos}
                 hint="تُعرض كمصغّرات في قسم تجارب المرضى ويمكن تصفّحها — يُنصح 4:3 (أفقي) أو 3:4 عمودي؛ تُقصّ تلقائيًا من المنتصف"
               />
               <div className="flex gap-3">
-                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
-                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
+                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : (editingId ? admin.testimonials.edit : admin.common.save)}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{admin.common.cancel}</Button>
               </div>
             </form>
           </CardContent>
@@ -111,8 +113,10 @@ export default function DashboardTestimonialsTab() {
       )}
 
       <div className="space-y-3">
-        {!testimonials || testimonials.length === 0 ? (
-          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No testimonials yet.</CardContent></Card>
+        {!testimonials ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">{admin.common.loading}</CardContent></Card>
+        ) : testimonials.length === 0 ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center space-y-3"><p className="text-muted-foreground">{admin.testimonials.empty}</p><Button variant="outline" size="sm" onClick={() => { setShowForm(true); setEditingId(null); }}>{admin.testimonials.emptyAction}</Button></CardContent></Card>
         ) : testimonials.map((t) => (
           <Card key={t._id} className="border-border/60">
             <CardContent className="p-4 flex items-center justify-between gap-4">
@@ -124,15 +128,15 @@ export default function DashboardTestimonialsTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{t.textEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => handleOpenTestForm(t._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
-                <button onClick={async () => { await updateTestimonial({ id: t._id, isActive: !t.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
+                <button onClick={() => handleOpenTestForm(t._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit}><FileText className="h-4 w-4" /></button>
+                <button onClick={async () => { await updateTestimonial({ id: t._id, isActive: !t.isActive }); toast.success(admin.toast.saved); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                   {t.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
-                <button onClick={async () => { if (confirm("Delete this testimonial?")) { await removeTestimonial({ id: t._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                <button onClick={async () => { if (confirm(admin.confirm.deleteTestimonial)) { await removeTestimonial({ id: t._id }); toast.success(admin.toast.deleted); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 {t.images != null && t.images.length > 0 && (
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-medium shrink-0" title="Result photos">
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-medium shrink-0" title={admin.testimonials.resultPhotos}>
                     <ImageIcon className="h-3 w-3" />
                     {t.images.length}
                   </span>

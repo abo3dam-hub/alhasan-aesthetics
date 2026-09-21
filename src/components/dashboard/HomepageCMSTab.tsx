@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { ChevronDown, ChevronUp, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -74,25 +75,26 @@ interface CTAFormFields {
 }
 
 export default function HomepageCMSTab() {
+  const admin = useAdminText();
   const [activeSection, setActiveSection] = useState<string | null>("hero");
 
   const sections = [
-    { key: "hero", label: "Hero Section" },
-    { key: "about", label: "About Section" },
-    { key: "information-card", label: "Information Card (Patient Guide)" },
-    { key: "procedures-header", label: "Procedures Section Header" },
-    { key: "beforeAfter-header", label: "Before & After Section Header" },
-    { key: "testimonials-header", label: "Testimonials Section Header" },
-    { key: "faq-header", label: "FAQ Section Header" },
-    { key: "cta", label: "CTA Section" },
-    { key: "footer", label: "Footer Content" },
-    { key: "visibility", label: "Section Visibility" },
+    { key: "hero", label: admin.homepage.hero },
+    { key: "about", label: admin.homepage.about },
+    { key: "information-card", label: admin.homepage.informationCard },
+    { key: "procedures-header", label: admin.homepage.proceduresHeader },
+    { key: "beforeAfter-header", label: admin.homepage.beforeAfterHeader },
+    { key: "testimonials-header", label: admin.homepage.testimonialsHeader },
+    { key: "faq-header", label: admin.homepage.faqHeader },
+    { key: "cta", label: admin.homepage.cta },
+    { key: "footer", label: admin.homepage.footer },
+    { key: "visibility", label: admin.homepage.visibility },
   ];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Homepage CMS</h2>
-      <p className="text-sm text-muted-foreground">Edit homepage section content. All changes reflect on the public website.</p>
+      <h2 className="text-2xl font-bold text-foreground">{admin.homepage.title}</h2>
+      <p className="text-sm text-muted-foreground">{admin.homepage.subtitle}</p>
 
       {sections.map((section) => (
         <div key={section.key}>
@@ -108,14 +110,14 @@ export default function HomepageCMSTab() {
               {section.key === "hero" && <HeroEditor />}
               {section.key === "about" && <AboutEditor />}
               {section.key === "information-card" && (
-                <ErrorBoundary fallback={<div className="p-4 rounded-xl border border-border/60 text-sm text-muted-foreground">Information card settings will appear after the Convex backend is updated.</div>}>
+                <ErrorBoundary fallback={<div className="p-4 rounded-xl border border-border/60 text-sm text-muted-foreground">{admin.homepage.relatedNote}</div>}>
                   <InformationCardEditor />
                 </ErrorBoundary>
               )}
-              {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label="Procedures" fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
-              {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label="Before & After" fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
-              {section.key === "testimonials-header" && <SectionHeaderEditor sectionKey="testimonialsSection" label="Testimonials" fallbackKeys={{ badge: "testimonials.badge", title: "testimonials.title", titleHighlight: "testimonials.titleHighlight", subtitle: "testimonials.subtitle" }} />}
-              {section.key === "faq-header" && <SectionHeaderEditor sectionKey="faqSection" label="FAQ" fallbackKeys={{ badge: "faq.badge", title: "faq.title", titleHighlight: "faq.titleHighlight", subtitle: "faq.subtitle" }} />}
+              {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label={admin.nav.procedures} fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
+              {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label={admin.nav.beforeAfter} fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
+              {section.key === "testimonials-header" && <SectionHeaderEditor sectionKey="testimonialsSection" label={admin.nav.testimonials} fallbackKeys={{ badge: "testimonials.badge", title: "testimonials.title", titleHighlight: "testimonials.titleHighlight", subtitle: "testimonials.subtitle" }} />}
+              {section.key === "faq-header" && <SectionHeaderEditor sectionKey="faqSection" label={admin.nav.faq} fallbackKeys={{ badge: "faq.badge", title: "faq.title", titleHighlight: "faq.titleHighlight", subtitle: "faq.subtitle" }} />}
               {section.key === "cta" && <CTAEditor />}
               {section.key === "footer" && <FooterEditor />}
               {section.key === "visibility" && <VisibilityEditor />}
@@ -129,6 +131,7 @@ export default function HomepageCMSTab() {
 
 // ─── Hero Editor ───
 function HeroEditor() {
+  const admin = useAdminText();
   const heroCMS = useQuery(api.homepageSettings.getHeroSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -168,83 +171,83 @@ function HeroEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "hero", value: form });
-      toast.success("Hero settings saved!");
+      toast.success(admin.toast.heroSaved);
     } catch {
-      toast.error("Failed to save hero settings");
+      toast.error(admin.toast.homepageSaveError);
     }
     setSaving(false);
   };
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">Hero Section Content</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.hero}</CardTitle></CardHeader>
       <CardContent className="space-y-6">
         {/* Badge */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Badge / Eyebrow</Label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.badgeEnabled} onChange={(e) => update("badgeEnabled", e.target.checked)} className="rounded" /> Enabled</label>
+            <Label className="text-sm font-medium">الشارة / التسمية العلوية</Label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.badgeEnabled} onChange={(e) => update("badgeEnabled", e.target.checked)} className="rounded" /> {admin.homepage.enabled}</label>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="Aesthetic & Plastic Surgery" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="جراحة تجميلية وتجميلية" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="Aesthetic & Plastic Surgery" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="جراحة تجميلية وتجميلية" /></div>
           </div>
         </div>
 
         {/* Title */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Main Title</Label>
+          <Label className="text-sm font-medium">العنوان الرئيسي</Label>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Your Beauty Deserves" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="جمالك يستحق" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Your Beauty Deserves" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="جمالك يستحق" /></div>
           </div>
         </div>
 
         {/* Subtitle / Highlight */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Highlighted Subtitle</Label>
+          <Label className="text-sm font-medium">العنوان الفرعي المميز</Label>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (EN)</Label><Input value={form.subtitleEn || ""} onChange={(e) => update("subtitleEn", e.target.value)} placeholder="The Finest Care" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (AR)</Label><Input dir="rtl" value={form.subtitleAr || ""} onChange={(e) => update("subtitleAr", e.target.value)} placeholder="أرقى العناية" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان الفرعي (EN)</Label><Input value={form.subtitleEn || ""} onChange={(e) => update("subtitleEn", e.target.value)} placeholder="The Finest Care" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان الفرعي (AR)</Label><Input dir="rtl" value={form.subtitleAr || ""} onChange={(e) => update("subtitleAr", e.target.value)} placeholder="أرقى العناية" /></div>
           </div>
         </div>
 
         {/* Description */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Description</Label>
+          <Label className="text-sm font-medium">الوصف</Label>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Description (EN)</Label><Textarea rows={2} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} placeholder="We bring your vision to life..." /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Description (AR)</Label><Textarea dir="rtl" rows={2} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} placeholder="نحول رؤيتك إلى واقع..." /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">الوصف (EN)</Label><Textarea rows={2} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} placeholder="We bring your vision to life..." /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">الوصف (AR)</Label><Textarea dir="rtl" rows={2} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} placeholder="نحول رؤيتك إلى واقع..." /></div>
           </div>
         </div>
 
         {/* Primary CTA */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Primary CTA Button</Label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaEnabled} onChange={(e) => update("ctaEnabled", e.target.checked)} className="rounded" /> Enabled</label>
+            <Label className="text-sm font-medium">زر الحجز الرئيسي</Label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaEnabled} onChange={(e) => update("ctaEnabled", e.target.checked)} className="rounded" /> {admin.homepage.enabled}</label>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">CTA Text (EN)</Label><Input value={form.ctaTextEn || ""} onChange={(e) => update("ctaTextEn", e.target.value)} placeholder="Book Your Consultation" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">CTA Text (AR)</Label><Input dir="rtl" value={form.ctaTextAr || ""} onChange={(e) => update("ctaTextAr", e.target.value)} placeholder="احجز استشارتك" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (EN)</Label><Input value={form.ctaTextEn || ""} onChange={(e) => update("ctaTextEn", e.target.value)} placeholder="Book Your Consultation" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (AR)</Label><Input dir="rtl" value={form.ctaTextAr || ""} onChange={(e) => update("ctaTextAr", e.target.value)} placeholder="احجز استشارتك" /></div>
           </div>
         </div>
 
         {/* Secondary CTA */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Secondary CTA Button</Label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaSecondaryEnabled} onChange={(e) => update("ctaSecondaryEnabled", e.target.checked)} className="rounded" /> Enabled</label>
+            <Label className="text-sm font-medium">زر الحجز الثانوي</Label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaSecondaryEnabled} onChange={(e) => update("ctaSecondaryEnabled", e.target.checked)} className="rounded" /> {admin.homepage.enabled}</label>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Text (EN)</Label><Input value={form.ctaSecondaryTextEn || ""} onChange={(e) => update("ctaSecondaryTextEn", e.target.value)} placeholder="Explore Procedures" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Text (AR)</Label><Input dir="rtl" value={form.ctaSecondaryTextAr || ""} onChange={(e) => update("ctaSecondaryTextAr", e.target.value)} placeholder="استكشف الإجراءات" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (EN)</Label><Input value={form.ctaSecondaryTextEn || ""} onChange={(e) => update("ctaSecondaryTextEn", e.target.value)} placeholder="Explore Procedures" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (AR)</Label><Input dir="rtl" value={form.ctaSecondaryTextAr || ""} onChange={(e) => update("ctaSecondaryTextAr", e.target.value)} placeholder="استكشف الإجراءات" /></div>
           </div>
         </div>
 
         {/* Trust Badges */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Trust Badges</Label>
+          <Label className="text-sm font-medium">شارات الثقة</Label>
           {(form.trustBadges || []).map((badge, i) => (
             <div key={i} className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-end">
               <div className="space-y-1"><Label className="text-xs">EN</Label><Input value={badge.labelEn} onChange={(e) => {
@@ -255,7 +258,7 @@ function HeroEditor() {
               }} /></div>
               <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={badge.enabled !== false} onChange={(e) => {
                 const badges = [...form.trustBadges]; badges[i] = { ...badges[i], enabled: e.target.checked }; update("trustBadges", badges);
-              }} className="rounded" /> On</label>
+              }} className="rounded" /> {admin.homepage.enabled}</label>
               <button type="button" onClick={() => {
                 const badges = form.trustBadges.filter((_, j) => j !== i); update("trustBadges", badges);
               }} className="p-1 text-red-500 hover:bg-red-50 rounded"><Trash2 className="h-3 w-3" /></button>
@@ -263,13 +266,13 @@ function HeroEditor() {
           ))}
           <Button type="button" variant="outline" size="sm" onClick={() => {
             update("trustBadges", [...(form.trustBadges || []), { labelAr: "", labelEn: "", icon: "award", enabled: true }]);
-          }} className="gap-1"><Plus className="h-3 w-3" /> Add Badge</Button>
+          }} className="gap-1"><Plus className="h-3 w-3" /> {admin.common.add} شارة</Button>
         </div>
 
         {/* Hero Image — INTENTIONALLY UNUSED: Hero section is text/design only, no image rendered */}
 
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Hero"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveHero}</Button>
         </div>
       </CardContent>
     </Card>
@@ -278,6 +281,7 @@ function HeroEditor() {
 
 // ─── About Editor ───
 function AboutEditor() {
+  const admin = useAdminText();
   const aboutCMS = useQuery(api.homepageSettings.getAboutSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -307,8 +311,8 @@ function AboutEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "about", value: form });
-      toast.success("About settings saved!");
-    } catch { toast.error("Failed to save"); }
+      toast.success(admin.toast.aboutSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
     setSaving(false);
   };
 
@@ -316,47 +320,47 @@ function AboutEditor() {
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">About Section Content</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.about}</CardTitle></CardHeader>
       <CardContent className="space-y-6">
         {/* Badge */}
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="About Dr. Al Hasan" /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="عن الدكتور الحسن" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="About Dr. Al Hasan" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="عن الدكتور الحسن" /></div>
         </div>
 
         {/* Title */}
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Expertise That Merges" /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="خبرة تجمع بين" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Expertise That Merges" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="خبرة تجمع بين" /></div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title Highlight (EN)</Label><Input value={form.titleHighlightEn || ""} onChange={(e) => update("titleHighlightEn", e.target.value)} placeholder="Science & Beauty" /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title Highlight (AR)</Label><Input dir="rtl" value={form.titleHighlightAr || ""} onChange={(e) => update("titleHighlightAr", e.target.value)} placeholder="العلم والجمال" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان المميز (EN)</Label><Input value={form.titleHighlightEn || ""} onChange={(e) => update("titleHighlightEn", e.target.value)} placeholder="Science & Beauty" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان المميز (AR)</Label><Input dir="rtl" value={form.titleHighlightAr || ""} onChange={(e) => update("titleHighlightAr", e.target.value)} placeholder="العلم والجمال" /></div>
         </div>
 
         {/* Description */}
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Description (EN)</Label><Textarea rows={3} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Description (AR)</Label><Textarea dir="rtl" rows={3} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الوصف (EN)</Label><Textarea rows={3} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الوصف (AR)</Label><Textarea dir="rtl" rows={3} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
         </div>
 
         {/* Doctor Image */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Doctor Profile Image</Label>
-          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select doctor image" hint="يُزرع عموديًا 3:4 في قسم «عن الطبيب» بالصفحة الرئيسية — يُنصح صورة عمودية (بورتريه)" />
+          <Label className="text-sm font-medium">صورة الطبيب</Label>
+          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="صورة الطبيب" hint="يُزرع عموديًا 3:4 في قسم «عن الطبيب» بالصفحة الرئيسية — يُنصح صورة عمودية (بورتريه)" />
         </div>
 
         {/* Stats */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Statistics</Label>
+          <Label className="text-sm font-medium">الإحصاءات</Label>
           {(form.stats || []).map((stat, i) => (
             <div key={i} className="grid grid-cols-2 sm:grid-cols-6 gap-2 items-end">
-              <div className="space-y-1"><Label className="text-xs">Value</Label><Input value={stat.value} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], value: e.target.value }; update("stats", s); }} placeholder="15+" /></div>
-              <div className="space-y-1"><Label className="text-xs">Icon</Label><select value={stat.icon} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], icon: e.target.value }; update("stats", s); }} className="w-full border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">{iconOptions.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
+              <div className="space-y-1"><Label className="text-xs">القيمة</Label><Input value={stat.value} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], value: e.target.value }; update("stats", s); }} placeholder="15+" /></div>
+              <div className="space-y-1"><Label className="text-xs">الأيقونة</Label><select value={stat.icon} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], icon: e.target.value }; update("stats", s); }} className="w-full border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">{iconOptions.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
               <div className="space-y-1"><Label className="text-xs">EN</Label><Input value={stat.labelEn} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], labelEn: e.target.value }; update("stats", s); }} /></div>
               <div className="space-y-1"><Label className="text-xs">AR</Label><Input dir="rtl" value={stat.labelAr} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], labelAr: e.target.value }; update("stats", s); }} /></div>
-              <label className="flex items-center gap-1 text-xs pb-1"><input type="checkbox" checked={stat.enabled !== false} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], enabled: e.target.checked }; update("stats", s); }} className="rounded" /> On</label>
+              <label className="flex items-center gap-1 text-xs pb-1"><input type="checkbox" checked={stat.enabled !== false} onChange={(e) => { const s = [...form.stats]; s[i] = { ...s[i], enabled: e.target.checked }; update("stats", s); }} className="rounded" /> {admin.homepage.enabled}</label>
               <button type="button" onClick={() => update("stats", form.stats.filter((_, j) => j !== i))} className="p-1 text-red-500 hover:bg-red-50 rounded pb-1"><Trash2 className="h-3 w-3" /></button>
               <div className="flex flex-col gap-0.5 pb-1">
                 <button type="button" disabled={i === 0} onClick={() => { const s = [...form.stats]; [s[i-1], s[i]] = [s[i], s[i-1]]; update("stats", s); }} className="p-1 text-muted-foreground hover:bg-muted rounded disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
@@ -364,11 +368,11 @@ function AboutEditor() {
               </div>
             </div>
           ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => update("stats", [...(form.stats || []), { icon: "award", value: "", labelAr: "", labelEn: "", enabled: true }])} className="gap-1"><Plus className="h-3 w-3" /> Add Stat</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => update("stats", [...(form.stats || []), { icon: "award", value: "", labelAr: "", labelEn: "", enabled: true }])} className="gap-1"><Plus className="h-3 w-3" /> {admin.common.add} إحصاء</Button>
         </div>
 
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save About"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveAbout}</Button>
         </div>
       </CardContent>
     </Card>
@@ -392,6 +396,7 @@ interface InformationCardForm {
 }
 
 function InformationCardEditor() {
+  const admin = useAdminText();
   const infoCMS = useQuery(api.homepageSettings.getInformationCardSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -424,9 +429,9 @@ function InformationCardEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "informationCard", value: form });
-      toast.success("Information card saved!");
+      toast.success(admin.toast.homepageSaved);
     } catch {
-      toast.error("Failed to save");
+      toast.error(admin.toast.homepageSaveError);
     }
     setSaving(false);
   };
@@ -435,7 +440,7 @@ function InformationCardEditor() {
     return (
       <Card className="border-border/60">
         <CardContent className="p-8 text-center text-muted-foreground text-sm">
-          Loading information card…
+          {admin.common.loading}
         </CardContent>
       </Card>
     );
@@ -444,56 +449,56 @@ function InformationCardEditor() {
   return (
     <Card className="border-border/60">
       <CardHeader>
-        <CardTitle className="text-lg">Information Card (Patient Guide)</CardTitle>
-        <p className="text-xs text-muted-foreground">Shown on the homepage between the About section and Our Procedures.</p>
+        <CardTitle className="text-lg">{admin.homepage.informationCard}</CardTitle>
+        <p className="text-xs text-muted-foreground">{admin.homepage.infoCardNote}</p>
       </CardHeader>
       <CardContent className="space-y-5">
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => update("enabled", e.target.checked)} className="rounded" /> Section Enabled</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => update("enabled", e.target.checked)} className="rounded" /> القسم {admin.homepage.enabled}</label>
 
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Badge / Eyebrow</Label>
+          <Label className="text-sm font-medium">الشارة / التسمية العلوية</Label>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="Patient Guide" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="معلومات مهمة" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} placeholder="Patient Guide" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} placeholder="معلومات مهمة" /></div>
           </div>
         </div>
 
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Title</Label>
+          <Label className="text-sm font-medium">العنوان</Label>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Textarea rows={2} value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Information Every Woman Considering Cosmetic Surgery Should Know" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Textarea dir="rtl" rows={2} value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="معلومات على كل سيدة تنوي إجراء جراحة تجميلية معرفتها" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (EN)</Label><Textarea rows={2} value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} placeholder="Information Every Woman Considering Cosmetic Surgery Should Know" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (AR)</Label><Textarea dir="rtl" rows={2} value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} placeholder="معلومات على كل سيدة تنوي إجراء جراحة تجميلية معرفتها" /></div>
           </div>
         </div>
 
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Body Content</Label>
-          <p className="text-xs text-muted-foreground">Separate paragraphs with a blank line.</p>
+          <Label className="text-sm font-medium">محتوى النص</Label>
+          <p className="text-xs text-muted-foreground">افصل الفقرات بسطر فارغ.</p>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Content (EN)</Label><Textarea rows={7} value={form.contentEn || ""} onChange={(e) => update("contentEn", e.target.value)} /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Content (AR)</Label><Textarea dir="rtl" rows={7} value={form.contentAr || ""} onChange={(e) => update("contentAr", e.target.value)} /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">المحتوى (EN)</Label><Textarea rows={7} value={form.contentEn || ""} onChange={(e) => update("contentEn", e.target.value)} /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">المحتوى (AR)</Label><Textarea dir="rtl" rows={7} value={form.contentAr || ""} onChange={(e) => update("contentAr", e.target.value)} /></div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Image (optional)</Label>
-          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="Select card image" hint="يُزرع أفقيًا يملأ نصف القسم في الرئيسية — يُنصح 4:3 (أفقي)" />
+          <Label className="text-sm font-medium">الصورة (اختياري)</Label>
+          <MediaSelector value={form.image || ""} onChange={(url) => update("image", url)} label="صورة البطاقة" hint="يُزرع أفقيًا يملأ نصف القسم في الرئيسية — يُنصح 4:3 (أفقي)" />
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Call-to-Action Button</Label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaEnabled} onChange={(e) => update("ctaEnabled", e.target.checked)} className="rounded" /> Enabled</label>
+            <Label className="text-sm font-medium">زر الحجز (Call to Action)</Label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.ctaEnabled} onChange={(e) => update("ctaEnabled", e.target.checked)} className="rounded" /> {admin.homepage.enabled}</label>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Text (EN)</Label><Input value={form.ctaTextEn || ""} onChange={(e) => update("ctaTextEn", e.target.value)} placeholder="Book Your Consultation" /></div>
-            <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Text (AR)</Label><Input dir="rtl" value={form.ctaTextAr || ""} onChange={(e) => update("ctaTextAr", e.target.value)} placeholder="احجزي استشارتك" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (EN)</Label><Input value={form.ctaTextEn || ""} onChange={(e) => update("ctaTextEn", e.target.value)} placeholder="Book Your Consultation" /></div>
+            <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (AR)</Label><Input dir="rtl" value={form.ctaTextAr || ""} onChange={(e) => update("ctaTextAr", e.target.value)} placeholder="احجزي استشارتك" /></div>
           </div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Destination</Label><Input value={form.ctaLink || ""} onChange={(e) => update("ctaLink", e.target.value)} placeholder="/consultation" /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">وجهة الزر</Label><Input value={form.ctaLink || ""} onChange={(e) => update("ctaLink", e.target.value)} placeholder="/consultation" /></div>
         </div>
 
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Information Card"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveInfoCard}</Button>
         </div>
       </CardContent>
     </Card>
@@ -502,6 +507,7 @@ function InformationCardEditor() {
 
 // ─── CTA Editor ───
 function CTAEditor() {
+  const admin = useAdminText();
   const ctaCMS = useQuery(api.homepageSettings.getCTASettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -527,42 +533,42 @@ function CTAEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "cta", value: form });
-      toast.success("CTA settings saved!");
-    } catch { toast.error("Failed to save"); }
+      toast.success(admin.toast.homepageSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
     setSaving(false);
   };
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">CTA Section Content</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.cta}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => update("enabled", e.target.checked)} className="rounded" /> Section Enabled</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.enabled} onChange={(e) => update("enabled", e.target.checked)} className="rounded" /> القسم {admin.homepage.enabled}</label>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} /></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} /></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Description (EN)</Label><Textarea rows={2} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Description (AR)</Label><Textarea dir="rtl" rows={2} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الوصف (EN)</Label><Textarea rows={2} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الوصف (AR)</Label><Textarea dir="rtl" rows={2} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
         </div>
 
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Button</Label>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.buttonEnabled} onChange={(e) => update("buttonEnabled", e.target.checked)} className="rounded" /> Enabled</label>
+          <Label className="text-sm font-medium">الزر</Label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.buttonEnabled} onChange={(e) => update("buttonEnabled", e.target.checked)} className="rounded" /> {admin.homepage.enabled}</label>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Text (EN)</Label><Input value={form.buttonTextEn || ""} onChange={(e) => update("buttonTextEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Text (AR)</Label><Input dir="rtl" value={form.buttonTextAr || ""} onChange={(e) => update("buttonTextAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (EN)</Label><Input value={form.buttonTextEn || ""} onChange={(e) => update("buttonTextEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">نص الزر (AR)</Label><Input dir="rtl" value={form.buttonTextAr || ""} onChange={(e) => update("buttonTextAr", e.target.value)} /></div>
         </div>
-        <div className="space-y-2"><Label className="text-xs text-muted-foreground">Button Destination</Label><Input value={form.buttonDestination || ""} onChange={(e) => update("buttonDestination", e.target.value)} placeholder="/consultation" /></div>
+        <div className="space-y-2"><Label className="text-xs text-muted-foreground">وجهة الزر</Label><Input value={form.buttonDestination || ""} onChange={(e) => update("buttonDestination", e.target.value)} placeholder="/consultation" /></div>
 
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save CTA"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveCta}</Button>
         </div>
       </CardContent>
     </Card>
@@ -571,6 +577,7 @@ function CTAEditor() {
 
 // ─── Footer Editor ───
 function FooterEditor() {
+  const admin = useAdminText();
   const footerCMS = useQuery(api.homepageSettings.getFooterSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -591,22 +598,22 @@ function FooterEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "footer", value: form });
-      toast.success("Footer settings saved!");
-    } catch { toast.error("Failed to save"); }
+      toast.success(admin.toast.homepageSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
     setSaving(false);
   };
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">Footer Content</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.footer}</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Footer Description (EN)</Label><Textarea rows={3} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Footer Description (AR)</Label><Textarea dir="rtl" rows={3} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">وصف التذييل (EN)</Label><Textarea rows={3} value={form.descriptionEn || ""} onChange={(e) => update("descriptionEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">وصف التذييل (AR)</Label><Textarea dir="rtl" rows={3} value={form.descriptionAr || ""} onChange={(e) => update("descriptionAr", e.target.value)} /></div>
         </div>
-        <p className="text-xs text-muted-foreground">Social media links and contact info come from Doctor Settings.</p>
+        <p className="text-xs text-muted-foreground">{admin.homepage.relatedNote}</p>
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Footer"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveFooter}</Button>
         </div>
       </CardContent>
     </Card>
@@ -615,6 +622,7 @@ function FooterEditor() {
 
 // ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter) ───
 function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
+  const admin = useAdminText();
   const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: sectionKey });
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -641,34 +649,34 @@ function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label:
     setSaving(true);
     try {
       await setSetting({ key: sectionKey, value: form });
-      toast.success(`${label} section header saved!`);
-    } catch { toast.error("Failed to save"); }
+      toast.success(admin.toast.homepageSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
     setSaving(false);
   };
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">{label} Section Header</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{label} — عنوان القسم</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Badge (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (EN)</Label><Input value={form.badgeEn || ""} onChange={(e) => update("badgeEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">الشارة (AR)</Label><Input dir="rtl" value={form.badgeAr || ""} onChange={(e) => update("badgeAr", e.target.value)} /></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (EN)</Label><Input value={form.titleEn || ""} onChange={(e) => update("titleEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان (AR)</Label><Input dir="rtl" value={form.titleAr || ""} onChange={(e) => update("titleAr", e.target.value)} /></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title Highlight (EN)</Label><Input value={form.titleHighlightEn || ""} onChange={(e) => update("titleHighlightEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Title Highlight (AR)</Label><Input dir="rtl" value={form.titleHighlightAr || ""} onChange={(e) => update("titleHighlightAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان المميز (EN)</Label><Input value={form.titleHighlightEn || ""} onChange={(e) => update("titleHighlightEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان المميز (AR)</Label><Input dir="rtl" value={form.titleHighlightAr || ""} onChange={(e) => update("titleHighlightAr", e.target.value)} /></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (EN)</Label><Textarea rows={2} value={form.subtitleEn || ""} onChange={(e) => update("subtitleEn", e.target.value)} /></div>
-          <div className="space-y-2"><Label className="text-xs text-muted-foreground">Subtitle (AR)</Label><Textarea dir="rtl" rows={2} value={form.subtitleAr || ""} onChange={(e) => update("subtitleAr", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان الفرعي (EN)</Label><Textarea rows={2} value={form.subtitleEn || ""} onChange={(e) => update("subtitleEn", e.target.value)} /></div>
+          <div className="space-y-2"><Label className="text-xs text-muted-foreground">العنوان الفرعي (AR)</Label><Textarea dir="rtl" rows={2} value={form.subtitleAr || ""} onChange={(e) => update("subtitleAr", e.target.value)} /></div>
         </div>
-        <p className="text-xs text-muted-foreground">Leave fields blank to use default translations.</p>
+        <p className="text-xs text-muted-foreground">{admin.homepage.defaultTranslationsHint}</p>
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveSection}</Button>
         </div>
       </CardContent>
     </Card>
@@ -677,6 +685,7 @@ function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label:
 
 // ─── Visibility Editor ───
 function VisibilityEditor() {
+  const admin = useAdminText();
   const homepageCMS = useQuery(api.homepageSettings.getHomepageSettings);
   const setSetting = useMutation(api.homepageSettings.set);
   const [saving, setSaving] = useState(false);
@@ -704,26 +713,26 @@ function VisibilityEditor() {
     setSaving(true);
     try {
       await setSetting({ key: "homepage", value: visibility });
-      toast.success("Visibility settings saved!");
-    } catch { toast.error("Failed to save"); }
+      toast.success(admin.toast.homepageSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
     setSaving(false);
   };
 
   const sections = [
-    { key: "hero", label: "Hero" },
-    { key: "about", label: "About" },
-    { key: "informationCard", label: "Information Card" },
-    { key: "procedures", label: "Procedures" },
-    { key: "beforeAfter", label: "Before & After" },
-    { key: "testimonials", label: "Testimonials" },
-    { key: "faq", label: "FAQ" },
-    { key: "cta", label: "CTA" },
-    { key: "contact", label: "Contact" },
+    { key: "hero", label: admin.homepage.hero },
+    { key: "about", label: admin.homepage.about },
+    { key: "informationCard", label: admin.homepage.informationCard },
+    { key: "procedures", label: admin.nav.procedures },
+    { key: "beforeAfter", label: admin.nav.beforeAfter },
+    { key: "testimonials", label: admin.nav.testimonials },
+    { key: "faq", label: admin.nav.faq },
+    { key: "cta", label: admin.homepage.cta },
+    { key: "contact", label: admin.nav.overview },
   ];
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">Homepage Section Visibility</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.visibilityTitle}</CardTitle></CardHeader>
       <CardContent className="space-y-3">
         {sections.map((s) => (
           <div key={s.key} className="flex items-center justify-between p-3 rounded-lg border border-border/40">
@@ -734,7 +743,7 @@ function VisibilityEditor() {
           </div>
         ))}
         <div className="flex justify-end" role="status" aria-live="polite">
-          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? "Saving..." : "Save Visibility"}</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveVisibility}</Button>
         </div>
       </CardContent>
     </Card>

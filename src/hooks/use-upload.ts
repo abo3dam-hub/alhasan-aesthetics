@@ -1,6 +1,7 @@
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState, useCallback } from "react";
+import { useAdminText } from "@/hooks/use-admin-text";
 
 export interface UploadResult {
   storageId: string;
@@ -22,6 +23,7 @@ export interface UploadResult {
 export function useImageUpload() {
   const generateUploadUrl = useMutation(api.media.generateUploadUrl);
   const recordUpload = useMutation(api.media.recordUpload);
+  const adminMedia = useAdminText().media;
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,12 +34,12 @@ export function useImageUpload() {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
       if (!allowedTypes.includes(file.type)) {
-        setError("Please upload a JPEG, PNG, WebP, or GIF image.");
+        setError(adminMedia.typeError);
         return null;
       }
 
       if (file.size > maxSize) {
-        setError("Image must be smaller than 5MB.");
+        setError(adminMedia.sizeError);
         return null;
       }
 
@@ -76,13 +78,15 @@ export function useImageUpload() {
 
         return { storageId, url: "" };
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed");
+        const message =
+          err instanceof Error ? err.message : adminMedia.uploadFailed;
+        setError(message === "Upload failed" ? adminMedia.uploadFailed : message);
         return null;
       } finally {
         setUploading(false);
       }
     },
-    [generateUploadUrl, recordUpload],
+    [generateUploadUrl, recordUpload, adminMedia],
   );
 
   const reset = useCallback(() => {

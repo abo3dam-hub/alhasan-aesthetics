@@ -5,6 +5,7 @@ import { ImageIcon, Search, X, Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useImageUpload } from "@/hooks/use-upload";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { api } from "@/convex/_generated/api";
 
@@ -31,8 +32,9 @@ export function MediaLibraryModal({
   onPick,
   onClose,
   onUploaded,
-  title = "Media Library",
+  title,
 }: MediaLibraryModalProps) {
+  const admin = useAdminText();
   const mediaItems = useQuery(api.media.list);
   const { upload, uploading } = useImageUpload();
   const [dragOver, setDragOver] = useState(false);
@@ -64,7 +66,7 @@ export function MediaLibraryModal({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-label={title ?? admin.media.searchLibrary}
     >
       <div
         className="relative bg-background rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
@@ -76,10 +78,10 @@ export function MediaLibraryModal({
             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <ImageIcon className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="font-semibold text-foreground">{title}</h3>
+            <h3 className="font-semibold text-foreground">{title ?? admin.media.searchLibrary}</h3>
             {mediaItems && <span className="text-sm text-muted-foreground">({mediaItems.length})</span>}
           </div>
-          <button type="button" onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Close media selector">
+          <button type="button" onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors" aria-label={admin.common.close}>
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -97,10 +99,10 @@ export function MediaLibraryModal({
           )}
         >
           {uploading ? (
-            <span className="text-sm text-muted-foreground">Uploading...</span>
+            <span className="text-sm text-muted-foreground">{admin.media.uploading}</span>
           ) : (
             <span className="text-sm text-muted-foreground flex items-center gap-2">
-              <Upload className="h-4 w-4" /> Click or drag to upload
+              <Upload className="h-4 w-4" /> {admin.media.uploadHelp}
             </span>
           )}
           <input
@@ -118,11 +120,11 @@ export function MediaLibraryModal({
           <div className="relative">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search images..."
+              placeholder={admin.media.searchPlaceholder}
               value={search}
               onChange={(e) => onSearch(e.target.value)}
               className="ps-9"
-              aria-label="Search media library"
+              aria-label={admin.media.searchPlaceholder}
             />
           </div>
         </div>
@@ -132,7 +134,7 @@ export function MediaLibraryModal({
           {!filtered || filtered.length === 0 ? (
             <div className="text-center py-12">
               <ImageIcon className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No images found</p>
+              <p className="text-sm text-muted-foreground">{admin.media.noImagesTitle}</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -173,7 +175,7 @@ export function MediaLibraryModal({
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-4 border-t border-border/40">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={onClose}>{admin.common.cancel}</Button>
         </div>
       </div>
     </div>

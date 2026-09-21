@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
+import { useAdminText } from "@/hooks/use-admin-text";
 
 function countryFlag(code: string): string {
   if (!/^[A-Z]{2}$/.test(code)) return "🌍";
@@ -19,22 +20,30 @@ function countryName(code: string): string {
 }
 
 export default function DashboardAnalyticsTab() {
+  const admin = useAdminText();
   const stats = useQuery(api.analytics.getStats, { days: 30 });
   const num = new Intl.NumberFormat();
 
+  const actionLabel = (type: string) => {
+    if (type === "whatsapp") return admin.analytics.actionWhatsapp;
+    if (type === "cta") return admin.analytics.actionCta;
+    if (type === "share") return admin.analytics.actionShare;
+    return admin.analytics.actionOther;
+  };
+
   const cards = [
-    { label: "Total visits (30d)", value: stats?.total ?? 0 },
-    { label: "Today", value: stats?.today ?? 0 },
-    { label: "Last 7 days", value: stats?.last7 ?? 0 },
-    { label: "Unique sessions (30d)", value: stats?.uniqueSessions ?? 0 },
+    { label: admin.analytics.totalVisits, value: stats?.total ?? 0 },
+    { label: admin.analytics.today, value: stats?.today ?? 0 },
+    { label: admin.analytics.last7Days, value: stats?.last7 ?? 0 },
+    { label: admin.analytics.uniqueSessions, value: stats?.uniqueSessions ?? 0 },
   ];
 
   const eventCount = (type: string) =>
     stats?.events.byType.find((e) => e.type === type)?.count ?? 0;
   const conversions = [
-    { label: "WhatsApp clicks (30d)", value: eventCount("whatsapp") },
-    { label: "CTA clicks (30d)", value: eventCount("cta") },
-    { label: "Tracked actions (30d)", value: stats?.events.total ?? 0 },
+    { label: admin.analytics.whatsappClicks, value: eventCount("whatsapp") },
+    { label: admin.analytics.ctaClicks, value: eventCount("cta") },
+    { label: admin.analytics.trackedActions, value: stats?.events.total ?? 0 },
   ];
 
   const series = stats?.series ?? [];
@@ -44,8 +53,8 @@ export default function DashboardAnalyticsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Analytics</h2>
-        <span className="text-xs text-muted-foreground">Last 30 days</span>
+        <h2 className="text-2xl font-bold text-foreground">{admin.analytics.title}</h2>
+        <span className="text-xs text-muted-foreground">{admin.analytics.last30Days}</span>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -76,7 +85,7 @@ export default function DashboardAnalyticsTab() {
 
       <Card className="border-border/60">
         <CardHeader>
-          <CardTitle className="text-base">Visits — last 14 days</CardTitle>
+          <CardTitle className="text-base">{admin.analytics.visitsChart}</CardTitle>
         </CardHeader>
         <CardContent>
           {series.length ? (
@@ -98,7 +107,7 @@ export default function DashboardAnalyticsTab() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No visit data yet.</p>
+            <p className="text-sm text-muted-foreground">{admin.analytics.noData}</p>
           )}
         </CardContent>
       </Card>
@@ -106,7 +115,7 @@ export default function DashboardAnalyticsTab() {
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-base">Countries</CardTitle>
+            <CardTitle className="text-base">{admin.analytics.countries}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {stats?.countries?.length ? (
@@ -128,14 +137,14 @@ export default function DashboardAnalyticsTab() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No visit data yet.</p>
+              <p className="text-sm text-muted-foreground">{admin.analytics.noData}</p>
             )}
           </CardContent>
         </Card>
 
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-base">Top pages</CardTitle>
+            <CardTitle className="text-base">{admin.analytics.topPages}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {stats?.topPages?.length ? (
@@ -157,23 +166,25 @@ export default function DashboardAnalyticsTab() {
 
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-base">Top actions</CardTitle>
+            <CardTitle className="text-base">{admin.analytics.topActions}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {stats?.events.top.length ? (
               stats.events.top.map((e) => (
                 <div key={`${e.type}-${e.label}`} className="flex items-center gap-2">
-                  <span className="text-xs font-mono bg-muted/60 rounded px-2 py-1 truncate flex-1">
+                  <span className="text-xs bg-muted/60 rounded px-2 py-1 truncate flex-1">
                     {e.label}
                   </span>
-                  <span className="text-[10px] text-muted-foreground shrink-0">{e.type}</span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {actionLabel(e.type)}
+                  </span>
                   <span className="text-xs text-muted-foreground shrink-0">
                     {num.format(e.count)}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No actions tracked yet.</p>
+              <p className="text-sm text-muted-foreground">{admin.analytics.noActions}</p>
             )}
           </CardContent>
         </Card>

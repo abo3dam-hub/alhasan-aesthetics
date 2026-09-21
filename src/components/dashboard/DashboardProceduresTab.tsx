@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useState, useMemo } from "react";
@@ -14,6 +15,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Loader2,
   Plus,
   RefreshCw,
   Star,
@@ -34,6 +36,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 const iconOptions = [...PROCEDURE_ICON_OPTIONS];
 
 export default function DashboardProceduresTab() {
+  const admin = useAdminText();
   const procedures = useQuery(api.procedures.list);
   const createProcedure = useMutation(api.procedures.create);
   const updateProcedure = useMutation(api.procedures.update);
@@ -55,20 +58,20 @@ export default function DashboardProceduresTab() {
 
   const handleToggleActive = async (id: Id<"procedures">, isActive: boolean) => {
     await updateProcedure({ id, isActive: !isActive });
-    toast.success("Procedure updated");
+    toast.success(admin.toast.saved);
   };
 
   const handleDelete = async (id: Id<"procedures">) => {
-    if (confirm("Are you sure you want to delete this procedure?")) {
+    if (confirm(admin.confirm.deleteProcedure)) {
       await removeProcedure({ id });
-      toast.success("Procedure deleted");
+      toast.success(admin.toast.deleted);
     }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Procedures</h2>
+        <h2 className="text-2xl font-bold text-foreground">{admin.procedures.title}</h2>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -78,9 +81,9 @@ export default function DashboardProceduresTab() {
               setNormalizingIcons(true);
               try {
                 await normalizeIcons();
-                toast.success("Procedure icons updated");
+                toast.success(admin.procedures.iconsUpdated);
               } catch {
-                toast.error("Failed to update icons");
+                toast.error(admin.procedures.iconsUpdateFailed);
               } finally {
                 setNormalizingIcons(false);
               }
@@ -88,7 +91,7 @@ export default function DashboardProceduresTab() {
             className="gap-2"
           >
             <RefreshCw className={cn("h-4 w-4", normalizingIcons && "animate-spin")} />
-            Normalize Icons
+            {admin.procedures.normalizeIcons}
           </Button>
           <Button
             variant="outline"
@@ -97,10 +100,10 @@ export default function DashboardProceduresTab() {
             onClick={async () => {
               setFillingSeo(true);
               try {
-                const res = await fillSeo();
-                toast.success(`SEO filled for ${res.updated} procedures`);
+                await fillSeo();
+                toast.success(admin.procedures.seoFilled);
               } catch {
-                toast.error("Failed to fill SEO");
+                toast.error(admin.procedures.seoFillFailed);
               } finally {
                 setFillingSeo(false);
               }
@@ -108,21 +111,21 @@ export default function DashboardProceduresTab() {
             className="gap-2"
           >
             <RefreshCw className={cn("h-4 w-4", fillingSeo && "animate-spin")} />
-            Fill SEO (AR/EN)
+            {admin.procedures.fillSeo}
           </Button>
 <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
-            <Plus className="h-4 w-4" /> Add Procedure
+            <Plus className="h-4 w-4" /> {admin.procedures.add}
           </Button>
         </div>
       </div>
 
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Input placeholder="Search procedures..." value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
+        <Input placeholder={admin.procedures.searchPlaceholder} value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
         <select value={filterActive} onChange={(e) => setFilterActive(e.target.value as "all" | "active" | "inactive")} className="border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="all">{admin.common.all}</option>
+          <option value="active">{admin.common.active}</option>
+          <option value="inactive">{admin.common.inactive}</option>
         </select>
       </div>
 
@@ -132,10 +135,10 @@ export default function DashboardProceduresTab() {
           onSubmit={async (data) => {
             if (editingId) {
               await updateProcedure({ id: editingId, ...data });
-              toast.success("Procedure updated");
+              toast.success(admin.toast.saved);
             } else {
               await createProcedure(data);
-              toast.success("Procedure created");
+              toast.success(admin.toast.saved);
             }
             setShowForm(false);
             setEditingId(null);
@@ -145,8 +148,25 @@ export default function DashboardProceduresTab() {
       )}
 
       <div className="space-y-3">
-        {!procedures || procedures.length === 0 ? (
-          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No procedures yet.</CardContent></Card>
+        {!procedures ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+            {admin.common.loading}
+          </CardContent></Card>
+        ) : procedures.length === 0 ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">
+            <p>{admin.procedures.empty}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => { setShowForm(true); setEditingId(null); }}
+            >
+              <Plus className="h-4 w-4" /> {admin.procedures.emptyAction}
+            </Button>
+          </CardContent></Card>
+        ) : (filteredProcedures || []).length === 0 ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">{admin.procedures.noResults}</CardContent></Card>
         ) : (
           (filteredProcedures || []).map((proc, index) => {
             const IconComp = getProcedureIcon(proc.slug, proc.icon);
@@ -169,7 +189,7 @@ export default function DashboardProceduresTab() {
                       setShowForm(true);
                     }}
                     className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
-                    title="Edit" aria-label="Edit"
+                    title={admin.common.edit} aria-label={admin.common.edit}
                   >
                     <FileText className="h-4 w-4" />
                   </button>
@@ -179,17 +199,17 @@ export default function DashboardProceduresTab() {
                       "p-2 rounded-lg transition-colors",
                       proc.isActive ? "text-green-600 hover:bg-green-50" : "text-muted-foreground hover:bg-muted"
                     )}
-                    title={proc.isActive ? "Deactivate" : "Activate"}
+                    title={proc.isActive ? admin.common.inactive : admin.common.active}
                   >
                     {proc.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <button
-                    onClick={async () => { await updateProcedure({ id: proc._id, isFeatured: !proc.isFeatured }); toast.success(proc.isFeatured ? "Unfeatured" : "Featured"); }}
+                    onClick={async () => { await updateProcedure({ id: proc._id, isFeatured: !proc.isFeatured }); toast.success(admin.toast.saved); }}
                     className={cn(
                       "p-2 rounded-lg transition-colors",
                       proc.isFeatured ? "text-amber-500 hover:bg-amber-50" : "text-muted-foreground hover:bg-muted"
                     )}
-                    title={proc.isFeatured ? "Unfeature" : "Feature"}
+                    title={admin.common.featured}
                   >
                     <Star className={cn("h-4 w-4", proc.isFeatured && "fill-amber-400")} />
                   </button>
@@ -246,6 +266,7 @@ function ProcedureForm({
   onCancel: () => void;
   editingId: Id<"procedures"> | null;
 }) {
+  const admin = useAdminText();
   const procedures = useQuery(api.procedures.list);
   const existing = editingId ? procedures?.find((p) => p._id === editingId) : null;
   const parentOptions = useMemo(
@@ -300,57 +321,57 @@ function ProcedureForm({
 
   return (
     <Card className="border-border/60">
-      <CardHeader><CardTitle className="text-lg">{editingId ? "Edit Procedure" : "Add New Procedure"}</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-lg">{editingId ? admin.procedures.edit : admin.procedures.addTitle}</CardTitle></CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Title (English)</Label>
+              <Label>{admin.content.titleEn}</Label>
               <Input name="titleEn" required defaultValue={existing?.titleEn} placeholder="Rhinoplasty" />
             </div>
             <div className="space-y-2">
-              <Label>Title (Arabic)</Label>
+              <Label>{admin.content.titleAr}</Label>
               <Input name="titleAr" dir="rtl" required defaultValue={existing?.titleAr} placeholder="تجميل الأنف" />
             </div>
           </div>
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Slug</Label>
+              <Label>{admin.procedures.slug}</Label>
               <Input name="slug" required defaultValue={existing?.slug} placeholder="rhinoplasty" />
             </div>
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>{admin.procedures.category}</Label>
               <Input name="category" defaultValue={existing?.category} placeholder="face" />
             </div>
             <div className="space-y-2">
-              <Label>Price (optional)</Label>
+              <Label>{admin.procedures.price}</Label>
               <Input name="price" defaultValue={existing?.price} placeholder="From $3000" />
             </div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Parent Procedure (sub-procedure of…)</Label>
+              <Label>{admin.procedures.parent}</Label>
               <select
                 name="parentSlug"
                 defaultValue={existing?.parentSlug || ""}
                 className="w-full border border-border/60 rounded-lg px-3 py-2 bg-white/40 text-sm"
               >
-                <option value="">None — top-level procedure</option>
+                <option value="">{admin.procedures.parentNone}</option>
                 {parentOptions.map((p) => (
                   <option key={p._id} value={p.slug}>
                     {p.titleEn} ({p.slug})
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-muted-foreground">Set to render this procedure as a sub-option inside its parent procedure page (e.g. breast-lift under breast-reduction-and-lift).</p>
+              <p className="text-xs text-muted-foreground">{admin.procedures.parentHint}</p>
             </div>
             <div className="space-y-2">
-              <Label>Duration</Label><Input name="duration" defaultValue={existing?.duration} placeholder="1-2 hours" />
+              <Label>{admin.procedures.duration}</Label><Input name="duration" defaultValue={existing?.duration} placeholder="1-2 hours" />
             </div>
           </div>
-          <div className="space-y-2"><Label>Recovery</Label><Input name="recovery" defaultValue={existing?.recovery} placeholder="1-2 weeks" /></div>
+          <div className="space-y-2"><Label>{admin.procedures.recovery}</Label><Input name="recovery" defaultValue={existing?.recovery} placeholder="1-2 weeks" /></div>
           <div className="space-y-2">
-            <Label>Icon</Label>
+            <Label>{admin.procedures.icon}</Label>
             <div className="relative">
               <button type="button" onClick={() => setShowIconPicker(!showIconPicker)} className="w-full flex items-center justify-between px-3 py-2 border border-border/60 rounded-lg bg-white/40 text-sm">
                 <span className="flex items-center gap-2">
@@ -367,7 +388,7 @@ function ProcedureForm({
               </button>
               {showIconPicker && (
                 <div className="absolute z-50 top-full mt-1 w-full bg-white rounded-xl shadow-lg border border-border/40 p-3 max-h-64 overflow-y-auto">
-                  <input type="text" placeholder="Search icons..." className="w-full mb-2 px-3 py-1.5 border border-border/60 rounded-lg text-sm bg-white" onChange={(e) => {
+                  <input type="text" placeholder={admin.procedures.iconSearch} className="w-full mb-2 px-3 py-1.5 border border-border/60 rounded-lg text-sm bg-white" onChange={(e) => {
                     const query = e.target.value.toLowerCase();
                     document.querySelectorAll('[data-icon-btn]').forEach((btn) => {
                       const name = (btn as HTMLElement).dataset.iconName || "";
@@ -391,38 +412,38 @@ function ProcedureForm({
               )}
             </div>
           </div>
-          <div className="space-y-2"><Label>Short Description (EN)</Label><Textarea name="descriptionEn" rows={2} required defaultValue={existing?.descriptionEn} placeholder="Brief description..." /></div>
-          <div className="space-y-2"><Label>Short Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} required defaultValue={existing?.descriptionAr} placeholder="وصف مختصر..." /></div>
-          <div className="space-y-2"><Label>Full Description (EN)</Label><Textarea name="longDescriptionEn" rows={4} required defaultValue={existing?.longDescriptionEn} placeholder="Detailed description..." /></div>
-          <div className="space-y-2"><Label>Full Description (AR)</Label><Textarea name="longDescriptionAr" dir="rtl" rows={4} required defaultValue={existing?.longDescriptionAr} placeholder="وصف تفصيلي..." /></div>
+          <div className="space-y-2"><Label>{admin.procedures.shortDescEn}</Label><Textarea name="descriptionEn" rows={2} required defaultValue={existing?.descriptionEn} placeholder="Brief description..." /></div>
+          <div className="space-y-2"><Label>{admin.procedures.shortDescAr}</Label><Textarea name="descriptionAr" dir="rtl" rows={2} required defaultValue={existing?.descriptionAr} placeholder="وصف مختصر..." /></div>
+          <div className="space-y-2"><Label>{admin.procedures.fullDescEn}</Label><Textarea name="longDescriptionEn" rows={4} required defaultValue={existing?.longDescriptionEn} placeholder="Detailed description..." /></div>
+          <div className="space-y-2"><Label>{admin.procedures.fullDescAr}</Label><Textarea name="longDescriptionAr" dir="rtl" rows={4} required defaultValue={existing?.longDescriptionAr} placeholder="وصف تفصيلي..." /></div>
 
           {/* Images */}
           <div className="space-y-4">
-            <Label className="text-base font-semibold">Images</Label>
+            <Label className="text-base font-semibold">{admin.procedures.images}</Label>
             <div className="space-y-2">
-              <Label>Main Image</Label>
-              <MediaSelector value={imageUrl} onChange={setImageUrl} label="Select procedure image" hint="يُزرع 4:3 في الرئيسية و16:10 في صفحة الإجراءات — يُنصح بقصّها أفقية واضحة" />
+              <Label>{admin.procedures.mainImage}</Label>
+              <MediaSelector value={imageUrl} onChange={setImageUrl} label={admin.procedures.mainImage} hint="يُزرع 4:3 في الرئيسية و16:10 في صفحة الإجراءات — يُنصح بقصّها أفقية واضحة" />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Before Image</Label>
-                <MediaSelector value={beforeImageUrl} onChange={setBeforeImageUrl} label="Select before image" hint="يُزرع 1:1 في صفحة الإجراء و4:3 في صفحة قبل/بعد — ضَع الوجه/المنطقة بالمنتصف" />
+                <Label>{admin.procedures.beforeImage}</Label>
+                <MediaSelector value={beforeImageUrl} onChange={setBeforeImageUrl} label={admin.procedures.beforeImage} hint="يُزرع 1:1 في صفحة الإجراء و4:3 في صفحة قبل/بعد — ضَع الوجه/المنطقة بالمنتصف" />
               </div>
               <div className="space-y-2">
-                <Label>After Image</Label>
-                <MediaSelector value={afterImageUrl} onChange={setAfterImageUrl} label="Select after image" hint="يُزرع 1:1 في صفحة الإجراء و4:3 في صفحة قبل/بعد — ضَع الوجه/المنطقة بالمنتصف" />
+                <Label>{admin.procedures.afterImage}</Label>
+                <MediaSelector value={afterImageUrl} onChange={setAfterImageUrl} label={admin.procedures.afterImage} hint="يُزرع 1:1 في صفحة الإجراء و4:3 في صفحة قبل/بعد — ضَع الوجه/المنطقة بالمنتصف" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>OG Image (for social sharing)</Label>
-              <MediaSelector value={ogImageUrl} onChange={setOgImageUrl} label="Select OG image" hint="صورة المشاركة على السوشيال — يُنصح 1200×630 (نسبة 1.91:1)" />
+              <Label>{admin.procedures.ogImage}</Label>
+              <MediaSelector value={ogImageUrl} onChange={setOgImageUrl} label={admin.procedures.ogImage} hint="صورة المشاركة على السوشيال — يُنصح 1200×630 (نسبة 1.91:1)" />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center justify-between">
-                <span>Gallery Images</span>
-                <Button type="button" variant="outline" size="sm" onClick={() => addGalleryImage("")}>+ Add Image</Button>
+                <span>{admin.procedures.gallery}</span>
+                <Button type="button" variant="outline" size="sm" onClick={() => addGalleryImage("")}>+ {admin.procedures.addImage}</Button>
               </Label>
-              <p className="text-xs text-muted-foreground">Drag order: use arrows to reorder gallery images.</p>
+              <p className="text-xs text-muted-foreground">{admin.procedures.galleryHint}</p>
               <div className="space-y-3">
                 {galleryUrls.map((url, i) => (
                   <div key={i} className="flex gap-2 items-start">
@@ -431,7 +452,7 @@ function ProcedureForm({
                         const updated = [...galleryUrls];
                         updated[i] = newUrl;
                         setGalleryUrls(updated);
-                      }} label={`Gallery image ${i + 1}`} hint="يُزرع مربّعًا 1:1 في معرض صور صفحة الإجراء" />
+                      }} label={`${admin.procedures.gallery} ${i + 1}`} hint="يُزرع مربّعًا 1:1 في معرض صور صفحة الإجراء" />
                     </div>
                     <div className="flex flex-col gap-0.5 mt-7">
                       <button type="button" disabled={i === 0} onClick={() => { const updated = [...galleryUrls]; [updated[i-1], updated[i]] = [updated[i], updated[i-1]]; setGalleryUrls(updated); }} className="p-1 rounded text-muted-foreground hover:bg-muted disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
@@ -448,24 +469,24 @@ function ProcedureForm({
 
           {/* SEO */}
           <div className="space-y-4">
-            <Label className="text-base font-semibold">SEO</Label>
+            <Label className="text-base font-semibold">{admin.procedures.seoBlock}</Label>
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>SEO Title (EN)</Label><Input name="seoTitleEn" defaultValue={existing?.seoTitleEn} placeholder="Custom SEO title..." /></div>
-              <div className="space-y-2"><Label>SEO Title (AR)</Label><Input name="seoTitleAr" dir="rtl" defaultValue={existing?.seoTitleAr} placeholder="عنوان SEO مخصص..." /></div>
+              <div className="space-y-2"><Label>{admin.procedures.seoTitleEn}</Label><Input name="seoTitleEn" defaultValue={existing?.seoTitleEn} placeholder="Custom SEO title..." /></div>
+              <div className="space-y-2"><Label>{admin.procedures.seoTitleAr}</Label><Input name="seoTitleAr" dir="rtl" defaultValue={existing?.seoTitleAr} placeholder="عنوان SEO مخصص..." /></div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>SEO Description (EN)</Label><Textarea name="seoDescriptionEn" rows={2} defaultValue={existing?.seoDescriptionEn} placeholder="Custom SEO description..." /></div>
-              <div className="space-y-2"><Label>SEO Description (AR)</Label><Textarea name="seoDescriptionAr" dir="rtl" rows={2} defaultValue={existing?.seoDescriptionAr} placeholder="وصف SEO مخصص..." /></div>
+              <div className="space-y-2"><Label>{admin.procedures.seoDescEn}</Label><Textarea name="seoDescriptionEn" rows={2} defaultValue={existing?.seoDescriptionEn} placeholder="Custom SEO description..." /></div>
+              <div className="space-y-2"><Label>{admin.procedures.seoDescAr}</Label><Textarea name="seoDescriptionAr" dir="rtl" rows={2} defaultValue={existing?.seoDescriptionAr} placeholder="وصف SEO مخصص..." /></div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <input type="checkbox" name="isFeatured" id="isFeatured" defaultChecked={existing?.isFeatured} className="rounded border-border" />
-            <Label htmlFor="isFeatured" className="cursor-pointer">Featured on homepage</Label>
+            <Label htmlFor="isFeatured" className="cursor-pointer">{admin.procedures.featuredHome}</Label>
           </div>
           <div className="flex gap-3">
-            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : "Save Procedure"}</Button>
-            <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : admin.common.save}</Button>
+            <Button type="button" variant="outline" onClick={onCancel}>{admin.common.cancel}</Button>
           </div>
         </form>
       </CardContent>

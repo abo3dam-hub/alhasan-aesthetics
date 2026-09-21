@@ -7,11 +7,13 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { ArrowDown, ArrowUp, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react";
 import { swapOrder } from "./dashboard-utils";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function DashboardFaqTab() {
+  const admin = useAdminText();
   const faqs = useQuery(api.faq.list);
   const createFaq = useMutation(api.faq.create);
   const updateFaq = useMutation(api.faq.update);
@@ -37,10 +39,10 @@ export default function DashboardFaqTab() {
     };
     if (editingId) {
       await updateFaq({ id: editingId, ...data });
-      toast.success("FAQ updated");
+      toast.success(admin.toast.saved);
     } else {
       await createFaq({ ...data, isActive: true, order: faqs?.length ?? 0 });
-      toast.success("FAQ added");
+      toast.success(admin.toast.saved);
     }
     setShowForm(false);
     setEditingId(null);
@@ -49,32 +51,32 @@ export default function DashboardFaqTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">FAQ</h2>
+        <h2 className="text-2xl font-bold text-foreground">{admin.faq.title}</h2>
         <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2 bg-primary text-primary-foreground">
-          <Plus className="h-4 w-4" /> Add FAQ
+          <Plus className="h-4 w-4" /> {admin.faq.add}
         </Button>
       </div>
 
       {/* Search */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Input placeholder="Search FAQ..." value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
+        <Input placeholder={admin.faq.searchPlaceholder} value={search} onChange={(e) => setSearch(e.target.value)} className="sm:max-w-xs" />
       </div>
 
       {showForm && (
         <Card className="border-border/60">
-          <CardHeader><CardTitle className="text-lg">{editingId ? "Edit FAQ" : "Add FAQ"}</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{editingId ? admin.faq.edit : admin.faq.addTitle}</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Question (EN)</Label><Input name="questionEn" required defaultValue={existing?.questionEn} /></div>
-                <div className="space-y-2"><Label>Question (AR)</Label><Input name="questionAr" dir="rtl" required defaultValue={existing?.questionAr} /></div>
+                <div className="space-y-2"><Label>{admin.faq.questionEn}</Label><Input name="questionEn" required defaultValue={existing?.questionEn} /></div>
+                <div className="space-y-2"><Label>{admin.faq.questionAr}</Label><Input name="questionAr" dir="rtl" required defaultValue={existing?.questionAr} /></div>
               </div>
-              <div className="space-y-2"><Label>Answer (EN)</Label><Textarea name="answerEn" rows={3} required defaultValue={existing?.answerEn} /></div>
-              <div className="space-y-2"><Label>Answer (AR)</Label><Textarea name="answerAr" dir="rtl" rows={3} required defaultValue={existing?.answerAr} /></div>
-              <div className="space-y-2"><Label>Category (optional)</Label><Input name="category" defaultValue={existing?.category} placeholder="e.g. general, pricing, recovery" /></div>
+              <div className="space-y-2"><Label>{admin.faq.answerEn}</Label><Textarea name="answerEn" rows={3} required defaultValue={existing?.answerEn} /></div>
+              <div className="space-y-2"><Label>{admin.faq.answerAr}</Label><Textarea name="answerAr" dir="rtl" rows={3} required defaultValue={existing?.answerAr} /></div>
+              <div className="space-y-2"><Label>{admin.faq.category}</Label><Input name="category" defaultValue={existing?.category} placeholder={admin.faq.categoryHint} /></div>
               <div className="flex gap-3">
-                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? "Update" : "Save"}</Button>
-                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
+                <Button type="submit" className="bg-primary text-primary-foreground">{editingId ? admin.faq.edit : admin.common.save}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{admin.common.cancel}</Button>
               </div>
             </form>
           </CardContent>
@@ -82,8 +84,12 @@ export default function DashboardFaqTab() {
       )}
 
       <div className="space-y-3">
-        {!faqs || faqs.length === 0 ? (
-          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No FAQ items yet.</CardContent></Card>
+        {!faqs ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">{admin.common.loading}</CardContent></Card>
+        ) : faqs.length === 0 ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center space-y-3"><p className="text-muted-foreground">{admin.faq.empty}</p><Button variant="outline" size="sm" onClick={() => { setShowForm(true); setEditingId(null); }}>{admin.faq.emptyAction}</Button></CardContent></Card>
+        ) : (filteredFaqs || []).length === 0 ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">{admin.faq.noResults}</CardContent></Card>
         ) : (
           (filteredFaqs || []).map((f) => (
           <Card key={f._id} className="border-border/60">
@@ -93,11 +99,11 @@ export default function DashboardFaqTab() {
                 <p className="text-sm text-muted-foreground truncate max-w-md">{f.answerEn}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => { setEditingId(f._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
-                <button onClick={async () => { await updateFaq({ id: f._id, isActive: !f.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
+                <button onClick={() => { setEditingId(f._id); setShowForm(true); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit}><FileText className="h-4 w-4" /></button>
+                <button onClick={async () => { await updateFaq({ id: f._id, isActive: !f.isActive }); toast.success(admin.toast.saved); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                   {f.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
-                <button onClick={async () => { if (confirm("Delete this FAQ?")) { await removeFaq({ id: f._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                <button onClick={async () => { if (confirm(admin.confirm.deleteFaq)) { await removeFaq({ id: f._id }); toast.success(admin.toast.deleted); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">

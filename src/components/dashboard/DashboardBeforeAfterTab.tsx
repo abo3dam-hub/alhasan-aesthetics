@@ -7,12 +7,14 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { ArrowDown, ArrowUp, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react";
 import { MediaSelector } from "@/components/MediaSelector";
 import { swapOrder } from "./dashboard-utils";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function DashboardBeforeAfterTab() {
+  const admin = useAdminText();
   const cases = useQuery(api.beforeAfter.list);
   const createCase = useMutation(api.beforeAfter.create);
   const updateCase = useMutation(api.beforeAfter.update);
@@ -50,10 +52,10 @@ export default function DashboardBeforeAfterTab() {
     };
     if (editingId) {
       await updateCase({ id: editingId, ...data });
-      toast.success("Case updated");
+      toast.success(admin.toast.saved);
     } else {
       await createCase({ ...data, isActive: true, order: cases?.length ?? 0 });
-      toast.success("Case added");
+      toast.success(admin.toast.saved);
     }
     setShowForm(false);
     setEditingId(null);
@@ -63,23 +65,23 @@ export default function DashboardBeforeAfterTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Before & After</h2>
+        <h2 className="text-2xl font-bold text-foreground">{admin.beforeAfter.title}</h2>
         <Button onClick={() => handleOpenBAForm(null)} className="gap-2 bg-primary text-primary-foreground">
-          <Plus className="h-4 w-4" /> Add Case
+          <Plus className="h-4 w-4" /> {admin.beforeAfter.add}
         </Button>
       </div>
 
       {showForm && (
         <Card className="border-border/60">
-          <CardHeader><CardTitle className="text-lg">{editingId ? "Edit Case" : "Add Before & After Case"}</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">{editingId ? admin.beforeAfter.edit : admin.beforeAfter.addTitle}</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Title (EN)</Label><Input name="titleEn" required defaultValue={existing?.titleEn} /></div>
-                <div className="space-y-2"><Label>Title (AR)</Label><Input name="titleAr" dir="rtl" required defaultValue={existing?.titleAr} /></div>
+                <div className="space-y-2"><Label>{admin.content.titleEn}</Label><Input name="titleEn" required defaultValue={existing?.titleEn} /></div>
+                <div className="space-y-2"><Label>{admin.content.titleAr}</Label><Input name="titleAr" dir="rtl" required defaultValue={existing?.titleAr} /></div>
               </div>
               <div className="space-y-2">
-                <Label>Procedure Type</Label>
+                <Label>{admin.beforeAfter.procedureType}</Label>
                 <select name="procedureType" defaultValue={existing?.procedureType} className="w-full border border-border/60 rounded-lg px-3 py-2 bg-background text-sm">
                   {procedures?.map((p) => <option key={p._id} value={p.slug}>{p.titleEn}</option>)}
                 </select>
@@ -87,15 +89,15 @@ export default function DashboardBeforeAfterTab() {
               <input type="hidden" name="beforeImage" value={baBeforeImage} />
               <input type="hidden" name="afterImage" value={baAfterImage} />
               <div className="grid sm:grid-cols-2 gap-4">
-                <MediaSelector value={baBeforeImage} onChange={setBaBeforeImage} label="Before Image" hint="يُزرع 4:3 في صفحة قبل/بعد و1:1 في قسم الرئيسية — ضَع الوجه/المنطقة بالمنتصف" />
-                <MediaSelector value={baAfterImage} onChange={setBaAfterImage} label="After Image" hint="يُزرع 4:3 في صفحة قبل/بعد و1:1 في قسم الرئيسية — ضَع الوجه/المنطقة بالمنتصف" />
+                <MediaSelector value={baBeforeImage} onChange={setBaBeforeImage} label={admin.beforeAfter.beforeImage} hint="يُزرع 4:3 في صفحة قبل/بعد و1:1 في قسم الرئيسية — ضَع الوجه/المنطقة بالمنتصف" />
+                <MediaSelector value={baAfterImage} onChange={setBaAfterImage} label={admin.beforeAfter.afterImage} hint="يُزرع 4:3 في صفحة قبل/بعد و1:1 في قسم الرئيسية — ضَع الوجه/المنطقة بالمنتصف" />
               </div>
-              <div className="space-y-2"><Label>Description (EN)</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
-              <div className="space-y-2"><Label>Description (AR)</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
-              <div className="space-y-2"><Label>Patient Age (optional)</Label><Input name="patientAge" type="number" min={1} max={120} defaultValue={existing?.patientAge ?? ""} placeholder="e.g. 35" /></div>
+              <div className="space-y-2"><Label>{admin.content.descEn}</Label><Textarea name="descriptionEn" rows={2} defaultValue={existing?.descriptionEn} /></div>
+              <div className="space-y-2"><Label>{admin.content.descAr}</Label><Textarea name="descriptionAr" dir="rtl" rows={2} defaultValue={existing?.descriptionAr} /></div>
+              <div className="space-y-2"><Label>{admin.beforeAfter.patientAge}</Label><Input name="patientAge" type="number" min={1} max={120} defaultValue={existing?.patientAge ?? ""} placeholder="مثال: 35" /></div>
               <div className="flex gap-3">
-                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? "Saving..." : (editingId ? "Update" : "Save")}</Button>
-                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
+                <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">{loading ? admin.common.saving : (editingId ? admin.beforeAfter.edit : admin.common.save)}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>{admin.common.cancel}</Button>
               </div>
             </form>
           </CardContent>
@@ -103,8 +105,10 @@ export default function DashboardBeforeAfterTab() {
       )}
 
       <div className="space-y-3">
-        {!cases || cases.length === 0 ? (
-          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">No before/after cases yet.</CardContent></Card>
+        {!cases ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center text-muted-foreground">{admin.common.loading}</CardContent></Card>
+        ) : cases.length === 0 ? (
+          <Card className="border-border/60"><CardContent className="p-8 text-center space-y-3"><p className="text-muted-foreground">{admin.beforeAfter.empty}</p><Button variant="outline" size="sm" onClick={() => handleOpenBAForm(null)}>{admin.beforeAfter.emptyAction}</Button></CardContent></Card>
         ) : (
           cases.map((c) => (
             <Card key={c._id} className="border-border/60">
@@ -114,11 +118,11 @@ export default function DashboardBeforeAfterTab() {
                   <p className="text-sm text-muted-foreground">{c.procedureType}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleOpenBAForm(c._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title="Edit"><FileText className="h-4 w-4" /></button>
-                  <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success("Updated"); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
+                  <button onClick={() => handleOpenBAForm(c._id)} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors" title={admin.common.edit}><FileText className="h-4 w-4" /></button>
+                  <button onClick={async () => { await updateCase({ id: c._id, isActive: !c.isActive }); toast.success(admin.toast.saved); }} className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors">
                     {c.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
-                  <button onClick={async () => { if (confirm("Delete this case?")) { await removeCase({ id: c._id }); toast.success("Deleted"); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                  <button onClick={async () => { if (confirm(admin.confirm.deleteCase)) { await removeCase({ id: c._id }); toast.success(admin.toast.deleted); } }} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <div className="flex flex-col gap-0.5 border-s border-border/40 ps-2 ms-1">

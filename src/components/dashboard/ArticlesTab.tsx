@@ -20,9 +20,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MediaSelector } from "@/components/MediaSelector";
+import { useAdminText } from "@/hooks/use-admin-text";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export default function ArticlesTab() {
+  const admin = useAdminText();
   const articles = useQuery(api.articles.list);
   const procedures = useQuery(api.procedures.list);
   const createArticle = useMutation(api.articles.create);
@@ -52,13 +54,13 @@ export default function ArticlesTab() {
     isPublished: boolean,
   ) => {
     await updateArticle({ id, isPublished: !isPublished });
-    toast.success(isPublished ? "Article moved to drafts" : "Article published");
+    toast.success(isPublished ? admin.toast.movedToDrafts : admin.toast.published);
   };
 
   const handleDelete = async (id: Id<"articles">) => {
-    if (confirm("Are you sure you want to delete this article?")) {
+    if (confirm(admin.confirm.deleteArticle)) {
       await removeArticle({ id });
-      toast.success("Article deleted");
+      toast.success(admin.toast.deleted);
     }
   };
 
@@ -77,7 +79,7 @@ export default function ArticlesTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Articles</h2>
+        <h2 className="text-2xl font-bold text-foreground">{admin.articles.title}</h2>
         <Button
           onClick={() => {
             setShowForm(!showForm);
@@ -85,13 +87,13 @@ export default function ArticlesTab() {
           }}
           className="gap-2 bg-primary text-primary-foreground"
         >
-          <Plus className="h-4 w-4" /> Add Article
+          <Plus className="h-4 w-4" /> {admin.articles.add}
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
-          placeholder="Search articles..."
+          placeholder={admin.articles.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="sm:max-w-xs"
@@ -103,9 +105,9 @@ export default function ArticlesTab() {
           }
           className="border border-border/60 rounded-lg px-3 py-2 bg-background text-sm"
         >
-          <option value="all">All</option>
-          <option value="published">Published</option>
-          <option value="draft">Drafts</option>
+          <option value="all">{admin.common.all}</option>
+          <option value="published">{admin.common.published}</option>
+          <option value="draft">{admin.common.drafts}</option>
         </select>
       </div>
 
@@ -120,10 +122,10 @@ export default function ArticlesTab() {
           onSubmit={async (data) => {
             if (editingId) {
               await updateArticle({ id: editingId, ...data });
-              toast.success("Article updated");
+              toast.success(admin.toast.saved);
             } else {
               await createArticle(data);
-              toast.success("Article created");
+              toast.success(admin.toast.saved);
             }
             setShowForm(false);
             setEditingId(null);
@@ -139,19 +141,30 @@ export default function ArticlesTab() {
         {!articles ? (
           <Card className="border-border/60">
             <CardContent className="p-8 text-center text-muted-foreground">
-              Loading articles...
+              {admin.common.loading}
             </CardContent>
           </Card>
         ) : articles.length === 0 ? (
           <Card className="border-border/60">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              No articles yet.
+            <CardContent className="p-8 text-center text-muted-foreground flex flex-col items-center gap-3">
+              {admin.articles.empty}
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={() => {
+                  setShowForm(true);
+                  setEditingId(null);
+                }}
+              >
+                <Plus className="h-4 w-4" /> {admin.articles.emptyAction}
+              </Button>
             </CardContent>
           </Card>
         ) : (filtered ?? []).length === 0 ? (
           <Card className="border-border/60">
             <CardContent className="p-8 text-center text-muted-foreground">
-              No articles match your search.
+              {admin.articles.noResults}
             </CardContent>
           </Card>
         ) : (
@@ -178,8 +191,8 @@ export default function ArticlesTab() {
                       setShowForm(true);
                     }}
                     className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
-                    title="Edit"
-                    aria-label="Edit"
+                    title={admin.common.edit}
+                    aria-label={admin.common.edit}
                   >
                     <FileText className="h-4 w-4" />
                   </button>
@@ -193,7 +206,9 @@ export default function ArticlesTab() {
                         ? "text-green-600 hover:bg-green-50"
                         : "text-muted-foreground hover:bg-muted",
                     )}
-                    title={article.isPublished ? "Unpublish" : "Publish"}
+                    title={
+                      article.isPublished ? "Unpublish" : admin.common.published
+                    }
                   >
                     {article.isPublished ? (
                       <Eye className="h-4 w-4" />
@@ -207,7 +222,11 @@ export default function ArticlesTab() {
                         id: article._id,
                         isFeatured: !article.isFeatured,
                       });
-                      toast.success(article.isFeatured ? "Unfeatured" : "Featured");
+                      toast.success(
+                        article.isFeatured
+                          ? admin.articles.unfeaturedSuccess
+                          : admin.articles.featuredSuccess,
+                      );
                     }}
                     className={cn(
                       "p-2 rounded-lg transition-colors",
@@ -215,7 +234,7 @@ export default function ArticlesTab() {
                         ? "text-amber-500 hover:bg-amber-50"
                         : "text-muted-foreground hover:bg-muted",
                     )}
-                    title="Feature"
+                    title={admin.common.featured}
                   >
                     <Star
                       className={cn("h-4 w-4", article.isFeatured && "fill-amber-400")}
@@ -295,6 +314,7 @@ function ArticleForm({
   procedures,
   nextOrder,
 }: ArticleFormProps) {
+  const admin = useAdminText();
   const articles = useQuery(api.articles.list);
   const existing = editingId
     ? articles?.find((a) => a._id === editingId)
@@ -340,7 +360,7 @@ function ArticleForm({
     <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-lg">
-          {editingId ? "Edit Article" : "Add New Article"}
+          {editingId ? admin.articles.edit : admin.articles.addTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -366,19 +386,19 @@ function ArticleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label>Slug</Label>
+              <Label>{admin.articles.slug}</Label>
               <Input
                 name="slug"
                 required
                 defaultValue={existing?.slug}
-                placeholder="how-long-does-a-facelift-last"
+                placeholder={admin.articles.slugHint}
               />
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Category (English)</Label>
+              <Label>{admin.articles.categoryEn}</Label>
               <Input
                 name="categoryEn"
                 defaultValue={existing?.categoryEn}
@@ -386,7 +406,7 @@ function ArticleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label>Category (Arabic)</Label>
+              <Label>{admin.articles.categoryAr}</Label>
               <Input
                 name="categoryAr"
                 dir="rtl"
@@ -398,7 +418,7 @@ function ArticleForm({
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Reading minutes</Label>
+              <Label>{admin.articles.readingMinutes}</Label>
               <Input
                 name="readingMinutes"
                 type="number"
@@ -407,13 +427,13 @@ function ArticleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label>Related procedure (optional)</Label>
+              <Label>{admin.articles.relatedProcedure}</Label>
               <select
                 name="relatedProcedureSlug"
                 defaultValue={existing?.relatedProcedureSlug || ""}
                 className="w-full border border-border/60 rounded-lg px-3 py-2 bg-white/40 text-sm"
               >
-                <option value="">None</option>
+                <option value="">{admin.articles.relatedNone}</option>
                 {procedures.map((p) => (
                   <option key={p._id} value={p.slug}>
                     {p.titleEn} ({p.slug})
@@ -425,7 +445,7 @@ function ArticleForm({
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Excerpt (English)</Label>
+              <Label>{admin.articles.excerptEn}</Label>
               <Textarea
                 name="excerptEn"
                 required
@@ -435,7 +455,7 @@ function ArticleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label>Excerpt (Arabic)</Label>
+              <Label>{admin.articles.excerptAr}</Label>
               <Textarea
                 name="excerptAr"
                 dir="rtl"
@@ -449,17 +469,17 @@ function ArticleForm({
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Body (English)</Label>
+              <Label>{admin.articles.bodyEn}</Label>
               <Textarea
                 name="bodyEn"
                 required
                 rows={10}
                 defaultValue={existing?.bodyEn}
-                placeholder={"Separate paragraphs with a blank line.\nStart a line with '## ' to render it as a section heading."}
+                placeholder={admin.articles.bodyEnHint}
               />
             </div>
             <div className="space-y-2">
-              <Label>Body (Arabic)</Label>
+              <Label>{admin.articles.bodyAr}</Label>
               <Textarea
                 name="bodyAr"
                 dir="rtl"
@@ -476,7 +496,7 @@ function ArticleForm({
               <MediaSelector
                 value={coverUrl}
                 onChange={setCoverUrl}
-                label="Cover image"
+                label={admin.articles.coverImage}
                 hint="Select a library image or paste a URL — the article header and listing card will use it."
               />
             </div>
@@ -484,7 +504,7 @@ function ArticleForm({
               <MediaSelector
                 value={ogImageUrl}
                 onChange={setOgImageUrl}
-                label="Open Graph image (optional)"
+                label={admin.articles.ogImage}
                 hint="Used when the article is shared on WhatsApp / social media. Falls back to the cover image."
               />
             </div>
@@ -492,18 +512,18 @@ function ArticleForm({
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>SEO Title (English)</Label>
+              <Label>{admin.articles.seoTitleEn}</Label>
               <Input name="seoTitleEn" defaultValue={existing?.seoTitleEn} placeholder="How Long Does a Facelift Last? | Dr. Al Hasan Al Saiem" />
             </div>
             <div className="space-y-2">
-              <Label>SEO Title (Arabic)</Label>
+              <Label>{admin.articles.seoTitleAr}</Label>
               <Input name="seoTitleAr" dir="rtl" defaultValue={existing?.seoTitleAr} placeholder="كم تدوم عملية شد الوجه؟ | د. الحسن الصايم" />
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>SEO Description (English)</Label>
+              <Label>{admin.articles.seoDescEn}</Label>
               <Textarea
                 name="seoDescriptionEn"
                 rows={2}
@@ -512,7 +532,7 @@ function ArticleForm({
               />
             </div>
             <div className="space-y-2">
-              <Label>SEO Description (Arabic)</Label>
+              <Label>{admin.articles.seoDescAr}</Label>
               <Textarea
                 name="seoDescriptionAr"
                 dir="rtl"
@@ -531,7 +551,7 @@ function ArticleForm({
                 defaultChecked={existing?.isPublished ?? true}
                 className="h-4 w-4 rounded border-border text-primary"
               />
-              Published (visible on the public blog)
+              {admin.articles.published} (visible on the public blog)
             </label>
             <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
               <input
@@ -540,16 +560,16 @@ function ArticleForm({
                 defaultChecked={existing?.isFeatured ?? false}
                 className="h-4 w-4 rounded border-border text-amber-500"
               />
-              Featured
+              {admin.articles.featured}
             </label>
           </div>
 
           <div className="flex items-center gap-3 pt-2">
             <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground">
-              {editingId ? "Save Changes" : "Create Article"}
+              {editingId ? admin.common.save : admin.articles.add}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {admin.common.cancel}
             </Button>
           </div>
         </form>

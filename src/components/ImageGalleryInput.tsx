@@ -3,6 +3,7 @@ import { Loader2, Plus, X, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { useImageUpload } from "@/hooks/use-upload";
+import { useAdminText } from "@/hooks/use-admin-text";
 import { MediaLibraryModal } from "@/components/MediaLibraryModal";
 import { Info } from "lucide-react";
 import type { ReactNode } from "react";
@@ -22,6 +23,7 @@ interface ImageGalleryInputProps {
  * Thumbnails can be removed individually.
  */
 export function ImageGalleryInput({ value, onChange, label, hint, className }: ImageGalleryInputProps) {
+  const admin = useAdminText();
   const [uploading, setUploading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
@@ -60,7 +62,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
               type="button"
               onClick={() => onChange(value.filter((v) => v !== id))}
               className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
-              aria-label="Remove image"
+              aria-label={admin.media.removeImage}
             >
               <X className="h-3 w-3" />
             </button>
@@ -77,7 +79,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
               ? "border-border/30 opacity-60 cursor-wait"
               : "border-border/40 cursor-pointer hover:border-primary/50 hover:bg-white/20"
           )}
-          title="Upload new images"
+          title={admin.media.upload}
         >
           {uploading ? (
             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
@@ -85,7 +87,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
             <>
               <Plus className="h-5 w-5 text-muted-foreground" />
               <span className="text-[9px] text-muted-foreground leading-none px-1 text-center">
-                Upload
+                {admin.media.upload}
               </span>
             </>
           )}
@@ -95,11 +97,11 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
           type="button"
           onClick={() => { setPickerSearch(""); setPickerOpen(true); }}
           className="w-20 h-20 rounded-xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-1 transition-all shrink-0 cursor-pointer hover:border-primary/50 hover:bg-white/20"
-          title="Choose from library"
+          title={admin.media.fromLibrary}
         >
           <Images className="h-5 w-5 text-muted-foreground" />
           <span className="text-[9px] text-muted-foreground leading-none px-1 text-center">
-            From Library
+            {admin.media.fromLibrary}
           </span>
         </button>
       </div>
@@ -135,7 +137,7 @@ export function ImageGalleryInput({ value, onChange, label, hint, className }: I
             if (!value.includes(id)) onChange([...value, id]);
           }}
           onClose={() => { setPickerOpen(false); setPickerSearch(""); }}
-          title="Choose Photos"
+          title={admin.media.choosePhotos}
         />
       )}
     </div>
