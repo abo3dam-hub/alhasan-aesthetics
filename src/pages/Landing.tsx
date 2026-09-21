@@ -14,6 +14,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useEffect } from "react";
 import { useI18n } from "@/i18n";
+import { safeJsonLd } from "@/lib/jsonLd";
 
 export default function Landing() {
   const { dir } = useI18n();
@@ -89,7 +90,7 @@ export default function Landing() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "MedicalBusiness",
             name: doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem",

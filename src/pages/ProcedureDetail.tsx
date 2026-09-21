@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import GlassNavbar from "@/components/GlassNavbar";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { getProcedureIcon } from "@/lib/procedureIcons";
+import { safeJsonLd } from "@/lib/jsonLd";
 
 
 
@@ -412,7 +413,7 @@ export default function ProcedureDetail() {
               {isRtl ? "تفاصيل الإجراء" : "Procedure Details"}
             </h2>
             <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-              {longDescription.split("\n").map((paragraph, i) => (
+              {longDescription.split("\n").map((paragraph: string, i: number) => (
                 <p key={i} className="mb-4">
                   {paragraph}
                 </p>
@@ -462,7 +463,7 @@ export default function ProcedureDetail() {
                 {isRtl ? "معرض الصور" : "Gallery"}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {gallery.map((url, i) => (
+                {gallery.map((url: string, i: number) => (
                   <button
                     key={i}
                     type="button"
@@ -528,7 +529,7 @@ export default function ProcedureDetail() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "Person",
             name: isRtl ? (doctorSettings?.doctorNameAr || "د. الحسن الصايم") : (doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem"),
@@ -544,7 +545,7 @@ export default function ProcedureDetail() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [

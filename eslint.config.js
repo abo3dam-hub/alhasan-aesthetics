@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { ignores: ["dist", "src/convex/_generated/**"] },
   {
     extends: [
       js.configs.recommended,
@@ -24,10 +24,11 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      // Dev-only fast-refresh (HMR) hint. The codebase intentionally mixes
+      // components with hooks/constants/variants in a single file (shadcn
+      // ui/*, i18n provider+hook, procedureIcons registry, dev toolbar), so
+      // this rule only produces noise. It has zero effect on production.
+      "react-refresh/only-export-components": "off",
     },
   },
 );

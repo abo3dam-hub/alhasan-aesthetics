@@ -1,12 +1,12 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 
 /**
  * Verify the current user has admin role.
  * Throws if not authenticated or not admin.
- * Use this at the top of any CMS mutation.
+ * Use this at the top of any CMS mutation or admin-only query.
  */
-export async function requireAdmin(ctx: MutationCtx) {
+export async function requireAdmin(ctx: MutationCtx | QueryCtx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) {
     throw new Error("Not authenticated");
@@ -19,10 +19,10 @@ export async function requireAdmin(ctx: MutationCtx) {
 }
 
 /**
- * Check if current user is admin (for queries).
+ * Check if current user is admin (for queries and mutations).
  * Returns null if not admin, or the user if admin.
  */
-export async function getAdminUser(ctx: MutationCtx) {
+export async function getAdminUser(ctx: MutationCtx | QueryCtx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) return null;
   const user = await ctx.db.get(userId);

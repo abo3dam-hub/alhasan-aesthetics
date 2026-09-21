@@ -92,7 +92,19 @@ class RootErrorBoundary extends React.Component<
   }
 }
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL || 'https://kindly-anaconda-422.convex.cloud');
+const fallbackConvexUrl = "https://kindly-anaconda-422.convex.cloud";
+
+if (!import.meta.env.VITE_CONVEX_URL) {
+  console.warn(
+    `[Convex] VITE_CONVEX_URL is not set — falling back to the configured production deployment (${fallbackConvexUrl}). ` +
+      "For anything other than the production site this is a misconfiguration; " +
+      "set VITE_CONVEX_URL in your environment (e.g. .env.local, Vercel project env).",
+  );
+}
+
+const convex = new ConvexReactClient(
+  import.meta.env.VITE_CONVEX_URL || fallbackConvexUrl,
+);
 
 
 

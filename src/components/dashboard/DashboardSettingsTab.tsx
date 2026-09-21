@@ -8,11 +8,33 @@ import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MediaSelector } from "@/components/MediaSelector";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardSettingsTab() {
   const settings = useQuery(api.siteSettings.getDoctorSettings);
   const setSetting = useMutation(api.siteSettings.set);
   const [saving, setSaving] = useState(false);
+
+  // Admin accounts management
+  const users = useQuery(api.users.listUsers);
+  const isLoadingUsers = useQuery(api.users.listUsers) === undefined;
+  const promoteUser = useMutation(api.users.promoteUser);
+  const [promoteEmail, setPromoteEmail] = useState("");
+  const [isPromoting, setIsPromoting] = useState(false);
+
+  const handlePromoteUser = async () => {
+    if (!promoteEmail.trim()) return;
+    setIsPromoting(true);
+    try {
+      await promoteUser({ email: promoteEmail.trim() });
+      toast.success(`User promoted to admin!`);
+      setPromoteEmail("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to promote user");
+    } finally {
+      setIsPromoting(false);
+    }
+  };
 
   const [form, setForm] = useState<Record<string, string>>({
     doctorNameAr: "",
@@ -216,6 +238,94 @@ export default function DashboardSettingsTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Admin Accounts Management */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Admin Accounts / إدارة حسابات الإدارة</h2>
+          <p className="text-sm text-muted-foreground">
+            Maximum 2 admin accounts allowed. Enter email to promote an existing user to admin.
+          </p>
+        </div>
+        
+        {/* Promote User Form */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="promoteEmail">Email to Promote</Label>
+            <Input
+              id="promoteEmail"
+              type="email"
+              placeholder="Enter user email..."
+              value={promoteEmail}
+              onChange={(e) => setPromoteEmail(e.target.value)}
+              disabled={isPromoting}
+            />
+          </div>
+          <Button
+            onClick={handlePromoteUser}
+            disabled={isPromoting || !promoteEmail}
+            className="w-full"
+          >
+            {isPromoting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Promoting...
+              </>
+            ) : (
+              "Promote to Admin"
+            )}
+          </Button>
+        </div>
+        
+        {/* Current Users List */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">Current Users</h3>
+            <p className="text-xs text-muted-foreground">
+              {users?.length} total
+            </p>
+          </div>
+          
+          {isLoadingUsers ? (
+            <div className="text-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+            </div>
+          ) : users?.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">No users found</p>
+          ) : (
+            <div className="divide-y">
+              {(users ?? []).map((user) => (
+                <div key={user._id} className="py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted/50 text-muted-foreground">
+                        {user.name || user.email?.slice(0, 1).toUpperCase() || "?"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{user.name || "Unknown"}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                    <span
+                      className={`
+                        px-2 py-0.5 text-xs font-medium rounded-full
+                        ${user.role === "admin"
+                          ? "bg-green-100 text-green-800"
+                          : user.role === "member"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                        }
+                      `}
+                    >
+                      {user.role === "admin" ? "Admin" : user.role === "member" ? "Member" : "User"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="flex justify-end" role="status" aria-live="polite">
         <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">

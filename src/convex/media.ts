@@ -26,6 +26,7 @@ export const recordUpload = mutation({
     const admin = await requireAdmin(ctx);
     return await ctx.db.insert("media", {
       ...args,
+      url: "",
       uploadedAt: Date.now(),
       uploadedBy: admin.userId,
     });

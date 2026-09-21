@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useAuth } from "@/hooks/use-auth";
+import { api } from "@/convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
 import doctorLogo from "/assets/3.jpg";
 import { ArrowRight, Loader2, Lock, Mail } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
@@ -50,6 +52,14 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const recordFailedAttempt = useMutation(api.loginRateLimit.recordFailedAttempt);
+  const resetLoginAttempts = useMutation(api.loginRateLimit.resetLoginAttempts);
+  const normalizedEmail = email.trim().toLowerCase();
+  const loginStatus = useQuery(
+    api.loginRateLimit.getLoginStatus,
+    mode === "signIn" && normalizedEmail ? { email: normalizedEmail } : "skip",
+  );
+
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       navigate(redirect);
@@ -61,16 +71,30 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setIsLoading(true);
     setError(null);
     try {
+      if (mode === "signIn" && loginStatus?.blocked) {
+        setError(
+          loginStatus.retryAfterMs
+            ? `Too many failed attempts. Try again in ${Math.ceil(loginStatus.retryAfterMs / 60000)} minute(s).`
+            : "Too many failed attempts. Please try again later.",
+        );
+        return;
+      }
       await signIn("password", {
         email,
         password,
         flow: mode,
       });
+      if (mode === "signIn") {
+        void resetLoginAttempts({ email });
+      }
       navigate(redirect);
     } catch (err) {
       console.error("Sign-in error:", err);
       const message = errorMessage(err);
       setError(message);
+      if (mode === "signIn") {
+        void recordFailedAttempt({ email });
+      }
     } finally {
       setIsLoading(false);
     }

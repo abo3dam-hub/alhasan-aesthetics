@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { safeJsonLd } from "@/lib/jsonLd";
 
 const placeholderFaqKeys = ["q1", "q2", "q3", "q4", "q5", "q6"];
 
@@ -112,7 +113,7 @@ export default function FAQ() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: safeJsonLd({
               "@context": "https://schema.org",
               "@type": "FAQPage",
               mainEntity: displayFaqs.map((faq) => ({

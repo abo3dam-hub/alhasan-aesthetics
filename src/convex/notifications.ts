@@ -1,1 +1,0 @@
-// DEPRECATED - Notifications table removed.

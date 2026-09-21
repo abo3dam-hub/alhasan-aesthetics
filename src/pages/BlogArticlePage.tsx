@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import GlassNavbar from "@/components/GlassNavbar";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { trackEvent } from "@/lib/track";
+import { safeJsonLd } from "@/lib/jsonLd";
 
 function formatDate(ts: number, locale: string): string {
   try {
@@ -226,7 +227,7 @@ export default function BlogArticlePage() {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
       )}
 

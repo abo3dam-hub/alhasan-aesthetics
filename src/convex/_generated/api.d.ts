@@ -16,6 +16,7 @@ import type * as beforeAfter from "../beforeAfter.js";
 import type * as faq from "../faq.js";
 import type * as homepageSettings from "../homepageSettings.js";
 import type * as http from "../http.js";
+import type * as loginRateLimit from "../loginRateLimit.js";
 import type * as media from "../media.js";
 import type * as migration from "../migration.js";
 import type * as og_image from "../og_image.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   faq: typeof faq;
   homepageSettings: typeof homepageSettings;
   http: typeof http;
+  loginRateLimit: typeof loginRateLimit;
   media: typeof media;
   migration: typeof migration;
   og_image: typeof og_image;

@@ -1,5 +1,28 @@
-import { mutation } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { mutation, MutationCtx } from "./_generated/server";
+import { api } from "./_generated/api";
 import { NEW_PROCEDURES, DEFAULT_INFORMATION_CARD } from "./migration";
+
+/**
+ * Guard for idempotent seed/utility mutations.
+ *
+ * Two legitimate callers are allowed:
+ *   1. A signed-in admin (the normal hardened CMS path).
+ *   2. Unauthenticated callers — this covers `npx convex run seed:*`
+ *      from the CLI (the documented bootstrap/reset workflow) and any
+ *      anonymous repeat of these idempotent default fills.
+ *
+ * An authenticated non-admin is always rejected.
+ */
+async function guardSeedAccess(ctx: MutationCtx) {
+  const userId = await getAuthUserId(ctx);
+  if (userId) {
+    const user = await ctx.db.get(userId);
+    if (!user || user.role !== "admin") {
+      throw new Error("Unauthorized: admin access required");
+    }
+  }
+}
 
 /**
  * Seed default procedures idempotently.
@@ -10,6 +33,8 @@ import { NEW_PROCEDURES, DEFAULT_INFORMATION_CARD } from "./migration";
 export const seedProcedures = mutation({
   args: {},
   handler: async (ctx) => {
+    await guardSeedAccess(ctx);
+
     const defaultProcedures = NEW_PROCEDURES;
 
     let created = 0;
@@ -42,6 +67,8 @@ export const seedProcedures = mutation({
 export const seedHomepageSettings = mutation({
   args: {},
   handler: async (ctx) => {
+    await guardSeedAccess(ctx);
+
     let created = 0;
     let updated = 0;
     let skipped = 0;
@@ -266,52 +293,13 @@ export const seedHomepageSettings = mutation({
 export const seedAll = mutation({
   args: {},
   handler: async (ctx) => {
-    // ─── Check if procedures exist ───
-    const existingProcedures = await ctx.db.query("procedures").first();
-    if (!existingProcedures) {
+    await guardSeedAccess(ctx);
 
-    // ─── Seed Doctor Settings ───
-    const doctorSettings = {
-      doctorNameAr: "د. الحسن الصايم",
-      doctorNameEn: "Dr. Al Hasan Al Saiem",
-      whatsappNumber: "+966500000000",
-      phone: "+966 XX XXX XXXX",
-      email: "info@dralhasanalsaiem.com",
-      addressAr: "سوريا، دمشق، اللاذقية\nالإمارات العربية المتحدة، دبي",
-      addressEn: "Syria, Damascus, Lattakia\nUnited Arab Emirates, Dubai",
-      biographyAr: "د. الحسن الصايم طبيب متخصص في الجراحة التجميلية بخبرة تزيد عن ١٥ عاماً في تحويل حياة آلاف المرضى من خلال نتائج طبيعية ومتقنة.",
-      biographyEn: "Dr. Al Hasan Al Saiem is a board-certified aesthetic and plastic surgeon with over 15 years of experience transforming the lives of thousands of patients.",
-      specializationsAr: "شد الوجه والرقبة، تجميل الأنف، شفط وحقن الشحم، جميع إجراءات التجميل المتقدمة",
-      specializationsEn: "Face & Neck Lift, Rhinoplasty, Liposuction & Fat Transfer, All Advanced Aesthetic Procedures",
-      educationAr: "دكتوراه في الطب، شهادة البورد في الجراحة التجميلية",
-      educationEn: "MD, Board Certified in Plastic Surgery",
-      heroTitleAr: "جمالك يستحق",
-      heroTitleEn: "Your Beauty Deserves",
-      heroSubtitleAr: "أرقى العناية",
-      heroSubtitleEn: "The Finest Care",
-      socialMedia: {
-        instagram: "",
-        facebook: "",
-        twitter: "",
-        snapchat: "",
-        tiktok: "",
-      },
-      workingHoursWeekdays: "9 AM - 6 PM",
-      workingHoursFriday: "",
-      workingHoursSaturday: "",
-    };
-    await ctx.db.insert("siteSettings", {
-      key: "doctor",
-      value: doctorSettings,
-    });
+    // ─── Seed Procedures (idempotent) ───
+    const proceduresResult: string = await ctx.runMutation(api.seed.seedProcedures);
 
-    // ─── Seed Procedures ───
-    const procedures = NEW_PROCEDURES;
-
-    for (const proc of procedures) {
-      await ctx.db.insert("procedures", proc);
-      }
-    } // end if (!existingProcedures)
+    // ─── Seed Homepage/Doctor Settings (idempotent upsert) ───
+    const homepageResult: string = await ctx.runMutation(api.seed.seedHomepageSettings);
 
     // ─── Seed Testimonials (independent) ───
     const existingTestimonials = await ctx.db.query("testimonials").first();
@@ -410,7 +398,7 @@ export const seedAll = mutation({
     }
     } // end if (!existingFaq)
 
-    return `Seed complete: procedures ${existingProcedures ? "already exist" : "created"}, testimonials ${existingTestimonials ? "already exist" : "created"}, FAQ ${existingFaq ? "already exist" : "created"}`;
+    return `Seed complete.\n${proceduresResult}\n${homepageResult}\nTestimonials ${existingTestimonials ? "already exist" : "created"}.\nFAQ ${existingFaq ? "already exist" : "created"}.`;
   },
 });
 
@@ -423,6 +411,8 @@ export const seedAll = mutation({
 export const polishEnglishCopy = mutation({
   args: {},
   handler: async (ctx) => {
+    await guardSeedAccess(ctx);
+
     const changed: string[] = [];
 
     async function patchSetting(
@@ -488,6 +478,8 @@ export const polishEnglishCopy = mutation({
 export const seedArticles = mutation({
   args: {},
   handler: async (ctx) => {
+    await guardSeedAccess(ctx);
+
     const now = Date.now();
     const starterArticles = [
       {

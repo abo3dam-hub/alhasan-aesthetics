@@ -177,9 +177,18 @@ const schema = defineSchema(
       ts: v.number(),
     }).index("by_ts", ["ts"]),
 
+    // ─── Login rate limiting (app-level, keyed per email) ───
+    loginAttempts: defineTable({
+      email: v.string(),
+      count: v.number(),
+      firstAttemptAt: v.number(),
+      lastAttemptAt: v.number(),
+      lockedUntil: v.optional(v.number()),
+    }).index("by_email", ["email"]),
+
   },
   {
-    schemaValidation: false,
+    schemaValidation: true,
   },
 );
 

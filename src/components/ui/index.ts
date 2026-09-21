@@ -78,12 +78,10 @@ export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 export { ScrollArea, ScrollBar } from "./scroll-area"; // ~6KB - Custom scrollbars
 export { Drawer, DrawerPortal, DrawerOverlay, DrawerTrigger, DrawerClose, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from "./drawer"; // ~12KB - Bottom sheet drawer
 export { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "./carousel"; // ~15KB - Image/content carousel (uses embla-carousel)
-export { Calendar } from "./calendar"; // ~12KB - Date picker calendar (uses react-day-picker)
 export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from "./command"; // ~10KB - Command palette (uses cmdk)
 export { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./pagination"; // ~5KB
 
 // Layout Components
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./resizable"; // ~8KB - Resizable panels
 export { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset, SidebarHeader, SidebarFooter, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarGroupAction, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuAction, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, SidebarMenuBadge, SidebarSeparator, SidebarRail } from "./sidebar"; // ~10KB
 
 // Data Visualization
@@ -136,7 +134,7 @@ export { Toaster } from "./sonner"; // ~8KB - Toast notifications
  *
  * 2. Lazy load heavy components:
  *    const Chart = lazy(() => import("@/components/ui").then(m => ({ default: m.Chart })));
- *    const Calendar = lazy(() => import("@/components/ui/calendar").then(m => ({ default: m.Calendar })));
+ *    const Command = lazy(() => import("@/components/ui/command").then(m => ({ default: m.Command })));
  *
  * 3. Group imports by route:
  *    - Landing page: Button, Card, Badge (small components only)
