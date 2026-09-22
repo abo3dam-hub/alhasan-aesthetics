@@ -96,3 +96,73 @@ export function useImageUpload() {
 
   return { upload, uploading, error, reset };
 }
+
+export interface VideoUploadResult {
+  storageId: string;
+  name: string;
+  type: string;
+  size: number;
+}
+
+/**
+ * Video upload hook — same flow as images (signed upload URL → storage → storageId),
+ * but for large Reels-style clips. The file itself is never passed into a mutation;
+ * only the returned storageId is recorded. Supports MP4 / WebM / MOV up to 50MB.
+ */
+export function useVideoUpload() {
+  const generateUploadUrl = useMutation(api.media.generateUploadUrl);
+  const adminVideos = useAdminText().videos;
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const upload = useCallback(
+    async (file: File): Promise<VideoUploadResult | null> => {
+      const maxSize = 50 * 1024 * 1024; // 50MB — keeps free-tier storage healthy
+      const allowedTypes = ["video/mp4", "video/webm", "video/quicktime"];
+      const looksLikeVideo = /\.(mp4|webm|mov)$/i.test(file.name);
+
+      if (!looksLikeVideo || !allowedTypes.includes(file.type)) {
+        setError(adminVideos.typeError);
+        return null;
+      }
+
+      if (file.size > maxSize) {
+        setError(adminVideos.sizeError);
+        return null;
+      }
+
+      setUploading(true);
+      setError(null);
+
+      try {
+        const uploadUrl = await generateUploadUrl();
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const result = await response.json();
+        return { storageId: result.storageId, name: file.name, type: file.type, size: file.size };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : adminVideos.uploadFailed;
+        setError(message === "Upload failed" ? adminVideos.uploadFailed : message);
+        return null;
+      } finally {
+        setUploading(false);
+      }
+    },
+    [generateUploadUrl, adminVideos],
+  );
+
+  const reset = useCallback(() => {
+    setError(null);
+    setUploading(false);
+  }, []);
+
+  return { upload, uploading, error, reset };
+}

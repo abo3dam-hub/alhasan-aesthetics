@@ -60,11 +60,24 @@
     "learnMore": "Learn More",
     "viewAll": "View All Procedures"
   },
-  "informationCard": {
+"informationCard": {
     "badge": "Patient Guide",
-    "title": "What Every Woman Considering Cosmetic Surgery Should Know",
-    "content": "Before considering any cosmetic surgery, it is important that you are fully informed about the stages of the procedure, the recovery period, and realistic expectations. Our team accompanies you step by step and explains every detail with honesty and full transparency.",
-    "ctaText": "Book Your Free Consultation"
+    "title": "What every woman needs to know before cosmetic surgery",
+    "content": "Before considering any cosmetic procedure, it's important to understand every stage, the recovery period, and realistic expectations. Our team guides you step by step with complete honesty and transparency.",
+    "ctaText": "Book your free consultation"
+  },
+  "videos": {
+    "badge": "Videos",
+    "title": "See real results",
+    "titleHighlight": "firsthand",
+    "subtitle": "Short clips from our clinic: procedure steps and real patient journeys.",
+    "noVideos": "No videos yet",
+    "playLabel": "Play video",
+    "pauseLabel": "Pause",
+    "muteLabel": "Mute",
+    "unmuteLabel": "Unmute",
+    "expandLabel": "Open larger",
+    "closeLabel": "Close"
   },
   "beforeAfter": {
     "badge": "Before & After",
@@ -293,6 +306,10 @@
       "seoSaveError": "Could not save SEO settings.",
       "homepageSaved": "Homepage content saved successfully",
       "homepageSaveError": "Could not save content. Try again.",
+      "videoSaved": "Video saved successfully",
+      "videoSaveError": "Could not save video",
+      "videoDeleted": "Video deleted successfully",
+      "videoDeleteError": "Could not delete video",
       "heroSaved": "Hero content saved successfully",
       "aboutSaved": "'About the doctor' section saved successfully",
       "published": "Article published",
@@ -317,6 +334,8 @@
       "deleteFaq": "Delete this FAQ item permanently?",
       "deleteArticle": "Delete this article permanently?",
       "deleteImage": "Delete this image permanently?",
+      "deleteVideoTitle": "Delete video?",
+      "deleteVideoMsg": "Do you want to permanently delete this video? The file will be removed from storage and cannot be undone.",
       "deleteAnyway": "Delete anyway",
       "imageReferencedBy": "Cannot delete right now",
       "imageReferenceWarning": "This image is used in other content ({count} places). If you delete it, those pages will break. We recommend removing it from where it is used, or leaving it.",
@@ -655,6 +674,7 @@
       "hero": "Hero section",
       "about": "About the doctor",
       "informationCard": "Contact card",
+      "videosTitle": "Videos (Reels)",
       "proceduresHeader": "Procedures section title",
       "beforeAfterHeader": "Before & After section title",
       "testimonialsHeader": "Testimonials section title",
@@ -673,8 +693,41 @@
       "saveFooter": "Save footer",
       "saveSection": "Save section title",
       "saveVisibility": "Save visibility",
-      "defaultTranslationsHint": "Default translations are saved regardless of the display language.",
-      "relatedNote": "Clinically linked to the related settings content."
+"defaultTranslationsHint": "Default translations are saved regardless of the display language.",
+      "relatedNote": "Linked to the relevant site settings content."
+    },
+    "videos": {
+      "title": "Homepage videos",
+      "subtitle": "Vertical Reels clips (9:16 preferred, MP4 or WebM, up to 50MB). Uploaded straight to regular Convex storage.",
+      "add": "Add video",
+      "edit": "Edit",
+      "delete": "Delete",
+      "empty": "No videos yet — add the first one",
+      "untitled": "Untitled",
+      "preview": "Preview",
+      "closePreview": "Stop preview",
+      "videoFile": "Video file",
+      "videoFileHint": "MP4 or WebM — vertical 9:16, up to 50MB. Replacing a file deletes the old one automatically, no duplicates left behind.",
+      "fileRequired": "Please choose a video file first",
+      "uploading": "Uploading…",
+      "typeError": "Unsupported format — MP4, WebM or MOV only",
+      "sizeError": "File exceeds 50MB",
+      "uploadFailed": "Video upload failed",
+      "unsavedPreview": "Not saved yet — this is a preview before saving",
+      "titleArLabel": "Title (Arabic)",
+      "titleEnLabel": "Title (English)",
+      "descriptionArLabel": "Description (Arabic)",
+      "descriptionEnLabel": "Description (English)",
+      "posterLabel": "Poster image",
+      "posterHint": "Shown before playback starts — a vertical 9:16 frame matching the video is recommended",
+      "activeLabel": "Active",
+      "activeHint": "Turning it off hides the video entirely",
+      "showOnHomeLabel": "Show on homepage",
+      "showOnHomeHint": "When disabled it stays saved but is hidden from the homepage video section",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "replaceFile": "Replace video file"
     }
   }
 }

@@ -259,6 +259,16 @@ export const checkReferences = query({
       .first();
     if (seo?.value?.ogImage === sid) refs.push("Global SEO OG Image");
 
+    // Check video posters (homepage video section)
+    const videos = await ctx.db
+      .query("siteSettings")
+      .withIndex("by_key", (q) => q.eq("key", "videos"))
+      .first();
+    const videoRecords = Array.isArray(videos?.value) ? (videos.value as Array<{ poster?: string; titleAr?: string; titleEn?: string }>) : [];
+    for (const v of videoRecords) {
+      if (v.poster === sid) refs.push(`Video Poster: ${v.titleAr || v.titleEn || "Video"}`);
+    }
+
     return refs;
   },
 });

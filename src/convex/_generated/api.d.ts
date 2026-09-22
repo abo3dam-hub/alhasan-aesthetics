@@ -27,6 +27,7 @@ import type * as seed from "../seed.js";
 import type * as siteSettings from "../siteSettings.js";
 import type * as testimonials from "../testimonials.js";
 import type * as users from "../users.js";
+import type * as videos from "../videos.js";
 
 import type {
   ApiFromModules,
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   siteSettings: typeof siteSettings;
   testimonials: typeof testimonials;
   users: typeof users;
+  videos: typeof videos;
 }>;
 
 /**

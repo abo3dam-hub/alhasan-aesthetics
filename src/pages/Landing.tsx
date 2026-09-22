@@ -2,6 +2,7 @@ import GlassNavbar from "@/components/GlassNavbar";
 import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
 import InformationCard from "@/components/sections/InformationCard";
+import Videos from "@/components/sections/Videos";
 import Procedures from "@/components/sections/Procedures";
 import BeforeAfter from "@/components/sections/BeforeAfter";
 import Testimonials from "@/components/sections/Testimonials";
@@ -77,6 +78,7 @@ export default function Landing() {
             </ErrorBoundary>
           )}
         </div>
+        <div className="cvv">{isVisible("videos") && <Videos />}</div>
         <div className="cvv">{isVisible("procedures") && <Procedures />}</div>
         <div className="cvv">{isVisible("beforeAfter") && <BeforeAfter />}</div>
         <div className="cvv">{isVisible("testimonials") && <Testimonials />}</div>

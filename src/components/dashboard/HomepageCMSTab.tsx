@@ -12,6 +12,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2, Eye, EyeOff, ArrowUp, ArrowDown }
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MediaSelector } from "@/components/MediaSelector";
+import VideoSectionEditor from "./VideoEditor";
 
 interface TrustBadge {
   labelAr: string;
@@ -82,6 +83,7 @@ export default function HomepageCMSTab() {
     { key: "hero", label: admin.homepage.hero },
     { key: "about", label: admin.homepage.about },
     { key: "information-card", label: admin.homepage.informationCard },
+    { key: "videos", label: admin.homepage.videosTitle },
     { key: "procedures-header", label: admin.homepage.proceduresHeader },
     { key: "beforeAfter-header", label: admin.homepage.beforeAfterHeader },
     { key: "testimonials-header", label: admin.homepage.testimonialsHeader },
@@ -113,6 +115,12 @@ export default function HomepageCMSTab() {
                 <ErrorBoundary fallback={<div className="p-4 rounded-xl border border-border/60 text-sm text-muted-foreground">{admin.homepage.relatedNote}</div>}>
                   <InformationCardEditor />
                 </ErrorBoundary>
+              )}
+              {section.key === "videos" && (
+                <div className="space-y-4">
+                  <SectionHeaderEditor sectionKey="videoSection" label={admin.homepage.videosTitle} fallbackKeys={{ badge: "videos.badge", title: "videos.title", titleHighlight: "videos.titleHighlight", subtitle: "videos.subtitle" }} />
+                  <VideoSectionEditor />
+                </div>
               )}
               {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label={admin.nav.procedures} fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
               {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label={admin.nav.beforeAfter} fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
@@ -620,8 +628,8 @@ function FooterEditor() {
   );
 }
 
-// ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter) ───
-function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
+// ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter/Videos) ───
+export function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
   const admin = useAdminText();
   const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: sectionKey });
   const setSetting = useMutation(api.homepageSettings.set);
@@ -697,6 +705,7 @@ function VisibilityEditor() {
       hero: homepageCMS.hero !== false,
       about: homepageCMS.about !== false,
       informationCard: homepageCMS.informationCard !== false,
+      videos: homepageCMS.videos !== false,
       procedures: homepageCMS.procedures !== false,
       beforeAfter: homepageCMS.beforeAfter !== false,
       testimonials: homepageCMS.testimonials !== false,
@@ -722,6 +731,7 @@ function VisibilityEditor() {
     { key: "hero", label: admin.homepage.hero },
     { key: "about", label: admin.homepage.about },
     { key: "informationCard", label: admin.homepage.informationCard },
+    { key: "videos", label: admin.homepage.videosTitle },
     { key: "procedures", label: admin.nav.procedures },
     { key: "beforeAfter", label: admin.nav.beforeAfter },
     { key: "testimonials", label: admin.nav.testimonials },
