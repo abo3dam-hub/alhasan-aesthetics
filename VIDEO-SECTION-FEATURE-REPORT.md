@@ -163,3 +163,11 @@ No schema migration is required. A typical `npx convex dev`/`deploy` will also r
 - **Poster remains optional by design** (brief allows it); without one the card shows a stylish dark placeholder with a play affordance — the auto-poster button is a convenience, not a hard requirement.
 - Auto-poster generation captures a frame server-side URL or object URL, so it needs the video to be loaded/cached by the browser; very large or unusual files may fail gracefully (button stays functional; poster can be picked manually instead).
 - `MOV` is accepted client-side but shouldn't be relied on for playback on iOS; `MP4 (H.264)` remains the recommended upload format.
+## Addendum — ReelCard interaction fixes (2026-09-23)
+
+Two defects in `src/components/sections/Videos.tsx` (`ReelCard`) were found and fixed during an external code review; behavior now matches the spec documented above:
+
+1. **Double toggle on click** — the `<video>` element and its parent container both declared `onClick={togglePlay}`, so a click on the video fired the toggle twice and click-to-pause did nothing. Removed the handler from `<video>` (the container covers it). QA checklist item 2 ("tapping the clip toggles playback") now actually holds.
+2. **Mute icon desync** — the autoplay effect wrote `el.muted` directly without updating React state, so the mute button could show the wrong icon after scrolling. State is now synced inside the `play()` promise callbacks, and the mute toggle applies one computed value to both state and DOM.
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.

@@ -222,6 +222,7 @@ A self-contained analytics feature — no third-party script (no GA4/Vercel Anal
 - **Aggregates (`analytics.getStats`, 30-day window):** total visits, today, last 7 days, unique sessions, top pages, country breakdown, a 14-day daily series, plus conversion totals (WhatsApp clicks, CTA clicks) and the top tracked actions.
 - **Dashboard widget:** four visit stat cards, conversion cards, a 14-day bar chart, countries list (flags + bars), top pages, and top actions.
 - **Maintenance:** `analytics.purgePath` (internal mutation) removes recorded visits and events for a given path (e.g. smoke-test data).
+- **Security (2026-09-23):** the write path (`insertVisit`, `insertEvent`, `saveIpCache`, `getIpCache`) is internal-only — callable solely from the `/trackVisit` HTTP action, never directly by clients. `analytics.getStats` requires admin authentication.
 
 | HTTP endpoint | Method | Purpose |
 |---------------|--------|---------|

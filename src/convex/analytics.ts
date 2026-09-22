@@ -1,5 +1,6 @@
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireAdmin } from "./admin";
 
 /** Non-crypto stable key derived from an IP address. The raw IP is never
  *  persisted — we only keep this hash to reuse/refresh the country cache. */
@@ -11,7 +12,7 @@ export function hashIp(ip: string): string {
   return Math.abs(h).toString(36);
 }
 
-export const insertVisit = mutation({
+export const insertVisit = internalMutation({
   args: {
     path: v.string(),
     locale: v.optional(v.string()),
@@ -29,7 +30,7 @@ export const insertVisit = mutation({
   },
 });
 
-export const insertEvent = mutation({
+export const insertEvent = internalMutation({
   args: {
     type: v.string(),
     label: v.string(),
@@ -51,7 +52,7 @@ export const insertEvent = mutation({
   },
 });
 
-export const saveIpCache = mutation({
+export const saveIpCache = internalMutation({
   args: { ipHash: v.string(), country: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -71,7 +72,7 @@ export const saveIpCache = mutation({
   },
 });
 
-export const getIpCache = query({
+export const getIpCache = internalQuery({
   args: { ipHash: v.string() },
   handler: async (ctx, args) => {
     const entry = await ctx.db
@@ -107,6 +108,7 @@ export const purgePath = internalMutation({
 export const getStats = query({
   args: { days: v.optional(v.number()) },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
     const range = args.days ?? 30;
     const now = Date.now();
     const dayInMs = 24 * 60 * 60 * 1000;

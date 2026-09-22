@@ -16,11 +16,12 @@ import { NEW_PROCEDURES, DEFAULT_INFORMATION_CARD } from "./migration";
  */
 async function guardSeedAccess(ctx: MutationCtx) {
   const userId = await getAuthUserId(ctx);
-  if (userId) {
-    const user = await ctx.db.get(userId);
-    if (!user || user.role !== "admin") {
-      throw new Error("Unauthorized: admin access required");
-    }
+  if (!userId) {
+    throw new Error("Unauthorized: admin access required");
+  }
+  const user = await ctx.db.get(userId);
+  if (!user || user.role !== "admin") {
+    throw new Error("Unauthorized: admin access required");
   }
 }
 

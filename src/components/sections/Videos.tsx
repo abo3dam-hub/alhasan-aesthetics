@@ -150,15 +150,22 @@ function ReelCard({ video }: { video: ReelVideo }) {
     if (!el) return;
 
     if (inView && !playing) {
+      // `muted` state is synced with the element inside the promise callbacks
+      // below — React's `muted` prop doesn't reliably update the underlying
+      // media property, so the DOM write must happen before play() for the
+      // browser's autoplay policy check.
       el.muted = false;
-      void el.play().catch(() => {
-        // Browser blocked unmuted autoplay — fall back to muted playback.
-        el.muted = true;
-        setMuted(true);
-        void el.play().catch(() => {
-          // Autoplay fully blocked — wait for user gesture
+      void el
+        .play()
+        .then(() => setMuted(false))
+        .catch(() => {
+          // Browser blocked unmuted autoplay — fall back to muted playback.
+          el.muted = true;
+          setMuted(true);
+          void el.play().catch(() => {
+            // Autoplay fully blocked — wait for user gesture
+          });
         });
-      });
     } else if (!inView && playing) {
       el.pause();
     }
@@ -190,7 +197,6 @@ function ReelCard({ video }: { video: ReelVideo }) {
               playsInline
               loop
               muted={muted}
-              onClick={togglePlay}
               onPlay={() => setPlaying(true)}
               onPause={() => setPlaying(false)}
               onError={() => setPlaying(false)}
@@ -241,8 +247,9 @@ function ReelCard({ video }: { video: ReelVideo }) {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setMuted((m) => !m);
-                  if (videoRef.current) videoRef.current.muted = !muted;
+                  const next = !muted;
+                  setMuted(next);
+                  if (videoRef.current) videoRef.current.muted = next;
                 }}
                 aria-label={muted ? t.videos.unmuteLabel : t.videos.muteLabel}
                 title={muted ? t.videos.unmuteLabel : t.videos.muteLabel}

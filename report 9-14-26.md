@@ -499,3 +499,13 @@
 - إعادة إنشاء ملفين بعد حذف عرضي أثناء الفحص: `src/convex/loginRateLimit.ts` و`src/lib/jsonLd.ts` (نفس المحتوى).
 - حُذفت أخطاء كثيرة كانت تظهر سابقًا بسبب حالة node_modules غير المتطابقة أثناء الفحص؛ في الحالة المتّسقة نهائيًا لا أخطاء.
 - `git status` (غير committed): تعديلات الكود/الوثائق أعلاه + ملفات جديدة (`loginRateLimit.ts`, `jsonLd.ts`, `vitest.config.ts`, `src/lib/__tests__/*`, `.github/workflows/ci.yml`) + حذف (`ui/calendar.tsx`, `ui/resizable.tsx`, `convex/notifications.ts`).
+
+### ٦.١٠ إصلاحات مراجعة خارجية — تقوية التحليلات + إصلاحات Reels (2026-09-23)
+
+مراجعة كود خارجية (كل الفحوص خضراء: `tsc -b`، `eslint`، `vitest` 12/12، `vite build`) اكتشفت وأصلحت:
+
+- **تقوية التحليلات** (`src/convex/analytics.ts`، `src/convex/http.ts`): حُوّلت `insertVisit` و`insertEvent` و`saveIpCache` و`getIpCache` من دوال عامة إلى داخلية (`internal`) — لا تُستدعى إلا من الـ HTTP action الخاص بـ `/trackVisit`؛ وأُضيف `requireAdmin` إلى `getStats`. سابقًا كان بإمكان أي شخص يملك رابط Convex حقن زيارات وهمية أو تسميم كاش الدول.
+- **حارس الـ seed** (`src/convex/seed.ts`): كان `guardSeedAccess` يمرّر غير المصدّقين بصمت؛ الآن يرمي خطأً، فالـ seed يتطلب جلسة أدمن.
+- **إصلاحات Reels** (`src/components/sections/Videos.tsx`): أُزيل معالج نقر مكرر كان يمنع الإيقاف المؤقت بالنقر؛ وزُامنت حالة الكتم مع عنصر الوسائط.
+
+مؤجّل (يتطلب تغييرًا معماريًا): تقييد محاولات الدخول (`loginRateLimit.ts`) مطبّق حاليًا في واجهة صفحة Auth فقط ويمكن تجاوزه عبر الـ API مباشرة؛ التنفيذ الصحيح يكون من جهة الخادم داخل مزوّد Password في `@convex-dev/auth`.

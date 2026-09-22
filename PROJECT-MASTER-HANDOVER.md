@@ -1887,3 +1887,13 @@ September 12, 2026
 ### Repository State
 
 Branch: main (assumed — git commands unavailable)
+
+## Addendum — Security & interaction fixes (2026-09-23)
+
+External code review (all checks green: `tsc -b`, `eslint`, `vitest` 12/12, `vite build`) found and fixed:
+
+- **Analytics hardening** (`src/convex/analytics.ts`, `src/convex/http.ts`): `insertVisit`, `insertEvent`, `saveIpCache`, `getIpCache` changed from public to internal — they are only invoked from the `/trackVisit` HTTP action, so direct client invocation is no longer possible. `getStats` now enforces `requireAdmin`. Previously anyone with the Convex deployment URL could inject fake page views/events or poison the IP→country cache.
+- **Seed guard** (`src/convex/seed.ts`): `guardSeedAccess` previously returned silently for unauthenticated callers; it now throws, so seeding requires an admin session.
+- **ReelCard fixes** (`src/components/sections/Videos.tsx`): removed a duplicate click handler that broke click-to-pause; synced mute button state with the media element.
+
+Deferred (needs an auth-architecture change): login rate limiting (`src/convex/loginRateLimit.ts`) is currently enforced cooperatively by the Auth page UI and is bypassable via direct API calls; proper enforcement belongs server-side in the `@convex-dev/auth` Password provider flow.

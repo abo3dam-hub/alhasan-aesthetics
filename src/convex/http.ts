@@ -298,21 +298,21 @@ http.route({
     if (ip) {
       const ipHash = hashIp(ip);
       const cached = await ctx
-        .runQuery(api.analytics.getIpCache, { ipHash })
+        .runQuery(internal.analytics.getIpCache, { ipHash })
         .catch(() => null);
       if (cached) {
         country = cached;
       } else {
         country = await geocodeCountry(ip);
         await ctx
-          .runMutation(api.analytics.saveIpCache, { ipHash, country: country ?? undefined })
+          .runMutation(internal.analytics.saveIpCache, { ipHash, country: country ?? undefined })
           .catch(() => {});
       }
     }
 
     if (eventType && eventLabel) {
       await ctx
-        .runMutation(api.analytics.insertEvent, {
+        .runMutation(internal.analytics.insertEvent, {
           type: eventType,
           label: eventLabel,
           path,
@@ -323,7 +323,7 @@ http.route({
         .catch(() => {});
     } else {
       await ctx
-        .runMutation(api.analytics.insertVisit, {
+        .runMutation(internal.analytics.insertVisit, {
           path,
           locale: locale ?? undefined,
           country: country ?? undefined,
