@@ -9,6 +9,7 @@ import { ConvexReactClient } from "convex/react";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { LazyMotion, domMax } from "framer-motion";
 import "./index.css";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -195,7 +196,10 @@ function DynamicFavicon() {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RootErrorBoundary>
+    {/* LazyMotion loads framer-motion's animation engine asynchronously so it
+        stays out of the initial bundle; `m` components behave like `motion`. */}
+    <LazyMotion features={domMax} strict>
+      <RootErrorBoundary>
       <ToolbarErrorBoundary>
         <Suspense fallback={null}>
           <VlyToolbar />
@@ -218,5 +222,6 @@ createRoot(document.getElementById("root")!).render(
         <Toaster />
       </ConvexAuthProvider>
     </RootErrorBoundary>
+    </LazyMotion>
   </StrictMode>,
 );

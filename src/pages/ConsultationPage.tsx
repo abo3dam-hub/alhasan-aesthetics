@@ -2,7 +2,7 @@ import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
 import { Link } from "react-router";
 import { trackEvent } from "@/lib/track";
 import {

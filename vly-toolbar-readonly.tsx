@@ -1,7 +1,7 @@
 // DO NOT MODIFY THIS FILE. THIS FILE IS READ-ONLY. CONTAINS ALL KEY APP FUNCTIONALITY.
 
 import React, { useState, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m as motion, AnimatePresence } from "framer-motion";
 import { MousePointer, ExternalLink, AlertTriangle } from "lucide-react";
 
 import { snapdom } from "@zumer/snapdom";

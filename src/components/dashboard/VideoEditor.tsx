@@ -300,7 +300,7 @@ export default function VideoSectionEditor() {
                     />
                     <div className="relative h-16 w-11 shrink-0 rounded-lg overflow-hidden bg-[#1E1E1E] flex items-center justify-center">
                       {video.posterUrl ? (
-                        <img src={video.posterUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                        <img src={video.posterUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
                       ) : (
                         <Film className="h-5 w-5 text-secondary/50" />
                       )}

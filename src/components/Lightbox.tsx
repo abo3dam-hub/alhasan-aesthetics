@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m as motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { ResolvedImage } from "@/components/ResolvedImage";
 

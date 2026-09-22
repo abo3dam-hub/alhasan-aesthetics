@@ -41,6 +41,7 @@ export function LogoDropdown() {
               alt="Dr. Al Hasan Al Saiem"
               width={32}
               height={32}
+              fetchPriority="high"
               className="rounded-full object-cover border border-primary/30"
               decoding="async"
             />

@@ -2,7 +2,7 @@ import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m as motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";

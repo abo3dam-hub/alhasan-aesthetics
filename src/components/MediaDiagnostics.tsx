@@ -93,6 +93,8 @@ export function MediaDiagnostics() {
                 <img
                   src={item.resolvedUrl || item.url}
                   alt={item.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-12 h-12 object-cover rounded-lg shrink-0"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = "none";

@@ -1,7 +1,7 @@
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m as motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Globe, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";

@@ -1,7 +1,7 @@
 import { useI18n } from "@/i18n";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Award, Heart, Users, Clock } from "lucide-react";
 import doctorImg from "/assets/1.jpg";

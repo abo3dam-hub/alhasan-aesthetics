@@ -122,6 +122,8 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 alt="Dr. Al Hasan Al Saiem"
                 width={64}
                 height={64}
+                fetchPriority="high"
+                decoding="async"
                 className="rounded-full mb-4 mt-4 cursor-pointer border-2 border-primary/30"
                 onClick={() => navigate("/")}
               />
