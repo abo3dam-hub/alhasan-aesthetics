@@ -125,9 +125,14 @@ A new built-in section appears in **Dashboard → Homepage content** (no new nav
 ```
 npx tsc -b         ✔ clean
 eslint .           ✔ clean
-vite build         ✔ built in ~6s
+vite build         ✔ built in ~8s
 vitest run         ✔ 3 files, 12/12 tests passed
 ```
+
+> **Fix note (2026-09-22):** the first `06bab65` build failed on Vercel with
+> `TS2339: Property 'showOnHome' does not exist on type …` in `VideoEditor.tsx`
+> (the stats bar referenced `admin.videos.showOnHome`, which is not an i18n key —
+> the correct key is `admin.videos.onHome`). Fixed and re-pushed.
 
 ## Deployment note (important)
 

@@ -229,7 +229,7 @@ export default function VideoSectionEditor() {
         </div>
         <div className="rounded-xl border border-border/60 bg-card p-3 text-center">
           <p className="text-2xl font-bold text-primary">{homeCount}</p>
-          <p className="text-xs text-muted-foreground">{admin.videos.showOnHome}</p>
+          <p className="text-xs text-muted-foreground">{admin.videos.onHome}</p>
         </div>
       </div>
 
