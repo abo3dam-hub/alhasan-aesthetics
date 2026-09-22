@@ -727,7 +727,24 @@
       "save": "حفظ",
       "saving": "جارٍ الحفظ…",
       "cancel": "إلغاء",
-      "replaceFile": "استبدال ملف الفيديو"
+      "replaceFile": "استبدال ملف الفيديو",
+      "total": "إجمالي",
+      "active": "مفعّل",
+      "inactive": "غير مفعّل",
+      "onHome": "ظاهر",
+      "offHome": "مختفي",
+      "moveUp": "تحريك لأعلى",
+      "moveDown": "تحريك لأسفل",
+      "select": "تحديد",
+      "selectAll": "تحديد الكل",
+      "clearSelection": "مسح التحديد",
+      "deleteSelected": "حذف المحدد ({count})",
+      "bulkDeleteTitle": "حذف الفيديوهات المحددة",
+      "bulkDeleteMsg": "سيتم حذف الفيديوهات المحددة وملفاتها نهائيًا. هل أنت متأكد؟",
+      "autoPoster": "توليد الغلاف من الفيديو",
+      "generatingPoster": "جارٍ توليد الغلاف…",
+      "posterReady": "تم توليد الغلاف من أول إطار تلقائيًا",
+      "posterFailed": "تعذّر توليد الغلاف من الفيديو"
     }
   }
 }

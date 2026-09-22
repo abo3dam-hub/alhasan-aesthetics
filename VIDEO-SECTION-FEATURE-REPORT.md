@@ -58,6 +58,8 @@ All admin operations call `requireAdmin(ctx)`; the public query filters `isActiv
 | `saveVideo` | mutation (admin) | Upsert a full record by its string `id`. |
 | `replaceVideoFile` | mutation (admin) | Swap a video's stored file; deletes the **old storage object** if no other record references it. |
 | `deleteVideo` | mutation (admin) | Remove the record and `ctx.storage.delete` its file. |
+| `moveVideo` | mutation (admin) | Reorder a clip one position up/down (swaps positions in the `videos` array). |
+| `deleteVideos` | mutation (admin) | Bulk-remove several records and `ctx.storage.delete` their files (used by the list's bulk action). |
 
 Reading/writing uses `db.query("siteSettings").withIndex("by_key", …)` with the same pattern as `homepageSettings.ts`; on first write the `videos` row is inserted, afterwards patched. `resolveStorageUrl` wraps `getUrl` in try/catch so a missing/un-granted file resolves to `""` instead of crashing the query.
 
@@ -69,7 +71,7 @@ Rendered by `Landing.tsx` exactly between `InformationCard` and `Procedures`, wr
 - **Reels-style cards** — vertical `aspect-[9/16]` glass cards (`glass-card card-glow glow-champagne`), centered grid 1 / sm:2 / lg:3 with `dir` and locale-correct titles/captions.
 - **Click the clip to play** — toggles playback in place, **no route change**. A keyboard-accessible play/pause (Enter/Space) is also wired up.
 - **Separate, always-visible expand button** — opens a full-screen overlay (`ReelsExpand`) with a close button, backdrop click to close, Escape to close, body scroll-lock, and a native-controls `<video>` (volume / seek / fullscreen — mobile appropriate).
-- **No autoplay with sound** — cards never autoplay; the very first frame is the poster (`poster=` attribute) with a centered play affordance; explicit user gestures are the only thing that starts audio.
+- **Muted autoplay on scroll, never with sound** — once ≥50% of a card enters the viewport (`useInView`, `threshold: 0.5`) the muted loop starts automatically and pauses when scrolled out of view; audio only ever starts from an explicit user gesture (play button). Posters render first so cards are still visual before playback begins.
 - **Performance / lazy** — `preload="none"` (clip fetches only on play), poster-first rendering, short clips looped (`loop` + `playsInline` for iOS), fade-in via the existing `useInView` + framer-motion pattern.
 - **Custom mini controls** — play/pause, mute/unmute, expand in a bottom glass gradient bar, using logical RTL-safe icon flipping (`rtl:-scale-x-100`).
 
@@ -83,13 +85,17 @@ A new built-in section appears in **Dashboard → Homepage content** (no new nav
 - **List** of records: 9:16 poster thumbnail (icon fallback), local language title, file name + size, and quick actions per row:
   - **Active toggle** (eye icon) — hard enable/disable.
   - **Show on homepage toggle** (home icon) — filters the public section only.
+  - **Move up / down** — reorders clips (order = homepage display order).
+  - **Row checkbox** — for the bulk toolbar (select all / clear, N-selected count, grouped delete with its own confirm dialog).
   - **Preview** — inline `<video>` (native controls) on/off.
   - **Edit / Delete**.
+- **Bulk toolbar** (visible when more than one clip exists): select-all checkbox, live `selected/total` counter, and a disabled-until-selection «حذف المحدد (N)» button backed by `deleteVideos`.
 - **Add / Edit form** (`VideoForm`):
   - Title & description in Arabic and English.
   - **Video file field** — `MP4 / WebM / MOV`, `≤ 50MB`, with a concise 9:16 practical hint. In **new** mode the file is required; in **edit** mode picking a new file becomes a **replace** (old storage object is deleted server-side).
   - **Preview before save** — a local `<video>` plays the selected unsaved file via a blob URL (clearly labeled «لم يُحفظ بعد»), or the saved file when editing.
   - **Poster selector** — existing `MediaSelector` (image storageId from the media library); recommended 9:16 matching frame.
+  - **Generate poster from video** — one-click button that captures a representative frame (≈0.5s in) from the selected/new or saved video via a hidden `<video>` + `<canvas>`, uploads it through the signed `media.generateUploadUrl` path (`useImageUpload`), and fills the poster field automatically.
   - **Active / Show-on-home** checkboxes with helper text.
   - Save runs upload (signed URL) → `replaceVideoFile` (if replacing) → `saveVideo`, with Arabic success/error toasts.
 - **Delete** uses the shared `ConfirmDialog` («حذف الفيديو؟») and removes the record + storage file.
@@ -100,10 +106,10 @@ A new built-in section appears in **Dashboard → Homepage content** (no new nav
 | --- | --- |
 | `src/convex/_generated/api.d.ts` | Manually registered the new `videos` module in `fullApi` (`api.js` is `anyApi`, so no runtime change needed). |
 | `src/convex/media.ts` | `checkReferences` now also scans video records and reports posters in use (avoids breaking a poster when deleting images from the library). |
-| `src/hooks/use-upload.ts` | New `useVideoUpload` — same signed-upload flow as `useImageUpload`, 50MB cap, MP4/WebM/MOV validation, returns `{ storageId, name, type, size }`; never calls `recordUpload` (videos are not library images). |
+| `src/hooks/use-upload.ts` | New `useVideoUpload` — same signed-upload flow as `useImageUpload`, 50MB cap, MP4/WebM/MOV validation, returns `{ storageId, name, type, size }`; never calls `recordUpload` (videos are not library images). `captureVideoFrame` helper lives in `VideoEditor.tsx`. |
 | `src/pages/Landing.tsx` | Imported `Videos` and inserted `<div className="cvv">{isVisible("videos") && <Videos />}</div>` between InformationCard and Procedures. |
 | `src/components/dashboard/HomepageCMSTab.tsx` | Added `videos` section entry + editor wiring; exported `SectionHeaderEditor` for reuse; added `videos` toggle to the Visibility editor (`homepageCMS.videos` defaults to visible). |
-| `src/locales/ar.json`, `en.json` | New top-level `videos` block (badge/title/titleHighlight/subtitle/noVideos/play/pause/mute/unmute/expand/close); `admin.homepage.videosTitle`; full `admin.videos` block; `admin.toast.videoSaved/videoSaveError/videoDeleted/videoDeleteError`; `admin.confirm.deleteVideoTitle/deleteVideoMsg`. Arabic is authoritative per repo convention. |
+| `src/locales/ar.json`, `en.json` | New top-level `videos` block (badge/title/titleHighlight/subtitle/noVideos/play/pause/mute/unmute/expand/close); `admin.homepage.videosTitle`; full `admin.videos` block; `admin.toast.videoSaved/videoSaveError/videoDeleted/videoDeleteError`; `admin.confirm.deleteVideoTitle/deleteVideoMsg`. Admin list additions: `total/active/inactive/onHome/offHome` stats, `moveUp/moveDown`, `select/selectAll/clearSelection`, `deleteSelected`/`bulkDeleteTitle/deleteVideoMsg`, `autoPoster/generatingPoster/posterReady/posterFailed`. Arabic is authoritative per repo convention. |
 
 ## Constraints honored
 
@@ -138,16 +144,17 @@ No schema migration is required. A typical `npx convex dev`/`deploy` will also r
 ### Manual QA checklist (after deploy)
 
 1. Dashboard → Homepage content → «فيديوهات (Reels)» → add a video (MP4), poster optional → Save.
-2. Homepage (AR & EN, mobile + desktop): section shows between InformationCard and Procedures; poster shows first; tapping the clip plays in place (no navigation); expand button opens the large viewer with volume/seek/close; no autoplay-with-sound anywhere.
+2. Homepage (AR & EN, mobile + desktop): section shows between InformationCard and Procedures; poster shows first; cards **muted-autoplay once 50% visible** and pause when scrolled away; tapping the clip toggles playback in place (no navigation); expand button opens the large viewer with volume/seek/close; no autoplay-with-sound anywhere.
 3. Replace the file on an existing video → old storage object removed (verify no duplicate in Convex dashboard; storage usage drops).
 4. Toggle «ظاهر في الصفحة الرئيسية» and «مفعّل» → reflects immediately on the homepage.
-5. Delete a video → confirm dialog (Arabic) → record + file gone.
-6. Try deleting a poster image in the Media library → reference warning mentions the video poster.
-7. Try a >50MB or non-video file → localized error, no upload.
+5. In the admin list: **move arrow** reorders a clip (change persists to the homepage order); select a few rows → bulk toolbar shows `N/total` → confirm bullets dialog → records + files gone together.
+6. Auto-poster: open the edit form of a saved video (or pick a new file) → «توليد الغلاف من الفيديو» → poster field auto-fills from a captured frame.
+7. Try deleting a poster image in the Media library → reference warning mentions the video poster.
+8. Try a >50MB or non-video file → localized error, no upload.
 
 ## Deferred / known limitations
 
 - **Storage cleanup is best-effort**: `storage.delete` failures (e.g. file already gone, or a "still referenced" guard triggered by another record) are swallowed so the UI never breaks; a manual storage sweep may occasionally be needed.
-- **Poster is optional by design** (brief allows it); without one the card shows a stylish dark placeholder with a play affordance.
-- No auto-poster generation from the first frame — out of scope, deferred.
+- **Poster remains optional by design** (brief allows it); without one the card shows a stylish dark placeholder with a play affordance — the auto-poster button is a convenience, not a hard requirement.
+- Auto-poster generation captures a frame server-side URL or object URL, so it needs the video to be loaded/cached by the browser; very large or unusual files may fail gracefully (button stays functional; poster can be picked manually instead).
 - `MOV` is accepted client-side but shouldn't be relied on for playback on iOS; `MP4 (H.264)` remains the recommended upload format.

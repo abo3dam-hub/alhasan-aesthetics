@@ -121,11 +121,12 @@ function ReelCard({ video }: { video: ReelVideo }) {
   const isArabic = locale === "ar";
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [expanded, setExpanded] = useState(false);
+  const [cardRef, inView] = useInView({ threshold: 0.5, triggerOnce: false });
 
   const title = isArabic ? video.titleAr || video.titleEn || t.videos.title : video.titleEn || video.titleAr || t.videos.title;
-  const description = video.descriptionAr || video.descriptionEn || "";
+  const description = isArabic ? video.descriptionAr || video.descriptionEn || "" : video.descriptionEn || video.descriptionAr || "";
 
   const togglePlay = useCallback(() => {
     const el = videoRef.current;
@@ -141,8 +142,23 @@ function ReelCard({ video }: { video: ReelVideo }) {
     void videoRef.current?.play();
   }, []);
 
+  // Auto-play when scrolled into view, pause when scrolled past
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+
+    if (inView && !playing) {
+      el.muted = true;
+      void el.play().catch(() => {
+        // Autoplay blocked — wait for user gesture
+      });
+    } else if (!inView && playing) {
+      el.pause();
+    }
+  }, [inView, playing]);
+
   return (
-    <figure className="glass-card rounded-[2rem] overflow-hidden glow-champagne card-glow">
+    <figure ref={cardRef} className="glass-card rounded-[2rem] overflow-hidden glow-champagne card-glow">
       <div className="p-2">
         {/* Player (9:16) — click to play in place, no route change */}
         <div

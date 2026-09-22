@@ -727,7 +727,24 @@
       "save": "Save",
       "saving": "Saving…",
       "cancel": "Cancel",
-      "replaceFile": "Replace video file"
+      "replaceFile": "Replace video file",
+      "total": "Total",
+      "active": "Active",
+      "inactive": "Inactive",
+      "onHome": "On",
+      "offHome": "Off",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "select": "Select",
+      "selectAll": "Select all",
+      "clearSelection": "Clear selection",
+      "deleteSelected": "Delete selected ({count})",
+      "bulkDeleteTitle": "Delete selected videos",
+      "bulkDeleteMsg": "The selected videos and their files will be permanently deleted. Are you sure?",
+      "autoPoster": "Generate poster from video",
+      "generatingPoster": "Generating poster…",
+      "posterReady": "Poster generated from the first frame automatically",
+      "posterFailed": "Could not generate a poster from the video"
     }
   }
 }

@@ -59,7 +59,8 @@ async function resolveStorageUrl(storage: QueryCtx["storage"], ref: string | und
   if (!ref) return "";
   try {
     return (await storage.getUrl(ref as Id<"_storage">)) ?? "";
-  } catch {
+  } catch (err) {
+    console.error("[videos] Failed to resolve storage URL for:", ref, err);
     return "";
   }
 }
@@ -146,6 +147,7 @@ export const replaceVideoFile = mutation({
       fileName: args.fileName ?? records[idx].fileName,
       size: args.size ?? records[idx].size,
       mimeType: args.mimeType ?? records[idx].mimeType,
+      uploadedAt: Date.now(),
     };
     await writeVideos(ctx.db, settingId, records);
     if (oldStorageId && oldStorageId !== args.storageId) {
@@ -177,5 +179,49 @@ export const deleteVideo = mutation({
         // File may already be gone from storage
       }
     }
+  },
+});
+
+/** Move a video one position up or down in the list order. */
+export const moveVideo = mutation({
+  args: { id: v.string(), direction: v.union(v.literal("up"), v.literal("down")) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const { settingId, records } = await readVideos(ctx.db);
+    const idx = records.findIndex((rec) => rec.id === args.id);
+    if (idx < 0) {
+      throw new Error("Video not found");
+    }
+    const target = args.direction === "up" ? idx - 1 : idx + 1;
+    if (target < 0 || target >= records.length) {
+      return;
+    }
+    [records[idx], records[target]] = [records[target], records[idx]];
+    await writeVideos(ctx.db, settingId, records);
+  },
+});
+
+/** Bulk-delete videos (records + their storage files). */
+export const deleteVideos = mutation({
+  args: { ids: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const { settingId, records } = await readVideos(ctx.db);
+    const ids = new Set(args.ids);
+    const targets = records.filter((rec) => ids.has(rec.id));
+    const next = records.filter((rec) => !ids.has(rec.id));
+    await writeVideos(ctx.db, settingId, next);
+    await Promise.all(
+      targets
+        .map((rec) => rec.storageId)
+        .filter(Boolean)
+        .map(async (storageId) => {
+          try {
+            await ctx.storage.delete(storageId as Id<"_storage">);
+          } catch {
+            // File may already be gone from storage
+          }
+        }),
+    );
   },
 });
