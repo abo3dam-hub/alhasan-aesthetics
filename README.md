@@ -304,6 +304,15 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - Champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, subtle film-grain overlay, and a centered animated scroll hint
 - Custom `::selection` and scrollbar theming; reduced-motion CSS support
 
+## Performance
+
+No third-party performance scripts; all optimizations are build-time or declarative:
+
+- **Fonts (self-hosted, 2026-09-23):** only the weights actually used are served as local woff2 (`public/fonts/`): Inter/Cairo 400–700, Playfair Display/El Messiri 600–700 — no italics, no Google Fonts requests. The two critical above-the-fold faces (`inter-400-latin`, `playfair-display-700-latin`) are `<link rel="preload">`d with `font-display: swap`.
+- **Animations:** framer-motion runs through `<LazyMotion features={domMax} strict>` — the animation engine loads as a separate async chunk instead of in the initial bundle. Components import `{ m as motion }`; API is unchanged.
+- **Images:** route-level code splitting (`React.lazy` for all pages) + manual vendor chunks; below-fold sections mount on intersection with `content-visibility: auto` (`.cvv`); videos use `preload="none"` with poster images; below-fold thumbnails use `loading="lazy"` + `decoding="async"`; above-fold logos use `fetchpriority="high"`.
+- **Build:** `esbuild` minify, `esnext` target, no sourcemaps in production.
+
 ## SEO & Structured Data
 
 - Global SEO (title, description, OG image) via admin

@@ -1897,3 +1897,13 @@ External code review (all checks green: `tsc -b`, `eslint`, `vitest` 12/12, `vit
 - **ReelCard fixes** (`src/components/sections/Videos.tsx`): removed a duplicate click handler that broke click-to-pause; synced mute button state with the media element.
 
 Deferred (needs an auth-architecture change): login rate limiting (`src/convex/loginRateLimit.ts`) is currently enforced cooperatively by the Auth page UI and is bypassable via direct API calls; proper enforcement belongs server-side in the `@convex-dev/auth` Password provider flow.
+
+## Addendum — Performance pass (2026-09-23)
+
+Load-time optimizations only — no design, behavior, or architecture changes:
+
+- **Fonts self-hosted** (`index.html`, `public/fonts/`): removed the Google Fonts stylesheet. Only the weights actually used are served as local woff2 files — Inter/Cairo 400–700, Playfair Display/El Messiri 600–700 (no italics); `inter-400-latin` and `playfair-display-700-latin` are preloaded. No third-party font requests remain.
+- **framer-motion → LazyMotion** (`src/main.tsx` + 19 files): components now import `{ m as motion }` and the app root is wrapped in `<LazyMotion features={domMax} strict>`; the animation engine ships as a separate async chunk loaded via dynamic `import()` instead of in the initial bundle. All animations are API-identical.
+- **Image loading hints:** `fetchpriority="high"` on the above-fold logos (`LogoDropdown.tsx`, `Auth.tsx`); `loading="lazy"` + `decoding="async"` on below-fold thumbnails (`MediaDiagnostics.tsx`, dashboard `VideoEditor.tsx` poster).
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.

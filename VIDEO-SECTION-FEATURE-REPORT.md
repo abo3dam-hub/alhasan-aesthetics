@@ -171,3 +171,13 @@ Two defects in `src/components/sections/Videos.tsx` (`ReelCard`) were found and 
 2. **Mute icon desync** — the autoplay effect wrote `el.muted` directly without updating React state, so the mute button could show the wrong icon after scrolling. State is now synced inside the `play()` promise callbacks, and the mute toggle applies one computed value to both state and DOM.
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
+
+## Addendum — Performance pass (2026-09-23)
+
+No behavior or design changes; load-time only:
+
+- **Fonts self-hosted:** Google Fonts stylesheet removed from `index.html`. Only used weights are served as local woff2 (`public/fonts/`): Inter/Cairo 400–700, Playfair Display/El Messiri 600–700; the two critical faces are preloaded. Eliminates the third-party font CSS round-trip on first paint.
+- **LazyMotion:** all `framer-motion` imports switched to `{ m as motion }` with `<LazyMotion features={domMax} strict>` at the root — the animation engine is now a separate async chunk (verified via dynamic `import()` in the built entry) instead of part of the initial bundle. ReelCard animations are API-identical.
+- **Video posters:** dashboard poster thumbnails (`VideoEditor.tsx`) now use `loading="lazy"` + `decoding="async"`.
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
