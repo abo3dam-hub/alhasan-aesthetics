@@ -1,6 +1,6 @@
 # Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery Website
 
-Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, a media library, and a branded on-demand Open Graph share-image generator for the blog.
+Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, a homepage **Reels video section** (vertical clips managed from the admin CMS), a media library, and a branded on-demand Open Graph share-image generator for the blog.
 
 Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-anaconda-422.convex.site`). Web: **`https://www.dralhasanalsaiem.com`** (custom domain wired to Vercel; auto-deployed from the `main` branch).
 
@@ -23,8 +23,9 @@ Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-
 src/
 ├── components/
 │   ├── sections/       # Homepage sections (Hero, About, Procedures, BeforeAfter,
-│   │                   #   Testimonials, FAQ, CTA, Contact, InformationCard)
-│   ├── dashboard/      # Admin CMS tab components (HomepageCMSTab, SEOTab, ArticlesTab)
+│   │                   #   Testimonials, FAQ, CTA, Contact, InformationCard, Videos)
+│   ├── dashboard/      # Admin CMS tab components (HomepageCMSTab, SEOTab, ArticlesTab,
+│   │                   #   VideoEditor)
 │   ├── ui/             # shadcn/ui components
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu + language toggle
@@ -53,6 +54,8 @@ src/
 │   ├── og_image.tsx          # OG share-card renderer (node action: satori → resvg PNG)
 │   ├── beforeAfter.ts        # Before & After CRUD (protected)
 │   ├── testimonials.ts       # Testimonials CRUD (protected, with photos)
+│   ├── videos.ts             # Homepage video section CRUD (protected); stores clips + posters
+│   │                         #   in Convex storage, records as a `videos` key in siteSettings
 │   ├── faq.ts                # FAQ CRUD (protected)
 │   ├── homepageSettings.ts   # Homepage CMS settings (hero, about, CTA, footer, sections)
 │   ├── siteSettings.ts       # Key/value settings store (doctor, SEO)
@@ -127,7 +130,16 @@ Every homepage section header and content is CMS-managed:
 | **FAQ Header** | Badge, title, title highlight, subtitle |
 | **CTA** | Badge, title, description, button text, destination, enable/disable |
 | **Footer** | Description (AR/EN) |
+| **Videos (Reels)** | Badge, title, highlight, subtitle + full video list management (see below) |
 | **Visibility** | Show/hide each homepage section |
+
+### Homepage Videos (Reels)
+
+Vertical 9:16 clips shown between «معلومات مهمة» (InformationCard) and «إجراءاتنا» (Procedures), fully managed from Dashboard → **Homepage content**:
+
+- **Add / Edit** — AR/EN titles + descriptions, video file (MP4/WebM/MOV, ≤ 50MB, direct Convex storage upload), optional poster (from the media library) with a **"generate poster from video"** one-click capture, active / show-on-homepage toggles, replace-file (old storage object auto-deleted), and an unsaved-file preview.
+- **List actions** — statistics bar (total / active / shown on homepage), pagination (20/page), **move up/down reordering**, row checkboxes with a **bulk toolbar** (select all, `N/total` counter, grouped delete with its own confirm dialog), active & show-on-homepage quick toggles, inline preview, edit, delete.
+- **Public behavior** — cards render poster-first; once ≥50% of a card enters the viewport it **muted-autoplays** and pauses when scrolled away; sound only starts from an explicit user gesture; an expand button opens a full-screen viewer with native controls.
 
 ### Blog (Articles)
 
@@ -240,6 +252,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | **Before & After** | beforeAfter.listActive + section header CMS | placeholder |
 | **Testimonials** | testimonials.listActive (photos + lightbox) + section header CMS | placeholder |
 | **FAQ** | faq.listActive + section header CMS | translations |
+| **Videos** | videos.getVideos (active + showOnHome) + section header CMS | translations (empty state) |
 | **Contact** | siteSettings.doctor (phone, email, address) | — |
 | **CTA** | siteSettings.cta | translations |
 | **Footer** | siteSettings.footer + doctor settings + procedures | translations |
@@ -263,7 +276,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | `testimonials` | Patient testimonials (CRUD, `images[]` photo gallery + avatar) |
 | `faq` | FAQ entries (CRUD) |
 | `media` | Media library records (storageId, url, name, type, size, alt) |
-| `siteSettings` | Key/value settings store (doctor, hero, about, CTA, footer, visibility, SEO, section headers) |
+| `siteSettings` | Key/value settings store (doctor, hero, about, CTA, footer, visibility, SEO, section headers, videoSection, **videos**) |
 | `pageVisits` | Analytics page views (path, locale, country, sessionId, ts) — no raw IP |
 | `ipCountryCache` | 24h IP-hash → country cache for analytics geolocation |
 | `analyticsEvents` | Conversion events (type, label, path, locale, country, sessionId, ts) |
@@ -337,7 +350,7 @@ npm run dev
 # Type check + production build
 npm run build
 
-# Lint (0 errors baseline; 26 benign warnings)
+# Lint (0 errors, 0 warnings)
 npm run lint
 
 # Convex dev (with codegen)
