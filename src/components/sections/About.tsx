@@ -45,6 +45,10 @@ export default function About() {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const doctorSettings = useQuery(api.siteSettings.getDoctorSettings);
   const aboutCMS = useQuery(api.homepageSettings.getAboutSettings);
+  // While the CMS query is still loading (undefined), show a neutral shimmer
+  // instead of the bundled default photo — otherwise the default flashes for
+  // a split second and then gets swapped for the CMS image.
+  const aboutLoading = aboutCMS === undefined;
 
   // CMS → per-language fallback (each language checked independently)
   const description = isArabic
@@ -92,7 +96,11 @@ export default function About() {
               <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-primary/20 via-secondary/15 to-primary/10 blur-sm" />
               <div className="relative glass-elevated rounded-[2rem] overflow-hidden glow-champagne">
                 <div className="aspect-[3/4] overflow-hidden">
-                  {aboutCMS?.image ? (
+                  {aboutLoading ? (
+                    <div className="relative w-full h-full overflow-hidden bg-muted/20">
+                      <div className="shimmer absolute inset-0" />
+                    </div>
+                  ) : aboutCMS?.image ? (
                     <ResolvedImage
                       storageId={aboutCMS.image}
                       alt={isArabic ? doctorNameAr : doctorName}
