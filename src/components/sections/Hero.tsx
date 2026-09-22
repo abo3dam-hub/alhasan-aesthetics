@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Sparkles, Star, Award } from "lucide-react";
 import { Link } from "react-router";
 import { useRef } from "react";
 import { trackEvent } from "@/lib/track";
+import { cn } from "@/lib/utils";
 
 const container = {
   hidden: { opacity: 0 },
@@ -26,6 +27,45 @@ interface TrustBadgeInfo {
   labelEn?: string;
   icon?: string;
   enabled?: boolean;
+}
+
+/** Luxury masked word-by-word reveal. Each word rises from behind an
+ *  overflow mask with a soft expo ease; the pb/-mb compensation keeps
+ *  Arabic descenders from clipping at rest. */
+function RevealWords({
+  text,
+  delay = 0,
+  wordClassName,
+}: {
+  text: string;
+  delay?: number;
+  wordClassName?: string;
+}) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return (
+    <span className="flex flex-wrap gap-x-[0.26em]" aria-label={text}>
+      {words.map((w, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          className="inline-block overflow-hidden pb-[0.12em] -mb-[0.12em]"
+        >
+          <motion.span
+            className={cn("inline-block will-change-transform", wordClassName)}
+            initial={{ y: "115%" }}
+            animate={{ y: "0%" }}
+            transition={{
+              duration: 0.75,
+              ease: [0.22, 1, 0.36, 1],
+              delay: delay + i * 0.06,
+            }}
+          >
+            {w}
+          </motion.span>
+        </span>
+      ))}
+    </span>
+  );
 }
 
 export default function Hero() {
@@ -76,6 +116,8 @@ export default function Hero() {
   const orb3Y = useTransform(scrollYProgress, [0, 1], [0, 50]);
   const glass1Y = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const glass2Y = useTransform(scrollYProgress, [0, 1], [0, 30]);
+  // Gentle drift of the whole text block as the hero scrolls away
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 70]);
 
   return (
     <section
@@ -109,6 +151,7 @@ export default function Hero() {
           variants={container}
           initial="hidden"
           animate="show"
+          style={{ y: contentY }}
           className="max-w-3xl"
           dir={dir}
         >
@@ -122,11 +165,22 @@ export default function Hero() {
             </motion.div>
           )}
 
-          {/* Heading */}
-          <motion.h1 variants={item} className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-            <span className="block text-foreground">{heroTitle}</span>
-            <span className="block mt-1 sm:mt-2 bg-gradient-to-l from-primary via-secondary to-primary bg-clip-text text-transparent font-serif-luxury">
-              {heroHighlight}
+          {/* Heading — masked word-by-word reveal */}
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight"
+          >
+            <span className="block text-foreground">
+              <RevealWords text={heroTitle} delay={0.35} />
+            </span>
+            <span className="block mt-1 sm:mt-2 font-serif-luxury">
+              <RevealWords
+                text={heroHighlight}
+                delay={0.75}
+                wordClassName="bg-gradient-to-l from-primary via-secondary to-primary bg-clip-text text-transparent"
+              />
             </span>
           </motion.h1>
 

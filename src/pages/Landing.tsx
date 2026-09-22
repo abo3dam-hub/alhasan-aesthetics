@@ -9,6 +9,7 @@ import Testimonials from "@/components/sections/Testimonials";
 import FAQ from "@/components/sections/FAQ";
 import Contact from "@/components/sections/Contact";
 import CTA from "@/components/sections/CTA";
+import InstagramSection from "@/components/sections/Instagram";
 import Footer from "@/components/Footer";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { api } from "@/convex/_generated/api";
@@ -85,6 +86,7 @@ export default function Landing() {
         <div className="cvv">{isVisible("faq") && <FAQ />}</div>
         <div className="cvv">{isVisible("cta") && <CTA />}</div>
         <div className="cvv">{isVisible("contact") && <Contact />}</div>
+        {isVisible("instagram") && <InstagramSection />}
       </main>
       <Footer />
 

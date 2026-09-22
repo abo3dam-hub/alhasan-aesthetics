@@ -90,6 +90,7 @@ export default function HomepageCMSTab() {
     { key: "faq-header", label: admin.homepage.faqHeader },
     { key: "cta", label: admin.homepage.cta },
     { key: "footer", label: admin.homepage.footer },
+    { key: "instagram", label: admin.homepage.instagram },
     { key: "visibility", label: admin.homepage.visibility },
   ];
 
@@ -128,6 +129,7 @@ export default function HomepageCMSTab() {
               {section.key === "faq-header" && <SectionHeaderEditor sectionKey="faqSection" label={admin.nav.faq} fallbackKeys={{ badge: "faq.badge", title: "faq.title", titleHighlight: "faq.titleHighlight", subtitle: "faq.subtitle" }} />}
               {section.key === "cta" && <CTAEditor />}
               {section.key === "footer" && <FooterEditor />}
+              {section.key === "instagram" && <InstagramEditor />}
               {section.key === "visibility" && <VisibilityEditor />}
             </div>
           )}
@@ -628,6 +630,107 @@ function FooterEditor() {
   );
 }
 
+// ─── Instagram Editor ───
+interface InstagramForm {
+  enabled: boolean;
+  profileUrl: string;
+  images: string[];
+}
+
+function InstagramEditor() {
+  const admin = useAdminText();
+  const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: "instagramSection" });
+  const setSetting = useMutation(api.homepageSettings.set);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<InstagramForm | null>(null);
+  const [initialized, setInitialized] = useState(false);
+
+  if (sectionCMS && !initialized) {
+    setForm({
+      enabled: sectionCMS.enabled !== false,
+      profileUrl: sectionCMS.profileUrl || "",
+      images: Array.isArray(sectionCMS.images) ? sectionCMS.images.slice(0, 6) : [],
+    });
+    setInitialized(true);
+  }
+
+  const update = <K extends keyof InstagramForm>(key: K, value: InstagramForm[K]) =>
+    setForm((p) => (p ? { ...p, [key]: value } : p));
+
+  const setImage = (i: number, v: string) => {
+    if (!form) return;
+    const images = [...form.images];
+    images[i] = v;
+    update("images", images.filter(Boolean));
+  };
+
+  const handleSave = async () => {
+    if (!form) return;
+    setSaving(true);
+    try {
+      await setSetting({ key: "instagramSection", value: form });
+      toast.success(admin.toast.homepageSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
+    setSaving(false);
+  };
+
+  if (!form) {
+    return (
+      <Card className="border-border/60">
+        <CardContent className="p-6"><div className="shimmer h-24 rounded-xl" /></CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.instagram}</CardTitle></CardHeader>
+      <CardContent className="space-y-6">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.enabled}
+            onChange={(e) => update("enabled", e.target.checked)}
+            className="rounded"
+          />
+          {admin.homepage.sectionEnabled}
+        </label>
+
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">رابط إنستغرام (اختياري — يُستخدم رابط الطبيب تلقائيًا إن تُرك فارغًا)</Label>
+          <Input
+            dir="ltr"
+            value={form.profileUrl}
+            onChange={(e) => update("profileUrl", e.target.value)}
+            placeholder="https://instagram.com/..."
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">الصور (حتى 6 — تظهر في الرئيسية قبل التذييل)</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <MediaSelector
+                key={i}
+                value={form.images[i] || ""}
+                onChange={(v) => setImage(i, v)}
+                label={`صورة ${i + 1}`}
+                hint="مربعة 1:1"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-end" role="status" aria-live="polite">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">
+            {saving ? admin.common.saving : admin.homepage.saveInstagram}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter/Videos) ───
 export function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
   const admin = useAdminText();
@@ -712,6 +815,7 @@ function VisibilityEditor() {
       faq: homepageCMS.faq !== false,
       cta: homepageCMS.cta !== false,
       contact: homepageCMS.contact !== false,
+      instagram: homepageCMS.instagram !== false,
     });
     setInitialized(true);
   }
@@ -738,6 +842,7 @@ function VisibilityEditor() {
     { key: "faq", label: admin.nav.faq },
     { key: "cta", label: admin.homepage.cta },
     { key: "contact", label: admin.nav.overview },
+    { key: "instagram", label: admin.homepage.instagram },
   ];
 
   return (

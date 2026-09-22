@@ -60,7 +60,7 @@
     "learnMore": "Learn More",
     "viewAll": "View All Procedures"
   },
-"informationCard": {
+  "informationCard": {
     "badge": "Patient Guide",
     "title": "What every woman needs to know before cosmetic surgery",
     "content": "Before considering any cosmetic procedure, it's important to understand every stage, the recovery period, and realistic expectations. Our team guides you step by step with complete honesty and transparency.",
@@ -85,6 +85,13 @@
     "titleHighlight": "Speak for Themselves",
     "subtitle": "We are proud to showcase real results from our patients. Each case is a unique success story.",
     "viewAll": "View All Results"
+  },
+  "instagram": {
+    "badge": "Instagram",
+    "title": "Follow Our",
+    "titleHighlight": "Journey",
+    "subtitle": "Daily results, behind-the-scenes moments and patient stories — straight from our clinic.",
+    "follow": "Follow on Instagram"
   },
   "testimonials": {
     "badge": "Patient Stories",
@@ -681,6 +688,8 @@
       "faqHeader": "FAQ section title",
       "cta": "Booking button (Call to Action)",
       "footer": "Footer",
+      "instagram": "Instagram section",
+      "saveInstagram": "Save Instagram section",
       "visibility": "Section visibility",
       "visibilityTitle": "Sections shown on the homepage",
       "infoCardNote": "Appears on the right side of the homepage: a reference card linked to the site settings.",
@@ -693,7 +702,7 @@
       "saveFooter": "Save footer",
       "saveSection": "Save section title",
       "saveVisibility": "Save visibility",
-"defaultTranslationsHint": "Default translations are saved regardless of the display language.",
+      "defaultTranslationsHint": "Default translations are saved regardless of the display language.",
       "relatedNote": "Linked to the relevant site settings content."
     },
     "videos": {
