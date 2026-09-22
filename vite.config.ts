@@ -53,7 +53,9 @@ export default defineConfig({
             '@radix-ui/react-tooltip',
           ],
           // Heavy optional libraries - separate chunks for better lazy loading
-          'framer-motion': ['framer-motion'],
+          // NOTE: framer-motion is intentionally NOT listed here. Its animation
+          // engine (domMax) is loaded via a dynamic import() in src/main.tsx so
+          // the chunk stays out of the initial bundle (no modulepreload).
           'charts': ['recharts'],
           'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
         },

@@ -9,10 +9,14 @@ import { ConvexReactClient } from "convex/react";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
-import { LazyMotion, domMax } from "framer-motion";
+import { LazyMotion } from "framer-motion";
 import "./index.css";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
+
+// Load the animation engine as a separate async chunk AFTER first paint —
+// it stays out of the initial bundle entirely (no <link rel=modulepreload>).
+const loadFeatures = () => import("framer-motion").then((mod) => mod.domMax);
 
 // Lazy load route components for better code splitting
 const Landing = lazy(() => import("./pages/Landing.tsx"));
@@ -198,7 +202,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     {/* LazyMotion loads framer-motion's animation engine asynchronously so it
         stays out of the initial bundle; `m` components behave like `motion`. */}
-    <LazyMotion features={domMax} strict>
+    <LazyMotion features={loadFeatures} strict>
       <RootErrorBoundary>
       <ToolbarErrorBoundary>
         <Suspense fallback={null}>
