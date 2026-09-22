@@ -1903,7 +1903,7 @@ Deferred (needs an auth-architecture change): login rate limiting (`src/convex/l
 Load-time optimizations only — no design, behavior, or architecture changes:
 
 - **Fonts self-hosted** (`index.html`, `public/fonts/`): removed the Google Fonts stylesheet. Only the weights actually used are served as local woff2 files — Inter/Cairo 400–700, Playfair Display/El Messiri 600–700 (no italics); `inter-400-latin` and `playfair-display-700-latin` are preloaded. No third-party font requests remain.
-- **framer-motion → LazyMotion** (`src/main.tsx` + 19 files): components now import `{ m as motion }` and the app root is wrapped in `<LazyMotion features={domMax} strict>`; the animation engine ships as a separate async chunk loaded via dynamic `import()` instead of in the initial bundle. All animations are API-identical.
+- **framer-motion → LazyMotion** (`src/main.tsx` + 19 files): components now import `{ m as motion }` and the app root is wrapped in `<LazyMotion features={loadFeatures} strict>` where `loadFeatures = () => import("framer-motion").then(m => m.domMax)` — the 132 kB animation engine is a genuinely separate async chunk: it is fetched via dynamic `import()` after mount and is **not** in the initial `<link rel="modulepreload">` set (verified in built `dist/index.html`). Follow-up fix `804cca6`: the first attempt kept a static `domMax` import plus a `manualChunks` entry, which left the chunk preloaded and deferred nothing; both were corrected.
 - **Image loading hints:** `fetchpriority="high"` on the above-fold logos (`LogoDropdown.tsx`, `Auth.tsx`); `loading="lazy"` + `decoding="async"` on below-fold thumbnails (`MediaDiagnostics.tsx`, dashboard `VideoEditor.tsx` poster).
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
