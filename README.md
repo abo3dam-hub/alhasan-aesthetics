@@ -139,7 +139,7 @@ Vertical 9:16 clips shown between «معلومات مهمة» (InformationCard) 
 
 - **Add / Edit** — AR/EN titles + descriptions, video file (MP4/WebM/MOV, ≤ 50MB, direct Convex storage upload), optional poster (from the media library) with a **"generate poster from video"** one-click capture, active / show-on-homepage toggles, replace-file (old storage object auto-deleted), and an unsaved-file preview.
 - **List actions** — statistics bar (total / active / shown on homepage), pagination (20/page), **move up/down reordering**, row checkboxes with a **bulk toolbar** (select all, `N/total` counter, grouped delete with its own confirm dialog), active & show-on-homepage quick toggles, inline preview, edit, delete.
-- **Public behavior** — cards render poster-first; once ≥50% of a card enters the viewport it **muted-autoplays** and pauses when scrolled away; sound only starts from an explicit user gesture; an expand button opens a full-screen viewer with native controls.
+- **Public behavior** — cards render poster-first; once ≥50% of a card enters the viewport it **autoplay with sound** (muted fallback only if the browser blocks unmuted autoplay) and pauses when scrolled away; an expand button opens a full-screen viewer with native controls.
 
 ### Blog (Articles)
 

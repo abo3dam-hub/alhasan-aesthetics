@@ -71,7 +71,7 @@ Rendered by `Landing.tsx` exactly between `InformationCard` and `Procedures`, wr
 - **Reels-style cards** — vertical `aspect-[9/16]` glass cards (`glass-card card-glow glow-champagne`), centered grid 1 / sm:2 / lg:3 with `dir` and locale-correct titles/captions.
 - **Click the clip to play** — toggles playback in place, **no route change**. A keyboard-accessible play/pause (Enter/Space) is also wired up.
 - **Separate, always-visible expand button** — opens a full-screen overlay (`ReelsExpand`) with a close button, backdrop click to close, Escape to close, body scroll-lock, and a native-controls `<video>` (volume / seek / fullscreen — mobile appropriate).
-- **Muted autoplay on scroll, never with sound** — once ≥50% of a card enters the viewport (`useInView`, `threshold: 0.5`) the muted loop starts automatically and pauses when scrolled out of view; audio only ever starts from an explicit user gesture (play button). Posters render first so cards are still visual before playback begins.
+- **Autoplay with sound on scroll** — once ≥50% of a card enters the viewport (`useInView`, `threshold: 0.5`) the clip starts automatically **with sound** and pauses when scrolled out of view. If the browser's autoplay policy blocks unmuted playback before a user gesture, it falls back to a muted start (the mute control stays toggled); audio only ever starts from an explicit user gesture (play/mute button). Posters render first so cards are still visual before playback begins.
 - **Performance / lazy** — `preload="none"` (clip fetches only on play), poster-first rendering, short clips looped (`loop` + `playsInline` for iOS), fade-in via the existing `useInView` + framer-motion pattern.
 - **Custom mini controls** — play/pause, mute/unmute, expand in a bottom glass gradient bar, using logical RTL-safe icon flipping (`rtl:-scale-x-100`).
 
@@ -149,7 +149,7 @@ No schema migration is required. A typical `npx convex dev`/`deploy` will also r
 ### Manual QA checklist (after deploy)
 
 1. Dashboard → Homepage content → «فيديوهات (Reels)» → add a video (MP4), poster optional → Save.
-2. Homepage (AR & EN, mobile + desktop): section shows between InformationCard and Procedures; poster shows first; cards **muted-autoplay once 50% visible** and pause when scrolled away; tapping the clip toggles playback in place (no navigation); expand button opens the large viewer with volume/seek/close; no autoplay-with-sound anywhere.
+2. Homepage (AR & EN, mobile + desktop): section shows between InformationCard and Procedures; poster shows first; cards **autoplay with sound once 50% visible** (muted fallback only if the browser blocks unmuted autoplay) and pause when scrolled away; tapping the clip toggles playback in place (no navigation); expand button opens the large viewer with volume/seek/close.
 3. Replace the file on an existing video → old storage object removed (verify no duplicate in Convex dashboard; storage usage drops).
 4. Toggle «ظاهر في الصفحة الرئيسية» and «مفعّل» → reflects immediately on the homepage.
 5. In the admin list: **move arrow** reorders a clip (change persists to the homepage order); select a few rows → bulk toolbar shows `N/total` → confirm bullets dialog → records + files gone together.

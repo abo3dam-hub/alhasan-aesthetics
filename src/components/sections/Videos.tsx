@@ -121,7 +121,7 @@ function ReelCard({ video }: { video: ReelVideo }) {
   const isArabic = locale === "ar";
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [cardRef, inView] = useInView({ threshold: 0.5, triggerOnce: false });
 
@@ -142,15 +142,22 @@ function ReelCard({ video }: { video: ReelVideo }) {
     void videoRef.current?.play();
   }, []);
 
-  // Auto-play when scrolled into view, pause when scrolled past
+  // Auto-play (with sound) when scrolled into view, pause when scrolled past.
+  // Some browsers block unmuted autoplay until a user gesture — fall back to
+  // muted playback in that case, then the sound control stays user-toggleable.
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
 
     if (inView && !playing) {
-      el.muted = true;
+      el.muted = false;
       void el.play().catch(() => {
-        // Autoplay blocked — wait for user gesture
+        // Browser blocked unmuted autoplay — fall back to muted playback.
+        el.muted = true;
+        setMuted(true);
+        void el.play().catch(() => {
+          // Autoplay fully blocked — wait for user gesture
+        });
       });
     } else if (!inView && playing) {
       el.pause();
