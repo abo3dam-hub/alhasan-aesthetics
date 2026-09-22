@@ -645,11 +645,12 @@ function InstagramEditor() {
   const [form, setForm] = useState<InstagramForm | null>(null);
   const [initialized, setInitialized] = useState(false);
 
-  if (sectionCMS && !initialized) {
+  if (sectionCMS !== undefined && !initialized) {
+    const s = sectionCMS ?? {};
     setForm({
-      enabled: sectionCMS.enabled !== false,
-      profileUrl: sectionCMS.profileUrl || "",
-      images: Array.isArray(sectionCMS.images) ? sectionCMS.images.slice(0, 6) : [],
+      enabled: s.enabled !== false,
+      profileUrl: s.profileUrl || "",
+      images: Array.isArray(s.images) ? s.images.slice(0, 6) : [],
     });
     setInitialized(true);
   }

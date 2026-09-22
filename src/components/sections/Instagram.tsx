@@ -33,7 +33,9 @@ export default function InstagramSection() {
     doctorSettings?.socialMedia?.instagram?.trim() ||
     "https://instagram.com";
 
-  if (sectionCMS && (sectionCMS.enabled === false || images.length === 0)) {
+  // While the query is still loading: show a shimmer. Once it resolves,
+  // hide the whole section when unconfigured (null), disabled, or image-less.
+  if (sectionCMS !== undefined && (!sectionCMS || sectionCMS.enabled === false || images.length === 0)) {
     return null;
   }
 
