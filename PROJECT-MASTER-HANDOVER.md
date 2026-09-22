@@ -719,7 +719,7 @@ Two JWT providers:
 - **Purpose:** Main homepage with all sections
 - **Data:** Reads `homepageSettings.getHomepageSettings` (visibility), `homepageSettings.getSEOSettings`, `siteSettings.getDoctorSettings`
 - **Sections rendered (conditionally based on CMS visibility):**
-  - Hero, About, Procedures, BeforeAfter, Testimonials, FAQ, CTA, Contact
+  - Hero, About, InformationCard, Videos, Procedures, BeforeAfter, Testimonials, FAQ, CTA, Contact, Instagram
 - **SEO:** Dynamic `document.title`, meta description, OG image, Twitter cards, MedicalOrganization JSON-LD
 - **Skip navigation:** `<a href="#home" className="sr-only ...">Skip to main content</a>`
 
@@ -1905,5 +1905,16 @@ Load-time optimizations only — no design, behavior, or architecture changes:
 - **Fonts self-hosted** (`index.html`, `public/fonts/`): removed the Google Fonts stylesheet. Only the weights actually used are served as local woff2 files — Inter/Cairo 400–700, Playfair Display/El Messiri 600–700 (no italics); `inter-400-latin` and `playfair-display-700-latin` are preloaded. No third-party font requests remain.
 - **framer-motion → LazyMotion** (`src/main.tsx` + 19 files): components now import `{ m as motion }` and the app root is wrapped in `<LazyMotion features={loadFeatures} strict>` where `loadFeatures = () => import("framer-motion").then(m => m.domMax)` — the 132 kB animation engine is a genuinely separate async chunk: it is fetched via dynamic `import()` after mount and is **not** in the initial `<link rel="modulepreload">` set (verified in built `dist/index.html`). Follow-up fix `804cca6`: the first attempt kept a static `domMax` import plus a `manualChunks` entry, which left the chunk preloaded and deferred nothing; both were corrected.
 - **Image loading hints:** `fetchpriority="high"` on the above-fold logos (`LogoDropdown.tsx`, `Auth.tsx`); `loading="lazy"` + `decoding="async"` on below-fold thumbnails (`MediaDiagnostics.tsx`, dashboard `VideoEditor.tsx` poster).
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
+
+## Addendum — Aesthetic improvements (2026-09-23)
+
+Visual/UX upgrades only — no architecture or behavior changes:
+
+- **Hero title reveal** (`src/components/sections/Hero.tsx`): the headline now animates word-by-word with a masked rise (expo ease, staggered 60 ms/word); per-word masks carry `pb`/`-mb` compensation so Arabic descenders never clip. The whole text block also drifts gently (`useScroll`/`useTransform`, 70 px) as the hero scrolls away. Existing orb/glass parallax untouched.
+- **Before/After fullscreen** (`src/components/sections/BeforeAfter.tsx`): the drag-compare slider was extracted into a reusable `CompareSlider` (pointer + touch + keyboard, RTL-aware, `onInteract` callback). Each card now has a hover expand button opening a fullscreen overlay with a large draggable comparison, Escape-to-close and body scroll-lock. The "drag to compare" hint still hides after first interaction.
+- **Instagram gallery section** (`src/components/sections/Instagram.tsx`, key `instagramSection`): a 6-image grid before the footer with hover zoom + Instagram overlay icon, linking to the clinic profile (per-section URL override or the doctor's social-settings URL as fallback). CMS-managed from Dashboard → Homepage CMS → Instagram (6 `MediaSelector` slots, enable toggle, visibility toggle); renders a shimmer while loading and nothing when unconfigured.
+- **About image flash fix** (`src/components/sections/About.tsx`): while `getAboutSettings` was still loading, the bundled default doctor photo rendered and then visibly swapped for the CMS image. The section now shows a neutral shimmer during loading; the default photo only renders after load when no CMS image is set.
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.

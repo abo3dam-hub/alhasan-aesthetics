@@ -131,7 +131,8 @@ Every homepage section header and content is CMS-managed:
 | **CTA** | Badge, title, description, button text, destination, enable/disable |
 | **Footer** | Description (AR/EN) |
 | **Videos (Reels)** | Badge, title, highlight, subtitle + full video list management (see below) |
-| **Visibility** | Show/hide each homepage section |
+| **Instagram** | Enable toggle, profile URL override (falls back to doctor's social settings), up to 6 gallery images |
+| **Visibility** | Show/hide each homepage section (incl. Instagram) |
 
 ### Homepage Videos (Reels)
 
@@ -299,7 +300,9 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - Glassmorphism design system with RTL/LTR support
 - Floating action stack (WhatsApp, socials, back-to-top) on public pages
 - Mobile hamburger menu with slide-in animation
-- Interactive before/after slider on the gallery page; **homepage before/after cards are drag-to-compare sliders** (mouse + touch, keyboard accessible) with an animated center handle
+- Interactive before/after slider on the gallery page; **homepage before/after cards are drag-to-compare sliders** (mouse + touch, keyboard accessible) with an animated center handle, قبل/بعد labels, and a hover **expand button opening a fullscreen draggable comparison** (Escape closes, scroll locked)
+- **Hero headline animates word-by-word** with a masked rise (staggered, descender-safe for Arabic) plus a gentle parallax drift of the text block on scroll
+- **Instagram gallery section** before the footer — 6 CMS-curated images with hover zoom + Instagram overlay, linking to the clinic profile (Dashboard → Homepage CMS → Instagram)
 - Testimonial photo thumbnails + full-screen lightbox
 - Champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, subtle film-grain overlay, and a centered animated scroll hint
 - Custom `::selection` and scrollbar theming; reduced-motion CSS support
@@ -309,7 +312,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 No third-party performance scripts; all optimizations are build-time or declarative:
 
 - **Fonts (self-hosted, 2026-09-23):** only the weights actually used are served as local woff2 (`public/fonts/`): Inter/Cairo 400–700, Playfair Display/El Messiri 600–700 — no italics, no Google Fonts requests. The two critical above-the-fold faces (`inter-400-latin`, `playfair-display-700-latin`) are `<link rel="preload">`d with `font-display: swap`.
-- **Animations:** framer-motion runs through `<LazyMotion features={domMax} strict>` — the animation engine loads as a separate async chunk instead of in the initial bundle. Components import `{ m as motion }`; API is unchanged.
+- **Animations:** framer-motion runs through `<LazyMotion features={loadFeatures} strict>` where `loadFeatures` is a dynamic `import()` — the animation engine loads as a separate async chunk instead of in the initial bundle (no `modulepreload` for it). Components import `{ m as motion }`; API is unchanged.
 - **Images:** route-level code splitting (`React.lazy` for all pages) + manual vendor chunks; below-fold sections mount on intersection with `content-visibility: auto` (`.cvv`); videos use `preload="none"` with poster images; below-fold thumbnails use `loading="lazy"` + `decoding="async"`; above-fold logos use `fetchpriority="high"`.
 - **Build:** `esbuild` minify, `esnext` target, no sourcemaps in production.
 
