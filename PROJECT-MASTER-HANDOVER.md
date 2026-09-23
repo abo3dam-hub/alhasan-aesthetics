@@ -1928,7 +1928,7 @@ Local-search upgrades only — no design, behavior, or architecture changes. Key
 - **MedicalClinic JSON-LD** (`src/pages/Landing.tsx`): the single `MedicalBusiness` node is replaced by a `@graph` of `MedicalClinic` nodes built from the CMS clinics (name, PostalAddress with city→country mapping, phone). Every node — and the legacy fallback when no clinics are configured — carries `areaServed`: Tartus, Beirut (as cities) plus Iraq, Syria, Lebanon, UAE (as countries). Fake addresses are never emitted.
 - **hreflang** (`src/pages/Landing.tsx` SEO effect): `ar` → `/ar`, `en` → `/en`, `x-default` → `/` link tags are injected/updated in `<head>`.
 - **/ar + /en locale forcing** (`src/main.tsx` `RouteSyncer`): visiting `/ar` forces the Arabic locale and `/en` the English one, so the served language always matches what hreflang promises (previously the locale came only from localStorage).
-- **FAQ for served markets** (pending, needs admin): three bilingual FAQ entries prepared for the dashboard FAQ editor — "Do you welcome patients from Tartus / Lebanon / Iraq?" — pointing to the Damascus/Latakia/Dubai clinics with WhatsApp booking. The FAQPage JSON-LD picks them up automatically once added.
+- **FAQ for served markets** (added 2026-09-23 via the authenticated dashboard): three bilingual FAQ entries are now live — "Do you welcome patients from Tartus / Lebanon / Iraq?" — pointing to the Damascus/Latakia/Dubai clinics with WhatsApp booking. The FAQPage JSON-LD picks them up automatically (9 FAQ entries total now).
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
 
