@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
-import { I18nProvider } from "@/i18n";
+import { I18nProvider, useI18n } from "@/i18n";
 import { FloatingSocial } from "@/components/FloatingSocial";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
@@ -116,6 +116,7 @@ const convex = new ConvexReactClient(
 function RouteSyncer() {
   const location = useLocation();
   const pathname = location.pathname;
+  const { locale, setLocale } = useI18n();
   useEffect(() => {
     window.parent.postMessage(
       { type: "iframe-route-change", path: pathname },
@@ -123,6 +124,13 @@ function RouteSyncer() {
     );
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  // /ar and /en are the hreflang alternates — force the matching locale so the
+  // served language always matches what the hreflang tags promise.
+  useEffect(() => {
+    if ((pathname === "/ar" || pathname.startsWith("/ar/")) && locale !== "ar") setLocale("ar");
+    else if ((pathname === "/en" || pathname.startsWith("/en/")) && locale !== "en") setLocale("en");
+  }, [pathname, locale, setLocale]);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {

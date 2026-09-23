@@ -18,6 +18,91 @@ import { useEffect } from "react";
 import { useI18n } from "@/i18n";
 import { safeJsonLd } from "@/lib/jsonLd";
 
+/**
+ * Areas served WITHOUT a physical clinic — the honest, Google-approved way to
+ * appear in searches from Tartus, Beirut and Iraq. Never emit these as
+ * addresses; only the real clinics (dashboard → Settings → Clinic Locations)
+ * get physical addresses in the structured data.
+ */
+const AREA_SERVED = [
+  { "@type": "City", name: "Tartus", containedInPlace: { "@type": "Country", name: "Syria" } },
+  { "@type": "City", name: "Beirut", containedInPlace: { "@type": "Country", name: "Lebanon" } },
+  { "@type": "Country", name: "Iraq" },
+  { "@type": "Country", name: "Syria" },
+  { "@type": "Country", name: "Lebanon" },
+  { "@type": "Country", name: "United Arab Emirates" },
+];
+
+const CITY_COUNTRY: Record<string, string> = {
+  Damascus: "Syria",
+  Latakia: "Syria",
+  Dubai: "United Arab Emirates",
+};
+
+/** Minimal shape of the `doctor` site-settings value (stored as v.any()). */
+interface DoctorSettingsLike {
+  doctorNameEn?: string;
+  phone?: string;
+  email?: string;
+  addressEn?: string;
+  clinics?: Array<{
+    nameAr?: string;
+    nameEn?: string;
+    city?: string;
+    addressAr?: string;
+    addressEn?: string;
+    phone?: string;
+  }>;
+}
+
+/** MedicalClinic JSON-LD for the real clinics, falling back to the legacy single MedicalBusiness node. */
+function buildClinicJsonLd(doctorSettings: DoctorSettingsLike | null | undefined, seoDescription: string | undefined, origin: string | undefined) {
+  const clinics = Array.isArray(doctorSettings?.clinics)
+    ? doctorSettings.clinics.filter((c) => c && (c.nameEn || c.nameAr || c.city))
+    : [];
+  const specialty = ["PlasticSurgery"];
+  if (clinics.length > 0) {
+    return {
+      "@context": "https://schema.org",
+      "@graph": clinics.map((c) => {
+        const node: Record<string, unknown> = {
+          "@type": "MedicalClinic",
+          name: c.nameEn || c.nameAr || doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem",
+          areaServed: AREA_SERVED,
+          medicalSpecialty: specialty,
+          url: origin,
+        };
+        if (c.addressEn || c.city) {
+          node.address = {
+            "@type": "PostalAddress",
+            ...(c.addressEn ? { streetAddress: c.addressEn } : {}),
+            ...(c.city ? { addressLocality: c.city } : {}),
+            ...(c.city && CITY_COUNTRY[c.city] ? { addressCountry: CITY_COUNTRY[c.city] } : {}),
+          };
+        }
+        const phone = c.phone || doctorSettings?.phone;
+        if (phone) node.telephone = phone;
+        return node;
+      }),
+    };
+  }
+  return {
+    "@context": "https://schema.org",
+    "@type": "MedicalBusiness",
+    name: doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem",
+    description: seoDescription || "Aesthetic & Plastic Surgery by Dr. Al Hasan Al Saiem",
+    telephone: doctorSettings?.phone || undefined,
+    email: doctorSettings?.email || undefined,
+    address: doctorSettings?.addressEn ? {
+      "@type": "PostalAddress",
+      streetAddress: doctorSettings.addressEn,
+    } : undefined,
+    areaServed: AREA_SERVED,
+    medicalSpecialty: specialty,
+    url: origin,
+  };
+}
+
 export default function Landing() {
   const { dir } = useI18n();
   const visibility = useQuery(api.homepageSettings.getHomepageSettings);
@@ -44,6 +129,22 @@ export default function Landing() {
       const ogMeta = document.querySelector('meta[property="og:image"]');
       if (ogMeta) ogMeta.setAttribute("content", seoCMS.ogImage);
     }
+
+    // hreflang: tell search engines which URL serves which language version
+    const setOrCreateHreflang = (hreflang: string, href: string) => {
+      let link = document.querySelector(`link[rel="alternate"][hreflang="${hreflang}"]`) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "alternate";
+        link.setAttribute("hreflang", hreflang);
+        document.head.appendChild(link);
+      }
+      link.href = href;
+    };
+    const pageOrigin = window.location.origin;
+    setOrCreateHreflang("ar", `${pageOrigin}/ar`);
+    setOrCreateHreflang("en", `${pageOrigin}/en`);
+    setOrCreateHreflang("x-default", `${pageOrigin}/`);
 
     // Twitter/X card meta
     const setOrCreateMeta = (attr: string, val: string) => {
@@ -90,24 +191,15 @@ export default function Landing() {
       </main>
       <Footer />
 
-      {/* MedicalOrganization Structured Data */}
+      {/* MedicalClinic Structured Data — real clinics only; served areas via areaServed */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: safeJsonLd({
-            "@context": "https://schema.org",
-            "@type": "MedicalBusiness",
-            name: doctorSettings?.doctorNameEn || "Dr. Al Hasan Al Saiem",
-            description: seoCMS?.metaDescriptionEn || "Aesthetic & Plastic Surgery by Dr. Al Hasan Al Saiem",
-            telephone: doctorSettings?.phone || undefined,
-            email: doctorSettings?.email || undefined,
-            address: doctorSettings?.addressEn ? {
-              "@type": "PostalAddress",
-              streetAddress: doctorSettings.addressEn,
-            } : undefined,
-            medicalSpecialty: ["PlasticSurgery", "DermatologicCosmeticProcedures"],
-            url: typeof window !== "undefined" ? window.location.origin : undefined,
-          }),
+          __html: safeJsonLd(buildClinicJsonLd(
+            doctorSettings,
+            seoCMS?.metaDescriptionEn,
+            typeof window !== "undefined" ? window.location.origin : undefined,
+          )),
         }}
       />
     </div>

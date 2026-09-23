@@ -321,7 +321,9 @@ No third-party performance scripts; all optimizations are build-time or declarat
 - Global SEO (title, description, OG image) via admin
 - Per-procedure SEO fillable from Dashboard → **Fill SEO (AR/EN)**: canonical geo-targeted titles/descriptions (AR + EN) covering all practice locations — Syria (Damascus, Latakia, Tartus), Dubai (UAE), Beirut (Lebanon), and Iraq — via `procedureSeoDefaults.ts`
 - Dynamic meta tags per route; per-procedure title/description injected in `ProcedureDetail`
-- Physician JSON-LD structured data with `location` array for all six clinics and the 16 active procedures as `availableService` (no fabricated aggregate rating)
+- Physician JSON-LD structured data with the 16 active procedures as `availableService` (no fabricated aggregate rating)
+- **hreflang (2026-09-23):** `ar` → `/ar`, `en` → `/en`, `x-default` → `/` on the homepage; visiting `/ar`/`/en` forces the matching locale
+- **MedicalClinic JSON-LD (2026-09-23):** `@graph` of `MedicalClinic` nodes built from Dashboard → Settings → Clinic Locations (the three real clinics: Damascus, Latakia, Dubai — editable: name AR/EN, city, address AR/EN, phone). `areaServed` covers Tartus, Beirut, Iraq, Syria, Lebanon, UAE — served markets are never emitted as physical addresses
 - FAQPage, Person/Physician, BreadcrumbList JSON-LD structured data
 - Blog articles emit `Article` JSON-LD and can additionally emit `NewsArticle`
   schema; the organization logo URL is fixed to the production domain

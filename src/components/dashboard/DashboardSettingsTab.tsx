@@ -11,6 +11,24 @@ import { MediaSelector } from "@/components/MediaSelector";
 import { useAdminText } from "@/hooks/use-admin-text";
 import { Info, Loader2 } from "lucide-react";
 
+interface ClinicLocation {
+  nameAr: string;
+  nameEn: string;
+  city: string;
+  addressAr: string;
+  addressEn: string;
+  phone: string;
+}
+
+// The three real clinic locations. Only these get physical addresses in the
+// site's structured data (MedicalClinic) — other served areas (Tartus,
+// Beirut, Iraq) are covered via `areaServed`, never as fake addresses.
+const DEFAULT_CLINICS: ClinicLocation[] = [
+  { nameAr: "عيادة دمشق", nameEn: "Damascus Clinic", city: "Damascus", addressAr: "", addressEn: "", phone: "" },
+  { nameAr: "عيادة اللاذقية", nameEn: "Latakia Clinic", city: "Latakia", addressAr: "", addressEn: "", phone: "" },
+  { nameAr: "عيادة دبي", nameEn: "Dubai Clinic", city: "Dubai", addressAr: "", addressEn: "", phone: "" },
+];
+
 export default function DashboardSettingsTab() {
   const admin = useAdminText();
   const settings = useQuery(api.siteSettings.getDoctorSettings);
@@ -71,40 +89,48 @@ export default function DashboardSettingsTab() {
     navbarPhoto: "",
   });
 
+  const [clinics, setClinics] = useState<ClinicLocation[]>(DEFAULT_CLINICS);
+
   const [initialized, setInitialized] = useState(false);
-  if (settings && !initialized) {
+  if (settings !== undefined && !initialized) {
+    const s = settings ?? {};
+    const savedClinics: Partial<ClinicLocation>[] = Array.isArray(s.clinics) ? s.clinics : [];
+    setClinics(DEFAULT_CLINICS.map((d, i) => ({ ...d, ...(savedClinics[i] || {}) })));
     setForm({
-      doctorNameAr: settings.doctorNameAr || "",
-      doctorNameEn: settings.doctorNameEn || "",
-      whatsappNumber: settings.whatsappNumber || "",
-      phone: settings.phone || "",
-      email: settings.email || "",
-      addressAr: settings.addressAr || "",
-      addressEn: settings.addressEn || "",
-      biographyAr: settings.biographyAr || "",
-      biographyEn: settings.biographyEn || "",
-      specializationsAr: settings.specializationsAr || "",
-      specializationsEn: settings.specializationsEn || "",
-      educationAr: settings.educationAr || "",
-      educationEn: settings.educationEn || "",
-      heroTitleAr: settings.heroTitleAr || "",
-      heroTitleEn: settings.heroTitleEn || "",
-      heroSubtitleAr: settings.heroSubtitleAr || "",
-      heroSubtitleEn: settings.heroSubtitleEn || "",
-      instagram: settings.socialMedia?.instagram || "",
-      facebook: settings.socialMedia?.facebook || "",
-      twitter: settings.socialMedia?.twitter || "",
-      snapchat: settings.socialMedia?.snapchat || "",
-      tiktok: settings.socialMedia?.tiktok || "",
-      workingHoursWeekdays: settings.workingHoursWeekdays || "9 AM - 6 PM",
-      workingHoursFriday: settings.workingHoursFriday || "",
-      workingHoursSaturday: settings.workingHoursSaturday || "",
-      navbarPhoto: settings.navbarPhoto || "",
+      doctorNameAr: s.doctorNameAr || "",
+      doctorNameEn: s.doctorNameEn || "",
+      whatsappNumber: s.whatsappNumber || "",
+      phone: s.phone || "",
+      email: s.email || "",
+      addressAr: s.addressAr || "",
+      addressEn: s.addressEn || "",
+      biographyAr: s.biographyAr || "",
+      biographyEn: s.biographyEn || "",
+      specializationsAr: s.specializationsAr || "",
+      specializationsEn: s.specializationsEn || "",
+      educationAr: s.educationAr || "",
+      educationEn: s.educationEn || "",
+      heroTitleAr: s.heroTitleAr || "",
+      heroTitleEn: s.heroTitleEn || "",
+      heroSubtitleAr: s.heroSubtitleAr || "",
+      heroSubtitleEn: s.heroSubtitleEn || "",
+      instagram: s.socialMedia?.instagram || "",
+      facebook: s.socialMedia?.facebook || "",
+      twitter: s.socialMedia?.twitter || "",
+      snapchat: s.socialMedia?.snapchat || "",
+      tiktok: s.socialMedia?.tiktok || "",
+      workingHoursWeekdays: s.workingHoursWeekdays || "9 AM - 6 PM",
+      workingHoursFriday: s.workingHoursFriday || "",
+      workingHoursSaturday: s.workingHoursSaturday || "",
+      navbarPhoto: s.navbarPhoto || "",
     });
     setInitialized(true);
   }
 
   const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const updateClinic = (i: number, field: keyof ClinicLocation, value: string) =>
+    setClinics((prev) => prev.map((c, j) => (j === i ? { ...c, [field]: value } : c)));
 
   const handleSave = async () => {
     setSaving(true);
@@ -135,6 +161,7 @@ export default function DashboardSettingsTab() {
           workingHoursFriday: form.workingHoursFriday,
           workingHoursSaturday: form.workingHoursSaturday,
           navbarPhoto: form.navbarPhoto,
+          clinics: clinics.map((c) => ({ ...c })),
           socialMedia: {
             instagram: form.instagram,
             facebook: form.facebook,
@@ -175,6 +202,31 @@ export default function DashboardSettingsTab() {
             <div className="space-y-2"><Label>{admin.settings.addressEn}</Label><Textarea rows={2} value={form.addressEn} onChange={(e) => updateField("addressEn", e.target.value)} /></div>
             <div className="space-y-2"><Label>{admin.settings.addressAr}</Label><Textarea dir="rtl" rows={2} value={form.addressAr} onChange={(e) => updateField("addressAr", e.target.value)} /></div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Clinic Locations — feed the MedicalClinic structured data for local SEO */}
+      <Card className="border-border/60">
+        <CardHeader><CardTitle className="text-lg">{admin.settings.clinicLocations}</CardTitle></CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-xs text-muted-foreground">{admin.settings.clinicsHint}</p>
+          {clinics.map((clinic, i) => (
+            <div key={i} className="rounded-xl border border-border/60 p-4 space-y-4">
+              <p className="text-sm font-semibold">{clinic.nameAr} · {clinic.nameEn}</p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>{admin.settings.clinicNameEn}</Label><Input value={clinic.nameEn} onChange={(e) => updateClinic(i, "nameEn", e.target.value)} /></div>
+                <div className="space-y-2"><Label>{admin.settings.clinicNameAr}</Label><Input dir="rtl" value={clinic.nameAr} onChange={(e) => updateClinic(i, "nameAr", e.target.value)} /></div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>{admin.settings.clinicCity}</Label><Input dir="ltr" value={clinic.city} onChange={(e) => updateClinic(i, "city", e.target.value)} /></div>
+                <div className="space-y-2"><Label>{admin.settings.clinicPhone}</Label><Input dir="ltr" value={clinic.phone} onChange={(e) => updateClinic(i, "phone", e.target.value)} placeholder="+963 ..." /></div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>{admin.settings.clinicAddressEn}</Label><Textarea rows={2} dir="ltr" value={clinic.addressEn} onChange={(e) => updateClinic(i, "addressEn", e.target.value)} /></div>
+                <div className="space-y-2"><Label>{admin.settings.clinicAddressAr}</Label><Textarea rows={2} dir="rtl" value={clinic.addressAr} onChange={(e) => updateClinic(i, "addressAr", e.target.value)} /></div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
 

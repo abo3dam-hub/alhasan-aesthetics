@@ -1919,3 +1919,16 @@ Visual/UX upgrades only — no architecture or behavior changes:
 - **Section header editors pre-filled with frontend text** (`src/components/dashboard/HomepageCMSTab.tsx`, `SectionHeaderEditor`): the header fields for Videos/Procedures/BeforeAfter/Testimonials/FAQ used to open empty even though the site shows the built-in default translations. They are now pre-filled with exactly what the frontend renders — the saved CMS value, or the matching Arabic/English default from `src/locales` when nothing was saved (the previously unused `fallbackKeys` prop is now wired up via a dotted-path locale lookup).
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
+
+## Addendum — Local SEO: hreflang + MedicalClinic + areaServed (2026-09-23)
+
+Local-search upgrades only — no design, behavior, or architecture changes. Key constraint from the site owner: only **three real clinics** (Damascus, Latakia, Dubai); Tartus/Beirut/Iraq are served markets, never physical addresses.
+
+- **Clinic Locations CMS** (`src/components/dashboard/DashboardSettingsTab.tsx`, `src/locales/{ar,en}.json`): new "Clinic Locations" card in Dashboard → Settings with the three real clinics (name AR/EN, city, address AR/EN, phone). Saved into the `doctor` settings as a `clinics` array. New admin locale keys: `clinicLocations`, `clinicsHint`, `clinicNameAr/En`, `clinicCity`, `clinicAddressAr/En`, `clinicPhone`.
+- **MedicalClinic JSON-LD** (`src/pages/Landing.tsx`): the single `MedicalBusiness` node is replaced by a `@graph` of `MedicalClinic` nodes built from the CMS clinics (name, PostalAddress with city→country mapping, phone). Every node — and the legacy fallback when no clinics are configured — carries `areaServed`: Tartus, Beirut (as cities) plus Iraq, Syria, Lebanon, UAE (as countries). Fake addresses are never emitted.
+- **hreflang** (`src/pages/Landing.tsx` SEO effect): `ar` → `/ar`, `en` → `/en`, `x-default` → `/` link tags are injected/updated in `<head>`.
+- **/ar + /en locale forcing** (`src/main.tsx` `RouteSyncer`): visiting `/ar` forces the Arabic locale and `/en` the English one, so the served language always matches what hreflang promises (previously the locale came only from localStorage).
+- **FAQ for served markets** (pending, needs admin): three bilingual FAQ entries prepared for the dashboard FAQ editor — "Do you welcome patients from Tartus / Lebanon / Iraq?" — pointing to the Damascus/Latakia/Dubai clinics with WhatsApp booking. The FAQPage JSON-LD picks them up automatically once added.
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
+
