@@ -98,3 +98,13 @@ Reason for the failure: the device is not authenticated. `npx convex login statu
 - Auth implementation / application architecture: **UNCHANGED.**
 - VLY/Freebuff tooling: **NOT cleaned.**
 - Files changed: only gitignored `.env.local` (one line removed); no tracked files modified; no commit created.
+---
+
+## 8. Successful production deploy (2026-09-23 ~03:46 CEST)
+
+- **Deployment:** `[Production] abo3dam:alhasan:production (prod)` → `https://kindly-anaconda-422.convex.cloud`
+- **Repo commit deployed:** `b850a36 feat(seo): local search — hreflang, MedicalClinic JSON-LD, areaServed, clinic CMS` (working tree clean; `git status --porcelain` empty before and after).
+- **Method:** `python3 ~/workspace/skills/convex/bin/convex_deploy.py` (`npx convex deploy --yes --typecheck enable`), auth via Convex connector credential (`custom.convex`).
+- **Result:** ✅ Deployed. CLI output confirmed: "No indexes are deleted by this push", "Schema validation complete", "Deployed Convex functions to https://kindly-anaconda-422.convex.cloud". Exit code 0.
+- **Generated bindings:** no diff in `src/convex/_generated` (git tree clean post-deploy).
+- CLI note: a minor update is available (Convex 1.42.1 → 1.46.0) — left for a future maintenance pass, not required.
