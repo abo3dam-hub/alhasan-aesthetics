@@ -13,6 +13,16 @@ import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MediaSelector } from "@/components/MediaSelector";
 import VideoSectionEditor from "./VideoEditor";
+import arLocale from "@/locales/ar.json";
+import enLocale from "@/locales/en.json";
+
+// Resolve a dotted path like "videos.badge" inside a locale JSON object.
+function localePath(locale: Record<string, unknown>, path: string): string {
+  const v = path
+    .split(".")
+    .reduce<unknown>((acc, k) => (acc && typeof acc === "object" ? (acc as Record<string, unknown>)[k] : undefined), locale);
+  return typeof v === "string" ? v : "";
+}
 
 interface TrustBadge {
   labelAr: string;
@@ -733,7 +743,7 @@ function InstagramEditor() {
 }
 
 // ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter/Videos) ───
-export function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
+export function SectionHeaderEditor({ sectionKey, label, fallbackKeys }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
   const admin = useAdminText();
   const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: sectionKey });
   const setSetting = useMutation(api.homepageSettings.set);
@@ -741,16 +751,20 @@ export function SectionHeaderEditor({ sectionKey, label }: { sectionKey: string;
   const [form, setForm] = useState<Record<string, string>>({});
   const [initialized, setInitialized] = useState(false);
 
-  if (sectionCMS && !initialized) {
+  // Pre-fill each field with what the frontend actually shows: the saved CMS
+  // value, or the locale's default translation (the same fallback the public
+  // section uses) when nothing was saved yet.
+  if (sectionCMS !== undefined && !initialized) {
+    const s = sectionCMS ?? {};
     setForm({
-      badgeAr: sectionCMS.badgeAr || "",
-      badgeEn: sectionCMS.badgeEn || "",
-      titleAr: sectionCMS.titleAr || "",
-      titleEn: sectionCMS.titleEn || "",
-      titleHighlightAr: sectionCMS.titleHighlightAr || "",
-      titleHighlightEn: sectionCMS.titleHighlightEn || "",
-      subtitleAr: sectionCMS.subtitleAr || "",
-      subtitleEn: sectionCMS.subtitleEn || "",
+      badgeAr: s.badgeAr || localePath(arLocale, fallbackKeys.badge),
+      badgeEn: s.badgeEn || localePath(enLocale, fallbackKeys.badge),
+      titleAr: s.titleAr || localePath(arLocale, fallbackKeys.title),
+      titleEn: s.titleEn || localePath(enLocale, fallbackKeys.title),
+      titleHighlightAr: s.titleHighlightAr || localePath(arLocale, fallbackKeys.titleHighlight),
+      titleHighlightEn: s.titleHighlightEn || localePath(enLocale, fallbackKeys.titleHighlight),
+      subtitleAr: s.subtitleAr || localePath(arLocale, fallbackKeys.subtitle),
+      subtitleEn: s.subtitleEn || localePath(enLocale, fallbackKeys.subtitle),
     });
     setInitialized(true);
   }
