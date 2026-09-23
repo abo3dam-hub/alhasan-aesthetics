@@ -262,6 +262,20 @@
   opacity: 1;
 }
 
+/* ── Thin gold frame for key imagery (outline: no layout impact, no
+      box-shadow conflict with glow-champagne / hover shadows) ── */
+.img-frame-gold {
+  outline: 1px solid rgba(197, 168, 130, 0.55);
+  outline-offset: 6px;
+}
+
+/* ── On-brand gold focus rings (accessibility). Component-level
+      focus-visible styles (higher specificity) still win where defined. ── */
+:focus-visible {
+  outline: 2px solid rgba(197, 168, 130, 0.9);
+  outline-offset: 3px;
+}
+
 /* ── Selection + scrollbar in theme tones ── */
 ::selection {
   background: rgba(197, 168, 130, 0.35);

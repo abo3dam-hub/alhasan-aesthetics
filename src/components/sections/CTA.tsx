@@ -43,7 +43,7 @@ export default function CTA() {
           variants={fadeInUp}
           dir={dir}
         >
-          <div className="glass-elevated rounded-3xl p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden glow-champagne">
+          <div className="glass-elevated rounded-3xl p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden glow-champagne card-glow">
             <div className="absolute top-0 left-1/4 w-40 h-40 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-56 h-56 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 

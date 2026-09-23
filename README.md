@@ -304,7 +304,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 - **Hero headline animates word-by-word** with a masked rise (staggered, descender-safe for Arabic) plus a gentle parallax drift of the text block on scroll
 - **Instagram gallery section** before the footer — 6 CMS-curated images with hover zoom + Instagram overlay, linking to the clinic profile (Dashboard → Homepage CMS → Instagram)
 - Testimonial photo thumbnails + full-screen lightbox
-- Champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, subtle film-grain overlay, and a centered animated scroll hint
+- Champagne scroll-progress bar, unified card hover glow (top gold line + soft shadow on all cards and banners), button sheen, section title underline, image shimmer placeholders, subtle film-grain overlay, thin gold frames around key imagery (doctor portrait, before/after cases), on-brand gold `:focus-visible` rings, and a centered animated scroll hint
 - Custom `::selection` and scrollbar theming; reduced-motion CSS support
 
 ## Performance

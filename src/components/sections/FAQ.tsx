@@ -66,7 +66,7 @@ export default function FAQ() {
             }}
             className="lg:col-span-3"
           >
-            <div className="glass-elevated rounded-3xl p-2 sm:p-3">
+            <div className="glass-elevated rounded-3xl p-2 sm:p-3 card-glow">
               <Accordion type="single" collapsible className="w-full">
                 {displayFaqs
                   ? displayFaqs.map((faq) => (

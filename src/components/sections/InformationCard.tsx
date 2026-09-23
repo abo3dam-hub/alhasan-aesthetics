@@ -49,7 +49,7 @@ export default function InformationCard() {
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
           variants={fadeInUp}
-          className="glass-elevated rounded-[2rem] overflow-hidden glow-champagne"
+          className="glass-elevated rounded-[2rem] overflow-hidden glow-champagne card-glow"
         >
           <div className="grid lg:grid-cols-2">
             {/* Image / Visual */}

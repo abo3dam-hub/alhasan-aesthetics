@@ -1932,3 +1932,13 @@ Local-search upgrades only — no design, behavior, or architecture changes. Key
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
 
+## Addendum — Zero-cost aesthetic touches (2026-09-23)
+
+Owner-approved suggestions (1, 3, 4, 5, 6, 8) — all pure CSS or GPU-composited properties, no new dependencies, no performance impact:
+
+- **Thin gold image frames** (`.img-frame-gold` in `src/index.css`): 1px gold `outline` with 6px offset — zero layout impact and no conflict with existing `box-shadow`s. Applied to the doctor portrait in `About.tsx` and the before/after case cards in `BeforeAfter.tsx`.
+- **Unified card hover glow** (`card-glow`): extended to the InformationCard banner, CTA banner, Instagram tiles, FAQ list container, and About stat cards — it already covered most cards.
+- **On-brand gold focus rings**: global `:focus-visible` gold outline in `src/index.css` (accessibility); component-level focus styles (higher specificity) still win where defined.
+- **Verified already present, no change needed**: film-grain overlay (mounted in `main.tsx`), smooth page fade between routes (`.page-enter`), and the unified section-header rhythm (badge pill + title + gold line + subtitle) across all six sections.
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.

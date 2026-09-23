@@ -93,7 +93,7 @@ export default function InstagramSection() {
                 target="_blank"
                 rel="noopener noreferrer"
                 variants={fadeInUp}
-                className="group relative aspect-square rounded-2xl overflow-hidden glass-card block"
+                className="group relative aspect-square rounded-2xl overflow-hidden glass-card card-glow block"
                 aria-label={t.instagram.follow}
               >
                 <ResolvedImage

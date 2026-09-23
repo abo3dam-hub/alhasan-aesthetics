@@ -94,7 +94,7 @@ export default function About() {
           >
             <div className="relative">
               <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-primary/20 via-secondary/15 to-primary/10 blur-sm" />
-              <div className="relative glass-elevated rounded-[2rem] overflow-hidden glow-champagne">
+              <div className="relative glass-elevated rounded-[2rem] overflow-hidden glow-champagne img-frame-gold">
                 <div className="aspect-[3/4] overflow-hidden">
                   {aboutLoading ? (
                     <div className="relative w-full h-full overflow-hidden bg-muted/20">
@@ -205,7 +205,7 @@ export default function About() {
                   return (
                     <div
                       key={i}
-                      className="glass-card rounded-2xl p-4 sm:p-5 text-center hover:bg-white/60 transition-colors"
+                      className="glass-card card-glow rounded-2xl p-4 sm:p-5 text-center hover:bg-white/60 transition-colors"
                     >
                       <div className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10 mb-3">
                         <StatIcon className="h-5 w-5 text-primary" />
