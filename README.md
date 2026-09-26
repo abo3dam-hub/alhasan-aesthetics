@@ -63,7 +63,7 @@ src/
 │   ├── analytics.ts          # Visit analytics (record, geocode cache, aggregates)
 │   ├── users.ts              # User queries + becomeAdmin
 │   ├── notifications.ts      # Notifications (unread counts)
-│   ├── http.ts               # HTTP actions: /sitemap.xml, /og-meta, /og-image, /trackVisit
+│   ├── http.ts               # HTTP actions: /sitemap.xml, /og-meta, /og-image, /trackVisit, /briefing-analytics
 │   ├── migration.ts          # Admin-only data migrations
 │   │                         #   (normalize icons, fill geo-targeted SEO)
 │   ├── procedureIconDefaults.ts  # Canonical icon key per procedure slug
@@ -224,11 +224,13 @@ A self-contained analytics feature — no third-party script (no GA4/Vercel Anal
 - **Dashboard widget:** four visit stat cards, conversion cards, a 14-day bar chart, countries list (flags + bars), top pages, and top actions.
 - **Maintenance:** `analytics.purgePath` (internal mutation) removes recorded visits and events for a given path (e.g. smoke-test data).
 - **Security (2026-09-23):** the write path (`insertVisit`, `insertEvent`, `saveIpCache`, `getIpCache`) is internal-only — callable solely from the `/trackVisit` HTTP action, never directly by clients. `analytics.getStats` requires admin authentication.
+- **Briefing automation (2026-09-26):** a token-gated, read-only endpoint `GET /briefing-analytics` serves exactly the morning-briefing numbers for one Europe/Berlin day (default: yesterday) — visits, unique visitors, WhatsApp/CTA clicks, top 3 pages, top 3 countries. Auth is a long random bearer token whose SHA-256 hash (only) is stored in the `serviceTokens` table (`analytics.registerServiceToken`, internal mutation); the comparison is constant-time and the token is never logged. Scope is read-only analytics — no writes, no other data leaves.
 
 | HTTP endpoint | Method | Purpose |
 |---------------|--------|---------|
 | `/trackVisit` | `POST` | Record a page visit **or** a conversion event (CORS-enabled, served on `*.convex.site`) |
 | `/trackVisit` | `OPTIONS` | CORS preflight |
+| `/briefing-analytics` | `GET` | Token-gated read-only briefing numbers for one Berlin day (`Authorization: Bearer <token>`, `?day=YYYY-MM-DD` optional) |
 | `/sitemap.xml` | `GET` | Dynamic sitemap from live CMS data |
 | `/og-meta` | `GET` | HTML shell for crawlers with `og:image` set to the branded card (served by Vercel edge middleware to bot user agents) |
 | `/og-image?slug=…&lang=…` | `GET` | Renders the branded 1200×630 PNG share card for an article (crawlers + public) |

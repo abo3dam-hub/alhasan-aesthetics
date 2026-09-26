@@ -1942,3 +1942,14 @@ Owner-approved suggestions (1, 3, 4, 5, 6, 8) — all pure CSS or GPU-composited
 - **Verified already present, no change needed**: film-grain overlay (mounted in `main.tsx`), smooth page fade between routes (`.page-enter`), and the unified section-header rhythm (badge pill + title + gold line + subtitle) across all six sections.
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
+
+## Addendum — Briefing analytics API token (2026-09-26)
+
+The morning-briefing cron could not read yesterday's analytics because the dashboard sign-in needs the owner's interactive approval, which never arrives on detached runs. Owner approved a minimal read-only API instead (no browser sign-in, no auth rework):
+
+- **New table** `serviceTokens` (`src/convex/schema.ts`): `{ name, tokenHash, scope, createdAt }`, indexed `by_name`. Only the SHA-256 hex digest of a token is stored — never the plaintext token.
+- **New functions** (`src/convex/analytics.ts`): `registerServiceToken` (internal mutation, upserts the hash for a named client), `getServiceTokenHash` (internal query), `getBriefingStats` (internal query returning exactly the briefing's numbers for one Europe/Berlin day — visits, unique visitors, WhatsApp/CTA clicks, top 3 pages, top 3 countries; default = yesterday).
+- **New endpoint** `GET /briefing-analytics` (`src/convex/http.ts`): gated by `Authorization: Bearer <token>` with constant-time digest comparison against the stored hash (`scope` must be `briefing-analytics`); read-only by construction; token never logged; `Cache-Control: no-store`; optional `?day=YYYY-MM-DD`.
+- The live token (256-bit random hex) is stored `0600` at `~/workspace/goals/alhasan-aesthetics-website-code-review-and-fixes/hidden_files/analytics_api_token` — never in git, chat, or logs. The morning-briefing cron instructions were updated to `curl` this endpoint instead of browser sign-in.
+
+Verified: `tsc -b`, `eslint`, `vitest` (12/12) all pass; endpoint tested end-to-end against production with real data.

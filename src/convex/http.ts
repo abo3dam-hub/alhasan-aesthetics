@@ -339,6 +339,88 @@ http.route({
   }),
 });
 
+// ─── Briefing analytics (token-gated, read-only) ───
+// Serves exactly the numbers the owner's morning-briefing automation needs
+// for one Europe/Berlin day (default: yesterday). Authenticated with a long
+// random bearer token whose SHA-256 hash (only) is stored in the
+// serviceTokens table under the name "morning-briefing". The endpoint is
+// read-only by construction: no writes, no other data leaves. The token is
+// never logged and must travel in the Authorization header, never the URL.
+http.route({
+  path: "/briefing-analytics",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const unauthorized = () =>
+      new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+
+    const authz = request.headers.get("authorization") || "";
+    const bearer = /^Bearer ([A-Za-z0-9_-]{32,128})$/.exec(authz.trim());
+    if (!bearer) return unauthorized();
+    const presented = bearer[1];
+
+    let stored: { tokenHash: string; scope: string } | null = null;
+    try {
+      stored = await ctx.runQuery(internal.analytics.getServiceTokenHash, {
+        name: "morning-briefing",
+      });
+    } catch {
+      return unauthorized();
+    }
+    if (!stored || stored.scope !== "briefing-analytics") return unauthorized();
+
+    let digest: string;
+    try {
+      const bytes = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(presented),
+      );
+      digest = [...new Uint8Array(bytes)]
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    } catch {
+      return unauthorized();
+    }
+    if (!constantTimeEqualHex(digest, stored.tokenHash)) return unauthorized();
+
+    const url = new URL(request.url);
+    const day = url.searchParams.get("day") ?? undefined;
+    try {
+      const stats = await ctx.runQuery(internal.analytics.getBriefingStats, {
+        day,
+      });
+      return new Response(JSON.stringify(stats), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    } catch {
+      return new Response(JSON.stringify({ error: "bad_request" }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+  }),
+});
+
+/** Constant-time hex digest comparison (digests are fixed at 64 chars). */
+function constantTimeEqualHex(a: string, b: string): boolean {
+  if (a.length !== 64 || b.length !== 64) return false;
+  let diff = 0;
+  for (let i = 0; i < 64; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 function corsHeaders(request: Request) {
   return {
     "Access-Control-Allow-Origin": request.headers.get("Origin") ?? "*",

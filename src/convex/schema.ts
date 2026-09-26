@@ -177,6 +177,16 @@ const schema = defineSchema(
       ts: v.number(),
     }).index("by_ts", ["ts"]),
 
+    // ─── Service API tokens (read-only automation, e.g. the morning briefing) ───
+    // Only the SHA-256 hash of a token is stored — the plaintext token is never
+    // persisted anywhere in the database or the codebase.
+    serviceTokens: defineTable({
+      name: v.string(),
+      tokenHash: v.string(), // lowercase hex SHA-256 of the bearer token
+      scope: v.string(), // e.g. "briefing-analytics"
+      createdAt: v.number(),
+    }).index("by_name", ["name"]),
+
     // ─── Login rate limiting (app-level, keyed per email) ───
     loginAttempts: defineTable({
       email: v.string(),
