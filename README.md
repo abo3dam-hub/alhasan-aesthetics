@@ -24,8 +24,10 @@ src/
 ├── components/
 │   ├── sections/       # Homepage sections (Hero, About, Procedures, BeforeAfter,
 │   │                   #   Testimonials, FAQ, CTA, Contact, InformationCard, Videos)
-│   ├── dashboard/      # Admin CMS tab components (HomepageCMSTab, SEOTab, ArticlesTab,
-│   │                   #   VideoEditor)
+│   ├── dashboard/      # Admin CMS tabs: Dashboard*Tab.tsx (Overview, Analytics, Procedures,
+│   │                   #   Before & After, Testimonials, FAQ, Articles, Settings, Media),
+│   │                   #   HomepageCMSTab, SEOTab, VideoEditor, DashboardLayout,
+│   │                   #   DashboardNav, ConfirmDialog, dashboard-utils.ts
 │   ├── ui/             # shadcn/ui components
 │   ├── Footer.tsx      # Dynamic footer (CMS-driven procedures + settings)
 │   ├── GlassNavbar.tsx # Navigation with mobile menu + language toggle
@@ -39,15 +41,16 @@ src/
 │   ├── ImageUpload.tsx # Convex storage upload component
 │   ├── BrandMark.tsx   # <picture> WebP logo/avatar with JPG/PNG fallback
 │   ├── RequireAuth.tsx # Auth guard
-│   └── dashboard/      # Admin CMS tabs: Dashboard*,Tab.tsx (Overview, Analytics, Procedures,
-│                       #   Before & After, Testimonials, FAQ, Settings, Media) + HomepageCMSTab,
-│                       #   ArticlesTab, SEOTab, DashboardLayout, DashboardNav, dashboard-utils.ts
+│   ├── ErrorBoundary.tsx # Runtime error boundary
 ├── lib/
 │   ├── procedureIcons.tsx    # SVG + Lucide icon registry keyed by icon slug
+│   ├── jsonLd.ts             # JSON-LD builders (safeJsonLd escaping helper)
 │   ├── track.ts              # Frontend analytics client (page views + events)
 │   └── utils.ts
 ├── convex/
-│   ├── schema.ts             # Database schema
+│   ├── schema.ts             # Database schema (13 tables, schemaValidation: true)
+│   ├── auth.ts               # Convex Auth setup (Password provider, max 2 admins)
+│   ├── auth.config.ts        # JWT provider config (Convex self-issued)
 │   ├── admin.ts              # Server-side admin authorization (requireAdmin)
 │   ├── procedures.ts         # Procedures CRUD (protected)
 │   ├── articles.ts           # Blog article CRUD + published queries (protected writes)
@@ -61,15 +64,14 @@ src/
 │   ├── siteSettings.ts       # Key/value settings store (doctor, SEO)
 │   ├── media.ts              # Media library (Convex storage upload, protected)
 │   ├── analytics.ts          # Visit analytics (record, geocode cache, aggregates)
-│   ├── users.ts              # User queries + becomeAdmin
-│   ├── notifications.ts      # Notifications (unread counts)
+│   ├── users.ts              # User queries + promoteUser (admin-only, max 2 admins)
+│   ├── loginRateLimit.ts     # Login-attempt tracking (app-level; UI-enforced)
 │   ├── http.ts               # HTTP actions: /sitemap.xml, /og-meta, /og-image, /trackVisit, /briefing-analytics
 │   ├── migration.ts          # Admin-only data migrations
 │   │                         #   (normalize icons, fill geo-targeted SEO)
 │   ├── procedureIconDefaults.ts  # Canonical icon key per procedure slug
 │   ├── procedureSeoDefaults.ts   # Canonical AR/EN SEO per procedure slug
 │   ├── seed.ts               # Initial data seeding
-│   └── auth/                 # Auth providers (Password)
 ├── pages/
 │   ├── Landing.tsx            # Homepage (all sections CMS-driven with toggle)
 │   ├── Dashboard.tsx          # Admin CMS shell (tabs live in components/dashboard/)
@@ -284,6 +286,9 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | `pageVisits` | Analytics page views (path, locale, country, sessionId, ts) — no raw IP |
 | `ipCountryCache` | 24h IP-hash → country cache for analytics geolocation |
 | `analyticsEvents` | Conversion events (type, label, path, locale, country, sessionId, ts) |
+| `articles` | Blog articles (bilingual title/body, slug, cover + OG image, SEO fields, publish flags) |
+| `serviceTokens` | Read-only automation tokens — stores only the SHA-256 hash (e.g. morning-briefing) |
+| `loginAttempts` | Login rate-limit state per email (count, window timestamps, lockedUntil) |
 
 ## Image Management
 

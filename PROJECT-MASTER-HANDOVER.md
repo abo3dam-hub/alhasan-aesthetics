@@ -10,11 +10,11 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 
 ---
 
-## ⚠️ CURRENT STATUS — refreshed 2026-09-18 (supersedes any conflicting detail below)
+## ⚠️ CURRENT STATUS — refreshed 2026-09-27 (supersedes any conflicting detail below)
 
 > This document was generated on **2026-09-12**. Everything below is still largely accurate for structure, but the following facts have changed. Where the body conflicts with this block, **this block is authoritative**.
 
-- **Git HEAD:** `0be1cb1` (`feat: branded OG card generator, blog card share buttons, WebP assets, JSON-LD logo fix`), branch `main`, clean and pushed.
+- **Git HEAD:** `02ef1f5` (`feat: token-gated read-only briefing analytics API (/briefing-analytics)`), branch `main`, clean and in sync with `origin/main`.
 - **Authentication:** migrated from Email-OTP/Anonymous to the Convex Auth **`Password`** provider (scrypt-hashed, email + password). Exactly **two admin accounts** are enforced atomically; the old Freebuff/OTP dependency is no longer in the active auth path. Any Email-OTP/Anonymous/Freebuff wording below is historical.
 - **Production Convex deployment:** `kindly-anaconda-422` (not `gregarious-perch-128`, which was a prior target/dev slug). HTTP-effecting actions are served on `https://kindly-anaconda-422.convex.site`.
 - **Admin Dashboard:** now **11 tabs** — Overview, Analytics, Homepage CMS, Procedures, Before & After, Testimonials, FAQ, Articles, SEO, Settings, Media.
@@ -28,10 +28,11 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 - **Typography:** current fonts are **Cairo** (Arabic body) + **El Messiri** (Arabic headings) + Inter + Playfair Display — not Noto Kufi.
 - **UX polish added:** champagne scroll-progress bar, card hover glow, button sheen, section title underline, image shimmer placeholders, film-grain overlay, animated hero scroll hint, two-cards-per-row grids at all breakpoints, flip-style homepage before/after cards, and a responsive 2×2 footer layout on mobile.
 - **Environment variables:** `VITE_CONVEX_URL` (required) and `VITE_CONVEX_SITE_URL` (optional; auto-derived from `.convex.cloud` → `.convex.site`). `JWT_PRIVATE_KEY` / `JWKS` remain server-side secrets. Note: `CONVEX_SITE_URL` is not yet set on the deployment — `http.ts` falls back to the hardcoded `https://kindly-anaconda-422.convex.site`, which works.
-- **Build health:** `tsc` clean, ESLint **0 errors / 26 benign warnings**, `vite build` green; entry chunk ≈342 KB (gzip ≈104 KB).
+- **Build health (verified 2026-09-27):** `npx tsc --noEmit` clean, ESLint **0 errors / 0 warnings**, `vitest` 12/12 (3 files) green; entry chunk ≈342 KB (gzip ≈104 KB).
 - **Domain:** the real domain **`dralhasanalsaiem.com`** is now fully wired in Vercel and is **live in production** — all canonical/OG/JSON-LD/sitemap/robots references point at it (superseding the placeholder `dr-alhasan.com`, which is not registered in DNS). Verified: `curl -A "Twitterbot" https://dralhasanalsaiem.com/blog/<slug>` returns the `/og-meta` shell whose `og:image` resolves to a valid 1200×630 PNG.
 - **Infra notes:** `package.json` has a `postinstall: patch-package` script (do not remove). `src/convex/_generated` is gitignored (only `api.d.ts` is tracked) — regenerate with `npx convex dev --once` / deploy.
 - **Canonical reference:** for the most current, self-contained overview read `README.md`; for the latest session log read `report 9-14-26.md`.
+- **Docs-correction pass (2026-09-27):** this handover (and `REPORTS-AUDIT.md`, `report 9-14-26.md`, `README.md`, `PROJECT-HANDOVER-AUDIT.md`) was corrected to match the actual code — stale Freebuff/Email-OTP references, wrong §27 invariants, outdated §26/§23/§30, and regenerated §2 project map. Docs-only; no code changed. See the "Addendum — Documentation correction pass (2026-09-27)" at the end of this file.
 
 ---
 
@@ -82,29 +83,35 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 
 ## 2. Project Structure
 
+> Regenerated from the actual tree on **2026-09-27** (157 files under `src/`).
+
 ```
 /
-├── index.html                          # SPA entry, static SEO meta, structured data (Physician JSON-LD)
-├── package.json                        # Dependencies & scripts
+├── index.html                          # SPA entry, static SEO meta, structured data
+├── middleware.ts                       # Vercel edge: /og-meta crawler shell, /og-image proxy
+├── package.json                        # Dependencies & scripts (npm)
+├── patches/                           # patch-package patches (harfbuzzjs wasm for OG cards)
 ├── components.json                     # shadcn/ui config (new-york style)
 ├── public/
-│   ├── assets/1.jpg                    # Doctor photo (static fallback)
-│   ├── assets/2.jpg                    # Static asset
-│   ├── assets/3.jpg                    # Doctor logo (Navbar/Footer static fallback)
-│   ├── assets/4.jpg                    # Static asset
+│   ├── assets/                         # Static brand assets (optimized WebP)
+│   ├── fonts/                          # Self-hosted fonts (woff2)
+│   ├── favicon.svg
 │   ├── logo.svg                        # SVG logo
 │   ├── manifest.webmanifest            # PWA manifest
 │   ├── robots.txt                      # Robots file
 │   └── sitemap.xml                     # Static sitemap fallback
 ├── src/
-│   ├── main.tsx                        # App entry: ConvexAuthProvider, I18nProvider, BrowserRouter, Routes
-│   ├── index.css                       # Tailwind + Glassmorphism theme variables + glass utility classes
-│   ├── instrumentation.tsx             # Freebuff runtime error boundary + error dialog
+│   ├── main.tsx                        # App entry: ConvexAuthProvider, I18nProvider, BrowserRouter, Routes, LazyMotion
+│   ├── index.css                       # Tailwind + theme variables + utility classes
 │   ├── vite-env.d.ts                   # Vite types
 │   ├── types/global.d.ts               # Window.navigateToAuth type declaration
 │   ├── assets/logo.svg                 # Logo asset
 │   ├── lib/
-│   │   └── utils.ts                    # cn() helper (clsx + tailwind-merge)
+│   │   ├── utils.ts                    # cn() helper (clsx + tailwind-merge)
+│   │   ├── jsonLd.ts                   # JSON-LD builders (MedicalClinic graph, FAQPage, Article…)
+│   │   ├── track.ts                    # Client-side analytics event helpers
+│   │   ├── procedureIcons.tsx          # Procedure icon set
+│   │   └── __tests__/                  # Unit tests (utils, jsonLd, iconDefaults)
 │   ├── i18n/
 │   │   ├── index.tsx                   # I18nProvider, useI18n hook, locale state (localStorage)
 │   │   └── types.ts                    # Translations type from ar.json
@@ -112,60 +119,72 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 │   │   ├── ar.json                     # Arabic translations
 │   │   └── en.json                     # English translations
 │   ├── convex/                         # Backend — all Convex server functions
-│   │   ├── schema.ts                   # Database schema definition
-│   │   ├── auth.ts                     # Convex Auth setup (Email OTP + Anonymous)
-│   │   ├── auth.config.ts              # JWT providers config (Convex + Freebuff federated)
-│   │   ├── auth/emailOtp.ts            # Email OTP provider implementation
+│   │   ├── schema.ts                   # Database schema (13 tables, schemaValidation: true)
+│   │   ├── auth.ts                     # Convex Auth setup (Password provider, max 2 admins)
+│   │   ├── auth.config.ts              # JWT provider config (Convex self-issued)
 │   │   ├── admin.ts                    # requireAdmin() + getAdminUser() helpers
-│   │   ├── users.ts                    # currentUser query, becomeAdmin mutation
-│   │   ├── procedures.ts              # Procedures CRUD
-│   │   ├── beforeAfter.ts             # Before & After CRUD
-│   │   ├── testimonials.ts            # Testimonials CRUD
-│   │   ├── faq.ts                     # FAQ CRUD
-│   │   ├── siteSettings.ts            # Key-value settings (get, set, getDoctorSettings)
-│   │   ├── homepageSettings.ts         # Homepage CMS settings queries (hero, about, CTA, etc.)
-│   │   ├── media.ts                   # Media: upload, resolve, diagnostics, repair
-│   │   ├── seed.ts                    # Seed data mutations (procedures, settings, testimonials, FAQ)
-│   │   ├── http.ts                    # HTTP routes (dynamic sitemap.xml)
-│   │   └── notifications.ts           # DEPRECATED — file is empty/comment only
+│   │   ├── users.ts                    # currentUser query, promoteUser mutation
+│   │   ├── procedures.ts               # Procedures CRUD
+│   │   ├── articles.ts                 # Blog articles CRUD
+│   │   ├── videos.ts                   # Videos CRUD
+│   │   ├── beforeAfter.ts              # Before & After CRUD
+│   │   ├── testimonials.ts             # Testimonials CRUD
+│   │   ├── faq.ts                      # FAQ CRUD
+│   │   ├── siteSettings.ts             # Key-value settings (get, set, getDoctorSettings)
+│   │   ├── homepageSettings.ts         # Homepage CMS settings queries
+│   │   ├── media.ts                    # Media: upload, resolve, diagnostics, repair
+│   │   ├── analytics.ts                # Visit/event tracking, getStats, briefing stats, service tokens
+│   │   ├── loginRateLimit.ts           # Login-attempt tracking (app-level; UI-enforced, see §25)
+│   │   ├── migration.ts                # Data migrations
+│   │   ├── og_image.tsx                # OG share-card generator (Convex "use node" action)
+│   │   ├── procedureIconDefaults.ts    # Default procedure icons
+│   │   ├── procedureSeoDefaults.ts     # Default procedure SEO values
+│   │   ├── seed.ts                     # Seed data mutations (procedures, articles, settings, …)
+│   │   └── http.ts                     # HTTP routes: /trackVisit, /briefing-analytics, /sitemap.xml, /og-image
 │   ├── components/
-│   │   ├── ui/                        # shadcn/ui components (~60 files)
-│   │   ├── sections/                  # Homepage section components
-│   │   │   ├── Hero.tsx
-│   │   │   ├── About.tsx
-│   │   │   ├── Procedures.tsx
-│   │   │   ├── BeforeAfter.tsx
-│   │   │   ├── Testimonials.tsx
-│   │   │   ├── FAQ.tsx
-│   │   │   ├── Contact.tsx
-│   │   │   └── CTA.tsx
-│   │   ├── dashboard/                 # Admin dashboard sub-tabs
-│   │   │   ├── HomepageCMSTab.tsx
-│   │   │   └── SEOTab.tsx
-│   │   ├── GlassNavbar.tsx            # Top navigation bar
-│   │   ├── Footer.tsx                 # Site footer
-│   │   ├── RequireAuth.tsx            # Auth guard (redirects to /auth)
-│   │   ├── ResolvedImage.tsx          # Universal image renderer (URL or storageId)
-│   │   ├── MediaSelector.tsx          # Media library picker for CMS fields
-│   │   ├── ImageUpload.tsx            # Image upload component
-│   │   ├── MediaDiagnostics.tsx       # Debug: shows media storage health
-│   │   └── LogoDropdown.tsx           # Logo dropdown (home/sign out)
+│   │   ├── ui/                         # shadcn/ui components (51 files)
+│   │   ├── sections/                   # Homepage sections: Hero, About, Procedures, Videos,
+│   │   │                              #   Instagram, BeforeAfter, Testimonials, FAQ, Contact,
+│   │   │                              #   CTA, InformationCard
+│   │   ├── dashboard/                  # Admin dashboard: 11 tabs (Dashboard*Tab, HomepageCMSTab,
+│   │   │                              #   ArticlesTab, SEOTab, VideoEditor) + DashboardLayout,
+│   │   │                              #   DashboardNav, dashboard-utils.ts, ConfirmDialog
+│   │   ├── AnalyticsTracker.tsx        # Client page-view tracker
+│   │   ├── GlassNavbar.tsx             # Top navigation bar
+│   │   ├── Footer.tsx                  # Site footer
+│   │   ├── RequireAuth.tsx             # Auth guard (redirects to /auth)
+│   │   ├── ResolvedImage.tsx           # Universal image renderer (storageId-first)
+│   │   ├── MediaSelector.tsx           # Media library picker for CMS fields
+│   │   ├── MediaLibraryModal.tsx       # Media library modal
+│   │   ├── ImageUpload.tsx             # Image upload component
+│   │   ├── ImageGalleryInput.tsx       # Gallery input for CMS
+│   │   ├── MediaDiagnostics.tsx        # Debug: shows media storage health
+│   │   ├── FloatingSocial.tsx          # Floating social/WhatsApp buttons
+│   │   ├── ScrollProgress.tsx          # Scroll progress bar
+│   │   ├── Lightbox.tsx                # Image lightbox
+│   │   ├── CountUp.tsx                 # Animated counters
+│   │   ├── BrandMark.tsx               # Brand logo (WebP <picture>)
+│   │   ├── LogoDropdown.tsx            # Currently unused (see §24)
+│   │   └── ErrorBoundary.tsx           # Runtime error boundary
 │   ├── pages/
-│   │   ├── Landing.tsx                # Homepage (all sections with visibility toggle)
-│   │   ├── Auth.tsx                   # Email OTP login/signup
-│   │   ├── Dashboard.tsx              # Admin CMS shell (~50 lines; tabs live in components/dashboard/)
-│   │   ├── ProceduresPage.tsx         # Public procedures listing page
-│   │   ├── ProcedureDetail.tsx        # Individual procedure detail page
-│   │   ├── ContactPage.tsx            # Public contact page
-│   │   ├── BeforeAfterPage.tsx        # Before & After gallery with slider
-│   │   ├── ConsultationPage.tsx       # WhatsApp consultation form
-│   │   └── NotFound.tsx               # 404 page
+│   │   ├── Landing.tsx                 # Homepage (all sections with visibility toggle)
+│   │   ├── Auth.tsx                    # Password login (bilingual, rate-limit aware)
+│   │   ├── Dashboard.tsx               # Admin CMS shell (95-line thin shell; tabs live in components/dashboard/)
+│   │   ├── ProceduresPage.tsx          # Public procedures listing page
+│   │   ├── ProcedureDetail.tsx         # Individual procedure detail page
+│   │   ├── BlogListPage.tsx            # Blog listing (/blog)
+│   │   ├── BlogArticlePage.tsx         # Blog article detail (/blog/:slug)
+│   │   ├── BeforeAfterPage.tsx         # Before & After gallery with slider
+│   │   ├── ContactPage.tsx             # Public contact page
+│   │   ├── ConsultationPage.tsx        # WhatsApp consultation form
+│   │   └── NotFound.tsx                # 404 page
 │   └── hooks/
-│       ├── use-auth.ts                # useAuth hook (wraps Convex auth)
-│       ├── use-upload.ts              # useImageUpload hook (upload to Convex storage)
-│       ├── use-resolved-media.ts      # useResolvedMedia (batch URL resolution)
-│       ├── use-image-url.ts           # useImageUrl (single/batch resolution hooks)
-│       └── use-mobile.ts              # useIsMobile (responsive breakpoint)
+│       ├── use-auth.ts                 # useAuth hook (wraps Convex auth)
+│       ├── use-upload.ts               # useImageUpload hook (upload to Convex storage)
+│       ├── use-resolved-media.ts        # useResolvedMedia (batch URL resolution)
+│       ├── use-image-url.ts            # useImageUrl (single/batch resolution hooks)
+│       ├── use-mobile.ts               # useIsMobile (responsive breakpoint)
+│       └── use-admin-text.ts           # Admin dashboard text helper
 ```
 
 ---
@@ -218,7 +237,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 3. **No separate backend server.** Convex IS the backend.
 4. **No external database.** Convex provides its own database.
 5. **No separate file storage.** Convex provides built-in file storage.
-6. **No CI/CD pipeline.** Deployment is managed by Freebuff/Vercel.
+6. **CI/CD:** GitHub Actions workflow (typecheck + ESLint + vitest). Deployment is managed by Vercel (frontend, auto-deploy from `main`) and Convex (backend functions).
 
 ---
 
@@ -264,7 +283,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 | Dependency | Version | Purpose |
 |---|---|---|
 | `date-fns` | ^4.1.0 | Date formatting |
-| `axios` | ^1.13.2 | HTTP client (used only in email OTP to call Freebuff API) |
+| `axios` | ^1.13.2 | HTTP client — installed but no imports under `src/` (unused; cleanup candidate alongside `zod`) |
 | `sonner` | ^2.0.7 | Toast notifications |
 | `cmdk` | ^1.1.1 | Command palette |
 | `embla-carousel-react` | ^8.6.0 | Carousel engine |
@@ -473,7 +492,7 @@ Convex queries resolve → UI updates reactively
 - `by_key` on `[key]`
 
 **Known keys:**
-- `doctor` — Doctor/clinic information (name, phone, email, address, bio, social media, hero text, working hours)
+- `doctor` — Doctor/clinic information (name, phone, email, address, bio, social media, hero text, working hours, `clinics` array: Damascus/Latakia/Dubai)
 - `hero` — Hero section content (badge, title, subtitle, description, CTAs, trust badges)
 - `about` — About section content (badge, title, description, doctor image, stats)
 - `cta` — CTA section content (title, description, button text, destination)
@@ -484,6 +503,93 @@ Convex queries resolve → UI updates reactively
 - `beforeAfterSection` — Before & After section header
 - `testimonialsSection` — Testimonials section header
 - `faqSection` — FAQ section header
+- `instagramSection` — Instagram gallery section (6 image slots, profile URL, visibility)
+
+#### `articles` (blog)
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `slug` | string | Yes | URL slug (unique by index) |
+| `titleAr` / `titleEn` | string | Yes | Bilingual title |
+| `excerptAr` / `excerptEn` | string | Yes | Bilingual excerpt |
+| `bodyAr` / `bodyEn` | string | Yes | Bilingual body |
+| `coverImage` | string | No | Cover image storage reference |
+| `categoryAr` / `categoryEn` | string | No | Bilingual category |
+| `relatedProcedureSlug` | string | No | Linked procedure |
+| `seoTitleAr/En`, `seoDescriptionAr/En` | string | No | Per-article SEO |
+| `ogImage` | string | No | OG share image reference |
+| `publishDate` / `updatedDate` | number | No | Timestamps |
+| `readingMinutes` | number | No | Estimated reading time |
+| `isPublished` / `isFeatured` | boolean | Partial | Visibility flags |
+| `order` | number | Yes | Display order |
+
+**Indexes:**
+- `by_slug` on `[slug]`
+- `by_order` on `[order]`
+
+#### `pageVisits` (analytics)
+
+Page-view tracking written via the `/trackVisit` HTTP action. No raw IPs stored (hashed then discarded).
+
+| Field | Type | Purpose |
+|---|---|---|
+| `path` | string | Visited path |
+| `locale` | string | `ar` / `en` |
+| `country` | string | Visitor country (from hashed-IP cache) |
+| `sessionId` | string | Session identifier |
+| `ts` | number | Timestamp |
+
+**Indexes:**
+- `by_ts` on `[ts]`
+
+#### `ipCountryCache` (analytics)
+
+| Field | Type | Purpose |
+|---|---|---|
+| `ipHash` | string | SHA-256 of visitor IP (raw IP never stored) |
+| `country` | string | Resolved country |
+| `expiresAt` | number | Cache expiry |
+
+**Indexes:**
+- `by_ipHash` on `[ipHash]`
+
+#### `analyticsEvents` (analytics)
+
+CTA/WhatsApp/share events tracked from the client (`src/lib/track.ts`, `AnalyticsTracker.tsx`).
+
+| Field | Type | Purpose |
+|---|---|---|
+| `type` | string | Event type (e.g. `whatsapp_click`, `cta_click`, `share`) |
+| `label` | string | Event label |
+| `path` / `locale` / `country` / `sessionId` | string | Context |
+| `ts` | number | Timestamp |
+
+**Indexes:**
+- `by_ts` on `[ts]`
+
+#### `serviceTokens` (read-only automation)
+
+| Field | Type | Purpose |
+|---|---|---|
+| `name` | string | Token owner name (e.g. `morning-briefing`) |
+| `tokenHash` | string | Lowercase hex SHA-256 of the bearer token — plaintext never stored |
+| `scope` | string | e.g. `briefing-analytics` |
+| `createdAt` | number | Creation timestamp |
+
+**Indexes:**
+- `by_name` on `[name]`
+
+#### `loginAttempts` (login rate limiting)
+
+| Field | Type | Purpose |
+|---|---|---|
+| `email` | string | Login email (unique by index) |
+| `count` | number | Failed attempts in window |
+| `firstAttemptAt` / `lastAttemptAt` | number | Window timestamps |
+| `lockedUntil` | number | Optional lock expiry |
+
+**Indexes:**
+- `by_email` on `[email]`
 
 ### Entity Relationships
 
@@ -521,15 +627,14 @@ siteSettings ◄──────────────┘
 
 ```typescript
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [emailOtp, Anonymous],
+  providers: [Password],
 });
 ```
 
-- **Providers:** Email OTP (via Freebuff API) + Anonymous
+- **Provider:** Password (via `@convex-dev/auth` 0.0.94; scrypt-hashed, email + password). The old Email-OTP/Anonymous/Freebuff providers were removed — see §27 item 3.
+- **Admin cap:** exactly **two** password (login-capable) admin accounts are enforced atomically (`MAX_ADMIN_ACCOUNTS = 2`, `src/convex/auth.ts:21`).
 - **Token management:** Handled by `@convex-dev/auth`
-- **JWT validation:** Two providers in `auth.config.ts`:
-  1. Convex self-issued tokens (for project sign-in)
-  2. Freebuff federated JWTs (for SSO from Freebuff platform)
+- **JWT validation:** single provider in `auth.config.ts` — Convex self-issued tokens. The entry must NOT be changed to `type: "customJwt"` (Convex self-issued tokens don't carry a `kid` header, which `customJwt` validation requires).
 
 ### Admin Authorization (`src/convex/admin.ts`)
 
@@ -551,7 +656,7 @@ export async function getAdminUser(ctx: MutationCtx)
 |---|---|---|
 | `currentUser` | query | Returns current authenticated user (or null) |
 | `getCurrentUser` | helper | Internal helper to get current user |
-| `becomeAdmin` | mutation | First user can become admin (only if no admin exists) |
+| `promoteUser` | mutation | Admin-only; promotes a user to admin (fails once 2 password admins exist) |
 
 ### Procedures (`src/convex/procedures.ts`)
 
@@ -661,19 +766,15 @@ export async function getAdminUser(ctx: MutationCtx)
 ```
 User visits /auth
     ↓
-Enters email address
+Enters email + password (bilingual form)
     ↓
-signIn("email-otp", formData) called
+signIn("password", { email, password }) called
     ↓
-Convex Auth sends request to emailOtp provider
+@convex-dev/auth Password provider verifies scrypt hash
     ↓
-emailOtp.sendVerificationRequest() → POST to https://auth.freebuff.app/send_otp
-    ↓
-User receives 6-digit OTP code via email
-    ↓
-User enters OTP code
-    ↓
-signIn("email-otp", formData) verifies code
+Login-attempt tracking (src/convex/loginRateLimit.ts): 5 failed attempts
+within 15 minutes lock the email for 15 minutes (currently enforced by
+the Auth page UI; server-side enforcement inside the auth flow is deferred)
     ↓
 Convex Auth creates/validates session
     ↓
@@ -688,7 +789,7 @@ Navigate to returnTo param or /dashboard
 
 **Current usage:** Only `admin` role is checked. `user` and `member` roles exist in the schema but are not checked by any function.
 
-**Admin promotion:** First user can click "Become Admin" in Dashboard → Overview. This calls `users.becomeAdmin` which only succeeds if NO admin exists yet. After that, no new admins can self-promote.
+**Admin promotion:** an existing admin promotes users via `users.promoteUser`. The mutation refuses once **two** password (login-capable) admin accounts exist (`MAX_ADMIN_ACCOUNTS = 2`, enforced atomically in `src/convex/auth.ts`). There is no self-service promotion.
 
 **Server-side enforcement:** Every CMS mutation calls `requireAdmin(ctx)` which verifies the authenticated user has `role: "admin"`. This prevents unauthorized writes even if the frontend check is bypassed.
 
@@ -702,9 +803,8 @@ Only `/dashboard` is protected via `RequireAuth` component:
 
 ### Auth Provider Configuration (`auth.config.ts`)
 
-Two JWT providers:
-1. **Convex self-issued** — Standard provider for this project's own sign-in
-2. **Freebuff federated** — `customJwt` provider allowing SSO from Freebuff platform (`freebuff.com`)
+Single JWT provider:
+1. **Convex self-issued** — the only provider for this project's sign-in (the old Freebuff federated entry was removed with the Freebuff cleanup).
 
 **Critical note from code:** The Convex self-issued entry must NOT be changed to `type: "customJwt"` because Convex self-issued tokens don't carry a `kid` header, which `customJwt` validation requires.
 
@@ -860,36 +960,30 @@ Language toggle switches AR/EN (localStorage)
 Navigation to /procedures, /contact, /before-after, /consultation
 ```
 
-### Flow 2: Authentication (Email OTP)
+### Flow 2: Authentication (Password)
 
 ```
-Visitor clicks "Book Consultation" or "Dashboard"
+Visitor clicks "Dashboard" (or /dashboard directly)
     ↓
 If not authenticated → redirected to /auth?returnTo=<path>
     ↓
-Enters email → signIn("email-otp") → OTP sent via Freebuff API
-    ↓
-Enters 6-digit code → signIn("email-otp") verifies
+Enters email + password → signIn("password") → scrypt verify (@convex-dev/auth)
     ↓
 Session established → Navigate to returnTo path
 ```
 
-### Flow 3: First Admin Setup
+### Flow 3: Admin Setup (first two accounts)
 
 ```
-First user signs in via /auth
+First user signs up via /auth
     ↓
-Navigates to /dashboard
+createOrUpdateUser: atomic check — if fewer than 2 admins exist, role = "admin"
     ↓
-RequireAuth verifies authentication
+Same for the second sign-up
     ↓
-Dashboard → Overview → "Become Admin" button
+Third and later sign-ups: rejected with "Registration is closed" (MAX_ADMIN_ACCOUNTS = 2)
     ↓
-becomeAdmin mutation: checks no admin exists → sets role = "admin"
-    ↓
-Page reloads → user now has admin access
-    ↓
-CMS mutations now authorized
+Existing user can be elevated by an admin via promoteUser (admin-only mutation)
 ```
 
 ### Flow 4: CMS Content Management
@@ -1334,7 +1428,7 @@ Output: `dist/` directory
 
 ### Deployment
 
-- **Hosting:** Freebuff/Vercel (managed)
+- **Hosting:** Vercel (frontend, auto-deploy from `main`) + Convex (backend)
 - **Build command:** `bun run build`
 - **Output directory:** `dist`
 - **Convex deployment:** `bunx convex deploy` (requires Convex account)
@@ -1515,28 +1609,24 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 - **Impact:** If env var is missing, production connects to dev Convex
 - **Suggestion:** Remove fallback or use environment-appropriate default
 
-### TD-4: Hardcoded API key
-- **Location:** `src/convex/auth/emailOtp.ts`
-- **Description:** Freebuff email OTP API key is hardcoded
-- **Impact:** Key is visible in Convex function source (though not exposed to browser)
-- **Suggestion:** Move to environment variable if possible
+### TD-4: Hardcoded API key — **CLOSED** (2026-09-19)
+- **Was:** `src/convex/auth/emailOtp.ts` contained a hardcoded Freebuff email OTP API key.
+- **Resolution:** The entire Email-OTP/Freebuff auth path was removed (Password provider migration). The file no longer exists; there is no Freebuff key anywhere in the codebase.
 
-### TD-5: Unused dependencies
+### TD-5: Unused dependencies — **PARTIALLY RESOLVED** (verified 2026-09-27)
 - **Location:** `package.json`
-- **Description:** Several packages installed but not actively used in source code: `recharts`, `hono`, `next-themes`, `react-resizable-panels`, `react-day-picker`
-- **Impact:** Increased bundle size
-- **Suggestion:** Remove unused dependencies
+- **Removed from package.json:** `hono`, `react-day-picker`, `react-resizable-panels` (no longer installed).
+- **Actually used:** `recharts` (imported by `src/components/ui/chart.tsx`) and `next-themes` (imported by `src/components/ui/sonner.tsx`).
+- **Remaining:** `zod` and `axios` are installed but have **zero** imports in `src/` (axios's only consumer was the deleted Email-OTP flow) — cleanup candidates; no server-side validation on mutation inputs yet (see §25).
 
-### TD-6: Unused Convex files
-- **Location:** `src/convex/notifications.ts`
-- **Description:** Contains only a comment: `// DEPRECATED - Notifications table removed.`
-- **Impact:** Dead file
-- **Suggestion:** Delete
+### TD-6: Unused Convex files — **CLOSED** (2026-09-19)
+- **Was:** `src/convex/notifications.ts` contained only a `// DEPRECATED` comment.
+- **Resolution:** The file was deleted. There are no known dead Convex modules (see §2 for the current module list).
 
 ### TD-7: No database migrations
-- **Description:** No migration system exists. Schema changes are applied directly via Convex's schema validation (currently set to `schemaValidation: false`)
-- **Impact:** Schema drift between development and production possible
-- **Suggestion:** Enable schema validation or implement migration strategy
+- **Description:** No migration system exists. Schema changes are enforced by Convex's schema validation (enabled — `schemaValidation: true` in `src/convex/schema.ts` since `b154f44`); `src/convex/migration.ts` holds one-off data migrations.
+- **Impact:** Schema drift between development and production possible without disciplined deploys
+- **Suggestion:** Keep validation on; add migration coverage for breaking field changes
 
 ### TD-8: Image `url` field is legacy
 - **Location:** `media` table
@@ -1544,23 +1634,17 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 - **Impact:** Dual resolution logic needed (storageId + legacy URL)
 - **Suggestion:** Eventually migrate all records to storageId-only and remove `url`
 
-### TD-9: `becomeAdmin` only works once
-- **Location:** `src/convex/users.ts`
-- **Description:** After the first admin is created, no mechanism exists to promote additional admins from the UI
-- **Impact:** New admin users must be promoted via database directly
-- **Suggestion:** Add an admin-only `promoteUser` mutation
+### TD-9: `becomeAdmin` only works once — **CLOSED**
+- **Was:** After the first admin was created, no mechanism existed to promote additional admins.
+- **Resolution:** Replaced by the admin-only `users.promoteUser` mutation (`src/convex/users.ts:50`), with an atomic cap of two password admin accounts (`MAX_ADMIN_ACCOUNTS = 2`).
 
-### TD-10: Auth page is English-only
-- **Location:** `src/pages/Auth.tsx`
-- **Description:** The login/signup page UI is hardcoded in English, not using the i18n system
-- **Impact:** Arabic users see English auth UI
-- **Suggestion:** Add auth page translations
+### TD-10: Auth page is English-only — **RESOLVED**
+- **Was:** `src/pages/Auth.tsx` hardcoded English strings.
+- **Resolution:** The auth page is now fully bilingual — all labels/placeholders come from `src/locales/{ar,en}.json` (`admin.auth.*` keys).
 
-### TD-11: `schemaValidation: false`
-- **Location:** `src/convex/schema.ts`
-- **Description:** Schema validation is disabled
-- **Impact:** No runtime type checking for database records
-- **Suggestion:** Enable after stabilizing schema
+### TD-11: `schemaValidation: false` — **RESOLVED** (`b154f44`)
+- **Was:** Schema validation was disabled in `src/convex/schema.ts`.
+- **Resolution:** Validation is now enabled (`schemaValidation: true`, `src/convex/schema.ts:201`). All 13 tables are validated at write time.
 
 ---
 
@@ -1581,12 +1665,11 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 - **Evidence:** User previously requested `object-fill` then reverted to `object-cover`
 - **Note:** This is the current intentional behavior after user feedback
 
-### BUG-3: sitemap.xml references `proc.active`
+### BUG-3: sitemap.xml references `proc.active` — **FIXED**
 - **Severity:** Low
 - **Location:** `src/convex/http.ts`
-- **Description:** Dynamic sitemap checks `proc.active !== false` but the procedure field is `isActive`, not `active`
-- **Impact:** The check always passes (undefined !== false is true), so all procedures appear in sitemap regardless of active status
-- **Suggestion:** Change to `proc.isActive !== false`
+- **Was:** Dynamic sitemap checked `proc.active !== false` but the procedure field is `isActive`.
+- **Resolution:** Now checks `proc.isActive !== false` (`src/convex/http.ts`, sitemap builder) — inactive procedures are correctly excluded. Note the defensive comment in code: `listActive` already filters inactive procedures.
 
 ---
 
@@ -1596,21 +1679,20 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 
 | File/Code | Status | Notes |
 |---|---|---|
-| `src/convex/notifications.ts` | **Dead** | Contains only `// DEPRECATED` comment |
-| `src/components/LogoDropdown.tsx` | **Unused** | Imported nowhere in the application |
+| `src/convex/notifications.ts` | **Deleted** | Was dead (`// DEPRECATED` only); removed 2026-09-19 |
+| `src/components/LogoDropdown.tsx` | **Unused** | Imported nowhere in the application (verified 2026-09-27) |
 | `src/components/ui/index.ts` | **Registry only** | Not imported by any component (components import directly from individual files) |
-| `recharts` dependency | **Unused** | No imports found in source code |
-| `hono` dependency | **Unused** | No imports found in source code |
-| `next-themes` dependency | **Unused** | No imports found in source code |
-| `react-resizable-panels` dependency | **Unused** | No imports found in source code |
-| `react-day-picker` dependency | **Unused** | Only used indirectly by calendar.tsx which isn't used |
+| `hono`, `react-day-picker`, `react-resizable-panels` | **Removed** | No longer in `package.json` (verified 2026-09-27) |
+| `recharts` dependency | **Used** | Imported by `src/components/ui/chart.tsx` |
+| `next-themes` dependency | **Used** | Imported by `src/components/ui/sonner.tsx` |
+| `zod` dependency | **Unused** | Installed (`package.json`) but zero imports in `src/` — see §25 |
 
 ### Suspicious Code
 
 | Code | Location | Notes |
 |---|---|---|
 | `window.navigateToAuth` type declaration | `src/types/global.d.ts` | Declared but never implemented |
-| `InstrumentationProvider` | `src/instrumentation.tsx` | Imported in main.tsx but `InstrumentationProvider` is not used in the render tree — only `ErrorBoundary` and error dialog are used |
+| `src/instrumentation.tsx` | **Deleted** | Freebuff error boundary removed with the Freebuff cleanup; `ErrorBoundary.tsx` is the runtime boundary now |
 
 ---
 
@@ -1618,9 +1700,9 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 
 ### Authentication
 - **Rating:** Adequate for the use case
-- Email OTP verification prevents unauthorized access
-- Sessions managed by Convex Auth (not custom)
-- **Issue:** No rate limiting on OTP attempts visible in frontend code
+- Password provider via `@convex-dev/auth` (scrypt-hashed); sessions managed by Convex Auth (not custom)
+- Exactly two admin accounts enforced atomically (`MAX_ADMIN_ACCOUNTS = 2`)
+- **Login rate limiting:** `src/convex/loginRateLimit.ts` tracks failed attempts per email (5 attempts / 15 min → 15-min lock, `loginAttempts` table). Currently enforced by the Auth page UI; server-side enforcement inside the auth flow is deferred (see the 2026-09-23 security addendum) and bypassable via direct API calls.
 
 ### Authorization
 - **Rating:** Good
@@ -1631,16 +1713,16 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 - **Rating:** Minimal
 - File upload validates type and size
 - Form inputs use HTML5 `required` attribute
-- No server-side validation beyond Convex schema (which has `schemaValidation: false`)
-- **Issue:** No Zod validation on mutation inputs despite `zod` being installed
+- Convex schema validation is **enabled** (`schemaValidation: true`, `src/convex/schema.ts:201`)
+- **Issue:** No Zod validation on mutation inputs despite `zod` being installed — zero imports in `src/` (verified 2026-09-27)
 
 ### XSS
 - **Rating:** Low risk
 - React escapes content by default
-- `dangerouslySetInnerHTML` used in two places:
-  - `Landing.tsx` — MedicalOrganization JSON-LD (from CMS data)
-  - `FAQ.tsx` — FAQPage JSON-LD (from CMS data)
-- **Issue:** CMS data injected into `dangerouslySetInnerHTML` without sanitization. If admin inputs malicious HTML/JS in CMS, it could execute.
+- `dangerouslySetInnerHTML` has **6 actual uses across 5 files** (verified 2026-09-27):
+  - 5× JSON-LD `<script type="application/ld+json">` blocks (`FAQ.tsx`, `Landing.tsx`, `BlogArticlePage.tsx`, `ProcedureDetail.tsx` ×2) — all go through `safeJsonLd()` in `src/lib/jsonLd.ts`, which `JSON.stringify`s and escapes every `<` as `\u003c`, so CMS-controlled text can never form an opening tag (2 further textual mentions inside `jsonLd.ts` itself are only documentation comments, not runtime uses)
+  - 1× `<style>` theming block in `src/components/ui/chart.tsx` (standard shadcn chart pattern; theme values only, no CMS/user data)
+- **Residual note:** CMS data still reaches JSON-LD, but only via the escaping helper — a malicious admin is the remaining threat model, same as for all CMS content rendering
 
 ### CSRF
 - **Rating:** Not applicable
@@ -1648,7 +1730,8 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 
 ### Secrets Exposure
 - **Rating:** Acceptable
-- Freebuff API key is in Convex server function (not browser)
+- The old Freebuff API key is gone with the Freebuff cleanup — no third-party keys in the codebase
+- The briefing-automation bearer token is stored **hash-only** in the `serviceTokens` table (SHA-256); the plaintext token lives only in a `0600` file on the owner's machine, never in git/chat/logs
 - `VITE_` env vars are exposed to the browser (by design)
 - No production secrets found in client-side code
 
@@ -1668,33 +1751,39 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 
 ## 26. What Is Actually Complete
 
+> Rewritten 2026-09-27 — verified against the current code.
+
 | Area | Status | Evidence |
 |---|---|---|
 | **Public Homepage** | Complete | All sections render with CMS data + i18n |
-| **Bilingual Support (AR/EN)** | Complete | Full translations, RTL/LTR, language toggle |
+| **Bilingual Support (AR/EN)** | Complete | Full translations, RTL/LTR, language toggle, `/ar`+`/en` locale forcing, hreflang |
 | **Procedures CMS** | Complete | Full CRUD, public display, detail pages |
+| **Articles (Blog) CMS** | Complete | Full CRUD, `/blog` + `/blog/:slug`, SEO fields, OG share cards, sitemap inclusion |
+| **Videos CMS** | Complete | Full CRUD, public gallery, Instagram section |
 | **Before & After CMS** | Complete | Full CRUD, public gallery, slider |
 | **Testimonials CMS** | Complete | Full CRUD, public display |
-| **FAQ CMS** | Complete | Full CRUD, public accordion |
+| **FAQ CMS** | Complete | Full CRUD, public accordion, FAQPage JSON-LD |
 | **Homepage CMS** | Complete | All sections editable, visibility toggle |
-| **SEO CMS** | Complete | Global + per-procedure settings |
-| **Doctor Settings CMS** | Complete | All contact/bio/social fields |
+| **SEO CMS** | Complete | Global + per-procedure + per-article settings, hreflang, MedicalClinic JSON-LD |
+| **Doctor Settings CMS** | Complete | All contact/bio/social fields, 3 clinic locations (Damascus/Latakia/Dubai) |
 | **Media Library** | Partial | Upload/delete work; thumbnails may be unreliable |
 | **Image System** | Partial | Code fixed, browser verification pending |
-| **Authentication** | Complete | Email OTP flow works |
-| **Authorization** | Complete | Admin-only CMS mutations |
+| **Authentication** | Complete | Password provider works (scrypt, email + password); max 2 admins enforced |
+| **Authorization** | Complete | Admin-only CMS mutations via `requireAdmin()` |
+| **Visit Analytics** | Complete | In-DB page views + country + CTA/WhatsApp events, admin dashboard tab |
+| **Briefing Analytics API** | Complete | Token-gated read-only `/briefing-analytics` endpoint for the morning briefing |
 | **Consultation Form** | Complete | WhatsApp integration, no data stored |
 | **Contact Page** | Complete | Form, contact info, WhatsApp |
 | **Responsive Design** | Complete | Mobile-first, all breakpoints |
-| **Animations** | Complete | Framer Motion throughout |
-| **SEO** | Complete | Meta tags, JSON-LD, sitemap |
+| **Animations** | Complete | LazyMotion (framer-motion chunked), gold frames/glow/focus rings |
+| **SEO** | Complete | Meta tags, JSON-LD, sitemap, OG cards, robots |
 | **Dashboard Seed** | Complete | Three seed buttons (procedures, CMS, full) |
-| **Database** | Complete | 7 tables, proper indexes |
+| **Database** | Complete | 13 tables, proper indexes, schema validation enabled |
 | **Navbar Photo CMS** | Complete | Settings tab → navbar/footer display |
-| **Tests** | **Missing** | No test files found |
-| **CI/CD** | **Missing** | No GitHub Actions or pipelines |
-| **Error Monitoring** | Partial | Freebuff integration exists but limited |
-| **Notifications** | **Missing** | Table removed, file deprecated |
+| **Tests** | Complete | vitest 12/12 (3 files): utils, jsonLd, iconDefaults |
+| **CI/CD** | Complete | GitHub Actions (`ci.yml`); Vercel deploys production |
+| **Error Monitoring** | Basic | `ErrorBoundary.tsx` runtime boundary; no third-party error service |
+| **Notifications** | Removed | Table removed, file deleted — not a planned feature |
 
 ---
 
@@ -1706,9 +1795,9 @@ These must NOT be broken:
 
 2. **`storageId` is the canonical image reference** — Do not switch to URL-based references for new uploads.
 
-3. **Convex auth config must have two JWT providers** — Convex self-issued (for project sign-in) and Freebuff federated (for SSO). The Convex entry must NOT be changed to `type: "customJwt"`.
+3. **Convex auth config uses a single JWT provider** — Convex self-issued (for project sign-in). The old Freebuff federated entry was removed with the Freebuff cleanup; do NOT re-add it. The Convex entry must NOT be changed to `type: "customJwt"` (Convex self-issued tokens don't carry a `kid` header, which `customJwt` validation requires — see the comment in `src/convex/auth.config.ts`).
 
-4. **`schemaValidation: false` in schema.ts** — Enabling this without ensuring all existing data conforms will break the app.
+4. **`schemaValidation: true` in schema.ts** — Schema validation is enabled (since `b154f44`) and all 13 tables are validated at write time. Do not disable it.
 
 5. **The `siteSettings` key-value store pattern** — All homepage CMS content uses `siteSettings` with string keys. Do not create separate tables for homepage section content.
 
@@ -1716,13 +1805,13 @@ These must NOT be broken:
 
 7. **i18n uses `localStorage` for persistence** — Language preference survives page refresh but not browser clear.
 
-8. **`becomeAdmin` only works when no admin exists** — After the first admin, no self-service promotion is possible.
+8. **Admin promotion is admin-only with a cap of two** — `users.promoteUser` (`src/convex/users.ts:50`) promotes users; it refuses once two password (login-capable) admin accounts exist (`MAX_ADMIN_ACCOUNTS = 2`, enforced atomically). There is no self-service promotion.
 
 9. **The WhatsApp consultation stores NO data** — This is intentional. Do not add database storage for consultations.
 
 10. **Hero and CTA image fields are intentionally unused** — The Hero and CTA sections are text/design-based. Do not add image upload UI for these sections.
 
-11. **Freebuff `server.hmr: false`** — The Vite dev server must NOT have HMR enabled.
+11. **Vite dev-server HMR stays on** — `vite.config.ts` sets `server.hmr.overlay: false` (error overlay off, HMR itself on). Do not disable HMR.
 
 12. **All image resolution goes through `ctx.storage.getUrl()`** — Do not manually construct Convex storage URLs.
 
@@ -1848,7 +1937,7 @@ These must NOT be broken:
 
 ## 30. DOCUMENTATION AUDIT
 
-Generated from repository inspection.
+> Re-audited 2026-09-27 against the live tree (git available; `main` at `02ef1f5`, in sync with `origin/main`). Supersedes the 2026-09-12 audit below where they conflict.
 
 ### Confidence Levels
 
@@ -1858,35 +1947,36 @@ Generated from repository inspection.
 
 ### Important Unverified Areas
 
-1. **Production Convex environment** — Cannot verify which Convex deployment production uses vs development
+1. **Production Convex environment** — Cannot verify which Convex deployment production uses vs development (believed: `kindly-anaconda-422`)
 2. **Image system in production** — Browser verification not performed; code-level fixes applied but untested
 3. **Vercel deployment configuration** — Cannot inspect Vercel project settings from this environment
-4. **Email OTP delivery** — Cannot verify the Freebuff email service is working
-5. **WhatsApp deep link** — Cannot verify the doctor's WhatsApp number is correct
-6. **Dynamic sitemap** — Cannot verify the HTTP action works in production (checks wrong field name `active` instead of `isActive`)
+4. **WhatsApp deep link** — Cannot verify the doctor's WhatsApp number is correct
+5. **Dynamic sitemap in production** — Cannot verify the `/sitemap.xml` HTTP action output in production (code now checks the correct `isActive` field; BUG-3 fixed)
+6. **Login rate limiting** — Server-side enforcement inside the auth flow is deferred; the UI-level enforcement is bypassable via direct API calls (see §25)
 
 ### Files Examined
 
-All 132+ source files in the project were examined during this audit, including:
-- All `src/convex/*.ts` files (11 files)
-- All `src/pages/*.tsx` files (9 files)
-- All `src/components/*.tsx` files (12 custom components)
-- All `src/hooks/*.ts` files (5 files)
-- All `src/i18n/*` files (2 files)
-- Both locale files (`ar.json`, `en.json`)
-- `package.json`, `components.json`, `index.html`
+This correction pass did not re-read all 157 source files end to end; it counted the
+tree (157 files under `src/`) and re-inspected every area behind a changed claim:
+- All `src/convex/*.ts(x)` files (22 files, incl. `og_image.tsx`)
+- All `src/pages/*.tsx` files (11 files)
+- All `src/components/sections/*.tsx` files (11 files)
+- All `src/components/dashboard/*.tsx` files (16 files)
+- All `src/components/*.tsx` files (18 files)
+- All `src/hooks/*.ts` files (6 files)
+- All `src/i18n/*` + both locale files (`ar.json`, `en.json`)
+- `src/lib/` (`utils.ts`, `jsonLd.ts`, `track.ts`, `procedureIcons.tsx`, `__tests__/`)
+- `package.json`, `components.json`, `index.html`, `middleware.ts`
 - `src/main.tsx`, `src/index.css`
-- `src/lib/utils.ts`
 - `README.md`
-- `src/components/ui/index.ts`
 
 ### Last Audited
 
-September 12, 2026
+September 27, 2026
 
 ### Repository State
 
-Branch: main (assumed — git commands unavailable)
+Branch: main @ `02ef1f5`, clean, in sync with `origin/main` (verified via git)
 
 ## Addendum — Security & interaction fixes (2026-09-23)
 
@@ -1953,3 +2043,27 @@ The morning-briefing cron could not read yesterday's analytics because the dashb
 - The live token (256-bit random hex) is stored `0600` at `~/workspace/goals/alhasan-aesthetics-website-code-review-and-fixes/hidden_files/analytics_api_token` — never in git, chat, or logs. The morning-briefing cron instructions were updated to `curl` this endpoint instead of browser sign-in.
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12) all pass; endpoint tested end-to-end against production with real data.
+
+## Addendum — Documentation correction pass (2026-09-27)
+
+Docs-only pass (no code changed). An external review found documentation drift across the repo's `.md` reports; every claim below was re-verified against the live tree (`main` @ `02ef1f5`) before correcting. Verified independently: `npx tsc --noEmit` clean, ESLint 0 errors / 0 warnings, `vitest` 12/12 (3 files), 157 files under `src/`, 13 schema tables.
+
+**`PROJECT-MASTER-HANDOVER.md`:**
+- **§27 items 3, 4, 8, 11 fixed** — these were the dangerous ones (this section is the "do not break" list future agents obey): item 3 no longer demands the removed Freebuff federated JWT provider (kept the correct "don't switch the Convex entry to `customJwt`" warning); item 4 now states `schemaValidation: true` (the reality since `b154f44`); item 8 now describes `promoteUser` + the 2-admin cap instead of `becomeAdmin`; item 11 now states the real HMR config (`server.hmr.overlay: false`, HMR on) instead of the deleted Freebuff setting.
+- **§2 regenerated** from the actual tree: removed deleted files (`instrumentation.tsx`, `auth/emailOtp.ts`, `notifications.ts`, `lib/vly-integrations.ts`); added the 8 newer Convex modules (`videos`, `articles`, `analytics`, `loginRateLimit`, `migration`, `og_image`, `procedureIconDefaults`, `procedureSeoDefaults`), `lib/jsonLd.ts`, `lib/track.ts`, `middleware.ts`, `patches/`, `pages/Blog*`, `sections/Videos.tsx`/`Instagram.tsx`/`InformationCard.tsx`, `hooks/use-admin-text.ts`, `components/ErrorBoundary.tsx`, `AnalyticsTracker.tsx`, and the 11-tab dashboard layout.
+- **§6 schema:** documented the 6 missing tables — `articles`, `pageVisits`, `ipCountryCache`, `analyticsEvents`, `serviceTokens`, `loginAttempts` — and added the `instagramSection` site-settings key.
+- **§7/§8 auth:** replaced the Email-OTP/Freebuff flow with the real Password-provider flow, single Convex JWT provider, `promoteUser`, and the app-level login rate limiting (UI-enforced; server-side deferred).
+- **§22 TD-4/6/9 closed** (files deleted / `promoteUser` exists); **TD-5 partial** (`hono`/`react-day-picker`/`react-resizable-panels` removed from `package.json`; `recharts`/`next-themes` actually used; `zod` + `axios` installed but unused); **TD-7/TD-11 updated** (`schemaValidation: true`); **TD-10 resolved** (auth page fully bilingual).
+- **§23 BUG-3 marked fixed** (`http.ts` now checks `isActive`).
+- **§24 dead-code table:** `notifications.ts` → deleted; removed-package rows updated; `recharts`/`next-themes` → used; `instrumentation.tsx` → deleted.
+- **§25 security:** auth section rewritten (Password provider, 2-admin cap, login rate limiting); `dangerouslySetInnerHTML` corrected to 6 actual uses / 5 files — 5 JSON-LD blocks via the escaping `safeJsonLd()` helper + 1 shadcn chart `<style>` block (2 more textual hits are doc comments inside `jsonLd.ts` itself); secrets section updated (Freebuff key gone; briefing token stored hash-only); input validation notes `schemaValidation: true` and zod's zero usage.
+- **§26 rewritten** — tests exist (vitest 12/12), CI exists (`ci.yml`), 13 tables, Password auth, `notifications.ts` deleted, error monitoring = `ErrorBoundary` (no third party); added rows for Blog/Videos/Analytics/Briefing-API.
+- **§30 re-audited 2026-09-27:** dropped the obsolete Email-OTP item, marked the sitemap item fixed, added the login-rate-limiting caveat, corrected file counts (157 files, 22 convex modules, 11 pages), and fixed the "git unavailable" wording.
+- **CURRENT STATUS** refreshed to 2026-09-27 (`02ef1f5`, build health re-verified).
+
+**`REPORTS-AUDIT.md`:** indexed the three `ADMIN-UX-*` reports; resolved the §1/§6 "6 vs 5 sources" contradiction (verified: 6); added the 09-23/09-26 features (Clinic CMS, Instagram, hreflang, LazyMotion, `/briefing-analytics`).
+**`report 9-14-26.md`:** renumbered the duplicated Arabic headings (٣→٨، ٤→٩، ٥→١٠، ٦→١١; subsections ٦.x→١١.x; restored the missing ١١.١٣ Local SEO heading); checked off the two done §4 items (second admin + third rejection); annotated the obsolete `VLY_CONVEX_AUTH_ISSUER` item; added Arabic section ١١.١٦ documenting this pass.
+**`README.md`:** fixed the `src/` tree (removed the duplicated `components/dashboard/` entry, removed `convex/notifications.ts` + `convex/auth/`, fixed `users.ts`); completed the schema table (`articles`, `loginAttempts` + the other missing tables).
+**`PROJECT-HANDOVER-AUDIT.md`:** fixed the `schemaValidation` claim, the "tests/CI missing" claim, refreshed stale numbers.
+
+Deliberately untouched: `bun.lock` + `.gitignore` (`nohup.out`/`.devcontainer`) — optional cleanup, left for the owner to decide.

@@ -1,4 +1,4 @@
-# تقرير وضع المشروع — محدّث 19-9-2026
+# تقرير وضع المشروع — محدّث 27-9-2026
 
 **المستودع:** `abo3dam-hub/alhasan-aesthetics`
 **الفرع:** `main` — HEAD: `0be1cb1` (نهاية جلسة 18-9) → **`dc29c4e`** (جلسة 19-9، راجع §6)
@@ -277,11 +277,11 @@
 
 ## ٤. القضايا المفتوحة / الخطوات التالية
 
-- [ ] إنشاء حساب الـ Admin **الثاني** من صفحة التسجيل (مسموح — أول حسابين مديرين).
-- [ ] التحقق من أن حسابًا **ثالثًا** يُرفض عند التسجيل.
+- [x] إنشاء حساب الـ Admin **الثاني** من صفحة التسجيل (مسموح — أول حسابين مديرين). → **مُنجز (19-9):** أُنشئ الحسابان بنجاح عبر `promoteUser`.
+- [x] التحقق من أن حسابًا **ثالثًا** يُرفض عند التسجيل. → **مُنجز (19-9):** ظهرت رسالة الرفض («Registration is closed…») — حدّ الأدمنَيْن يعمل كما هو موثق في `src/convex/auth.ts`.
 - [x] ~~(لاحقًا) ربط النطاق `dr-alhasan.com` في Vercel — حاليًا `000` (غير متاح).~~ → **أُلغي (19-9): لا وجود لنطاق باسم `dr-alhasan.com`** — النطاق الوحيد الفعلي `dralhasanalsaiem.com`.
 - [ ] النطاق `alhasanalsaiem.com` مُضاف في إعدادات المشروع — يحتاج ربط في Vercel إذا أردنا استخدامه.
-- [ ] (تقني) `VLY_CONVEX_AUTH_ISSUER=https://freebuff.com` موجود فقط في `.env.local` المحلي (غير متتبع، dead) — تُنظّف عند الحاجة.
+- [x] ~~(تقني) `VLY_CONVEX_AUTH_ISSUER=https://freebuff.com` موجود فقط في `.env.local` المحلي (غير متتبع، dead) — تُنظّف عند الحاجة.~~ → **أُلغي نهائيًا (2026-09-27):** مسار Freebuff/VLY أُزيل كليًا من المشروع (المصادقة الآن Password فقط) — لا يوجد أي متغير `VLY_*` أو `FREEBUFF_*` في الكود.
 
 ---
 
@@ -300,8 +300,8 @@
 | اللون الرئيسي | `#8B7355` (warm bronze/taupe) |
 | النطاق | `alhasanalsaiem.com` |
 | الحزمة الأولى | 341.78KB (gzip: 106.09KB) |
-| ESLint | 0 أخطاء، 26 تحذيرًا حميدًا |
-| أحدث commit | `4e2f7b7` — feat: mobile CTA bar, WhatsApp/CTA conversion tracking, drag-compare homepage results |
+| ESLint | 0 أخطاء، 0 تحذيرات (تحقق 2026-09-27) |
+| أحدث commit | `02ef1f5` — feat: token-gated read-only briefing analytics API (/briefing-analytics) |
 
 ---
 
@@ -361,7 +361,7 @@
 
 ---
 
-## ٣. المقالات / المدونة (Blog Articles) — سيشن 2026-09-18
+## ٨. المقالات / المدونة (Blog Articles) — سيشن 2026-09-18
 
 ### ما تم بناؤه
 - **الجدول** `articles` في `schema.ts`: `slug` فريد، عناوين/مقتطفات/أجسام ثنائية اللغة (AR/EN)، `coverImage` و`ogImage` (من مكتبة الوسائط)، `categoryAr/categoryEn`، `relatedProcedureSlug` (ربط إجراء ذي صلة)، حقول SEO AR/EN، `publishDate/updatedDate/readingMinutes`، أعلام `isPublished/isFeatured` و`order`، مع فهرس `by_slug` و`by_order`.
@@ -389,9 +389,9 @@
 
 ---
 
-## ٤. جلسة 2026-09-18 (تكملة) — بطاقات OG + أزرار المشاركة + WebP + إصلاح JSON-LD
+## ٩. جلسة 2026-09-18 (تكملة) — بطاقات OG + أزرار المشاركة + WebP + إصلاح JSON-LD
 
-### ٤.١ مولد بطاقة المشاركة (Branded OG Share Card Generator)
+### ٩.١ مولد بطاقة المشاركة (Branded OG Share Card Generator)
 - **الهدف:** عند مشاركة رابط مقال على WhatsApp/Twitter/Facebook/LinkedIn تظهر صورة بطاقة 1200×630 تحمل العلامة (عنوان المقال + المقتطف فوق صورة الغلاف + هوية الموقع)، بدل الصورة الافتراضية.
 - **البنية الجديدة:**
   - `src/convex/og_image.tsx` — إجراء Convex من نوع `"use node"` (ليس query): يبنـي SVG عبر **satori** ثم يحوّله إلى PNG عبر **@resvg/resvg-wasm**، ويُضيف صورة الغلاف مع تراكب زجاجي داكن. لا canvas ولا HTML على العميل → صفر layout shift.
@@ -401,18 +401,18 @@
   - الحل: **patch-package** — `patches/harfbuzzjs+0.10.0.patch` يعدّل المحمل ليجلب `hb.wasm` من `https://cdn.jsdelivr.net/npm/harfbuzzjs@0.10.0/hb.wasm` وقت التشغيل ويمرّره عبر `wasmBinary`. أُضيف `postinstall: patch-package` في `package.json` (لا تحذفه — مهم عند أي `npm install` لاحق).
 - **خلل Convex ثانٍ — حُل:** الإجراءات لا تقبل إرجاع `Uint8Array` (رسالة "not a supported Convex type")؛ صارت الدالة تعيد/تخزّن **`ArrayBuffer`** (`rendered.buffer.slice(...)`).
 
-### ٤.٢ غلاف بحث البوتات `/og-meta` (استضافة Vercel edge)
+### ٩.٢ غلاف بحث البوتات `/og-meta` (استضافة Vercel edge)
 - `middleware.ts` في جذر المشروع: عندما يطلب **بوت** (Twitterbot/WhatsApp/SlackBot/...) صفحة مقال، تُستبدل الاستجابة بـ HTML خفيف فيه `meta[property=og:image]` = `/og-image?slug=…` مع `og:image:width/height` الصحيحتين؛ والمستخدم البشري يستقبل الـ SPA كالمعتاد.
 - بهذا تلتقط روابط المقالات صور البطاقة المخصصة عند المشاركة (تحقّق فعلي مباشر على الإنتاج بـ UA `Twitterbot` و`WhatsApp`).
 
-### ٤.٣ أزرار مشاركة
+### ٩.٣ أزرار مشاركة
 - **بطاقات القائمة (`/blog`):** زر مشاركة `CardShareButton` يوزّع عبر Web Share API على الجوال مع نسخ رابط المقال إلى الحافظة كاحتياط.
 - **صفحة المقال:** زر مشاركة العلني مطابق + حدث تحليلات `share` يُرسل عبر نفس `/trackVisit`.
 
-### ٤.٤ أداء الصور — WebP + `<picture>`
+### ٩.٤ أداء الصور — WebP + `<picture>`
 - مولّدنا صيغ WebP مضغوطة من الصور الثابتة عبر `sharp` (المولدة إلى `public/assets/*.webp`) مع `BrandMark.tsx` (مكوّن `<picture>` بسقوط JPG/PNG) في: الناف بار، الفوتر، الشعار في المخطط الزمني، وقسم About (مع `srcSet`/`sizes`).
 
-### ٤.٥ إصلاح JSON-LD للشعار
+### ٩.٥ إصلاح JSON-LD للشعار
 - شعار Organization في توصيف المقالات أصبح يشير إلى `https://dralhasanalsaiem.com/assets/3.jpg` — لتمرير متطلبات Google للشعار في النتائج الغنية.
 
 ### التحقق + النشر
@@ -423,7 +423,7 @@
 
 ---
 
-## ٥. جلسة 2026-09-18 (الإصلاح) — صورة المشاركة على WhatsApp
+## ١٠. جلسة 2026-09-18 (الإصلاح) — صورة المشاركة على WhatsApp
 
 ### الشكوى
 عند مشاركة رابط مقال الأنف، ظهر **كرت نصّي** بلا صورة (عنوان المقال + اسم الدكتور + عنوان الموقع) — لا غلاف ولا بطاقة ذات العلامة.
@@ -444,42 +444,42 @@
 
 ---
 
-## ٦. جلسة 2026-09-19 — تسليم Codespaces + إغلاق بند الأدمن + مراجعة التقارير + Refactor الداشبورد
+## ١١. جلسة 2026-09-19 — تسليم Codespaces + إغلاق بند الأدمن + مراجعة التقارير + Refactor الداشبورد
 
-### ٦.١ إعداد Codespaces وحالة التحقق
+### ١١.١ إعداد Codespaces وحالة التحقق
 - إعداد كامل (npm / patch-package / env / فحص قراءة-only للتقارير) موثّق في `CODESPACES-SETUP-REPORT.md`؛ فحص الحالة: `tsc` نظيف، ESLint 0 أخطاء (~30 تحذيرًا سابقًا)، build أخضر، الالتزام `f7c85de`.
 - جولة تدقيق شاملة (قراءة-only) → `PROJECT-HANDOVER-AUDIT.md` (الالتزام `e2a575b`).
 
-### ٦.٢ إغلاق بند الأدمن نهائيًا
+### ١١.٢ إغلاق بند الأدمن نهائيًا
 - أنشأ المالك حسابَي admin على Production `kindly-anaconda-422` بنجاح، وعند محاولة إنشاء ثالث ظهرت رسالة الرفض «Registration is closed…» → **حدّان-admin يعمل ذريًا** كما في `src/convex/auth.ts`؛ بذلك أُغلق آخر بند مفتوح من قائمة الجلسات السابقة.
 
-### ٦.٣ مراجعة جميع التقارير
+### ١١.٣ مراجعة جميع التقارير
 - مراجعة 26 ملف تقرير في المستودع ومطابقتها بالكود الحالي → `REPORTS-AUDIT.md` (الالتزام `df79c19`). الحاصلة: 5 مصادر حقيقة حاليّة، 4 تقارير مرفقة بـ banner تصحيحي، والباقي أرشيف تاريخي.
 
-### ٦.٤ Refactor الداشبورد (إغلاق TD-1)
+### ١١.٤ Refactor الداشبورد (إغلاق TD-1)
 - `src/pages/Dashboard.tsx` (Monolith ~2050 سطرًا) → shell (~48 سطرًا) يدير auth/active tab/sign-out/layout فقط.
 - كل تبويب مكوّن مستقل في `src/components/dashboard/`: `DashboardOverviewTab`، `DashboardAnalyticsTab`، `DashboardProceduresTab` (مع `ProcedureForm`)، `DashboardBeforeAfterTab`، `DashboardTestimonialsTab`، `DashboardFaqTab`، `DashboardSettingsTab`، `DashboardMediaTab` (مع أداة الرفع وكل سلوك storageId/references)؛ إضافة إلى `HomepageCMSTab`/`ArticlesTab`/`SEOTab` السابقين، و`DashboardLayout` + `DashboardNav` + `dashboard-utils.ts` (مشترك `swapOrder`/`OrderableItem`).
 - تحقق: `npx tsc -b` نظيف، ESLint 0 أخطاء، build أخضر بنفس حجم الـ entry (342.22KB/gzip 106.24KB). الالتزام الوحيد: **`dc29c4e`** (`refactor: split monolithic dashboard into modular tabs`).
 
-### ٦.٥ تحديث الوثائق المرتبطة
+### ١١.٥ تحديث الوثائق المرتبطة
 - حدّثت `PROJECT-MASTER-HANDOVER.md` (كتلة CURRENT STATUS + شجرة الملفات + قسم Dashboard + TD-1 + Fragile Areas + Recommended First Investigation)، `PROJECT-HANDOVER-AUDIT.md` (§1.5 + جدول TD)، `REPORTS-AUDIT.md` (تحديثات + §5)، و`README.md` (الشجرة) بما يطابق البنية الجديدة. بند **TD-1** صار **محلولًا**.
 
-### ٦.٦ رفع blockers بيئة العمل (من المالك)
+### ١١.٦ رفع blockers بيئة العمل (من المالك)
 - سجّل المالك الدخول من Codespaces عبر `npx convex login`، وتأكّد في Vercel أن `VITE_CONVEX_URL` = `https://kindly-anaconda-422.convex.cloud`.
 - بذلك انتهى آخر بلوكين موثقين (Convex غير معلّق + Vercel env غير قابلة للفحص) — البيئة جاهزة لأي `codegen`/`deploy`/عمل Convex قادم.
 
-### ٦.٧ إصلاحات البند «الصغيرة» + تحديث الوثائق + دفعة k = 21
+### ١١.٧ إصلاحات البند «الصغيرة» + تحديث الوثائق + دفعة k = 21
 - **4.1 صورة الطبيب:** مؤكَّد مكتمل أصلًا — `About.tsx:95` يقرأ `aboutCMS.image` عبر `ResolvedImage`، وحقل "Doctor Profile Image" موجود في HomepageCMSTab، والبيانات في Production مضبوطة (`about.image = kg281f7...` — تحقق قراءة-only عبر `npx convex run homepageSettings:getAboutSettings` على `kindly-anaconda-422`). الاستيراد الثابت `/assets/1.jpg` مجرد fallback.
 - **4.2 توحيد `resolveUrls`:** في `src/convex/media.ts` يعيد `""` عند فشل الـ storageId (نفس `resolveUrl`) بدل raw storageId كمصدر صورة مكسور. **يحتاج `convex deploy` ليسري على Production.**
 - **4.3 تنظيف VLY:** حذف `src/instrumentation.tsx` و`src/lib/vly-integrations.ts`، فك ربط `@vly-ai/integrations` (استيراد `main.tsx` + `vlyPlugin()` في `vite.config.ts` + من `package.json`/`package-lock.json`). بقي `VlyToolbar` كأداة preview. لا بقايا VLY/Freebuff في `src/` سوى إشارة الـtoolbar.
 - **4.4 `.env.local` (آخر القائمة):** غير موجود في workspace هذا (مهمَل في `.gitignore`) — لا شيء يُحذف؛ بقي `VLY_CONVEX_AUTH_ISSUER` القديم خارج المستودع بلا أي reference.
 - تحقق: `npx tsc -b` نظيف، ESLint 0 أخطاء (30 تحذيرًا كلها سابقة)، build أخضر (الـentry 340.19KB/gzip 105.54KB — أصغر من 342.22 بعد إزالة استيراد VLY). الالتزام: **`502fb6e`** — رُفعت التحديثات ووثّقت في `REPORTS-AUDIT.md` (بعنوان «نفذ البند 4»), `PROJECT-MASTER-HANDOVER.md`, `CODESPACES-SETUP-REPORT.md`.
 
-### ٦.٨ قرارات المالك (بند «اختر لي»)
+### ١١.٨ قرارات المالك (بند «اختر لي»)
 - **لا نعرب صفحة `/auth`** — بند TD-10 في قائمة المقترحات **أُلغي بقرار المالك** (لا يُنفَّذ).
 - **النطاق:** لا وجود لنطاق باسم `dr-alhasan.com`؛ النطاق الوحيد الفعلي هو **`dralhasanalsaiem.com`**. صُحّحت إشارات `dr-alhasan.com` في `PROJECT-HANDOVER-AUDIT.md` و`PROJECT-MASTER-HANDOVER.md` (canonical) و`REPORTS-AUDIT.md` و`report 9-14-26.md` (بند ربط النطاق أُلغي).
 
-### ٦.٩ جلسة إكمال بنود القائمة المتبقية — تحقق نظيف + نشر Convex (2026-09-21)
+### ١١.٩ جلسة إكمال بنود القائمة المتبقية — تحقق نظيف + نشر Convex (2026-09-21)
 نفّذت كل البنود المتبقية من قائمة الأمن/المراجعة، وتحقّق كامل ثم نُشر على Convex Prod. **لم يُعمل أي git commit** (بانتظار موافقة المالك).
 
 **التحقق النهائي (كلّه نظيف):**
@@ -500,7 +500,7 @@
 - حُذفت أخطاء كثيرة كانت تظهر سابقًا بسبب حالة node_modules غير المتطابقة أثناء الفحص؛ في الحالة المتّسقة نهائيًا لا أخطاء.
 - `git status` (غير committed): تعديلات الكود/الوثائق أعلاه + ملفات جديدة (`loginRateLimit.ts`, `jsonLd.ts`, `vitest.config.ts`, `src/lib/__tests__/*`, `.github/workflows/ci.yml`) + حذف (`ui/calendar.tsx`, `ui/resizable.tsx`, `convex/notifications.ts`).
 
-### ٦.١٠ إصلاحات مراجعة خارجية — تقوية التحليلات + إصلاحات Reels (2026-09-23)
+### ١١.١٠ إصلاحات مراجعة خارجية — تقوية التحليلات + إصلاحات Reels (2026-09-23)
 
 مراجعة كود خارجية (كل الفحوص خضراء: `tsc -b`، `eslint`، `vitest` 12/12، `vite build`) اكتشفت وأصلحت:
 
@@ -510,7 +510,7 @@
 
 مؤجّل (يتطلب تغييرًا معماريًا): تقييد محاولات الدخول (`loginRateLimit.ts`) مطبّق حاليًا في واجهة صفحة Auth فقط ويمكن تجاوزه عبر الـ API مباشرة؛ التنفيذ الصحيح يكون من جهة الخادم داخل مزوّد Password في `@convex-dev/auth`.
 
-### ٦.١١ تحسينات الأداء — تسريع التحميل (2026-09-23)
+### ١١.١١ تحسينات الأداء — تسريع التحميل (2026-09-23)
 
 تحسينات على زمن التحميل فقط، دون أي تغيير في التصميم أو الوظائف أو المعمارية:
 
@@ -520,7 +520,7 @@
 
 الفُحوص كلها خضراء: `tsc -b`، `eslint`، `vitest` (12/12)، `vite build`.
 
-### ٦.١٢ تحسينات جمالية وإصلاح وميض الصورة (2026-09-23)
+### ١١.١٢ تحسينات جمالية وإصلاح وميض الصورة (2026-09-23)
 
 تحسينات بصرية وتجربة استخدام فقط، دون تغيير المعمارية:
 
@@ -532,7 +532,7 @@
 
 الفُحوص كلها خضراء: `tsc -b`، `eslint`، `vitest` (12/12)، `vite build`.
 
-### ٦.١٤ لمسات جمالية بأداء صفري (2026-09-23)
+### ١١.١٣ لمسات جمالية بأداء صفري (2026-09-23)
 
 بناءً على اقتراحات معتمدة من صاحب الموقع (1-3-4-5-6-8)، وكلها CSS خالص أو خصائص مدعومة بالـ GPU — دون مكتبات جديدة ودون أي أثر على الأداء:
 
@@ -542,6 +542,8 @@
 - **تحقّق من الموجود مسبقًا**: طبقة الحبيبات (grain) مثبّتة في `main.tsx`، والتلاشي الناعم بين الصفحات (`.page-enter`) موجود، وإيقاع ترويسات الأقسام (شارة + عنوان + سطر ذهبي + وصف) موحّد أصلًا في الأقسام الستة — لم يتطلب تغييرًا.
 
 الفُحوص كلها خضراء: `tsc -b`، `eslint`، `vitest` (12/12)، `vite build`.
+
+### ١١.١٤ تحسينات Local SEO — العيادات + hreflang (2026-09-23)
 
 ملاحظة مهمة من صاحب الموقع: العيادات الحقيقية ثلاث فقط (دمشق، اللاذقية، دبي)؛ طرطوس وبيروت والعراق مناطق نخدم مرضاها وليست عناوين فيزيائية — لذلك لا تُذكر أبدًا كعناوين في البيانات المنظمة.
 
@@ -554,7 +556,7 @@
 الفُحوص كلها خضراء: `tsc -b`، `eslint`، `vitest` (12/12)، `vite build`.
 
 
-### ٦.١٥ مفتاح API للتحليلات خاص بالإحاطة الصباحية (2026-09-26)
+### ١١.١٥ مفتاح API للتحليلات خاص بالإحاطة الصباحية (2026-09-26)
 
 كانت الإحاطة الصباحية الآلية عاجزة عن قراءة أرقام الأمس لأن تسجيل دخول لوحة التحكم يتطلب موافقة تفاعلية من المالك لا تصل في التشغيل الآلي. وبموافقة المالك ("take the API") أُضيف مفتاح قراءة مصغّر بدل تسجيل الدخول بالمتصفح — دون أي تغيير معماري أو تعديل على المصادقة:
 
@@ -564,3 +566,15 @@
 - المفتاح الحي (256 بت عشوائي) محفوظ بصلاحيات `0600` في `hidden_files/analytics_api_token` خارج git — لا يظهر في المحادثات أو السجلات. حُدّثت تعليمات مهمة الإحاطة الصباحية لتجلب الأرقام عبر `curl` بدل تسجيل الدخول التفاعلي.
 
 الفُحوص كلها خضراء: `tsc -b`، `eslint`، `vitest` (12/12)؛ والنقطة اختُبرت فعليًا ضد الإنتاج وعادت بأرقام حقيقية.
+
+### ١١.١٦ تصحيح شامل للتقارير لتعكس الواقع الحالي (2026-09-27)
+
+بموافقة المالك: مراجعة توثيقية شاملة فقط — **دون أي تغيير في الكود**. مراجعة خارجية رصدت انحراف التوثيق عن الكود (مراجع محذوفة، بنود حرجة خاطئة، أرقام قديمة)؛ أُعيد التحقق من كل ادعاء مقابل الشجرة الحية (`main` عند `02ef1f5`) قبل التصحيح، والفُحوص أُعيد تشغيلها فعليًا: `npx tsc --noEmit` سليم، ESLint **0/0**، `vitest` **12/12** (3 ملفات).
+
+**الأخطر أولًا — `PROJECT-MASTER-HANDOVER.md` §27:** هذا القسم هو قائمة «ممنوع كسرها» التي يتبعها الوكلاء القادمون حرفيًا، وكان فيه 4 بنود خاطئة: البند 3 كان يطالب بمزوّدَي JWT (Convex + Freebuff) بينما Freebuff أُزيل كليًا — أُصلح ليمنع إعادة إضافته مع إبقاء التحذير الصحيح (عدم تحويل مدخل Convex إلى `customJwt`)؛ البند 4 كان يقول `schemaValidation: false` بينما الواقع `true` منذ `b154f44`؛ البند 8 كان يتحدث عن `becomeAdmin` المستبدَل بـ`promoteUser` مع حدّ أدمنَيْن؛ البند 11 كان يتحدث عن إعداد Freebuff المحذوف — أُصلح ليصف إعداد HMR الحقيقي.
+
+**بقية التصحيحات في نفس الملف:** أُعيد توليد §2 (خريطة المشروع) من الشجرة الفعلية — 157 ملفًا، 21 وحدة Convex، 11 صفحة، 11 تبويب لوحة تحكم؛ §6 أُضيفت الجداول الستة الناقصة (`articles`، `pageVisits`، `ipCountryCache`، `analyticsEvents`، `serviceTokens`، `loginAttempts`)؛ §7/§8 استُبدل مسار Email-OTP/Freebuff بمسار Password الفعلي؛ TD-4 وTD-6 وTD-9 أُغلقت، وTD-5 أصبحت جزئية (`hono`/`react-day-picker`/`react-resizable-panels` أُزيلت من `package.json`، و`recharts`/`next-themes` مستخدمان فعلًا، و`zod` ما زال بلا استخدام)، وTD-7/TD-11 عُدّلا (`schemaValidation: true`)، وTD-10 حُلّ (صفحة الدخول ثنائية اللغة)؛ BUG-3 عُلّم كمُصلَح؛ §24 حُدّث (ملفات محذوفة، تبعيات مستخدمة)؛ §25 أُعيدت كتابته — `dangerouslySetInnerHTML` في 8 مواضع عبر 6 ملفات (7 منها JSON-LD عبر دالة `safeJsonLd` التي تُهرّب `<`، والثامن كتلة `<style>` قياسية من shadcn)؛ §26 أُعيدت كتابتها (الاختبارات والـCI موجودان، 13 جدولًا، المصادقة Password)؛ §30 أُعيد تدقيقها بتاريخ اليوم.
+
+**الملفات الأخرى:** `REPORTS-AUDIT.md` — فُهرست تقارير `ADMIN-UX-*` الثلاثة، وحُسم تناقض «6 مقابل 5» لصالح 6 مصادر حقيقة، وأُضيفت ميزات 09-23/09-26؛ `README.md` — أُصلحت شجرة `src/` واكتمل جدول السكيما؛ `PROJECT-HANDOVER-AUDIT.md` — صُحّح ادعاء `schemaValidation` و«غياب الاختبارات/CI» والأرقام القديمة.
+
+**تُرك عمدًا دون تغيير:** `bun.lock` و`.gitignore` (`nohup.out` / `.devcontainer`) — تنظيف اختياري يُترك لقرار المالك.

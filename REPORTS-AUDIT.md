@@ -1,7 +1,14 @@
 # REPORTS AUDIT — مراجعة جميع تقارير المستودع
 
-**التاريخ:** 2026-09-19
-**المرجع:** HEAD `e2a575b` (الكود آخر تعديله `b842f3c`)
+**التاريخ:** 2026-09-27 (تحديث شامِل — انظر الملاحظة أدناه)
+**المرجع:** HEAD `02ef1f5` (متزامن مع `origin/main`)
+
+> **تحديث 2026-09-27 (تصحيح التوثيق):** أُعيد التحقق من كل الأرقام والادعاءات أدناه مقابل الكود
+> الحي: `npx tsc --noEmit` سليم، ESLint **0 أخطاء / 0 تحذيرات**، `vitest` **12/12** (3 ملفات)،
+> **157** ملفاً تحت `src/`، **13** جدولاً في السكيما (`schemaValidation: true`). أُضيفت التقارير
+> الثلاثة `ADMIN-UX-*` إلى الفهرس (§1، الصفوف 28–30)، وحُسم تناقض «6 مقابل 5» لصالح **6**
+> (§6 أدناه)، وحُدّثت الميزات 09-23/09-26 (Clinic CMS، Instagram، hreflang، LazyMotion،
+> `/briefing-analytics`).
 
 > **تحديث 2026-09-19 (تحقق حي على Production):** تم إنشاء حسابَي admin بنجاح، وعند محاولة
 > إنشاء حساب ثالث ظهرت رسالة الرفض («Registration is closed…») — **حدّان-admin يعمل كما هو
@@ -15,7 +22,7 @@
 > انظر §1، الصف 27). اكتملت جولة تحسين أُدمن الفيديو: pagination + شريط إحصائيات + تحقق فوري من الملف
 > + توليد غلاف تلقائي من الفيديو (#4) + إعادة ترتيب بالأزرار وحذف جماعي (#8، عبر `moveVideo`/
 > `deleteVideos` في `src/convex/videos.ts`) + الوصف يتبع لغة الواجهة.
-**المنهجية:** مراجعة كل ملف تقرير في المستودع (26 ملفاً) ومطابقته مع **الكود الفعلي الحالي** (auth، schema، http، main.tsx، middleware، vercel.json، env) ومع كتلة **"CURRENT STATUS — refreshed 2026-09-18"** في `PROJECT-MASTER-HANDOVER.md`.
+**المنهجية:** مراجعة كل ملف تقرير في المستودع (31 ملفاً: 23 `.md` + 8 `.txt`) ومطابقته مع **الكود الفعلي الحالي** (auth، schema، http، main.tsx، middleware، vercel.json، env) ومع كتلة **"CURRENT STATUS — refreshed 2026-09-27"** في `PROJECT-MASTER-HANDOVER.md`.
 
 ---
 
@@ -50,9 +57,12 @@
 | 25 | `DATA-SYNC-DIAGNOSIS-REPORT.txt` | 2-9 | 🟡 تشخيص ما زال مناسباً محتملاً |
 | 26 | `integrations.md` | بلا تاريخ | 🔴 وثقة VLY قديمة غير موصولة بالكود |
 | 27 | `VIDEO-SECTION-FEATURE-REPORT.md` | 22-9 | ✅ **مرجع حالي** (قسم الفيديوهات Reels + إدارة الأُدمن) |
+| 28 | `ADMIN-UX-AUDIT-AND-IMPROVEMENT-PLAN.md` | 19-9 | 🟡 خطة تحسين أُدمن (نُفّذت مرحلتان منها — انظر 29 و30) |
+| 29 | `ADMIN-UX-PHASE1-COMPLETION-REPORT.md` | 19-9 | 🟡 تاريخي + **مكتمل** (المرحلة 1 من خطة الأُدمن) |
+| 30 | `ADMIN-UX-PHASE2-COMPLETION-REPORT.md` | 19-9 | 🟡 تاريخي + **مكتمل** (المرحلة 2 من خطة الأُدمن) |
 
 > الملاحظة: ملفات المرجع الحالي = **6**، التاريخية المصحوبة بـbanner = **4**،
-> التاريخية الخام بلا banner = **13**، وفيها بقايا صالحة = **4** (المجموع 27).
+> التاريخية الخام بلا banner = **13**، وفيها بقايا صالحة = **4**، وخطط/تقارير الأُدمن = **3** (المجموع 30).
 
 ---
 
@@ -65,7 +75,7 @@
    `customJwt` و`VLY_CONVEX_AUTH_ISSUER` أُزيلا نهائياً.
 2. **نطاقات/Deployments:** `dr-alhasan.com` (**لا وجود لنطاق بهذا الاسم** — ذُكر كوهمي)، `impartial-ladybug-881`، `gregarious-perch-128`
    → الحقيقي: **`dralhasanalsaiem.com`** وحيداً، و**`kindly-anaconda-422`** هو production.
-3. **التوابـل:** «7 جداول» → الحالي **12** (أُضيفت articles, pageVisits, ipCountryCache, analyticsEvents).
+3. **التوابـل:** «7 جداول» → الحالي **13** (`users`، `procedures`، `articles`، `beforeAfter`، `testimonials`، `faq`، `media`، `siteSettings`، `pageVisits`، `ipCountryCache`، `analyticsEvents`، `serviceTokens`، `loginAttempts`) مع `schemaValidation: true`.
 4. **الـbuild:** أرقام `bun` القديمة و«Index 461.71 kB» → الحالي npm، entry **≈342.22 kB (gzip 106.24 kB)**.
 5. **بند صار خاطئاً نص التاريخ:** `BUG-3` (sitemap `active` بدل `isActive`) → **حُلّ** في `http.ts:65`.
 6. **قيد «hero/CTA image fields»** في عدد من التقارير لم يعد قابلاً للاستخدام — عمدي (قاعدة CMS).
@@ -118,15 +128,17 @@
 - ~~`Dashboard.tsx` monolith (~2050 سطراً)~~ → **حُلّ (2026-09-19، `dc29c4e`):** الملف صار shellاً
   (~48 سطراً) وكل تبويب مكوّن مستقل في `src/components/dashboard/` (`Dashboard*Tab.tsx` +
   `DashboardLayout`/`DashboardNav`/`dashboard-utils.ts`)؛ الملاحظة القديمة أعلاه صارت تاريخية.
-- صفحة `/auth` إنجليزية دائماً (بند TD-10 قائم، تحقّقنا: لا i18n في `Auth.tsx`).
+- صفحة `/auth` ~~إنجليزية دائماً (بند TD-10 قائم، تحقّقنا: لا i18n في `Auth.tsx`)~~ → ✅ **حُلّ:** الصفحة ثنائية اللغة بالكامل الآن (مفاتيح `admin.auth.*` في `src/locales`) — تحقق 2026-09-27: لا سلاسل إنجليزية ثابتة في `Auth.tsx`.
+- **ميزات 09-23/09-26 غير المفهرسة سابقاً:** عيادات CMS + MedicalClinic JSON-LD (دمشق/اللاذقية/دبي فقط)، قسم Instagram، hreflang مع `/ar` و`/en`، LazyMotion، ونقطة `/briefing-analytics` (توكن قراءة-فقط للإحاطة الصباحية) — كلها موثقة الآن في `PROJECT-MASTER-HANDOVER.md` (الإضافات) و`report 9-14-26.md` (§١١.١١–١١.١٦).
 
 ---
 
 ## 6) الخلاصة
 
-- **مصادر الحقيقة للوضع الحالي (5 ملفات):** `README.md`، `PROJECT-MASTER-HANDOVER.md`
-  (كتلة التحديث 18-9 هي الأعلى سلطة)، `CODESPACES-SETUP-REPORT.md`، `PROJECT-HANDOVER-AUDIT.md`،
-  و`report 9-14-26.md` لسجل الجلسات.
+- **مصادر الحقيقة للوضع الحالي (6 ملفات):** `README.md`، `PROJECT-MASTER-HANDOVER.md`
+  (كتلة التحديث 27-9 هي الأعلى سلطة)، `CODESPACES-SETUP-REPORT.md`، `PROJECT-HANDOVER-AUDIT.md`،
+  `VIDEO-SECTION-FEATURE-REPORT.md`، و`report 9-14-26.md` لسجل الجلسات.
+  (حُسم التناقض السابق «6 مقابل 5» لصالح 6 — كان `VIDEO-SECTION-FEATURE-REPORT.md` ساقطاً من القائمة هنا.)
 - **التقارير التاريخية (17+ ملفاً):** يُنصح بمعاملتها كأرشيف فقط؛ لا تُبنى عليها قرارات تخص الحالة الحالية.
 - **لا يوجد تناقض حالي يمنع التطوير**؛ الـblockers السابقة (أمور مالك فقط: `convex login`، فحص Vercel env)
   ~~أُغلقت~~ → ✅ **مؤكَّدة من المالك (2026-09-19):** تم تسجيل الدخول من Codespaces + تأكيد `VITE_CONVEX_URL` على Vercel.
