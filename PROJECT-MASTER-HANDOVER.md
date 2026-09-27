@@ -31,8 +31,9 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 - **Build health (verified 2026-09-27):** `npx tsc --noEmit` clean, ESLint **0 errors / 0 warnings**, `vitest` 12/12 (3 files) green; entry chunk ≈342 KB (gzip ≈104 KB).
 - **Domain:** the real domain **`dralhasanalsaiem.com`** is now fully wired in Vercel and is **live in production** — all canonical/OG/JSON-LD/sitemap/robots references point at it (superseding the placeholder `dr-alhasan.com`, which is not registered in DNS). Verified: `curl -A "Twitterbot" https://dralhasanalsaiem.com/blog/<slug>` returns the `/og-meta` shell whose `og:image` resolves to a valid 1200×630 PNG.
 - **Infra notes:** `package.json` has a `postinstall: patch-package` script (do not remove). `src/convex/_generated` is gitignored (only `api.d.ts` is tracked) — regenerate with `npx convex dev --once` / deploy.
-- **Canonical reference:** for the most current, self-contained overview read `README.md`; for the latest session log read `report 9-14-26.md`.
-- **Docs-correction pass (2026-09-27):** this handover (and `REPORTS-AUDIT.md`, `report 9-14-26.md`, `README.md`, `PROJECT-HANDOVER-AUDIT.md`) was corrected to match the actual code — stale Freebuff/Email-OTP references, wrong §27 invariants, outdated §26/§23/§30, and regenerated §2 project map. Docs-only; no code changed. See the "Addendum — Documentation correction pass (2026-09-27)" at the end of this file.
+- **Canonical reference:** for the most current, self-contained overview read `README.md`; for the latest session log read `WORK-LOG.md`.
+- **Docs-correction pass (2026-09-27):** this handover (and `WORK-LOG.md`, `README.md`, plus the since-archived `REPORTS-AUDIT.md` / `PROJECT-HANDOVER-AUDIT.md`) was corrected to match the actual code — stale Freebuff/Email-OTP references, wrong §27 invariants, outdated §26/§23/§30, and regenerated §2 project map. Docs-only; no code changed. See the "Addendum — Documentation correction pass (2026-09-27)" at the end of this file.
+- **Docs reorganization (2026-09-27):** all one-time/phase/audit reports were moved to `docs/archive/` (frozen history — do not treat as current). The living docs are: `README.md`, `PROJECT-MASTER-HANDOVER.md`, `WORK-LOG.md` (renamed from `report 9-14-26.md`), `VIDEO-SECTION-FEATURE-REPORT.md`.
 
 ---
 
@@ -2062,7 +2063,7 @@ Docs-only pass (no code changed). An external review found documentation drift a
 - **CURRENT STATUS** refreshed to 2026-09-27 (`02ef1f5`, build health re-verified).
 
 **`REPORTS-AUDIT.md`:** indexed the three `ADMIN-UX-*` reports; resolved the §1/§6 "6 vs 5 sources" contradiction (verified: 6); added the 09-23/09-26 features (Clinic CMS, Instagram, hreflang, LazyMotion, `/briefing-analytics`).
-**`report 9-14-26.md`:** renumbered the duplicated Arabic headings (٣→٨، ٤→٩، ٥→١٠، ٦→١١; subsections ٦.x→١١.x; restored the missing ١١.١٣ Local SEO heading); checked off the two done §4 items (second admin + third rejection); annotated the obsolete `VLY_CONVEX_AUTH_ISSUER` item; added Arabic section ١١.١٦ documenting this pass.
+**`WORK-LOG.md`** (formerly `report 9-14-26.md`): renumbered the duplicated Arabic headings (٣→٨، ٤→٩، ٥→١٠، ٦→١١; subsections ٦.x→١١.x; restored the missing ١١.١٣ Local SEO heading); checked off the two done §4 items (second admin + third rejection); annotated the obsolete `VLY_CONVEX_AUTH_ISSUER` item; added Arabic section ١١.١٦ documenting this pass.
 **`README.md`:** fixed the `src/` tree (removed the duplicated `components/dashboard/` entry, removed `convex/notifications.ts` + `convex/auth/`, fixed `users.ts`); completed the schema table (`articles`, `loginAttempts` + the other missing tables).
 **`PROJECT-HANDOVER-AUDIT.md`:** fixed the `schemaValidation` claim, the "tests/CI missing" claim, refreshed stale numbers.
 
