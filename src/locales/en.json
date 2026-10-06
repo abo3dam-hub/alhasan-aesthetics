@@ -217,6 +217,16 @@
     "shareCopied": "Article link copied to clipboard",
     "shareFailed": "Could not copy the link"
   },
+  "latestArticles": {
+    "badge": "Medical Blog",
+    "title": "Latest",
+    "titleHighlight": "Articles",
+    "subtitle": "Trusted articles by Dr. Al Hasan Al Saiem to help you understand aesthetic procedures and decide with confidence.",
+    "readMore": "Read article",
+    "allArticles": "All articles",
+    "minutes": "min read",
+    "featured": "Featured"
+  },
   "proceduresPage": {
     "title": "Our Procedures",
     "subtitle": "Discover our comprehensive range of aesthetic and plastic surgery procedures, each designed to deliver natural, refined results.",
@@ -711,7 +721,9 @@
       "saveSection": "Save section title",
       "saveVisibility": "Save visibility",
       "defaultTranslationsHint": "Default translations are saved regardless of the display language.",
-      "relatedNote": "Linked to the relevant site settings content."
+      "relatedNote": "Linked to the relevant site settings content.",
+      "latestArticles": "Latest Articles",
+      "latestArticlesCount": "Number of articles shown"
     },
     "videos": {
       "title": "Homepage videos",

@@ -23,7 +23,7 @@ Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-
 src/
 ├── components/
 │   ├── sections/       # Homepage sections (Hero, About, Procedures, BeforeAfter,
-│   │                   #   Testimonials, FAQ, CTA, Contact, InformationCard, Videos)
+│   │                   #   Testimonials, LatestArticles, FAQ, CTA, Contact, InformationCard, Videos)
 │   ├── dashboard/      # Admin CMS tabs: Dashboard*Tab.tsx (Overview, Analytics, Procedures,
 │   │                   #   Before & After, Testimonials, FAQ, Articles, Settings, Media),
 │   │                   #   HomepageCMSTab, SEOTab, VideoEditor, DashboardLayout,
@@ -129,6 +129,7 @@ Every homepage section header and content is CMS-managed:
 | **Procedures Header** | Badge, title, title highlight, subtitle |
 | **Before & After Header** | Badge, title, title highlight, subtitle |
 | **Testimonials Header** | Badge, title, title highlight, subtitle |
+| **Latest Articles Header** | Badge, title, title highlight, subtitle + article count (2–6) |
 | **FAQ Header** | Badge, title, title highlight, subtitle |
 | **CTA** | Badge, title, description, button text, destination, enable/disable |
 | **Footer** | Description (AR/EN) |
@@ -257,6 +258,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | **Procedures** | procedures.listActive + section header CMS | translations |
 | **Before & After** | beforeAfter.listActive + section header CMS | placeholder |
 | **Testimonials** | testimonials.listActive (photos + lightbox) + section header CMS | placeholder |
+| **Latest Articles** | articles.listPublished + section header CMS + count config (`latestArticlesConfig`) | — (auto-hides when no published articles) |
 | **FAQ** | faq.listActive + section header CMS | translations |
 | **Videos** | videos.getVideos (active + showOnHome) + section header CMS | translations (empty state) |
 | **Contact** | siteSettings.doctor (phone, email, address) | — |

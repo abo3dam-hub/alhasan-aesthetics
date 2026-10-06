@@ -97,6 +97,7 @@ export default function HomepageCMSTab() {
     { key: "procedures-header", label: admin.homepage.proceduresHeader },
     { key: "beforeAfter-header", label: admin.homepage.beforeAfterHeader },
     { key: "testimonials-header", label: admin.homepage.testimonialsHeader },
+    { key: "latestArticles-header", label: admin.homepage.latestArticles },
     { key: "faq-header", label: admin.homepage.faqHeader },
     { key: "cta", label: admin.homepage.cta },
     { key: "footer", label: admin.homepage.footer },
@@ -136,6 +137,12 @@ export default function HomepageCMSTab() {
               {section.key === "procedures-header" && <SectionHeaderEditor sectionKey="proceduresSection" label={admin.nav.procedures} fallbackKeys={{ badge: "procedures.badge", title: "procedures.title", titleHighlight: "procedures.titleHighlight", subtitle: "procedures.subtitle" }} />}
               {section.key === "beforeAfter-header" && <SectionHeaderEditor sectionKey="beforeAfterSection" label={admin.nav.beforeAfter} fallbackKeys={{ badge: "beforeAfter.badge", title: "beforeAfter.title", titleHighlight: "beforeAfter.titleHighlight", subtitle: "beforeAfter.subtitle" }} />}
               {section.key === "testimonials-header" && <SectionHeaderEditor sectionKey="testimonialsSection" label={admin.nav.testimonials} fallbackKeys={{ badge: "testimonials.badge", title: "testimonials.title", titleHighlight: "testimonials.titleHighlight", subtitle: "testimonials.subtitle" }} />}
+              {section.key === "latestArticles-header" && (
+                <div className="space-y-4">
+                  <SectionHeaderEditor sectionKey="latestArticlesSection" label={admin.homepage.latestArticles} fallbackKeys={{ badge: "latestArticles.badge", title: "latestArticles.title", titleHighlight: "latestArticles.titleHighlight", subtitle: "latestArticles.subtitle" }} />
+                  <LatestArticlesCountEditor />
+                </div>
+              )}
               {section.key === "faq-header" && <SectionHeaderEditor sectionKey="faqSection" label={admin.nav.faq} fallbackKeys={{ badge: "faq.badge", title: "faq.title", titleHighlight: "faq.titleHighlight", subtitle: "faq.subtitle" }} />}
               {section.key === "cta" && <CTAEditor />}
               {section.key === "footer" && <FooterEditor />}
@@ -743,6 +750,54 @@ function InstagramEditor() {
 }
 
 // ─── Section Header Editor (reusable for Procedures/Testimonials/FAQ/BeforeAfter/Videos) ───
+// ─── Latest Articles: article count editor (stored in the latestArticlesConfig CMS key) ───
+export function LatestArticlesCountEditor() {
+  const admin = useAdminText();
+  const config = useQuery(api.homepageSettings.getSectionContent, { key: "latestArticlesConfig" });
+  const setSetting = useMutation(api.homepageSettings.set);
+  const [count, setCount] = useState(4);
+  const [saving, setSaving] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  if (config !== undefined && !initialized) {
+    const c = Number((config as { count?: number } | null)?.count);
+    setCount(Number.isFinite(c) ? Math.max(2, Math.min(c, 6)) : 4);
+    setInitialized(true);
+  }
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await setSetting({ key: "latestArticlesConfig", value: { count } });
+      toast.success(admin.toast.homepageSaved);
+    } catch { toast.error(admin.toast.homepageSaveError); }
+    setSaving(false);
+  };
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader><CardTitle className="text-lg">{admin.homepage.latestArticles} — {admin.homepage.latestArticlesCount}</CardTitle></CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Label className="text-sm">{admin.homepage.latestArticlesCount}</Label>
+          <Input
+            type="number"
+            min={2}
+            max={6}
+            value={count}
+            onChange={(e) => setCount(Math.max(2, Math.min(Number(e.target.value) || 4, 6)))}
+            className="w-24"
+          />
+          <span className="text-xs text-muted-foreground">(2–6)</span>
+        </div>
+        <div className="flex justify-end" role="status" aria-live="polite">
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground px-8">{saving ? admin.common.saving : admin.homepage.saveSection}</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function SectionHeaderEditor({ sectionKey, label, fallbackKeys }: { sectionKey: string; label: string; fallbackKeys: { badge: string; title: string; titleHighlight: string; subtitle: string } }) {
   const admin = useAdminText();
   const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: sectionKey });
@@ -827,6 +882,7 @@ function VisibilityEditor() {
       procedures: homepageCMS.procedures !== false,
       beforeAfter: homepageCMS.beforeAfter !== false,
       testimonials: homepageCMS.testimonials !== false,
+      latestArticles: homepageCMS.latestArticles !== false,
       faq: homepageCMS.faq !== false,
       cta: homepageCMS.cta !== false,
       contact: homepageCMS.contact !== false,
@@ -854,6 +910,7 @@ function VisibilityEditor() {
     { key: "procedures", label: admin.nav.procedures },
     { key: "beforeAfter", label: admin.nav.beforeAfter },
     { key: "testimonials", label: admin.nav.testimonials },
+    { key: "latestArticles", label: admin.homepage.latestArticles },
     { key: "faq", label: admin.nav.faq },
     { key: "cta", label: admin.homepage.cta },
     { key: "contact", label: admin.nav.overview },

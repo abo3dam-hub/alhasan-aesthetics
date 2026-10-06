@@ -6,6 +6,7 @@ import Videos from "@/components/sections/Videos";
 import Procedures from "@/components/sections/Procedures";
 import BeforeAfter from "@/components/sections/BeforeAfter";
 import Testimonials from "@/components/sections/Testimonials";
+import LatestArticles from "@/components/sections/LatestArticles";
 import FAQ from "@/components/sections/FAQ";
 import Contact from "@/components/sections/Contact";
 import CTA from "@/components/sections/CTA";
@@ -184,6 +185,7 @@ export default function Landing() {
         <div className="cvv">{isVisible("procedures") && <Procedures />}</div>
         <div className="cvv">{isVisible("beforeAfter") && <BeforeAfter />}</div>
         <div className="cvv">{isVisible("testimonials") && <Testimonials />}</div>
+        <div className="cvv">{isVisible("latestArticles") && <LatestArticles />}</div>
         <div className="cvv">{isVisible("faq") && <FAQ />}</div>
         <div className="cvv">{isVisible("cta") && <CTA />}</div>
         <div className="cvv">{isVisible("contact") && <Contact />}</div>

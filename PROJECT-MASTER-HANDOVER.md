@@ -503,6 +503,8 @@ Convex queries resolve → UI updates reactively
 - `proceduresSection` — Procedures section header (badge, title, highlight, subtitle)
 - `beforeAfterSection` — Before & After section header
 - `testimonialsSection` — Testimonials section header
+- `latestArticlesSection` — Latest Articles section header (badge, title, highlight, subtitle)
+- `latestArticlesConfig` — Latest Articles config (`{ count }`, 2–6, default 4)
 - `faqSection` — FAQ section header
 - `instagramSection` — Instagram gallery section (6 image slots, profile URL, visibility)
 
@@ -1233,6 +1235,8 @@ The CMS uses a **key-value store pattern** (`siteSettings` table) for most homep
 | B&A section header | `beforeAfterSection` settings | i18n translations |
 | Testimonials | `testimonials.listActive` | Placeholder |
 | Testimonials section header | `testimonialsSection` settings | i18n translations |
+| Latest Articles | `articles.listPublished` (sliced to `latestArticlesConfig.count`) | Not rendered if empty |
+| Latest Articles section header | `latestArticlesSection` settings | i18n translations |
 | FAQ | `faq.listActive` | i18n translations |
 | FAQ section header | `faqSection` settings | i18n translations |
 | CTA | `cta` settings | i18n translations |
