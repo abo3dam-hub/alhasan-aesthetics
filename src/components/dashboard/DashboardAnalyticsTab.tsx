@@ -36,6 +36,7 @@ export default function DashboardAnalyticsTab() {
     if (type === "whatsapp") return admin.analytics.actionWhatsapp;
     if (type === "cta") return admin.analytics.actionCta;
     if (type === "share") return admin.analytics.actionShare;
+    if (type === "consult") return admin.analytics.actionConsult;
     return admin.analytics.actionOther;
   };
 
@@ -51,6 +52,7 @@ export default function DashboardAnalyticsTab() {
   const conversions = [
     { label: admin.analytics.whatsappClicks, value: eventCount("whatsapp") },
     { label: admin.analytics.ctaClicks, value: eventCount("cta") },
+    { label: admin.analytics.consultStep1, value: eventCount("consult") },
     { label: admin.analytics.trackedActions, value: stats?.events.total ?? 0 },
   ];
 
@@ -82,7 +84,7 @@ export default function DashboardAnalyticsTab() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {conversions.map((c) => (
           <Card key={c.label} className="border-border/60">
             <CardContent className="p-5">

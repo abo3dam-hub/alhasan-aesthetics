@@ -644,6 +644,7 @@
       "uniqueSessions": "Unique sessions",
       "whatsappClicks": "WhatsApp clicks",
       "ctaClicks": "Button clicks",
+      "consultStep1": "Consultation step-1 clicks",
       "trackedActions": "Tracked actions",
       "visitsChart": "Daily visits",
       "countries": "Top countries",
@@ -654,6 +655,7 @@
       "actionWhatsapp": "Opened WhatsApp",
       "actionCta": "Clicked a button",
       "actionShare": "Shared",
+      "actionConsult": "Consultation step",
       "actionOther": "Other action",
       "topPagesHint": "Internal page paths as shown in the browser."
     },

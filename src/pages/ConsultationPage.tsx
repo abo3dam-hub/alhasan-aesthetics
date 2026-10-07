@@ -179,6 +179,9 @@ export default function ConsultationPage() {
 
   const handleNext = () => {
     if (validate()) {
+      // Funnel signal: the visitor completed consultation step 1 (chose
+      // procedures) and moved to step 2. Fire-and-forget, never blocks UI.
+      if (step === 1) trackEvent("consult", "step1-next");
       setStep(step + 1);
     }
   };

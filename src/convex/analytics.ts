@@ -375,6 +375,12 @@ export const getBriefingStats = internalQuery({
       uniqueVisitors: sessions.size,
       whatsappClicks: countType("whatsapp"),
       ctaClicks: countType("cta"),
+      // Consultation funnel: visitors who completed step 1 of the form
+      // (chose procedures, clicked "next") — distinguishes "saw the form"
+      // from "started filling it".
+      consultStep1Clicks: events.filter(
+        (e) => e.type === "consult" && e.label === "step1-next",
+      ).length,
       topPages,
       topCountries,
     };

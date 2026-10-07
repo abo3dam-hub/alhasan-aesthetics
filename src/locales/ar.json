@@ -644,6 +644,7 @@
       "uniqueSessions": "جلسات منفردة",
       "whatsappClicks": "نقرات واتساب",
       "ctaClicks": "نقرات الأزرار",
+      "consultStep1": "نقرات الخطوة ١ في الاستشارة",
       "trackedActions": "إجراءات متتبعة",
       "visitsChart": "الزيارات اليومية",
       "countries": "أكثر الدول",
@@ -654,6 +655,7 @@
       "actionWhatsapp": "فتح واتساب",
       "actionCta": "الضغط على زر",
       "actionShare": "مشاركة",
+      "actionConsult": "خطوة استشارة",
       "actionOther": "إجراء آخر",
       "topPagesHint": "روابط داخلية كما تظهر في المتصفح."
     },
