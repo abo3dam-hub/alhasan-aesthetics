@@ -134,12 +134,23 @@ function toVisualRtl(text: string): string {
 
 /**
  * Greedy run-wrap for RTL titles, then per-line visual-order reversal.
- * Lines stay top-to-bottom; runs within each line are reversed so satori's
- * LTR layout renders them right-to-left. The estimate is deliberately
- * conservative — shorter lines are harmless, but a line longer than satori
- * itself would wrap would get re-wrapped out of order.
+ *
+ * Satori lays text out strictly left-to-right (no Unicode bidi pass), so
+ * Arabic must be fed in *visual* order (reversed runs) — that is what makes
+ * the single-line header/footer texts render correctly. The critical
+ * constraint: a visual-order line must NEVER be re-wrapped by Satori
+ * itself. Satori breaks over-long lines at spaces, and re-wrapping an
+ * already-reversed line scrambles the fragment order (each fragment reads
+ * RTL on its own, but the fragments stack out of sequence — the bug seen
+ * on 2026-10-07). The wrap budget therefore has to come from the real
+ * pixel width of the title column, not a character guess: with the cover
+ * photo the column is only 574px wide (1200 − 2×84 padding − 48 gap −
+ * 410 photo), not 980.
+ *
+ * Returns the visual-order lines; the caller renders one block <div> per
+ * line so line stacking is structural and can never be reordered.
  */
-function wrapVisualRtl(text: string, maxChars: number): string {
+function wrapVisualRtlLines(text: string, maxChars: number): string[] {
   const runs = visualRuns(text);
   const lines: string[][] = [];
   let line: string[] = [];
@@ -156,7 +167,7 @@ function wrapVisualRtl(text: string, maxChars: number): string {
     }
   }
   if (line.length > 0) lines.push(line);
-  return lines.map((l) => l.reverse().join(" ")).join("\n");
+  return lines.map((l) => l.reverse().join(" "));
 }
 
 async function renderCard(
@@ -190,7 +201,17 @@ async function renderCard(
   const titleFont = isRtl ? "ElMessiri" : "Playfair";
   const short = truncate(title, isRtl ? 120 : 110);
   // Visual-order Arabic for satori's LTR text engine (see helpers above).
-  const visualTitle = isRtl ? wrapVisualRtl(short, 30) : short;
+  // The title column is flex:1 in a row with the photo: 1200 − 2×84 page
+  // padding − 48 gap − 410 photo = 574px with a photo; without one the
+  // title div's own maxWidth: 980 binds. Calibrated ~26px/char for
+  // ElMessiri 700 @ 52px; the 0.92 factor keeps satori from re-wrapping.
+  const titleColPx = imageDataUri ? 574 : 980;
+  const visualTitleLines = isRtl
+    ? wrapVisualRtlLines(
+        short,
+        Math.max(8, Math.floor(((titleColPx * 0.92) / 26))),
+      )
+    : [short];
   const visualBrand = isRtl ? toVisualRtl(brand) : brand;
   const visualTagline = isRtl ? toVisualRtl(tagline) : tagline;
   const visualBlogLabel = isRtl ? toVisualRtl(blogLabel) : blogLabel;
@@ -328,7 +349,9 @@ async function renderCard(
                 maxWidth: 980,
               }}
             >
-              {visualTitle}
+              {isRtl
+                ? visualTitleLines.map((ln, i) => <div key={i}>{ln}</div>)
+                : short}
             </div>
             <div style={{ marginTop: 30, height: 2, width: 96, background: GOLD }} />
           </div>

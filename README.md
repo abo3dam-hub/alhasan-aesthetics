@@ -197,6 +197,17 @@ Sharing an article on WhatsApp/Twitter/Facebook/LinkedIn shows a **branded
 - **Fallbacks:** if an article has no cover image a branded graphic-only
   fallback is rendered; if rendering still fails the route falls back to a
   static OG-ready asset.
+- **Arabic (RTL) rendering:** Satori lays text out strictly left-to-right
+  with no Unicode bidi pass, so Arabic strings are fed in *visual* order
+  (word runs reversed, Latin/number runs kept intact — `visualRuns` /
+  `toVisualRtl` / `wrapVisualRtlLines` in `og_image.tsx`). The hard rule: a
+  visual-order line must never be re-wrapped by Satori — re-wrapping
+  scrambles the fragment order (seen live 2026-10-07: title fragments
+  stacked out of sequence). The wrap budget therefore comes from the real
+  title-column pixels (574px with the cover photo, 980px without), and each
+  wrapped line renders as its own block `<div>` so line stacking is
+  structural. `og:url` carries `?lang=` so Facebook treats each locale as
+  its own share object instead of merging into the cached English card.
 
 #### Share buttons
 

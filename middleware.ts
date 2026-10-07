@@ -90,10 +90,14 @@ export default async function middleware(request: Request) {
     const header = new Headers();
     const acceptLanguage = request.headers.get("accept-language");
     if (acceptLanguage) header.set("accept-language", acceptLanguage);
+    // Generous timeout: a cold Convex isolate loads satori + resvg-wasm +
+    // webfonts before first render, which can exceed a few seconds. A
+    // timeout here returns 404 "not found" and the crawler drops the
+    // preview image for that share, so waiting out the cold start wins.
     const res = await fetchWithTimeout(
       `${CONVEX_SITE_URL}/og-image${url.search}`,
       header,
-      8000,
+      20000,
     );
     if (res && res.ok) {
       const body = await res.arrayBuffer();
