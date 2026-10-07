@@ -362,7 +362,7 @@ async function renderCard(
             color: "rgba(244,236,225,0.8)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexDirection: isRtl ? "row-reverse" : "row" }}>
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: GOLD }} />
             <span style={{ letterSpacing: isRtl ? 0 : 0.5 }}>{visualBlogLabel}</span>
           </div>
