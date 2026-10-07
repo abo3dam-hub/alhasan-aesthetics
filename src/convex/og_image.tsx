@@ -93,6 +93,72 @@ function truncate(text: string, max: number): string {
   return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trim() + "…";
 }
 
+const LTR_TOKEN = /^[A-Za-z0-9]/;
+
+/**
+ * Split text into visual units: single RTL tokens, or runs of consecutive
+ * LTR-ish tokens (Latin words, numbers like "FDA 2026") that must keep their
+ * internal left-to-right order.
+ */
+function visualRuns(text: string): string[] {
+  const tokens = text.split(/\s+/).filter(Boolean);
+  const runs: string[] = [];
+  let ltrRun: string[] = [];
+  const flush = () => {
+    if (ltrRun.length > 0) {
+      runs.push(ltrRun.join(" "));
+      ltrRun = [];
+    }
+  };
+  for (const t of tokens) {
+    if (LTR_TOKEN.test(t)) ltrRun.push(t);
+    else {
+      flush();
+      runs.push(t);
+    }
+  }
+  flush();
+  return runs;
+}
+
+/**
+ * Satori does not implement the Unicode bidi algorithm: even with
+ * `direction: rtl`, Arabic words are laid out left-to-right (each word is
+ * shaped correctly, but the word order is wrong). For RTL cards we therefore
+ * feed satori the text in *visual* order (reversed runs) and let its LTR
+ * engine lay it out — the result reads correctly right-to-left.
+ */
+function toVisualRtl(text: string): string {
+  return visualRuns(text).reverse().join(" ");
+}
+
+/**
+ * Greedy run-wrap for RTL titles, then per-line visual-order reversal.
+ * Lines stay top-to-bottom; runs within each line are reversed so satori's
+ * LTR layout renders them right-to-left. The estimate is deliberately
+ * conservative — shorter lines are harmless, but a line longer than satori
+ * itself would wrap would get re-wrapped out of order.
+ */
+function wrapVisualRtl(text: string, maxChars: number): string {
+  const runs = visualRuns(text);
+  const lines: string[][] = [];
+  let line: string[] = [];
+  let len = 0;
+  for (const r of runs) {
+    const add = line.length === 0 ? r.length : 1 + r.length;
+    if (line.length > 0 && len + add > maxChars) {
+      lines.push(line);
+      line = [r];
+      len = r.length;
+    } else {
+      line.push(r);
+      len += add;
+    }
+  }
+  if (line.length > 0) lines.push(line);
+  return lines.map((l) => l.reverse().join(" ")).join("\n");
+}
+
 async function renderCard(
   title: string,
   isRtl: boolean,
@@ -123,6 +189,11 @@ async function renderCard(
   const blogLabel = isRtl ? "مقالات طبية" : "Health & Beauty Blog";
   const titleFont = isRtl ? "ElMessiri" : "Playfair";
   const short = truncate(title, isRtl ? 120 : 110);
+  // Visual-order Arabic for satori's LTR text engine (see helpers above).
+  const visualTitle = isRtl ? wrapVisualRtl(short, 30) : short;
+  const visualBrand = isRtl ? toVisualRtl(brand) : brand;
+  const visualTagline = isRtl ? toVisualRtl(tagline) : tagline;
+  const visualBlogLabel = isRtl ? toVisualRtl(blogLabel) : blogLabel;
 
   const node = (
     <div
@@ -200,6 +271,7 @@ async function renderCard(
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            flexDirection: isRtl ? "row-reverse" : "row",
           }}
         >
           <div
@@ -210,7 +282,7 @@ async function renderCard(
               letterSpacing: isRtl ? 0 : 1,
             }}
           >
-            {brand}
+            {visualBrand}
           </div>
           <div
             style={{
@@ -219,7 +291,7 @@ async function renderCard(
               fontFamily: isRtl ? "ElMessiri" : "Playfair",
             }}
           >
-            {tagline}
+            {visualTagline}
           </div>
         </div>
 
@@ -252,11 +324,11 @@ async function renderCard(
                 fontFamily: titleFont,
                 letterSpacing: isRtl ? 0 : 0.5,
                 whiteSpace: "pre-wrap",
-                direction: isRtl ? "rtl" : "ltr",
+                direction: "ltr",
                 maxWidth: 980,
               }}
             >
-              {short}
+              {visualTitle}
             </div>
             <div style={{ marginTop: 30, height: 2, width: 96, background: GOLD }} />
           </div>
@@ -285,13 +357,14 @@ async function renderCard(
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            flexDirection: isRtl ? "row-reverse" : "row",
             fontSize: 22,
             color: "rgba(244,236,225,0.8)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: GOLD }} />
-            <span style={{ letterSpacing: isRtl ? 0 : 0.5 }}>{blogLabel}</span>
+            <span style={{ letterSpacing: isRtl ? 0 : 0.5 }}>{visualBlogLabel}</span>
           </div>
           <div style={{ letterSpacing: 1, fontFamily: "Playfair" }}>
             www.dralhasanalsaiem.com

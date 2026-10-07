@@ -152,6 +152,13 @@ http.route({
     const esc = (s: string) =>
       s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+    // og:url carries the language so share platforms (Facebook especially)
+    // treat each language as its own share object instead of merging every
+    // language into the cached English preview. The SEO canonical stays
+    // language-neutral so search engines keep indexing one URL per article.
+    const shareLink = slug
+      ? `${link}?lang=${wantsArabic ? "ar" : "en"}`
+      : link;
     const html = `<!DOCTYPE html>
 <html lang="${wantsArabic ? "ar" : "en"}" dir="${wantsArabic ? "rtl" : "ltr"}">
 <head>
@@ -166,7 +173,7 @@ http.route({
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="${esc(title)}" />
 ${publishedIso ? `\n<meta property="article:published_time" content="${publishedIso}" />` : ""}
-<meta property="og:url" content="${esc(link)}" />
+<meta property="og:url" content="${esc(shareLink)}" />
 <meta property="og:site_name" content="Dr. Al Hasan Al Saiem" />
 <meta property="og:locale" content="${wantsArabic ? "ar_AR" : "en_US"}" />
 <meta property="og:locale:alternate" content="${wantsArabic ? "en_US" : "ar_AR"}" />
