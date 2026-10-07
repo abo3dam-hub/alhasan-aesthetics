@@ -106,7 +106,7 @@ export default function BlogArticlePage() {
   const handleShare = async () => {
     const slug = display?.slug ?? "";
     trackEvent("share", `article/${slug}`);
-    const url = `https://dralhasanalsaiem.com/blog/${slug}`;
+    const url = `https://dralhasanalsaiem.com/blog/${slug}?lang=${locale}`;
     const text = seoDesc || title || t.blogPage.title;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {

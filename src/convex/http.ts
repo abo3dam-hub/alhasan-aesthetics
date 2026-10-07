@@ -107,6 +107,17 @@ http.route({
     const url = new URL(request.url);
     const slug = (url.searchParams.get("slug") || "").trim().toLowerCase();
 
+    // Explicit ?lang= (from the share button) wins; otherwise fall back to the
+    // crawler's Accept-Language header. Scrapers rarely send Arabic, so the
+    // param is what makes Arabic shares render Arabic cards.
+    const langParam = (url.searchParams.get("lang") || "").toLowerCase();
+    const wantsArabic =
+      langParam === "ar" ||
+      (langParam !== "en" &&
+        (request.headers.get("accept-language") || "")
+          .toLowerCase()
+          .startsWith("ar"));
+
     let title = "Dr. Al Hasan Al Saiem — Aesthetic & Plastic Surgery";
     let description =
       "Board-certified aesthetic surgeon with 15+ years experience. " +
@@ -121,16 +132,13 @@ http.route({
       try {
         const article = await ctx.runQuery(api.articles.getBySlug, { slug });
         if (article && article.isPublished) {
-          const wantsArabic = (request.headers.get("accept-language") || "")
-            .toLowerCase()
-            .startsWith("ar");
           title = wantsArabic
             ? article.seoTitleAr || article.titleAr || title
             : article.seoTitleEn || article.titleEn || title;
           description = wantsArabic
             ? article.seoDescriptionAr || article.excerptAr || description
             : article.seoDescriptionEn || article.excerptEn || description;
-          image = `${DOMAIN}/og-image?slug=${encodeURIComponent(slug)}`;
+          image = `${DOMAIN}/og-image?slug=${encodeURIComponent(slug)}&lang=${wantsArabic ? "ar" : "en"}`;
           type = "article";
           publishedIso = article.publishDate
             ? new Date(article.publishDate).toISOString()
@@ -145,7 +153,7 @@ http.route({
       s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
     const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="${wantsArabic ? "ar" : "en"}" dir="${wantsArabic ? "rtl" : "ltr"}">
 <head>
 <meta charset="UTF-8" />
 <title>${esc(title)}</title>
@@ -160,6 +168,8 @@ http.route({
 ${publishedIso ? `\n<meta property="article:published_time" content="${publishedIso}" />` : ""}
 <meta property="og:url" content="${esc(link)}" />
 <meta property="og:site_name" content="Dr. Al Hasan Al Saiem" />
+<meta property="og:locale" content="${wantsArabic ? "ar_AR" : "en_US"}" />
+<meta property="og:locale:alternate" content="${wantsArabic ? "en_US" : "ar_AR"}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${esc(title)}" />
 <meta name="twitter:description" content="${esc(description)}" />
@@ -197,9 +207,14 @@ http.route({
       if (!article || !article.isPublished) {
         return new Response("not found", { status: 404 });
       }
-      const wantsArabic = (request.headers.get("accept-language") || "")
-        .toLowerCase()
-        .startsWith("ar");
+      // Same rule as /og-meta: explicit ?lang= wins over Accept-Language.
+      const langParam = (url.searchParams.get("lang") || "").toLowerCase();
+      const wantsArabic =
+        langParam === "ar" ||
+        (langParam !== "en" &&
+          (request.headers.get("accept-language") || "")
+            .toLowerCase()
+            .startsWith("ar"));
       const title = (wantsArabic ? article.titleAr : article.titleEn) || "";
       if (!title) {
         return new Response("no title", { status: 404 });

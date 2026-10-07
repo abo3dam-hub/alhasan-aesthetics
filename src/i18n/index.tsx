@@ -16,6 +16,17 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 function getInitialLocale(): Locale {
+  // A shared link carries ?lang= so the recipient lands in the sharer's
+  // language (e.g. an Arabic share opens the Arabic page).
+  try {
+    const q = new URLSearchParams(window.location.search).get("lang");
+    if (q === "ar" || q === "en") {
+      localStorage.setItem("locale", q);
+      return q;
+    }
+  } catch {
+    // URL parsing failed — fall through to stored preference.
+  }
   const stored = localStorage.getItem("locale") as Locale | null;
   if (stored === "ar" || stored === "en") return stored;
   return "ar";

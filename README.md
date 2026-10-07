@@ -185,8 +185,15 @@ Sharing an article on WhatsApp/Twitter/Facebook/LinkedIn shows a **branded
   `/og-image?slug=<article>&lang=<…>` **on the same production origin**, with the
   right `og:image`/`og:image:width`/`og:image:height`, so scrapers like
   Twitterbot/WhatsApp fetch the PNG directly. The Vercel edge also proxies
-  `/og-image` itself (it is not a Vercel route) and forwards the crawler's
-  `Accept-Language`, so Arabic devices get Arabic previews.
+  `/og-image` itself (it is not a Vercel route).
+- **Share language:** the share buttons append `?lang=<locale>` to the shared
+  article URL (`/blog/<slug>?lang=ar`). The edge middleware forwards `lang` to
+  `/og-meta`, and both `/og-meta` and `/og-image` prefer the explicit `lang`
+  param over the crawler's `Accept-Language` (scrapers rarely send Arabic, so
+  without the param every card came out English). `/og-meta` also emits
+  `og:locale` / `og:locale:alternate` and `lang`/`dir` on `<html>`. Bonus: the
+  SPA's locale init respects `?lang=`, so whoever opens a shared link lands in
+  the sharer's language.
 - **Fallbacks:** if an article has no cover image a branded graphic-only
   fallback is rendered; if rendering still fails the route falls back to a
   static OG-ready asset.

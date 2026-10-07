@@ -22,7 +22,7 @@ function CardShareButton({
   excerptAr?: string | null;
   excerptEn?: string | null;
 }) {
-  const { t, dir } = useI18n();
+  const { t, dir, locale } = useI18n();
   const isRtl = dir === "rtl";
   const title = isRtl ? titleAr || "" : titleEn || "";
   const excerpt = isRtl ? excerptAr || "" : excerptEn || "";
@@ -31,7 +31,7 @@ function CardShareButton({
     e.preventDefault();
     e.stopPropagation();
     trackEvent("share", `card/${slug}`);
-    const url = `https://dralhasanalsaiem.com/blog/${slug}`;
+    const url = `https://dralhasanalsaiem.com/blog/${slug}?lang=${locale}`;
     const text = excerpt || title || t.blogPage.title;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {

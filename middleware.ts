@@ -130,7 +130,12 @@ export default async function middleware(request: Request) {
   const acceptLanguage = request.headers.get("accept-language");
   if (acceptLanguage) header.set("accept-language", acceptLanguage);
 
-  const endpoint = `${CONVEX_SITE_URL}/og-meta?slug=${encodeURIComponent(slug)}`;
+  // Forward an explicit ?lang= from the shared URL so Arabic shares render
+  // Arabic preview cards (scrapers don't send a useful Accept-Language).
+  const langParam = url.searchParams.get("lang");
+  const langSuffix =
+    langParam === "ar" || langParam === "en" ? `&lang=${langParam}` : "";
+  const endpoint = `${CONVEX_SITE_URL}/og-meta?slug=${encodeURIComponent(slug)}${langSuffix}`;
   const res = await fetchWithTimeout(endpoint, header, 5000);
   if (res && res.ok) {
     const html = await res.text();
