@@ -347,6 +347,13 @@ async function renderCard(
                 whiteSpace: "pre-wrap",
                 direction: "ltr",
                 maxWidth: 980,
+                // Satori requires an explicit flex/contents/none display on
+                // any div with more than one child: the Arabic title renders
+                // one block div per wrapped line, so this must be flex.
+                // (Missing it made every Arabic card 500.)
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
               {isRtl
