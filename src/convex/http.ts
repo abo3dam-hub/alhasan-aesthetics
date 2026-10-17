@@ -361,6 +361,39 @@ http.route({
   }),
 });
 
+/** Shared service-token check (same token as /briefing-analytics). */
+async function checkServiceToken(
+  ctx: any,
+  request: Request,
+): Promise<boolean> {
+  const authz = request.headers.get("authorization") || "";
+  const bearer = /^Bearer ([A-Za-z0-9_-]{32,128})$/.exec(authz.trim());
+  if (!bearer) return false;
+  const presented = bearer[1];
+  let stored: { tokenHash: string; scope: string } | null = null;
+  try {
+    stored = await ctx.runQuery(internal.analytics.getServiceTokenHash, {
+      name: "morning-briefing",
+    });
+  } catch {
+    return false;
+  }
+  if (!stored || stored.scope !== "briefing-analytics") return false;
+  let digest: string;
+  try {
+    const bytes = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(presented),
+    );
+    digest = [...new Uint8Array(bytes)]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  } catch {
+    return false;
+  }
+  return constantTimeEqualHex(digest, stored.tokenHash);
+}
+
 // ─── Briefing analytics (token-gated, read-only) ───
 // Serves exactly the numbers the owner's morning-briefing automation needs
 // for one Europe/Berlin day (default: yesterday). Authenticated with a long
@@ -381,40 +414,57 @@ http.route({
         },
       });
 
-    const authz = request.headers.get("authorization") || "";
-    const bearer = /^Bearer ([A-Za-z0-9_-]{32,128})$/.exec(authz.trim());
-    if (!bearer) return unauthorized();
-    const presented = bearer[1];
-
-    let stored: { tokenHash: string; scope: string } | null = null;
-    try {
-      stored = await ctx.runQuery(internal.analytics.getServiceTokenHash, {
-        name: "morning-briefing",
-      });
-    } catch {
-      return unauthorized();
-    }
-    if (!stored || stored.scope !== "briefing-analytics") return unauthorized();
-
-    let digest: string;
-    try {
-      const bytes = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(presented),
-      );
-      digest = [...new Uint8Array(bytes)]
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
-    } catch {
-      return unauthorized();
-    }
-    if (!constantTimeEqualHex(digest, stored.tokenHash)) return unauthorized();
+    if (!(await checkServiceToken(ctx, request))) return unauthorized();
 
     const url = new URL(request.url);
     const day = url.searchParams.get("day") ?? undefined;
     try {
       const stats = await ctx.runQuery(internal.analytics.getBriefingStats, {
         day,
+      });
+      return new Response(JSON.stringify(stats), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    } catch {
+      return new Response(JSON.stringify({ error: "bad_request" }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+  }),
+});
+
+// ─── Demo-link opens (token-gated, read-only) ───
+// Powers the outreach follow-up: which clinics opened their personalized demo
+// link in the last N days. Same service token as /briefing-analytics.
+http.route({
+  path: "/demo-opens",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const unauthorized = () =>
+      new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    if (!(await checkServiceToken(ctx, request))) return unauthorized();
+    const url = new URL(request.url);
+    const days = Math.min(
+      Math.max(parseInt(url.searchParams.get("days") ?? "7", 10) || 7, 1),
+      30,
+    );
+    try {
+      const stats = await ctx.runQuery(internal.analytics.getDemoOpens, {
+        days,
       });
       return new Response(JSON.stringify(stats), {
         status: 200,
