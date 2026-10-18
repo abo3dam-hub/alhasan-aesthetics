@@ -423,3 +423,40 @@ export const getDemoOpens = internalQuery({
     };
   },
 });
+
+/**
+ * Menu-link opens for the restaurant outreach (type="menu_open" events written by
+ * the tracking snippet on menu-list.github.io/menu-demo/<slug>/ pages).
+ * Test rows (label starting with "test-") are excluded.
+ */
+export const getMenuOpens = internalQuery({
+  args: { days: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const days = Math.min(Math.max(Math.floor(args.days ?? 7), 1), 30);
+    const since = Date.now() - days * 24 * 60 * 60 * 1000;
+    const events = await ctx.db
+      .query("analyticsEvents")
+      .withIndex("by_ts", (q) => q.gte("ts", since))
+      .collect();
+    const bySlug = new Map<string, { count: number; lastTs: number }>();
+    for (const e of events) {
+      if (e.type !== "menu_open") continue;
+      if (e.label.startsWith("test-")) continue;
+      const cur = bySlug.get(e.label) ?? { count: 0, lastTs: 0 };
+      cur.count += 1;
+      if (e.ts > cur.lastTs) cur.lastTs = e.ts;
+      bySlug.set(e.label, cur);
+    }
+    return {
+      days,
+      since: new Date(since).toISOString(),
+      opens: [...bySlug.entries()]
+        .map(([slug, s]) => ({
+          slug,
+          opens: s.count,
+          lastOpen: new Date(s.lastTs).toISOString(),
+        }))
+        .sort((a, b) => b.opens - a.opens),
+    };
+  },
+});

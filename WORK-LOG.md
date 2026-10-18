@@ -689,3 +689,10 @@
 - **التنفيذ:** استعلام داخلي `analytics.getDemoOpens` + endpoint عام `GET /demo-opens?days=N` (بنفس توكن `/briefing-analytics`) — يُرجع الفتحات مجمّعة حسب العيادة مع آخر فتح. إضافي بالكامل؛ فحص التوكن أُعيد هيكلته لدالة مشتركة دون تغيير السلوك.
 - **التحقق:** `npx convex deploy` نجح؛ `GET /demo-opens?days=7` يُرجع بيانات حقيقية (10 عيادات فتحت).
 - **ملاحظة:** أحداث `demo_open` لا تلوث إحصاءات الموقع — تُحفظ في `analyticsEvents` فقط، وكل الاستعلامات الحالية إما تقرأ `pageVisits` أو تفلتر حسب النوع.
+
+### ١٧. endpoint قراءة فتحات ديمو المطاعم (2026-10-19)
+
+- **الدافع:** صفحات ديمو المطاعم (`menu-list.github.io/menu-demo/<slug>/`) ترسل حدث `menu_open` منذ 2026-10-18 — كانت تُجمع بلا طريقة قراءة (مطابق لحالة العيادات §١٦).
+- **التنفيذ:** استعلام داخلي `analytics.getMenuOpens` + endpoint عام `GET /menu-opens?days=N` (بنفس توكن `/briefing-analytics` و`/demo-opens`) — يُرجع الفتحات مجمّعة حسب المطعم (slug) مع آخر فتح. إضافي بالكامل؛ لا تغيير بأي سلوك قائم. نُفّذ بموافقة صريحة من علي («نفّذ النشر ✅»).
+- **التحقق:** `npx tsc --noEmit` سليم؛ النشر عبر `convex_deploy.py` (موصل `custom.legacy-convex` + `PYTHONPATH=/opt/muse/skills/custom-connector-setup/bin`) نجح على `kindly-anaconda-422`؛ `POST /trackVisit` يُرجع `ok:true`؛ `GET /menu-opens?days=7` بدون توكن يُرجع 401، وبالتوكن يُرجع بنية سليمة (`opens:[]` — حدث الاختبار `test-verify` مستبعد كما هو مصمم، ولا فتحات حقيقية بعد).
+- **ملاحظة:** أحداث `menu_open` لا تلوث إحصاءات الموقع — تُحفظ في `analyticsEvents` فقط، وكل الاستعلامات الحالية إما تقرأ `pageVisits` أو تفلتر حسب النوع (نفس عزل `demo_open`).

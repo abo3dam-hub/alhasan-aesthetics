@@ -485,6 +485,51 @@ http.route({
   }),
 });
 
+// ─── Menu-link opens (token-gated, read-only) ───
+// Powers the restaurant outreach follow-up: which restaurant owners opened their
+// personalized menu demo link in the last N days. Same service token as
+// /briefing-analytics and /demo-opens. Added 2026-10-19.
+http.route({
+  path: "/menu-opens",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const unauthorized = () =>
+      new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    if (!(await checkServiceToken(ctx, request))) return unauthorized();
+    const url = new URL(request.url);
+    const days = Math.min(
+      Math.max(parseInt(url.searchParams.get("days") ?? "7", 10) || 7, 1),
+      30,
+    );
+    try {
+      const stats = await ctx.runQuery(internal.analytics.getMenuOpens, {
+        days,
+      });
+      return new Response(JSON.stringify(stats), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    } catch {
+      return new Response(JSON.stringify({ error: "bad_request" }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+  }),
+});
+
 /** Constant-time hex digest comparison (digests are fixed at 64 chars). */
 function constantTimeEqualHex(a: string, b: string): boolean {
   if (a.length !== 64 || b.length !== 64) return false;
