@@ -99,7 +99,8 @@ export default function CardPage() {
   const instagram = doctor?.socialMedia?.instagram || "";
   const facebook = doctor?.socialMedia?.facebook || "";
   const bio = isArabic ? doctor?.biographyAr : doctor?.biographyEn;
-  const profTitle = isArabic ? doctor?.educationAr : doctor?.educationEn;
+  // Card-only credential (Ali, 2026-10-19) — intentionally static, not from CMS.
+  const profTitle = card.credential;
   const specialties = useMemo(
     () => splitList(isArabic ? doctor?.specializationsAr || "" : doctor?.specializationsEn || ""),
     [doctor, isArabic],
@@ -284,13 +285,6 @@ export default function CardPage() {
       href: "/consultation",
     },
     {
-      key: "save",
-      label: card.actions.saveContact[0],
-      sub: card.actions.saveContact[1],
-      icon: <UserPlus size={22} />,
-      onClick: handleSaveContact,
-    },
-    {
       key: "email",
       label: card.actions.email[0],
       sub: card.actions.email[1],
@@ -428,6 +422,16 @@ export default function CardPage() {
         <div className="dcard-section-head">
           <h2 className={isArabic ? "dcard-ar-display" : "dcard-serif"}>{card.sections.connect}</h2>
         </div>
+        {/* Primary CTA: save contact — first and most prominent */}
+        <button type="button" className="dcard-cta-primary" onClick={handleSaveContact}>
+          <span className="dcard-cta-icon">
+            <UserPlus size={26} />
+          </span>
+          <span className="dcard-cta-text">
+            <span className="dcard-cta-label">{card.actions.saveContact[0]}</span>
+            <span className="dcard-cta-sub">{card.actions.saveContact[1]}</span>
+          </span>
+        </button>
         <div className="dcard-actions">
           {actions.map((a) =>
             a.href ? (

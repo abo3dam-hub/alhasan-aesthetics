@@ -122,6 +122,26 @@
   object-fit: contain;
   object-position: bottom center;
   filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.6));
+  /* Soft fade of the lower edge so the photo melts into the card instead of
+     looking cut off. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 99%);
+}
+/* Soft blurred golden line under the photo's lower edge. */
+.dcard-photo::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 1%;
+  height: 54px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(212, 175, 106, 0.5),
+    transparent 70%
+  );
+  filter: blur(16px);
+  pointer-events: none;
 }
 .dcard-photo-glow {
   position: absolute;
@@ -222,6 +242,66 @@
 [dir="rtl"] .dcard-section-head::after {
   background: linear-gradient(-90deg, var(--dcard-line), transparent);
 }
+/* ── Primary CTA: save contact (first, most prominent) ─── */
+.dcard-cta-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto 22px;
+  padding: 18px 26px;
+  border-radius: 20px;
+  border: 1px solid #e8c987;
+  background: linear-gradient(170deg, #eecf8f, #c79e57 60%, #b08a45);
+  color: #1d1508;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  box-shadow:
+    0 12px 34px rgba(212, 175, 106, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+}
+.dcard-cta-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow:
+    0 18px 44px rgba(212, 175, 106, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.dcard-cta-primary:focus-visible {
+  outline: 2px solid var(--dcard-gold-bright);
+  outline-offset: 3px;
+}
+.dcard-cta-icon {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(29, 21, 8, 0.14);
+  border: 1px solid rgba(29, 21, 8, 0.25);
+  color: #1d1508;
+}
+.dcard-cta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.dcard-cta-label {
+  font-size: 19px;
+  font-weight: 800;
+}
+.dcard-cta-sub {
+  font-size: 13.5px;
+  opacity: 0.72;
+  font-weight: 600;
+}
+
 .dcard-actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -539,10 +619,12 @@ button.dcard-action {
   .dcard-action,
   .dcard-lang-toggle,
   .dcard-icon-btn,
-  .dcard-btn {
+  .dcard-btn,
+  .dcard-cta-primary {
     transition: none;
   }
-  .dcard-action:hover {
+  .dcard-action:hover,
+  .dcard-cta-primary:hover {
     transform: none;
   }
 }

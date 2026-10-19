@@ -897,9 +897,15 @@ Single JWT provider:
   addresses, bio, specializations, education) — no new backend, no CMS changes
 - **Name:** literal "Dr. Alhasan Alsaiem" everywhere (display, VCF, QR alt, JSON-LD)
 - **Photo:** `public/card/doctor.webp` — professional studio photo supplied by Ali
-  (2026-10-19, 832×1248, standing with arms crossed, black background); head breaks
-  above the gold frame via absolute positioning (`top: -84px` desktop / `-64px`
-  mobile), `overflow: visible`
+  (2026-10-19, standing with arms crossed); true transparency via rembg background
+  removal (758×1217 WebP); head breaks above the gold frame via absolute
+  positioning (`top: -84px` desktop / `-64px` mobile), `overflow: visible`; lower
+  edge fades into the card (`mask-image` gradient) with a blurred golden glow
+  (`.dcard-photo::after`)
+- **Primary CTA:** full-width gold save-contact button (`.dcard-cta-primary`) first,
+  remaining actions in the grid below
+- **Card-only copy:** `card.tagline` / `card.credential` i18n strings — the CMS
+  `educationAr` field is intentionally NOT read by the card (Ali, 2026-10-19)
 - **Logo:** recreated circular gold SVG emblem inline (no standalone logo file exists)
 - **Actions:** tel:, wa.me, mailto:, /consultation, VCF download (`src/lib/cardVcf.ts`,
   tested in `src/lib/cardVcf.test.ts`), Web Share API + clipboard fallback,

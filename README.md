@@ -223,9 +223,14 @@ Dr. Alhasan Alsaiem — `src/pages/CardPage.tsx` + `src/pages/CardPage.css`
 (styles scoped under `.dcard` so the site theme is untouched).
 
 - Hero: professional studio photo supplied by Ali (standing, arms crossed,
-  `public/card/doctor.webp`, 832×1248, black background blending into the card)
-  with the head intentionally breaking above the gold frame; recreated circular
-  gold emblem (no standalone logo file exists); literal name "Dr. Alhasan Alsaiem".
+  `public/card/doctor.webp`, 758×1217 transparent WebP after rembg background
+  removal) with the head intentionally breaking above the gold frame; the photo's
+  lower edge melts into the card via a soft mask fade + blurred golden glow;
+  recreated circular gold emblem (no standalone logo file exists);
+  literal name "Dr. Alhasan Alsaiem".
+- Primary CTA: a full-width gold "save contact" (VCF) button sits first above the
+  action grid; tagline/credential are card-only i18n strings (`card.tagline`,
+  `card.credential`) — the CMS `educationAr` is intentionally not used here.
 - Contact data is read live from the existing `doctor` siteSettings
   (`api.siteSettings.getDoctorSettings`) — phone, WhatsApp (`wa.me`), email
   (`mailto:`), Instagram/Facebook (shown only when set), clinic addresses.
