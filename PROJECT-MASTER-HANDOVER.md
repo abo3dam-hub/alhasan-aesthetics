@@ -112,6 +112,8 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 │   │   ├── jsonLd.ts                   # JSON-LD builders (MedicalClinic graph, FAQPage, Article…)
 │   │   ├── track.ts                    # Client-side analytics event helpers
 │   │   ├── procedureIcons.tsx          # Procedure icon set
+│   │   ├── cardVcf.ts                  # vCard 3.0 builder for the /card page
+│   │   ├── cardVcf.test.ts             # 8 unit tests (folding, escaping, UTF-8)
 │   │   └── __tests__/                  # Unit tests (utils, jsonLd, iconDefaults)
 │   ├── i18n/
 │   │   ├── index.tsx                   # I18nProvider, useI18n hook, locale state (localStorage)
@@ -178,6 +180,8 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 │   │   ├── BeforeAfterPage.tsx         # Before & After gallery with slider
 │   │   ├── ContactPage.tsx             # Public contact page
 │   │   ├── ConsultationPage.tsx        # WhatsApp consultation form
+│   │   ├── CardPage.tsx                # Luxury digital business card (/card)
+│   │   ├── CardPage.css                # Card styles (scoped under .dcard)
 │   │   └── NotFound.tsx                # 404 page
 │   └── hooks/
 │       ├── use-auth.ts                 # useAuth hook (wraps Convex auth)
@@ -323,6 +327,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 | `/contact` | `ContactPage` | Public | Contact page |
 | `/before-after` | `BeforeAfterPage` | Public | Before & After gallery |
 | `/consultation` | `ConsultationPage` | Public | WhatsApp consultation form |
+| `/card` | `CardPage` | Public | Luxury digital business card (AR/EN, VCF, QR, NFC guide) |
 | `/auth` | `AuthPage` | Public | Login/signup (Email OTP) |
 | `/dashboard` | `Dashboard` | **Admin** | Admin CMS dashboard |
 | `*` | `NotFound` | Public | 404 page |
@@ -884,6 +889,28 @@ Single JWT provider:
 - **Flow:** 2-step wizard: Select procedures → Fill personal info → Review → Send via WhatsApp
 - **Data stored:** NONE — purely client-side, generates WhatsApp message
 - **Features:** Multi-select procedures, "Other Procedure" option, age/gender/nationality/residence fields, Arabic/English message generation
+
+#### CardPage (`src/pages/CardPage.tsx` + `src/pages/CardPage.css`)
+- **Route:** `/card`
+- **Purpose:** Luxury black & gold digital business card for Dr. Alhasan Alsaiem
+- **Data:** `api.siteSettings.getDoctorSettings` (phone, WhatsApp, email, socials,
+  addresses, bio, specializations, education) — no new backend, no CMS changes
+- **Name:** literal "Dr. Alhasan Alsaiem" everywhere (display, VCF, QR alt, JSON-LD)
+- **Photo:** `public/card/doctor-cutout.webp` — real About-section portrait
+  (733×978) with background removed via rembg; head breaks above the gold frame
+  via absolute positioning (`top: -84px` desktop / `-64px` mobile), `overflow: visible`
+- **Logo:** recreated circular gold SVG emblem inline (no standalone logo file exists)
+- **Actions:** tel:, wa.me, mailto:, /consultation, VCF download (`src/lib/cardVcf.ts`,
+  tested in `src/lib/cardVcf.test.ts`), Web Share API + clipboard fallback,
+  QR modal (`public/card/qr-card.png` → `https://dralhasanalsaiem.com/card`, decode-verified),
+  NFC guide modal (tag programmed externally with the card URL as URI/NDEF)
+- **Clinics:** Damascus / Latakia / Dubai cards with Google Maps *search* links
+  (no precise pin URLs exist in CMS — documented limitation)
+- **i18n:** `card` namespace in `src/locales/{ar,en}.json`; `?lang=` honored globally
+- **SEO:** per-route title/meta/canonical/OG + Physician JSON-LD (`#dcard-jsonld`)
+- **Styling:** all rules scoped under `.dcard`; site theme untouched
+- **Known limitation:** no standing/arms-crossed photo exists in project assets, so the
+  authentic head-and-shoulders portrait is used (real face prioritized over pose)
 
 #### NotFound (`src/pages/NotFound.tsx`)
 - **Route:** `*` (catch-all)

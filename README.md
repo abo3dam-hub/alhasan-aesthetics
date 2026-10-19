@@ -216,6 +216,31 @@ article share): uses the native Web Share API on mobile, clipboard copy of the
 public article URL as fallback, and fires a `share` analytics event through the
 same `/trackVisit` endpoint.
 
+#### Digital business card (`/card`)
+
+Luxury black & gold bilingual (AR/EN, RTL/LTR) digital business card for
+Dr. Alhasan Alsaiem — `src/pages/CardPage.tsx` + `src/pages/CardPage.css`
+(styles scoped under `.dcard` so the site theme is untouched).
+
+- Hero: real doctor portrait (background removed, `public/card/doctor-cutout.webp`)
+  with the head intentionally breaking above the gold frame; recreated circular
+  gold emblem (no standalone logo file exists); literal name "Dr. Alhasan Alsaiem".
+- Contact data is read live from the existing `doctor` siteSettings
+  (`api.siteSettings.getDoctorSettings`) — phone, WhatsApp (`wa.me`), email
+  (`mailto:`), Instagram/Facebook (shown only when set), clinic addresses.
+- Actions: call, WhatsApp, book (`/consultation`), save contact (VCF download),
+  email, clinic locations (Google Maps search per clinic: Damascus / Latakia / Dubai),
+  website, Web Share API (clipboard fallback), QR modal, NFC guide modal.
+- `src/lib/cardVcf.ts` builds a valid vCard 3.0 (UTF-8, RFC 2426 line folding);
+  covered by `src/lib/cardVcf.test.ts` (8 tests).
+- `public/card/qr-card.png` encodes `https://dralhasanalsaiem.com/card`
+  (verified by decoding); shown in a modal and downloadable.
+- NFC: the tag must be programmed with `https://dralhasanalsaiem.com/card` as a
+  URI/NDEF record (NTAG213/215/216 via the NFC Tools app); the page itself
+  documents the steps and notes that read behavior depends on the device.
+- SEO: per-route title/meta/canonical/OG + Physician JSON-LD. `?lang=` is
+  honored by the global i18n initializer.
+
 ### Settings CMS Fields
 
 - Doctor name (AR/EN)
@@ -376,6 +401,7 @@ No third-party performance scripts; all optimizations are build-time or declarat
 | `/before-after` | Before & After gallery | Public |
 | `/consultation` | WhatsApp consultation form | Public |
 | `/contact` | Contact page | Public |
+| `/card` | Luxury digital business card (bilingual AR/EN, VCF download, QR, NFC guide) | Public |
 | `/auth` | Admin sign in / sign up (email + password) | Public |
 | `/dashboard` | Admin CMS dashboard | Admin only |
 

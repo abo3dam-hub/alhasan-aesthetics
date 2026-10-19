@@ -777,5 +777,99 @@
       "posterReady": "Poster generated from the first frame automatically",
       "posterFailed": "Could not generate a poster from the video"
     }
+  },
+  "card": {
+    "pageTitle": "Digital Card | Dr. Alhasan Alsaiem",
+    "metaDescription": "Dr. Alhasan Alsaiem's digital card — Plastic Surgery, Aesthetic Medicine and Body Contouring. Damascus, Latakia, Dubai.",
+    "brandName": "Dr. Alhasan Alsaiem",
+    "tagline": "Expert in Plastic Surgery, Aesthetic Medicine and Body Contouring",
+    "taglineScript": "Plastic Surgery & Aesthetics",
+    "sections": {
+      "about": "About the Doctor",
+      "specialties": "Specialties & Services",
+      "clinics": "Clinics",
+      "connect": "Get in Touch"
+    },
+    "actions": {
+      "call": [
+        "Call",
+        "Direct call"
+      ],
+      "whatsapp": [
+        "WhatsApp",
+        "Instant chat"
+      ],
+      "email": [
+        "Email",
+        "Write to us"
+      ],
+      "location": [
+        "Clinic Location",
+        "Google Maps"
+      ],
+      "instagram": [
+        "Instagram",
+        "Follow us"
+      ],
+      "facebook": [
+        "Facebook",
+        "Follow us"
+      ],
+      "website": [
+        "Official Website",
+        "dralhasanalsaiem.com"
+      ],
+      "book": [
+        "Book Consultation",
+        "Book now"
+      ],
+      "saveContact": [
+        "Save Contact",
+        "VCF file"
+      ],
+      "share": [
+        "Share Card",
+        "Send to a friend"
+      ],
+      "qr": [
+        "QR Code",
+        "Scan the code"
+      ],
+      "nfc": [
+        "NFC",
+        "Tap your phone"
+      ]
+    },
+    "clinics": {
+      "damascus": "Damascus, Syria",
+      "latakia": "Latakia, Syria",
+      "dubai": "Dubai, United Arab Emirates",
+      "openMaps": "Open in Google Maps",
+      "hours": "Sat – Thu: 9 AM – 6 PM"
+    },
+    "qrModal": {
+      "title": "Scan with your phone camera",
+      "hint": "Opens: dralhasanalsaiem.com/card",
+      "download": "Download QR",
+      "close": "Close"
+    },
+    "nfcModal": {
+      "title": "Using an NFC Tag",
+      "intro": "Program a blank NFC tag with the card's permanent link — then anyone just taps their phone on the tag to open the card.",
+      "steps": [
+        "Get a blank writable NFC tag (NTAG213, NTAG215 or NTAG216).",
+        "Install the NFC Tools app on your phone (available for Android and iPhone).",
+        "In the app choose Write, then Add a record, then URL / URI.",
+        "Paste the card link: https://dralhasanalsaiem.com/card",
+        "Tap Write and hold the tag near the phone to finish programming."
+      ],
+      "note": "Note: read success and how the notification appears depend on the receiving device and its NFC settings. iPhone XS and newer read the tag automatically when tapped.",
+      "copyLink": "Copy card link",
+      "copied": "Link copied",
+      "close": "Close"
+    },
+    "shareDone": "Card link copied",
+    "vcardNote": "Clinics: Damascus, Latakia (Syria) — Dubai (UAE)",
+    "footerNote": "Official digital card"
   }
 }

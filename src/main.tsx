@@ -30,6 +30,7 @@ const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage.tsx"));
 const ConsultationPage = lazy(() => import("./pages/ConsultationPage.tsx"));
 const BlogListPage = lazy(() => import("./pages/BlogListPage.tsx"));
 const BlogArticlePage = lazy(() => import("./pages/BlogArticlePage.tsx"));
+const CardPage = lazy(() => import("./pages/CardPage.tsx"));
 const VlyToolbar = lazy(() => import("../vly-toolbar-readonly.tsx").then((m) => ({ default: m.VlyToolbar })));
 
 // Simple loading fallback for route transitions
@@ -163,6 +164,7 @@ function AnimatedRoutes() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/before-after" element={<BeforeAfterPage />} />
         <Route path="/consultation" element={<ConsultationPage />} />
+        <Route path="/card" element={<CardPage />} />
         <Route
           path="/auth"
           element={<AuthPage redirectAfterAuth="/dashboard" />}

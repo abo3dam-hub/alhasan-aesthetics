@@ -1,0 +1,548 @@
+/* ── Digital business card (/card) — dark luxury theme, black & gold.
+ * Scoped under .dcard so the warm-light site theme is never affected. */
+
+.dcard {
+  --dcard-bg: #07080a;
+  --dcard-panel: #0c0e12;
+  --dcard-panel-2: #101318;
+  --dcard-gold: #d4af6a;
+  --dcard-gold-bright: #f0dcae;
+  --dcard-gold-deep: #8a6d3b;
+  --dcard-line: rgba(212, 175, 106, 0.28);
+  --dcard-text: #f4efe4;
+  --dcard-muted: #b9b2a2;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 500px at 50% -80px, rgba(212, 175, 106, 0.14), transparent 60%),
+    radial-gradient(900px 600px at 85% 110%, rgba(212, 175, 106, 0.06), transparent 60%),
+    var(--dcard-bg);
+  color: var(--dcard-text);
+}
+
+.dcard-serif {
+  font-family: "Playfair Display", "El Messiri", Georgia, serif;
+}
+.dcard-ar-display {
+  font-family: "El Messiri", "Cairo", serif;
+}
+.dcard-body {
+  font-family: "Cairo", "Inter", system-ui, sans-serif;
+}
+
+/* ── Top bar ─────────────────────────────── */
+.dcard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 20px 0;
+}
+.dcard-lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--dcard-line);
+  background: rgba(212, 175, 106, 0.08);
+  color: var(--dcard-gold-bright);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.dcard-lang-toggle:hover {
+  background: rgba(212, 175, 106, 0.16);
+}
+.dcard-lang-toggle:focus-visible {
+  outline: 2px solid var(--dcard-gold);
+  outline-offset: 2px;
+}
+.dcard-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--dcard-line);
+  background: rgba(212, 175, 106, 0.08);
+  color: var(--dcard-gold-bright);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dcard-icon-btn:hover {
+  background: rgba(212, 175, 106, 0.16);
+}
+.dcard-icon-btn:focus-visible {
+  outline: 2px solid var(--dcard-gold);
+  outline-offset: 2px;
+}
+
+/* ── Hero card ───────────────────────────── */
+.dcard-hero-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 96px 20px 0;
+}
+.dcard-hero {
+  position: relative;
+  border: 1px solid var(--dcard-line);
+  border-radius: 28px;
+  background:
+    radial-gradient(700px 320px at 80% 0%, rgba(212, 175, 106, 0.1), transparent 60%),
+    linear-gradient(160deg, var(--dcard-panel-2), var(--dcard-panel) 55%, #08090c);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(240, 220, 174, 0.12);
+  overflow: visible;
+}
+.dcard-hero-inner {
+  position: relative;
+  z-index: 3;
+  padding: 44px 44px 44px calc(min(400px, 36%) + 72px);
+}
+[dir="rtl"] .dcard-hero-inner {
+  padding: 44px calc(min(400px, 36%) + 72px) 44px 44px;
+}
+
+/* Doctor photo — head intentionally breaks above the gold frame. */
+.dcard-photo {
+  position: absolute;
+  inset-inline-start: 36px;
+  top: -84px;
+  bottom: 0;
+  width: min(400px, 36%);
+  z-index: 4;
+  pointer-events: none;
+}
+.dcard-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.6));
+}
+.dcard-photo-glow {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 8%;
+  width: min(440px, 40%);
+  height: 46%;
+  background: radial-gradient(closest-side, rgba(212, 175, 106, 0.22), transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dcard-emblem {
+  width: 104px;
+  height: 104px;
+  margin-bottom: 18px;
+}
+.dcard-name {
+  font-size: clamp(30px, 4.6vw, 52px);
+  line-height: 1.12;
+  margin: 0 0 10px;
+  background: linear-gradient(175deg, #f7ead0 10%, var(--dcard-gold) 55%, #a37f45 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.01em;
+}
+.dcard-tagline-script {
+  font-size: clamp(17px, 2.2vw, 24px);
+  font-style: italic;
+  color: var(--dcard-gold-bright);
+  margin: 0 0 8px;
+}
+.dcard-tagline-ar {
+  font-size: clamp(15px, 2vw, 19px);
+  color: var(--dcard-muted);
+  margin: 0 0 18px;
+}
+.dcard-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 18px;
+  max-width: 420px;
+}
+.dcard-divider::before,
+.dcard-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--dcard-gold));
+}
+.dcard-divider::after {
+  background: linear-gradient(90deg, var(--dcard-gold), transparent);
+}
+.dcard-divider span {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  background: var(--dcard-gold);
+  flex: none;
+}
+.dcard-title-line {
+  font-size: 15px;
+  color: var(--dcard-muted);
+  margin: 0;
+  line-height: 1.9;
+}
+.dcard-title-line strong {
+  color: var(--dcard-gold-bright);
+  font-weight: 600;
+}
+
+/* ── Action grid ─────────────────────────── */
+.dcard-section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 56px 20px 0;
+}
+.dcard-section-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.dcard-section-head h2 {
+  font-size: clamp(19px, 2.6vw, 25px);
+  color: var(--dcard-gold-bright);
+  margin: 0;
+  white-space: nowrap;
+}
+.dcard-section-head::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, var(--dcard-line), transparent);
+}
+[dir="rtl"] .dcard-section-head::after {
+  background: linear-gradient(-90deg, var(--dcard-line), transparent);
+}
+.dcard-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .dcard-actions {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .dcard-actions {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.dcard-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: start;
+  border: 1px solid rgba(212, 175, 106, 0.16);
+  background: linear-gradient(165deg, rgba(212, 175, 106, 0.07), rgba(12, 14, 18, 0.6));
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: var(--dcard-text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  min-height: 76px;
+}
+button.dcard-action {
+  font: inherit;
+  width: 100%;
+}
+.dcard-action:hover {
+  border-color: var(--dcard-gold);
+  background: linear-gradient(165deg, rgba(212, 175, 106, 0.14), rgba(12, 14, 18, 0.7));
+  transform: translateY(-2px);
+}
+.dcard-action:focus-visible {
+  outline: 2px solid var(--dcard-gold);
+  outline-offset: 2px;
+}
+.dcard-action-icon {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--dcard-line);
+  background: radial-gradient(circle at 30% 25%, rgba(240, 220, 174, 0.22), rgba(212, 175, 106, 0.06));
+  color: var(--dcard-gold-bright);
+}
+.dcard-action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dcard-action-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dcard-text);
+}
+.dcard-action-sub {
+  font-size: 12.5px;
+  color: var(--dcard-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── Content blocks ──────────────────────── */
+.dcard-prose {
+  border: 1px solid rgba(212, 175, 106, 0.16);
+  background: linear-gradient(170deg, rgba(16, 19, 24, 0.9), rgba(10, 11, 14, 0.9));
+  border-radius: 20px;
+  padding: 26px 28px;
+  font-size: 16.5px;
+  line-height: 2;
+  color: #ddd6c6;
+}
+.dcard-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.dcard-chip {
+  border: 1px solid var(--dcard-line);
+  background: rgba(212, 175, 106, 0.07);
+  color: var(--dcard-gold-bright);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 14.5px;
+}
+.dcard-clinics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .dcard-clinics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.dcard-clinic {
+  border: 1px solid rgba(212, 175, 106, 0.16);
+  background: linear-gradient(170deg, rgba(16, 19, 24, 0.9), rgba(10, 11, 14, 0.9));
+  border-radius: 20px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dcard-clinic-city {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--dcard-gold-bright);
+}
+.dcard-clinic-hours {
+  font-size: 13.5px;
+  color: var(--dcard-muted);
+  line-height: 1.8;
+}
+.dcard-clinic-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  color: var(--dcard-gold);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.dcard-clinic-link:hover {
+  color: var(--dcard-gold-bright);
+  text-decoration: underline;
+}
+
+/* ── Modals ──────────────────────────────── */
+.dcard-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.dcard-modal {
+  width: 100%;
+  max-width: 440px;
+  max-height: 88vh;
+  overflow-y: auto;
+  border: 1px solid var(--dcard-line);
+  border-radius: 24px;
+  background: linear-gradient(170deg, #12151b, #0a0b0e);
+  padding: 30px 28px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+}
+.dcard-modal h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--dcard-gold-bright);
+}
+.dcard-modal p,
+.dcard-modal li {
+  color: #d8d2c2;
+  font-size: 14.5px;
+  line-height: 1.9;
+}
+.dcard-modal ol {
+  margin: 12px 0;
+  padding-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dcard-modal-note {
+  border-inline-start: 3px solid var(--dcard-gold);
+  padding-inline-start: 12px;
+  color: var(--dcard-muted);
+  font-size: 13.5px;
+}
+.dcard-qr-img {
+  display: block;
+  width: 240px;
+  height: 240px;
+  margin: 18px auto;
+  border-radius: 16px;
+  border: 1px solid var(--dcard-gold);
+  background: #fff;
+  padding: 10px;
+}
+.dcard-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.dcard-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--dcard-gold);
+  background: linear-gradient(170deg, #e8c987, #c39a52);
+  color: #1d1508;
+  transition: filter 0.2s;
+}
+.dcard-btn:hover {
+  filter: brightness(1.08);
+}
+.dcard-btn:focus-visible {
+  outline: 2px solid var(--dcard-gold-bright);
+  outline-offset: 2px;
+}
+.dcard-btn-ghost {
+  background: transparent;
+  color: var(--dcard-gold-bright);
+  border: 1px solid var(--dcard-line);
+}
+.dcard-btn-ghost:hover {
+  background: rgba(212, 175, 106, 0.1);
+  filter: none;
+}
+.dcard-toast {
+  position: fixed;
+  bottom: 28px;
+  inset-inline: 0;
+  margin-inline: auto;
+  width: max-content;
+  max-width: 90vw;
+  z-index: 70;
+  background: #14171d;
+  border: 1px solid var(--dcard-gold);
+  color: var(--dcard-gold-bright);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dcard-footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 20px 40px;
+  text-align: center;
+  color: var(--dcard-muted);
+  font-size: 13.5px;
+}
+.dcard-footer a {
+  color: var(--dcard-gold);
+  text-decoration: none;
+}
+.dcard-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive hero ─────────────────────── */
+@media (max-width: 900px) {
+  .dcard-hero-wrap {
+    padding-top: 84px;
+  }
+  .dcard-hero-inner {
+    padding: 0 26px 34px;
+    text-align: center;
+  }
+  [dir="rtl"] .dcard-hero-inner {
+    padding: 0 26px 34px;
+  }
+  .dcard-photo {
+    position: relative;
+    inset-inline-start: auto;
+    top: -64px;
+    bottom: auto;
+    width: min(300px, 72vw);
+    height: 340px;
+    margin: 0 auto -48px;
+  }
+  .dcard-photo-glow {
+    inset-inline-start: auto;
+    left: 50%;
+    translate: -50% 0;
+    width: min(340px, 80vw);
+  }
+  .dcard-emblem {
+    margin: 0 auto 14px;
+  }
+  .dcard-divider {
+    margin-inline: auto;
+  }
+  .dcard-title-line {
+    max-width: 520px;
+    margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dcard-action,
+  .dcard-lang-toggle,
+  .dcard-icon-btn,
+  .dcard-btn {
+    transition: none;
+  }
+  .dcard-action:hover {
+    transform: none;
+  }
+}
