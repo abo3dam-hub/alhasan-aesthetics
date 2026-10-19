@@ -23,7 +23,7 @@ const CONVEX_SITE_URL = (
 ).replace(/\/$/, "");
 
 export const config = {
-  matcher: ["/blog/:path*", "/og-image"],
+  matcher: ["/blog/:path*", "/card", "/card/", "/og-image"],
 };
 
 async function fetchWithTimeout(
@@ -79,6 +79,80 @@ async function serveSpa(origin: string): Promise<Response> {
   );
 }
 
+// ─── Digital business card (/card) share preview ───
+// Same crawler problem as articles: CardPage sets its OG tags client-side,
+// which WhatsApp/Facebook/Telegram crawlers never execute — so shares of
+// /card always rendered the generic site preview. Unlike /blog (per-article
+// content from Convex), the card's preview content is static, so the tags
+// are served inline here with no backend round-trip. ?lang=ar|en selects
+// the language (crawlers don't send a useful Accept-Language); og:url
+// carries the language so platforms treat each locale as its own share
+// object, exactly like the article cards.
+const CARD_DOMAIN = "https://dralhasanalsaiem.com";
+
+const CARD_PREVIEW = {
+  en: {
+    title: "Digital Card | Dr. Alhasan Alsaiem",
+    description:
+      "Dr. Alhasan Alsaiem's digital card — Plastic Surgery, Aesthetic Medicine and Body Contouring. Damascus, Latakia, Dubai.",
+  },
+  ar: {
+    title: "البطاقة الرقمية | د. الحسن الصايم",
+    description:
+      "البطاقة الرقمية للدكتور الحسن الصايم — جراحة التجميل والطب التجميلي ونحت الجسم. دمشق، اللاذقية، دبي.",
+  },
+} as const;
+
+function cardCrawlerHtml(url: URL): Response {
+  const langParam = url.searchParams.get("lang");
+  const wantsArabic = langParam === "ar";
+  const lang = wantsArabic ? "ar" : "en";
+  const { title, description } = CARD_PREVIEW[lang];
+  const esc = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const image = `${CARD_DOMAIN}/card/og-preview.jpg`;
+  const link = `${CARD_DOMAIN}/card`;
+  const shareLink = `${link}?lang=${lang}`;
+  const html = `<!DOCTYPE html>
+<html lang="${lang}" dir="${wantsArabic ? "rtl" : "ltr"}">
+<head>
+<meta charset="UTF-8" />
+<title>${esc(title)}</title>
+<link rel="canonical" href="${esc(link)}" />
+<meta property="og:type" content="profile" />
+<meta property="og:title" content="${esc(title)}" />
+<meta property="og:description" content="${esc(description)}" />
+<meta property="og:image" content="${esc(image)}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="1200" />
+<meta property="og:image:alt" content="${esc(title)}" />
+<meta property="og:url" content="${esc(shareLink)}" />
+<meta property="og:site_name" content="Dr. Al Hasan Al Saiem" />
+<meta property="og:locale" content="${wantsArabic ? "ar_AR" : "en_US"}" />
+<meta property="og:locale:alternate" content="${wantsArabic ? "en_US" : "ar_AR"}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${esc(title)}" />
+<meta name="twitter:description" content="${esc(description)}" />
+<meta name="twitter:image" content="${esc(image)}" />
+<meta name="twitter:image:alt" content="${esc(title)}" />
+</head>
+<body></body>
+</html>`;
+  return new Response(html, {
+    status: 200,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      // Same short TTL as /og-meta: crawlers cache aggressively, so a
+      // changed card preview needs a re-scrape, not a long cache.
+      "cache-control": "public, max-age=300, s-maxage=300",
+    },
+  });
+}
+
 export default async function middleware(request: Request) {
   const url = new URL(request.url);
 
@@ -122,6 +196,10 @@ export default async function middleware(request: Request) {
   const userAgent = request.headers.get("user-agent") || "";
   if (!BOT_REGEX.test(userAgent)) {
     return serveSpa(new URL(request.url).origin);
+  }
+
+  if (url.pathname === "/card" || url.pathname === "/card/") {
+    return cardCrawlerHtml(url);
   }
 
   const match = url.pathname.match(/^\/blog\/([^/]+)\/?$/);
