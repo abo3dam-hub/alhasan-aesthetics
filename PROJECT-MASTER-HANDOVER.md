@@ -896,9 +896,10 @@ Single JWT provider:
 - **Data:** `api.siteSettings.getDoctorSettings` (phone, WhatsApp, email, socials,
   addresses, bio, specializations, education) — no new backend, no CMS changes
 - **Name:** literal "Dr. Alhasan Alsaiem" everywhere (display, VCF, QR alt, JSON-LD)
-- **Photo:** `public/card/doctor-cutout.webp` — real About-section portrait
-  (733×978) with background removed via rembg; head breaks above the gold frame
-  via absolute positioning (`top: -84px` desktop / `-64px` mobile), `overflow: visible`
+- **Photo:** `public/card/doctor.webp` — professional studio photo supplied by Ali
+  (2026-10-19, 832×1248, standing with arms crossed, black background); head breaks
+  above the gold frame via absolute positioning (`top: -84px` desktop / `-64px`
+  mobile), `overflow: visible`
 - **Logo:** recreated circular gold SVG emblem inline (no standalone logo file exists)
 - **Actions:** tel:, wa.me, mailto:, /consultation, VCF download (`src/lib/cardVcf.ts`,
   tested in `src/lib/cardVcf.test.ts`), Web Share API + clipboard fallback,

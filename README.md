@@ -222,7 +222,8 @@ Luxury black & gold bilingual (AR/EN, RTL/LTR) digital business card for
 Dr. Alhasan Alsaiem — `src/pages/CardPage.tsx` + `src/pages/CardPage.css`
 (styles scoped under `.dcard` so the site theme is untouched).
 
-- Hero: real doctor portrait (background removed, `public/card/doctor-cutout.webp`)
+- Hero: professional studio photo supplied by Ali (standing, arms crossed,
+  `public/card/doctor.webp`, 832×1248, black background blending into the card)
   with the head intentionally breaking above the gold frame; recreated circular
   gold emblem (no standalone logo file exists); literal name "Dr. Alhasan Alsaiem".
 - Contact data is read live from the existing `doctor` siteSettings

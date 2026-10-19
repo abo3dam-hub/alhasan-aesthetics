@@ -397,7 +397,7 @@ export default function CardPage() {
           <div className="dcard-photo-glow" aria-hidden="true" />
           <div className="dcard-photo" aria-hidden="false">
             <img
-              src="/card/doctor-cutout.webp"
+              src="/card/doctor.webp"
               alt={CARD_NAME}
               fetchPriority="high"
               draggable={false}
