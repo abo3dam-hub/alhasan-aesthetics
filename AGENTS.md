@@ -85,3 +85,23 @@ production data unless explicitly asked.
 - Text: CMS field → i18n key → hardcoded default fallback chain; RTL/LTR both handled.
 - shadcn/ui primitives live in `src/components/ui/`; import individual files, not the barrel.
 - `vly-toolbar-readonly.tsx` is a preview-only dev tool (Freebuff is otherwise fully removed).
+
+## 6. Modern Web Guidance (adopted 2026-11-16, Ali's decision)
+
+- The `modern-web-guidance` skill (GoogleChrome/modern-web-guidance,
+  stewarded by the Chrome/Edge/Firefox/MDN teams) is planted in this repo
+  at `.agents/skills/modern-web-guidance/`. For any HTML/CSS/client-JS
+  work, search/retrieve its guides BEFORE coding:
+  `DISABLE_TELEMETRY=1 npx -y modern-web-guidance@latest search "<query>"`
+  then `... retrieve "<guide-id>"`. Telemetry stays OFF.
+- **Browser support policy: Baseline Widely Available only** (see
+  `.mwgrc` — Origin Trial and volatile features are locked off). The
+  audience includes modest Android devices; fallbacks must be lightweight
+  (<50 LOC) and case-specific.
+- Before delivery of frontend work, run a report-only
+  `DISABLE_TELEMETRY=1 npx -y modern-web-guidance@latest legacy-scan . --json`
+  and summarize verified findings in `WORK-LOG.md`. Never edit code just
+  to force the scan to zero.
+- To update the planted skill, re-copy the current
+  `skills/modern-web-guidance/` folder from
+  `GoogleChrome/modern-web-guidance` over `.agents/skills/modern-web-guidance/`.

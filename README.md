@@ -434,6 +434,13 @@ npx convex dev --once
 CONVEX_DEPLOYMENT=kindly-anaconda-422 npx convex deploy --typecheck enable
 ```
 
+**Agent guidance — Modern Web Guidance (adopted 2026-11-16):** the
+`modern-web-guidance` skill is planted at `.agents/skills/modern-web-guidance/`
+(see `AGENTS.md` §6 and `.mwgrc`). Frontend work (HTML/CSS/client JS) must
+search/retrieve its guides before coding, with `DISABLE_TELEMETRY=1` on every
+CLI call; browser policy is **Baseline Widely Available only**. A report-only
+`legacy-scan` runs before delivery of frontend work.
+
 ## Environment Variables
 
 - `VITE_CONVEX_URL` — Convex deployment URL (managed at build/platform level)

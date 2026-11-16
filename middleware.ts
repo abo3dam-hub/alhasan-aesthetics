@@ -31,15 +31,14 @@ async function fetchWithTimeout(
   headers: HeadersInit | undefined,
   ms: number,
 ): Promise<Response | null> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
   try {
-    const res = await fetch(url, { signal: controller.signal, cache: "no-store", headers });
+    // AbortSignal.timeout replaces the manual AbortController + setTimeout
+    // scaffolding (MWG: js/abort-signal-timeout). The catch-all below treats
+    // its TimeoutError exactly like the old AbortError — both return null.
+    const res = await fetch(url, { signal: AbortSignal.timeout(ms), cache: "no-store", headers });
     return res;
   } catch {
     return null;
-  } finally {
-    clearTimeout(timer);
   }
 }
 

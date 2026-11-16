@@ -282,6 +282,17 @@
   color: var(--foreground);
 }
 
+/* Standard scrollbar theming (Firefox, and Safari/Chrome standard path).
+   The ::-webkit-scrollbar rules below stay as the Blink/WebKit
+   enhancement: they carry the exact 12px width and the thumb's
+   track-coloured border, which the standard properties cannot express,
+   and Blink prefers them when present — so Chrome's look is unchanged
+   while Firefox now gets the theme too. (MWG: customize-scrollbar-color-and-thickness) */
+:root {
+  scrollbar-color: #C5A882 #F0E8DE;
+  scrollbar-width: auto;
+}
+
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
