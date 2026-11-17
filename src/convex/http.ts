@@ -1,5 +1,5 @@
 import { httpRouter } from "convex/server";
-import { httpAction } from "./_generated/server";
+import { httpAction, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { auth } from "./auth";
 import { hashIp } from "./analytics";
@@ -363,7 +363,7 @@ http.route({
 
 /** Shared service-token check (same token as /briefing-analytics). */
 async function checkServiceToken(
-  ctx: any,
+  ctx: ActionCtx,
   request: Request,
 ): Promise<boolean> {
   const authz = request.headers.get("authorization") || "";
