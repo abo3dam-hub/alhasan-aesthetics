@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, ArrowLeftRight, Eye, Maximize2, X } from "lucide
 import { Link } from "react-router";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { cn } from "@/lib/utils";
-import type { Doc } from "@/convex/_generated/dataModel";
+import type { PublicBeforeAfterCase } from "@/lib/beforeAfterCase";
 
 
 const placeholderCases = [
@@ -207,7 +207,7 @@ function CompareFullscreen({
   );
 }
 
-function CaseCard({ c, isRtl }: { c: Doc<"beforeAfter">; isRtl: boolean }) {
+function CaseCard({ c, isRtl }: { c: PublicBeforeAfterCase; isRtl: boolean }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [touched, setTouched] = useState(false);
   const title = isRtl ? c.titleAr : c.titleEn;
@@ -267,7 +267,7 @@ export default function BeforeAfter() {
   const isArabic = locale === "ar";
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.05 });
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
-  const cases = useQuery(api.beforeAfter.listActive);
+  const cases = useQuery(api.beforeAfter.listPublic);
   const sectionCMS = useQuery(api.homepageSettings.getSectionContent, { key: "beforeAfterSection" });
 
   const displayCases = cases && cases.length > 0 ? cases.slice(0, 4) : null;

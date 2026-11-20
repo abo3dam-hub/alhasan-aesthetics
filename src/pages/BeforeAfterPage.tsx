@@ -18,7 +18,7 @@ export default function BeforeAfterPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({});
 
-  const cases = useQuery(api.beforeAfter.listActive);
+  const cases = useQuery(api.beforeAfter.listPublic);
   const procedures = useQuery(api.procedures.listActive);
 
   // Build filters dynamically from CMS procedures

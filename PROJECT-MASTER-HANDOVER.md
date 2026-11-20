@@ -693,6 +693,7 @@ export async function getAdminUser(ctx: MutationCtx)
 |---|---|---|---|
 | `list` | query | Public | All cases |
 | `listActive` | query | Public | Active cases only |
+| `listPublic` | query | Public | **Public feed used by the homepage section + `/before-after` page:** active standalone cases merged with one derived case per active procedure (sub-procedures included) that has its own `beforeImage`+`afterImage` pair; curated cases first, exact image-pair duplicates of a standalone case skipped (2026-11-20) |
 | `getByProcedure` | query | Public | Cases by procedure type |
 | `create` | mutation | Admin | Create case |
 | `update` | mutation | Admin | Update case |

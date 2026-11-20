@@ -17,6 +17,63 @@ export const listActive = query({
   },
 });
 
+/**
+ * Public before/after feed: the curated standalone cases PLUS one case per
+ * active procedure (sub-procedures included) that carries its own
+ * before+after pair — so photos added on a procedure also surface in the
+ * standalone Before/After section/page (Ali, 2026-11-20). Standalone cases keep their curated order
+ * first; procedure-derived cases follow in procedure order. A procedure pair
+ * whose two images exactly match a standalone case is not duplicated.
+ */
+export const listPublic = query({
+  args: {},
+  handler: async (ctx) => {
+    const standalone = (
+      await ctx.db.query("beforeAfter").withIndex("by_order").collect()
+    ).filter((c) => c.isActive);
+    // Sub-procedures are included too: Ali wants every procedure's pair in the
+    // feed, not only top-level ones (they surface under "All" on the page).
+    const procedures = (
+      await ctx.db.query("procedures").withIndex("by_order").collect()
+    ).filter((p) => p.isActive && p.beforeImage && p.afterImage);
+
+    const seenPairs = new Set(
+      standalone.map((c) => `${c.beforeImage}|${c.afterImage}`),
+    );
+
+    return [
+      ...standalone.map((c) => ({
+        _id: c._id as string,
+        titleAr: c.titleAr,
+        titleEn: c.titleEn,
+        procedureType: c.procedureType,
+        beforeImage: c.beforeImage,
+        afterImage: c.afterImage,
+        descriptionAr: c.descriptionAr,
+        descriptionEn: c.descriptionEn,
+        patientAge: c.patientAge,
+        order: c.order,
+        source: "case" as const,
+      })),
+      ...procedures
+        .filter((p) => !seenPairs.has(`${p.beforeImage}|${p.afterImage}`))
+        .map((p, i) => ({
+          _id: `proc:${p._id}`,
+          titleAr: p.titleAr,
+          titleEn: p.titleEn,
+          procedureType: p.slug,
+          beforeImage: p.beforeImage as string,
+          afterImage: p.afterImage as string,
+          descriptionAr: p.descriptionAr,
+          descriptionEn: p.descriptionEn,
+          patientAge: undefined,
+          order: 10000 + i,
+          source: "procedure" as const,
+        })),
+    ];
+  },
+});
+
 export const getByProcedure = query({
   args: { procedureType: v.string() },
   handler: async (ctx, args) => {

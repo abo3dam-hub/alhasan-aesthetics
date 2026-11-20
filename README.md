@@ -310,7 +310,7 @@ Every homepage section pulls data from Convex with translation fallbacks:
 | **Hero** | siteSettings.hero, hero image | translations |
 | **About** | siteSettings.about, doctor image | translations |
 | **Procedures** | procedures.listActive + section header CMS | translations |
-| **Before & After** | beforeAfter.listActive + section header CMS | placeholder |
+| **Before & After** | beforeAfter.listPublic (standalone cases + per-procedure before/after pairs merged) + section header CMS | placeholder |
 | **Testimonials** | testimonials.listActive (photos + lightbox) + section header CMS | placeholder |
 | **Latest Articles** | articles.listPublished + section header CMS + count config (`latestArticlesConfig`) | — (auto-hides when no published articles) |
 | **FAQ** | faq.listActive + section header CMS | translations |
