@@ -687,6 +687,15 @@ export async function getAdminUser(ctx: MutationCtx)
 | `update` | mutation | Admin | Update procedure (filters out undefined) |
 | `remove` | mutation | Admin | Delete procedure |
 
+**Comparison slider (frontend):** ONE shared component,
+`src/components/CompareSlider.tsx`, renders every before/after comparison —
+homepage section cards, the fullscreen overlay, and the `/before-after` page.
+Its geometry is direction-aware (RTL mirrors the reveal side, the pointer
+math, and the label pinning), so the «قبل»/Before label always sits over the
+actual before photo in both languages. Do not re-implement a local slider in a
+page; the page previously had a hand-rolled LTR-only copy whose labels swapped
+in Arabic (fixed 2026-11-20, WORK-LOG §٢٢).
+
 ### Before & After (`src/convex/beforeAfter.ts`)
 
 | Function | Type | Auth | Purpose |
