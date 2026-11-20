@@ -78,7 +78,11 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    return await ctx.db.insert("articles", args);
+    // Store slugs canonically no matter what the client sent (see normalizeSlug).
+    return await ctx.db.insert("articles", {
+      ...args,
+      slug: normalizeSlug(args.slug),
+    });
   },
 });
 
@@ -111,6 +115,9 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const { id, ...updates } = args;
+    if (updates.slug !== undefined) {
+      updates.slug = normalizeSlug(updates.slug);
+    }
     const filtered = Object.fromEntries(
       Object.entries(updates).filter(([, v]) => v !== undefined)
     );
