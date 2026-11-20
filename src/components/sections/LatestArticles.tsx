@@ -7,6 +7,7 @@ import { Link } from "react-router";
 import { ArrowLeft, ArrowRight, Clock, Sparkles } from "lucide-react";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { safeJsonLd } from "@/lib/jsonLd";
+import { cleanSlug } from "@/lib/slug";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -64,7 +65,7 @@ export default function LatestArticles() {
         "@type": "BlogPosting",
         headline: isRtl ? a.titleAr : a.titleEn,
         description: isRtl ? a.excerptAr : a.excerptEn,
-        url: `/blog/${a.slug}`,
+        url: `/blog/${cleanSlug(a.slug)}`,
         ...(a.publishDate ? { datePublished: new Date(a.publishDate).toISOString() } : {}),
       },
     })),
@@ -99,7 +100,7 @@ export default function LatestArticles() {
             animate={inView ? "visible" : "hidden"}
             variants={fadeInUp}
           >
-            <Link to={`/blog/${featured.slug}`} className="group block">
+            <Link to={`/blog/${cleanSlug(featured.slug)}`} className="group block">
               <div className="img-frame-gold rounded-2xl overflow-hidden mb-6 relative">
                 <ResolvedImage
                   storageId={featured.coverImage || undefined}
@@ -149,7 +150,7 @@ export default function LatestArticles() {
               return (
                 <Link
                   key={a._id}
-                  to={`/blog/${a.slug}`}
+                  to={`/blog/${cleanSlug(a.slug)}`}
                   className="group flex items-center gap-5 py-5 first:pt-0 last:pb-0"
                 >
                   <div className="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-xl overflow-hidden">

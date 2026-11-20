@@ -536,6 +536,12 @@ Convex queries resolve → UI updates reactively
 - `by_slug` on `[slug]`
 - `by_order` on `[order]`
 
+**Slug normalization (2026-11-20):** `getBySlug` normalizes its input
+(`normalizeSlug` in `articles.ts`) and falls back to a normalized match over all
+rows, so legacy slugs stored with surrounding slashes still resolve. The
+dashboard sanitizes the slug on save, and public links/sitemap use the canonical
+form (`cleanSlug`, `src/lib/slug.ts`).
+
 #### `pageVisits` (analytics)
 
 Page-view tracking written via the `/trackVisit` HTTP action. No raw IPs stored (hashed then discarded).

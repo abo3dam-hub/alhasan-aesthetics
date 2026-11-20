@@ -359,7 +359,12 @@ function ArticleForm({
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     await onSubmit({
-      slug: (fd.get("slug") as string).trim(),
+      // Sanitize: a pasted path like "/my-article/" must be stored as "my-article".
+      slug: ((fd.get("slug") as string) || "")
+        .trim()
+        .replace(/^\/+|\/+$/g, "")
+        .replace(/\s+/g, "-")
+        .toLowerCase(),
       titleAr: fd.get("titleAr") as string,
       titleEn: fd.get("titleEn") as string,
       excerptAr: fd.get("excerptAr") as string,

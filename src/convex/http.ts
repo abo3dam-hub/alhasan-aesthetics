@@ -3,6 +3,7 @@ import { httpAction, type ActionCtx } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { auth } from "./auth";
 import { hashIp } from "./analytics";
+import { normalizeSlug } from "./articles";
 
 const http = httpRouter();
 
@@ -75,7 +76,7 @@ http.route({
     for (const article of publishedArticles) {
       if (article.slug) {
         xml += `  <url>\n`;
-        xml += `    <loc>${DOMAIN}/blog/${article.slug}</loc>\n`;
+        xml += `    <loc>${DOMAIN}/blog/${normalizeSlug(article.slug)}</loc>\n`;
         xml += `    <changefreq>monthly</changefreq>\n`;
         xml += `    <priority>0.6</priority>\n`;
         xml += `  </url>\n`;

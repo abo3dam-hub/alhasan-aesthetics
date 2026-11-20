@@ -8,6 +8,7 @@ import { ResolvedImage } from "@/components/ResolvedImage";
 import { Calendar, Clock, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/track";
+import { cleanSlug } from "@/lib/slug";
 
 function CardShareButton({
   slug,
@@ -31,7 +32,7 @@ function CardShareButton({
     e.preventDefault();
     e.stopPropagation();
     trackEvent("share", `card/${slug}`);
-    const url = `https://dralhasanalsaiem.com/blog/${slug}?lang=${locale}`;
+    const url = `https://dralhasanalsaiem.com/blog/${cleanSlug(slug)}?lang=${locale}`;
     const text = excerpt || title || t.blogPage.title;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
@@ -123,7 +124,7 @@ export default function BlogListPage() {
           ) : (
             <>
               {featured && (
-                <Link to={`/blog/${featured.slug}`} className="block group mb-10">
+                <Link to={`/blog/${cleanSlug(featured.slug)}`} className="block group mb-10">
                   <div className="glass-card card-glow rounded-3xl overflow-hidden hover:bg-white/60 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
                     <div className="grid md:grid-cols-2">
                       <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden">
@@ -192,7 +193,7 @@ export default function BlogListPage() {
                     transition={{ duration: 0.5, delay: 0.05 * i }}
                   >
                     <Link
-                      to={`/blog/${article.slug}`}
+                      to={`/blog/${cleanSlug(article.slug)}`}
                       className="block h-full group"
                     >
                       <div className="glass-card card-glow rounded-3xl overflow-hidden h-full hover:bg-white/60 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">

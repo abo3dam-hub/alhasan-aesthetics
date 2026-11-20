@@ -8,6 +8,7 @@ import { ArrowRight, ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import GlassNavbar from "@/components/GlassNavbar";
+import { cleanSlug } from "@/lib/slug";
 import { ResolvedImage } from "@/components/ResolvedImage";
 import { trackEvent } from "@/lib/track";
 import { safeJsonLd } from "@/lib/jsonLd";
@@ -106,7 +107,7 @@ export default function BlogArticlePage() {
   const handleShare = async () => {
     const slug = display?.slug ?? "";
     trackEvent("share", `article/${slug}`);
-    const url = `https://dralhasanalsaiem.com/blog/${slug}?lang=${locale}`;
+    const url = `https://dralhasanalsaiem.com/blog/${cleanSlug(slug)}?lang=${locale}`;
     const text = seoDesc || title || t.blogPage.title;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
@@ -149,7 +150,7 @@ export default function BlogArticlePage() {
     if (absoluteImage) setOrCreateMeta("og:image", absoluteImage);
     setOrCreateMeta("og:title", seoTitle, true);
     setOrCreateMeta("og:type", "article", true);
-    setOrCreateMeta("og:url", `https://dralhasanalsaiem.com/blog/${display.slug}`, true);
+    setOrCreateMeta("og:url", `https://dralhasanalsaiem.com/blog/${cleanSlug(display.slug)}`, true);
     if (seoDesc) setOrCreateMeta("og:description", seoDesc, true);
     setOrCreateMeta("twitter:card", "summary_large_image");
     setOrCreateMeta("twitter:title", seoTitle);
@@ -194,7 +195,7 @@ export default function BlogArticlePage() {
       dateModified: display.updatedDate
         ? new Date(display.updatedDate).toISOString()
         : undefined,
-      mainEntityOfPage: `https://dralhasanalsaiem.com/blog/${display.slug}`,
+      mainEntityOfPage: `https://dralhasanalsaiem.com/blog/${cleanSlug(display.slug)}`,
       inLanguage: isAr ? "ar" : "en",
     };
   }, [display, title, seoDesc, isAr, absoluteImage]);
@@ -308,7 +309,7 @@ export default function BlogArticlePage() {
                 {t.blogPage.relatedTopic}
               </h2>
               <Link
-                to={`/blog/${relatedArticle.slug}`}
+                to={`/blog/${cleanSlug(relatedArticle.slug)}`}
                 className="group block glass-card card-glow rounded-2xl p-5 hover:bg-white/60 transition-all duration-300"
               >
                 <h3 className="font-bold text-foreground mb-1 group-hover:text-primary transition-colors">

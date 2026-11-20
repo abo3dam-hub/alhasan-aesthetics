@@ -20,14 +20,27 @@ export const listPublished = query({
   },
 });
 
+/** Canonical slug form: no surrounding whitespace/slashes, lowercase. */
+export function normalizeSlug(raw: string): string {
+  return raw.trim().replace(/^\/+|\/+$/g, "").toLowerCase();
+}
+
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
-    const results = await ctx.db
-      .query("articles")
-      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
-      .first();
-    return results;
+    const clean = normalizeSlug(args.slug);
+    // Fast path: exact (or normalized) slug via the index.
+    for (const candidate of [args.slug, clean]) {
+      const hit = await ctx.db
+        .query("articles")
+        .withIndex("by_slug", (q) => q.eq("slug", candidate))
+        .first();
+      if (hit) return hit;
+    }
+    // Fallback: legacy rows whose stored slug carries slashes/case
+    // (e.g. "/my-article/" pasted into the dashboard slug field).
+    const all = await ctx.db.query("articles").collect();
+    return all.find((a) => normalizeSlug(a.slug) === clean) ?? null;
   },
 });
 

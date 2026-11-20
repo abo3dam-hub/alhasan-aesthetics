@@ -162,6 +162,11 @@ The bilingual patient-education blog lives at `/blog` (listing) and `/blog/:slug
   `<script type="application/ld+json">` Article schema (author Dr. Al Hasan Al
   Saiem, dates, in-language).
 - **Sitemap:** published articles are emitted in `/sitemap.xml` (priority 0.6).
+- **Slug hygiene (2026-11-20):** slugs are canonicalized (trim, strip surrounding
+  slashes, lowercase) in the dashboard on save, in every public link builder
+  (`cleanSlug`, `src/lib/slug.ts`), in the sitemap, and in `articles.getBySlug`
+  (`normalizeSlug` + a normalized-match fallback) — a slug pasted as a full path
+  (`/my-article/`) can no longer produce a "no article" page.
 - **SEO defaults:** each article carries its own AR/EN SEO title + description;
   matching procedures can be cross-linked via *Related procedure*.
 - **Starter content:** `seed.seedArticles` (idempotent) creates 2 sample bilingual
