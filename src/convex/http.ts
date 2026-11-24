@@ -371,15 +371,6 @@ async function checkServiceToken(
   const bearer = /^Bearer ([A-Za-z0-9_-]{32,128})$/.exec(authz.trim());
   if (!bearer) return false;
   const presented = bearer[1];
-  let stored: { tokenHash: string; scope: string } | null = null;
-  try {
-    stored = await ctx.runQuery(internal.analytics.getServiceTokenHash, {
-      name: "morning-briefing",
-    });
-  } catch {
-    return false;
-  }
-  if (!stored || stored.scope !== "briefing-analytics") return false;
   let digest: string;
   try {
     const bytes = await crypto.subtle.digest(
@@ -392,7 +383,24 @@ async function checkServiceToken(
   } catch {
     return false;
   }
-  return constantTimeEqualHex(digest, stored.tokenHash);
+  // Two independently-rotatable tokens share this check: the original
+  // "morning-briefing" token and the "morning-briefing-muse" token added
+  // 2026-11-24 at the owner's request, so either can be rotated or revoked
+  // without breaking the other.
+  const TOKEN_NAMES = ["morning-briefing", "morning-briefing-muse"];
+  for (const name of TOKEN_NAMES) {
+    let stored: { tokenHash: string; scope: string } | null = null;
+    try {
+      stored = await ctx.runQuery(internal.analytics.getServiceTokenHash, {
+        name,
+      });
+    } catch {
+      return false;
+    }
+    if (!stored || stored.scope !== "briefing-analytics") continue;
+    if (constantTimeEqualHex(digest, stored.tokenHash)) return true;
+  }
+  return false;
 }
 
 // ─── Briefing analytics (token-gated, read-only) ───
