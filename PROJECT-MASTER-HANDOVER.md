@@ -1870,6 +1870,7 @@ These must NOT be broken:
 11. **Vite dev-server HMR stays on** — `vite.config.ts` sets `server.hmr.overlay: false` (error overlay off, HMR itself on). Do not disable HMR.
 
 12. **All image resolution goes through `ctx.storage.getUrl()`** — Do not manually construct Convex storage URLs.
+    - **Exception (2026-11-25, Convex egress plan):** `media.toCdnUrl()` rewrites the *host* of a URL that `getUrl()` already resolved, to `media.dralhasanalsaiem.com` (Cloudflare Worker cache). The storage URL itself is never hand-built, `getUrl()` still runs first, and any URL that does not match the Convex storage pattern is returned unchanged (direct Convex URL stays the fallback). See ADR-7.
 
 ---
 
@@ -1916,6 +1917,14 @@ These must NOT be broken:
 - **Where:** `src/components/ResolvedImage.tsx`, all components rendering CMS images
 - **Dependencies:** All image rendering across the app
 - **Break if changed:** Image display in Dashboard and public site
+
+### ADR-7: Media served through a Cloudflare Worker cache (2026-11-25)
+- **Decision:** All Convex storage media (images + video) is served to visitors through `media.dralhasanalsaiem.com`, a Cloudflare Worker (`alhasan-media`) that caches each file at the edge for 1 year (`public, max-age=31536000, immutable`) and serves video Range requests (206) from the cached file. The URL layer in `src/convex/media.ts` (`toCdnUrl`, used by `resolveUrl`/`resolveUrls`/`getFileUrl`) and `src/convex/videos.ts` (`resolveStorageUrl`) rewrites only `<deployment>.convex.cloud/api/storage/<uuid>` URLs; anything else is returned unchanged.
+- **Why:** Convex free plan Data Egress hit 1.7 GB / 1 GB in Nov 2026 (58 raw phone photos, 74.88 MB, served with `Cache-Control: private` so no shared cache could help). The Worker drops Convex egress to cache-fill only; uploads, the CMS, and the database are untouched, and no file was moved.
+- **Where:** Worker script + deployment notes live outside this repo (Ted's workspace `hidden/alhasan-phase0-webp/`); DNS `media` record (proxied A → 192.0.2.1) + Worker route `media.dralhasanalsaiem.com/*` on Cloudflare zone `dralhasanalsaiem.com`; code in `src/convex/media.ts`, `src/convex/videos.ts`.
+- **Dependencies:** Cloudflare account (Global API Key); the Worker fetches from `kindly-anaconda-422.convex.cloud`. Workers free plan (100k req/day) is far above current traffic.
+- **Break if changed:** Removing the Worker/DNS/route breaks every media URL the site emits; rollback is redeploying the previous Convex functions (direct Convex URLs) — no data change needed. Known trade-offs: a deleted file's old URL may stay reachable from the edge cache for a while (nothing links to it); a replaced image always gets a new storageId, so cache staleness cannot happen.
+- **Monitoring:** daily Convex usage-state watch (`alhasan-egress-watch`, 26 Nov–2 Dec 2026) — see WORK-LOG.md §2026-11-25.
 
 ---
 
