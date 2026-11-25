@@ -9,7 +9,7 @@ Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-
 - **Convex egress fix complete (Phases 0–2):** Nov 2026 Data Egress had hit 1.7 GB / 1 GB. The 18 heaviest images were recompressed (library 74.88 MB → 19.20 MB, 58 files) and all media is now served via the Cloudflare cache; the Convex counter stays "Exceeded" until the 1 Dec reset — December is the real test.
 - **Monitoring:** daily Convex usage-state watch (`alhasan-egress-watch`, 09:00 Asia/Beirut, 26 Nov–2 Dec 2026); any re-exceedance after 1 Dec or a "Disabled" state is flagged immediately.
 - **Build health (verified 2026-11-25):** `tsc` clean, ESLint 0 errors / 0 warnings, vitest 20/20 (4 files), `vite build` OK.
-- **Known open item:** the FAQ section is missing on the English homepage (present in Arabic) — observed 2026-11-25, content decision pending.
+- **Known open item (corrected 2026-11-25):** the FAQ section is present on both homepages (9 questions each, full English content) — the earlier "missing on English" note was a false negative caused by `content-visibility` (below-fold sections only render on scroll). The real open item: Google's Rich Results Test does not detect the FAQPage structured data on `/en` (verified twice); the JSON-LD script is injected client-side after the FAQ data arrives, and Google's snapshot does not wait for it. Proposed fix (pending the owner's word): serve the FAQPage JSON-LD server-side.
 
 ## Stack
 

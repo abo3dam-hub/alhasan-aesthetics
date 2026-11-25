@@ -31,7 +31,7 @@ Production URL: https://www.dralhasanalsaiem.com/ (custom domain wired in Vercel
 - **Build health (verified 2026-11-25):** `npx tsc --noEmit` clean, ESLint **0 errors / 0 warnings**, `vitest` 20/20 (4 files) green; entry chunk 422.57 KB (gzip 131.77 KB).
 - **Media CDN + Convex egress fix (2026-11-25, Phases 0–2 complete):** Nov 2026 Data Egress hit 1.7 GB / 1 GB. The 18 heaviest images were recompressed (library 74.88 MB → 19.20 MB, 58 files) and all media is now served through a Cloudflare Worker cache at `media.dralhasanalsaiem.com` (DNS `media` record + Worker `alhasan-media` + route; 1-year immutable edge cache, Range/206 video support). URL rewrite in `src/convex/media.ts` (`toCdnUrl`) + `src/convex/videos.ts`; `getUrl()` still runs first — see §27 invariant 12 (with the documented exception) and ADR-7. Commits `db003e1` (code) + `c0cf3ca` (docs). The Convex usage state stays "Exceeded" until the 1 Dec reset — December is the real test; daily watch (`alhasan-egress-watch`, 26 Nov–2 Dec) reports to the agent chat.
 - **Briefing tokens:** a second independent token `morning-briefing-muse` was added 2026-11-24 for the current agent (commit `61e8704`); the original `morning-briefing` token is untouched and still works.
-- **Known open item:** the FAQ section is missing on the English homepage (present in Arabic) — observed 2026-11-25, see §23.
+- **Known open item (corrected 2026-11-25):** the FAQ section is present on both homepages (9 questions each, full English content) — the earlier "missing on English" note was a false negative caused by `content-visibility` (below-fold sections only render on scroll). The real open item is in §23: Google's Rich Results Test does not detect the FAQPage structured data on `/en` (verified twice); the JSON-LD script is injected client-side after the FAQ data arrives. Proposed fix (pending the owner's word): serve the FAQPage JSON-LD server-side.
 - **Domain:** the real domain **`dralhasanalsaiem.com`** is now fully wired in Vercel and is **live in production** — all canonical/OG/JSON-LD/sitemap/robots references point at it (superseding the placeholder `dr-alhasan.com`, which is not registered in DNS). Verified: `curl -A "Twitterbot" https://dralhasanalsaiem.com/blog/<slug>` returns the `/og-meta` shell whose `og:image` resolves to a valid 1200×630 PNG.
 - **Infra notes:** `package.json` has a `postinstall: patch-package` script (do not remove). `src/convex/_generated` is gitignored (only `api.d.ts` is tracked) — regenerate with `npx convex dev --once` / deploy.
 - **Canonical reference:** for the most current, self-contained overview read `README.md`; for the latest session log read `WORK-LOG.md`.
@@ -1729,11 +1729,12 @@ All CMS mutations require admin role. The first authenticated user can self-prom
 - **Was:** Dynamic sitemap checked `proc.active !== false` but the procedure field is `isActive`.
 - **Resolution:** Now checks `proc.isActive !== false` (`src/convex/http.ts`, sitemap builder) — inactive procedures are correctly excluded. Note the defensive comment in code: `listActive` already filters inactive procedures.
 
-### KNOWN-1: FAQ section missing on the English homepage — **OPEN (observed 2026-11-25)**
-- **Severity:** Medium (content gap)
-- **Location:** Homepage FAQ section (`/en` renders without it; Arabic homepage shows it)
-- **Current behavior:** The FAQ section (header + entries) is present on the Arabic homepage and absent on the English one. Found incidentally during the 2026-11-25 egress verification visual check — not caused by the egress work.
-- **Status:** Flagged to the owner; not part of the egress task. Needs a content/owner decision (whether the English FAQ was never filled in the CMS or the section is hidden for EN).
+### KNOWN-1: FAQPage JSON-LD not seen by Google — **OPEN (diagnosed 2026-11-25)**
+- **Severity:** Medium (SEO)
+- **Location:** Homepage FAQ section (`/en` and `/ar`); structured data in `src/components/sections/FAQ.tsx`
+- **Correction of the earlier note:** the FAQ section itself is NOT missing — a live browser check (full slow scroll) confirmed it renders on both homepages with 9 questions each and full English content. The 2026-11-25 "missing on English" observation was a false negative caused by `content-visibility: auto` (below-fold sections do not render until scrolled into view). Data verified live: 9 active FAQ rows, all with complete EN questions + answers; section CMS and visibility settings complete; no locale filtering in code; `faq` i18n keys exist in both locales.
+- **Current behavior:** Google's Rich Results Test on `/en` (run twice, 2026-11-25) detects only LocalBusiness + Organization items (16 then 14 valid items) and **no FAQPage**, even though the section visibly shows 9 questions. The JSON-LD script is injected client-side by React only after the `faq.listActive` query resolves, and Google's render snapshot does not wait for it (the item count changing between runs supports render-timing sensitivity). `safeJsonLd` output is valid JSON.
+- **Status:** Diagnosed and reported to the owner; fix awaits his word. Proposed fix: serve the FAQPage JSON-LD server-side (e.g. via an HTTP endpoint / middleware, like `/sitemap.xml`) so crawlers see it without client JS. No new English content is needed.
 
 ---
 
