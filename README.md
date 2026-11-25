@@ -2,7 +2,14 @@
 
 Premium bilingual (Arabic/English) aesthetic surgery website with a structured Admin CMS, WhatsApp consultation flow, built-in visit + conversion analytics (page views, visitor countries, WhatsApp/CTA clicks), semantic procedure icons, geo-targeted SEO, patient-review photo galleries, a homepage **Reels video section** (vertical clips managed from the admin CMS), a media library, and a branded on-demand Open Graph share-image generator for the blog.
 
-Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-anaconda-422.convex.site`). Web: **`https://www.dralhasanalsaiem.com`** (custom domain wired to Vercel; auto-deployed from the `main` branch).
+Production Convex deployment: `kindly-anaconda-422` (HTTP site: `https://kindly-anaconda-422.convex.site`). Web: **`https://www.dralhasanalsaiem.com`** (custom domain wired to Vercel; auto-deployed from the `main` branch). Media (images + videos) is served through a Cloudflare Worker cache at **`https://media.dralhasanalsaiem.com`** (see *Media delivery (Cloudflare cache)* below) — storage itself stays in Convex.
+
+## Current status (2026-11-25)
+
+- **Convex egress fix complete (Phases 0–2):** Nov 2026 Data Egress had hit 1.7 GB / 1 GB. The 18 heaviest images were recompressed (library 74.88 MB → 19.20 MB, 58 files) and all media is now served via the Cloudflare cache; the Convex counter stays "Exceeded" until the 1 Dec reset — December is the real test.
+- **Monitoring:** daily Convex usage-state watch (`alhasan-egress-watch`, 09:00 Asia/Beirut, 26 Nov–2 Dec 2026); any re-exceedance after 1 Dec or a "Disabled" state is flagged immediately.
+- **Build health (verified 2026-11-25):** `tsc` clean, ESLint 0 errors / 0 warnings, vitest 20/20 (4 files), `vite build` OK.
+- **Known open item:** the FAQ section is missing on the English homepage (present in Arabic) — observed 2026-11-25, content decision pending.
 
 ## Stack
 
@@ -58,11 +65,13 @@ src/
 │   ├── beforeAfter.ts        # Before & After CRUD (protected)
 │   ├── testimonials.ts       # Testimonials CRUD (protected, with photos)
 │   ├── videos.ts             # Homepage video section CRUD (protected); stores clips + posters
-│   │                         #   in Convex storage, records as a `videos` key in siteSettings
+│   │                         #   in Convex storage, records as a `videos` key in siteSettings;
+│   │                         #   URLs are served via the media CDN (see below)
 │   ├── faq.ts                # FAQ CRUD (protected)
 │   ├── homepageSettings.ts   # Homepage CMS settings (hero, about, CTA, footer, sections)
 │   ├── siteSettings.ts       # Key/value settings store (doctor, SEO)
-│   ├── media.ts              # Media library (Convex storage upload, protected)
+│   ├── media.ts              # Media library (Convex storage upload, protected);
+│   │                         #   URL resolution rewrites to the media CDN
 │   ├── analytics.ts          # Visit analytics (record, geocode cache, aggregates)
 │   ├── users.ts              # User queries + promoteUser (admin-only, max 2 admins)
 │   ├── loginRateLimit.ts     # Login-attempt tracking (app-level; UI-enforced)
@@ -281,7 +290,7 @@ A self-contained analytics feature — no third-party script (no GA4/Vercel Anal
 - **Dashboard widget:** four visit stat cards, conversion cards, a 14-day bar chart, countries list (flags + bars), top pages, and top actions.
 - **Maintenance:** `analytics.purgePath` (internal mutation) removes recorded visits and events for a given path (e.g. smoke-test data).
 - **Security (2026-09-23):** the write path (`insertVisit`, `insertEvent`, `saveIpCache`, `getIpCache`) is internal-only — callable solely from the `/trackVisit` HTTP action, never directly by clients. `analytics.getStats` requires admin authentication.
-- **Briefing automation (2026-09-26; extended 2026-10-07):** a token-gated, read-only endpoint `GET /briefing-analytics` serves exactly the morning-briefing numbers for one Europe/Berlin day (default: yesterday) — visits, unique visitors, WhatsApp/CTA clicks, **consultation step-1 clicks** (`consultStep1Clicks`; live in the API only after the analytics backend is deployed), top 3 pages, top 3 countries. Auth is a long random bearer token whose SHA-256 hash (only) is stored in the `serviceTokens` table (`analytics.registerServiceToken`, internal mutation); the comparison is constant-time and the token is never logged. Scope is read-only analytics — no writes, no other data leaves.
+- **Briefing automation (2026-09-26; extended 2026-10-07; second token 2026-11-24):** a token-gated, read-only endpoint `GET /briefing-analytics` serves exactly the morning-briefing numbers for one Europe/Berlin day (default: yesterday) — visits, unique visitors, WhatsApp/CTA clicks, **consultation step-1 clicks** (`consultStep1Clicks`; live in the API only after the analytics backend is deployed), top 3 pages, top 3 countries. Auth is a long random bearer token whose SHA-256 hash (only) is stored in the `serviceTokens` table (`analytics.registerServiceToken`, internal mutation); the comparison is constant-time and the token is never logged. Scope is read-only analytics — no writes, no other data leaves. A second independent token `morning-briefing-muse` was added 2026-11-24 for the current agent (commit `61e8704`); the original `morning-briefing` token is untouched.
 
 | HTTP endpoint | Method | Purpose |
 |---------------|--------|---------|
@@ -357,6 +366,14 @@ Every homepage section pulls data from Convex with translation fallbacks:
   rendered through `BrandMark` (`<picture>` with JPG/PNG fallbacks) in the navbar, footer,
   timeline logo, and About; the about image uses `srcSet`/`sizes` for art direction
 
+### Media delivery (Cloudflare cache, 2026-11-25)
+
+- All media URLs the site emits are served through **`https://media.dralhasanalsaiem.com`**, a Cloudflare Worker (`alhasan-media`) that caches each file at the edge for 1 year (`public, max-age=31536000, immutable`) and serves video Range requests (206) from the cached file. Storage stays in Convex — no file was moved.
+- The rewrite lives in `src/convex/media.ts` (`toCdnUrl`, used by `resolveUrl` / `resolveUrls` / `getFileUrl`) and `src/convex/videos.ts` (`resolveStorageUrl`); it rewrites only `<deployment>.convex.cloud/api/storage/<uuid>` URLs, anything else is returned unchanged, and resolution still goes through `ctx.storage.getUrl()` first (`storageId` stays canonical — see HANDOVER §27 invariant 12 + ADR-7).
+- **Why:** Convex free-plan Data Egress hit 1.7 GB / 1 GB in Nov 2026 (58 raw phone photos, 74.88 MB, served with `Cache-Control: private`). The cache drops Convex egress to cache-fill only. The 18 heaviest images were also recompressed first (WebP, max 1600px, q80; the two OG images stayed compressed JPEG because WhatsApp/Facebook crawlers don't reliably support WebP `og:image`) — library 74.88 MB → **19.20 MB** (58 files).
+- **Verified 2026-11-25:** images 200 with exact sizes, cache HIT across edge colos, video Range 206 + real browser playback with seek/resume, dashboard upload gets a `media.…` URL immediately (test file deleted afterwards, library back to 58). A deleted file's old URL now returns 404 (edge cache evicted it).
+- **Trade-offs:** a deleted file's URL may stay reachable from the edge cache for a while (nothing links to it); a replaced image always gets a new storageId, so cache staleness cannot happen. Workers free plan (100k req/day) is far above current traffic. Rollback: redeploy the previous Convex functions (direct Convex URLs) — no data change needed.
+
 ## Responsive Design & UI Polish
 
 - Mobile-first with responsive breakpoints; **two cards per row on all screen sizes** for procedures, before/after, and testimonials
@@ -377,6 +394,7 @@ No third-party performance scripts; all optimizations are build-time or declarat
 - **Fonts (self-hosted, 2026-09-23):** only the weights actually used are served as local woff2 (`public/fonts/`): Inter/Cairo 400–700, Playfair Display/El Messiri 600–700 — no italics, no Google Fonts requests. The two critical above-the-fold faces (`inter-400-latin`, `playfair-display-700-latin`) are `<link rel="preload">`d with `font-display: swap`.
 - **Animations:** framer-motion runs through `<LazyMotion features={loadFeatures} strict>` where `loadFeatures` is a dynamic `import()` — the animation engine loads as a separate async chunk instead of in the initial bundle (no `modulepreload` for it). Components import `{ m as motion }`; API is unchanged.
 - **Images:** route-level code splitting (`React.lazy` for all pages) + manual vendor chunks; below-fold sections mount on intersection with `content-visibility: auto` (`.cvv`); videos use `preload="none"` with poster images; below-fold thumbnails use `loading="lazy"` + `decoding="async"`; above-fold logos use `fetchpriority="high"`.
+- **Media CDN:** images and videos are served from the Cloudflare edge cache (`media.dralhasanalsaiem.com`, 1-year immutable) instead of directly from Convex storage, so repeat views cost no Convex egress (see *Media delivery* above).
 - **Build:** `esbuild` minify, `esnext` target, no sourcemaps in production.
 
 ## SEO & Structured Data

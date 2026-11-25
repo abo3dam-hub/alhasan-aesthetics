@@ -181,3 +181,13 @@ No behavior or design changes; load-time only:
 - **Video posters:** dashboard poster thumbnails (`VideoEditor.tsx`) now use `loading="lazy"` + `decoding="async"`.
 
 Verified: `tsc -b`, `eslint`, `vitest` (12/12), `vite build` all pass.
+
+## Addendum — Media delivery moved to the Cloudflare cache (2026-11-25)
+
+No behavior or design change to the video section itself; delivery only:
+
+- Video files and posters still live in Convex storage (`storageId` remains canonical, resolution still starts with `ctx.storage.getUrl()`), but the URLs `getVideos`/`listAll` return are now rewritten to **`https://media.dralhasanalsaiem.com/<uuid>`** by `toCdnUrl` in `src/convex/videos.ts` (`resolveStorageUrl`). Anything that is not a Convex storage URL is returned unchanged.
+- **Why:** Convex free-plan Data Egress hit 1.7 GB / 1 GB in Nov 2026; the Worker cache (1-year immutable, Range/206 support) drops Convex egress to cache-fill only. See HANDOVER ADR-7 and WORK-LOG.md §2026-11-25.
+- **Verified 2026-11-25:** video `964e57c0-9254-41f3-b555-02c5e5272c13` plays in the browser (23s, seek to midpoint + resume, no errors), Range `0-999` → 206 with exactly 1000 bytes, out-of-range → 416, and the homepage reels section plays normally with the poster shown first. A real iOS Safari playback test was not done (device browser unavailable) — desktop browser + Range mechanics verified instead.
+
+Verified: `tsc`, `eslint` (0 errors), `vitest` (20/20), `vite build` all pass.
