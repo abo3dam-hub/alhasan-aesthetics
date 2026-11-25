@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./admin";
+import { toCdnUrl } from "./media";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 
@@ -58,7 +59,11 @@ async function writeVideos(db: MutationCtx["db"], settingId: Id<"siteSettings"> 
 async function resolveStorageUrl(storage: QueryCtx["storage"], ref: string | undefined) {
   if (!ref) return "";
   try {
-    return (await storage.getUrl(ref as Id<"_storage">)) ?? "";
+    // Video file and poster URLs go through the media CDN as well
+    // (Phase 2 of the Convex egress plan); toCdnUrl leaves any URL that
+    // does not match the Convex storage pattern untouched.
+    const url = await storage.getUrl(ref as Id<"_storage">);
+    return url ? toCdnUrl(url) : "";
   } catch (err) {
     console.error("[videos] Failed to resolve storage URL for:", ref, err);
     return "";

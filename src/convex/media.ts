@@ -3,6 +3,29 @@ import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./admin";
 import type { Id } from "./_generated/dataModel";
 
+/**
+ * Public media CDN (Phase 1/2 of the Convex egress plan, 2026-11-25):
+ * a Cloudflare Worker on media.dralhasanalsaiem.com caches Convex storage
+ * files at the edge for 1 year (immutable — a replaced image always gets a
+ * new storageId and therefore a new URL).
+ *
+ * toCdnUrl rewrites ONLY URLs that match the Convex storage pattern
+ * (<deployment>.convex.cloud/api/storage/<uuid>). Anything else — external
+ * URLs, data URIs, already-rewritten CDN URLs — is returned unchanged, so
+ * the direct Convex URL stays the fallback whenever a rewrite cannot apply.
+ * Resolution still goes through ctx.storage.getUrl() first (§27 invariant:
+ * storageId is canonical); only the host of the resolved URL is rewritten.
+ */
+export const MEDIA_CDN_ORIGIN = "https://media.dralhasanalsaiem.com";
+
+export function toCdnUrl(url: string): string {
+  const match = url.match(
+    /^https?:\/\/[^/]+\.convex\.cloud\/api\/storage\/([^/?#]+)/,
+  );
+  if (!match) return url;
+  return `${MEDIA_CDN_ORIGIN}/${match[1]}`;
+}
+
 /** Generate a signed upload URL for file uploads */
 export const generateUploadUrl = mutation({
   args: {},
@@ -56,7 +79,8 @@ export const getByStorageId = query({
 export const getFileUrl = query({
   args: { storageId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.storage.getUrl(args.storageId as Id<"_storage">);
+    const resolved = await ctx.storage.getUrl(args.storageId as Id<"_storage">);
+    return resolved ? toCdnUrl(resolved) : resolved;
   },
 });
 
@@ -97,7 +121,7 @@ export const resolveUrl = query({
     if (!ref.startsWith("http://") && !ref.startsWith("https://")) {
       try {
         const resolved = await ctx.storage.getUrl(ref as Id<"_storage">);
-        if (resolved) return resolved;
+        if (resolved) return toCdnUrl(resolved);
       } catch {
         // Storage object may not exist — fall through
       }
@@ -110,7 +134,7 @@ export const resolveUrl = query({
     if (extractedId) {
       try {
         const resolved = await ctx.storage.getUrl(extractedId as Id<"_storage">);
-        if (resolved) return resolved;
+        if (resolved) return toCdnUrl(resolved);
       } catch {
         // Fall through to media record lookup
       }
@@ -122,7 +146,7 @@ export const resolveUrl = query({
       if (item.url === ref && item.storageId) {
         try {
           const resolved = await ctx.storage.getUrl(item.storageId as Id<"_storage">);
-          if (resolved) return resolved;
+          if (resolved) return toCdnUrl(resolved);
         } catch {
           // Storage object may not exist
         }
@@ -168,7 +192,7 @@ export const resolveUrls = query({
       if (!ref.startsWith("http://") && !ref.startsWith("https://")) {
         try {
           const resolved = await ctx.storage.getUrl(ref as Id<"_storage">);
-          if (resolved) { results[ref] = resolved; continue; }
+          if (resolved) { results[ref] = toCdnUrl(resolved); continue; }
         } catch { /* fall through */ }
         // Unresolvable storageId — return empty (matches resolveUrl) so the
         // "No image" fallback renders instead of a broken storageId as src.
@@ -181,7 +205,7 @@ export const resolveUrls = query({
       if (extractedId) {
         try {
           const resolved = await ctx.storage.getUrl(extractedId as Id<"_storage">);
-          if (resolved) { results[ref] = resolved; continue; }
+          if (resolved) { results[ref] = toCdnUrl(resolved); continue; }
         } catch { /* fall through */ }
       }
 
@@ -190,7 +214,7 @@ export const resolveUrls = query({
       if (mediaStorageId) {
         try {
           const resolved = await ctx.storage.getUrl(mediaStorageId as Id<"_storage">);
-          if (resolved) { results[ref] = resolved; continue; }
+          if (resolved) { results[ref] = toCdnUrl(resolved); continue; }
         } catch { /* fall through */ }
       }
 
