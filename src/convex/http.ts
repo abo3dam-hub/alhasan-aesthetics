@@ -4,6 +4,7 @@ import { api, internal } from "./_generated/api";
 import { auth } from "./auth";
 import { hashIp } from "./analytics";
 import { normalizeSlug } from "./articles";
+import { buildFaqJsonLd } from "../lib/jsonLd";
 
 const http = httpRouter();
 
@@ -89,6 +90,52 @@ http.route({
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      },
+    });
+  }),
+});
+
+// ─── FAQPage JSON-LD (server-side, 2026-11-25) ───
+// Returns the homepage FAQ structured data as JSON for one locale, built
+// from the live CMS FAQ rows. The block used to be injected client-side by
+// FAQ.tsx after the Convex query resolved — Google's renderer consistently
+// snapshotted before that, so Rich Results Test never detected a FAQPage
+// (verified twice, 2026-11-25). The Vercel Edge middleware now fetches this
+// endpoint and inlines the block into the homepage HTML for every request,
+// so crawlers see it in the raw HTML without running JavaScript.
+// Locale: explicit ?lang=ar|en wins, else Accept-Language (same rule as
+// /og-meta); default is Arabic (the site's primary language). Public data —
+// no auth. On a query failure an empty FAQPage is served (the middleware
+// then falls back to the plain SPA shell).
+http.route({
+  path: "/faq-jsonld",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const langParam = (url.searchParams.get("lang") || "").toLowerCase();
+    const wantsArabic =
+      langParam === "ar" ||
+      (langParam !== "en" &&
+        (request.headers.get("accept-language") || "")
+          .toLowerCase()
+          .startsWith("ar"));
+
+    let faqs: {
+      questionAr: string;
+      questionEn: string;
+      answerAr: string;
+      answerEn: string;
+    }[] = [];
+    try {
+      faqs = await ctx.runQuery(api.faq.listActive);
+    } catch {
+      // Serve an empty FAQPage; the middleware falls back to the plain shell.
+    }
+
+    return new Response(JSON.stringify(buildFaqJsonLd(faqs, wantsArabic)), {
+      headers: {
+        "Content-Type": "application/ld+json; charset=utf-8",
+        "Cache-Control": "public, max-age=300, s-maxage=300",
       },
     });
   }),

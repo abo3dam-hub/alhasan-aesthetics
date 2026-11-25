@@ -9,7 +9,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { safeJsonLd } from "@/lib/jsonLd";
 
 const placeholderFaqKeys = ["q1", "q2", "q3", "q4", "q5", "q6"];
 
@@ -107,27 +106,6 @@ export default function FAQ() {
           </motion.div>
         </div>
       </div>
-
-      {/* FAQPage Structured Data */}
-      {displayFaqs && displayFaqs.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: safeJsonLd({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: displayFaqs.map((faq) => ({
-                "@type": "Question",
-                name: isRtl ? faq.questionAr : faq.questionEn,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: isRtl ? faq.answerAr : faq.answerEn,
-                },
-              })),
-            }),
-          }}
-        />
-      )}
     </section>
   );
 }

@@ -16,3 +16,34 @@
 export function safeJsonLd(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
+
+/**
+ * Build the FAQPage structured-data object for a list of CMS FAQ rows.
+ *
+ * One shared builder for the server-side `/faq-jsonld` endpoint — the only
+ * place the block is emitted since 2026-11-25 (it used to be injected
+ * client-side by FAQ.tsx after the Convex query resolved, which Google's
+ * renderer consistently snapshotted before — Rich Results Test never saw
+ * it). `isArabic` picks the Arabic or English question/answer per row.
+ */
+export interface FaqJsonLdRow {
+  questionAr: string;
+  questionEn: string;
+  answerAr: string;
+  answerEn: string;
+}
+
+export function buildFaqJsonLd(faqs: FaqJsonLdRow[], isArabic: boolean) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: isArabic ? faq.questionAr : faq.questionEn,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: isArabic ? faq.answerAr : faq.answerEn,
+      },
+    })),
+  };
+}

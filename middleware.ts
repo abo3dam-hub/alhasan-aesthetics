@@ -23,7 +23,7 @@ const CONVEX_SITE_URL = (
 ).replace(/\/$/, "");
 
 export const config = {
-  matcher: ["/blog/:path*", "/card", "/card/", "/og-image"],
+  matcher: ["/", "/ar", "/en", "/ar/", "/en/", "/blog/:path*", "/card", "/card/", "/og-image"],
 };
 
 async function fetchWithTimeout(
@@ -47,35 +47,78 @@ async function fetchWithTimeout(
 const SPA_CACHE = new Map<string, { html: string; at: number }>();
 const SPA_TTL = 10 * 60 * 1000;
 
-async function serveSpa(origin: string): Promise<Response> {
+const SPA_HEADERS = {
+  "content-type": "text/html; charset=utf-8",
+  "cache-control": "public, max-age=0, must-revalidate",
+} as const;
+
+async function getSpaHtml(origin: string): Promise<string> {
   const cached = SPA_CACHE.get(origin);
-  if (cached && Date.now() - cached.at < SPA_TTL) {
-    return new Response(cached.html, {
-      headers: {
-        "content-type": "text/html; charset=utf-8",
-        "cache-control": "public, max-age=0, must-revalidate",
-      },
-    });
-  }
+  if (cached && Date.now() - cached.at < SPA_TTL) return cached.html;
   try {
     const res = await fetch(`${origin}/index.html`, { cache: "no-store" });
     if (res.ok) {
       const html = await res.text();
       SPA_CACHE.set(origin, { html, at: Date.now() });
-      return new Response(html, {
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "public, max-age=0, must-revalidate",
-        },
-      });
+      return html;
     }
   } catch {
     // Fall through to the minimal fallback below.
   }
-  return new Response(
-    '<!DOCTYPE html><html><head><title>Dr. Al Hasan Al Saiem</title></head><body><div id="root"></div></body></html>',
-    { headers: { "content-type": "text/html; charset=utf-8" } },
+  return '<!DOCTYPE html><html><head><title>Dr. Al Hasan Al Saiem</title></head><body><div id="root"></div></body></html>';
+}
+
+async function serveSpa(origin: string): Promise<Response> {
+  return new Response(await getSpaHtml(origin), { headers: SPA_HEADERS });
+}
+
+// ─── Homepage FAQPage structured data (2026-11-25) ───
+// The FAQPage JSON-LD used to be injected client-side by FAQ.tsx after the
+// Convex FAQ query resolved — Google's renderer consistently snapshotted
+// before that, so Rich Results Test never detected a FAQPage (verified
+// twice). It is now rendered server-side: this middleware fetches the block
+// from the Convex /faq-jsonld endpoint and inlines it into the homepage
+// HTML for every GET request (bot or not — crawlers with unlisted UAs get
+// it too, and for humans it is invisible metadata). On any failure the
+// plain SPA shell is served, exactly as before.
+const FAQ_CACHE = new Map<string, { json: string; at: number }>();
+const FAQ_TTL = 10 * 60 * 1000;
+
+async function fetchFaqJsonLd(lang: string): Promise<string | null> {
+  const cached = FAQ_CACHE.get(lang);
+  if (cached && Date.now() - cached.at < FAQ_TTL) return cached.json;
+  const res = await fetchWithTimeout(
+    `${CONVEX_SITE_URL}/faq-jsonld?lang=${lang}`,
+    undefined,
+    3000,
   );
+  if (!res || !res.ok) return null;
+  try {
+    const json = await res.text();
+    // Validate it parses before caching — a broken block must never be inlined.
+    JSON.parse(json);
+    FAQ_CACHE.set(lang, { json, at: Date.now() });
+    return json;
+  } catch {
+    return null;
+  }
+}
+
+function injectFaqJsonLd(html: string, json: string): string {
+  // Escape "<" the same way safeJsonLd does so the inlined JSON can never
+  // form a tag.
+  const safe = json.replace(/</g, "\\u003c");
+  const script = `<script type="application/ld+json">${safe}</script>`;
+  return html.includes("</head>")
+    ? html.replace("</head>", `${script}</head>`)
+    : html;
+}
+
+async function serveHomepage(origin: string, lang: string): Promise<Response> {
+  const html = await getSpaHtml(origin);
+  const faqJson = await fetchFaqJsonLd(lang);
+  const body = faqJson ? injectFaqJsonLd(html, faqJson) : html;
+  return new Response(body, { headers: SPA_HEADERS });
 }
 
 // ─── Digital business card (/card) share preview ───
@@ -188,6 +231,23 @@ export default async function middleware(request: Request) {
       status: 404,
       headers: { "cache-control": "no-store" },
     });
+  }
+
+  // Homepage (/, /ar, /en): serve the SPA shell with the FAQPage JSON-LD
+  // inlined (see the note above fetchFaqJsonLd). Explicit ?lang= wins over
+  // the path segment; the root defaults to Arabic (primary language).
+  if (request.method === "GET") {
+    const home = url.pathname.match(/^\/(ar|en)?\/?$/);
+    if (home) {
+      const langParam = url.searchParams.get("lang");
+      const lang =
+        langParam === "en" || langParam === "ar"
+          ? langParam
+          : home[1] === "en"
+            ? "en"
+            : "ar";
+      return serveHomepage(url.origin, lang);
+    }
   }
 
   if (request.method !== "GET") return serveSpa(new URL(request.url).origin);
